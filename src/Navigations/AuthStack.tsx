@@ -6,12 +6,11 @@ import Signup from '../Screens/Signup';
 import Welcome from '../Screens/Welcome';
 import Login from '../Screens/Login';
 
-
 const Stack = createNativeStackNavigator();
 
 const AuthStack = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name={NavigationStrings.HOME} component={Welcome} />
       <Stack.Screen name={NavigationStrings.Welcome} component={Signup} />
       <Stack.Screen name={NavigationStrings.LOG_IN} component={Login} />
