@@ -1,25 +1,12 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {MMKV} from 'react-native-mmkv';
+import {useDispatch} from 'react-redux';
 
 const App = () => {
-  const data = useSelector(state => state);
-  const storage = new MMKV();
-
   return (
     <View style={{flex: 1}}>
-      <Text style={{color: '#000', fontSize: 20, textAlign: 'center'}}>
-        App
-      </Text>
-
-      <TouchableOpacity style={{}}>
-        <Text>Add</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={{}}>
-        <Text>Get</Text>
-      </TouchableOpacity>
+      <Text>App</Text>
+      <Text>OK HOW ARE U</Text>
     </View>
   );
 };
