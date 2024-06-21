@@ -10,4 +10,11 @@ export const Images = {
   home_filled: require('../assets/Images/home-color.png'),
   message: require('../assets/Images/list.png'),
   message_filled: require('../assets/Images/list-color.png'),
+  payment_wallet:require('../assets/Images/paym.png'),
+  back:require("../assets/Images/back.png"),
+  trainer:require("../assets/Images/2.png"),
+  trainer2:require("../assets/Images/3.png"),
+  trainer3:require("../assets/Images/Mask.png"),
+  filter:require("../assets/Images/filter.png")
+
 };

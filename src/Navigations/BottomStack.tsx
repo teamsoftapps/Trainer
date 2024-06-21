@@ -5,12 +5,12 @@ import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import NavigationStrings from './NavigationStrings'
 import Home from '../Screens/Home';
-import Message from '../Screens/Message';
 import Search from '../Screens/Search';
 import Favourites from '../Screens/Favourites';
 import Profile from '../Screens/Profile';
 import { Images } from '../utils/Images';
 import { responsiveScreenHeight } from 'react-native-responsive-dimensions';
+import Booking from '../Screens/Booking';
 
 const BottomStack = () => {
   const Bottom = createBottomTabNavigator();
@@ -46,7 +46,7 @@ const BottomStack = () => {
             }}
           />
         ),
-      }} name={NavigationStrings.MESSAGE} component={Message} />
+      }} name={NavigationStrings.MESSAGE} component={Booking} />
       <Bottom.Screen options={{
         tabBarIcon: ({ focused }) => (
           <Image
@@ -81,12 +81,12 @@ const BottomStack = () => {
             source={focused ? Images.profile_filled : Images.profile}
             resizeMode="contain"
             style={{
-                height: responsiveScreenHeight(3),
+              height: responsiveScreenHeight(3),
               width: responsiveScreenHeight(3)
             }}
           />
         ),
-      }}  name={NavigationStrings.PROFILE} component={Profile} />
+      }} name={NavigationStrings.PROFILE} component={Profile} />
     </Bottom.Navigator>
   );
 };
