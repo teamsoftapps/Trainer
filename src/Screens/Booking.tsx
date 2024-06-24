@@ -40,27 +40,25 @@ const Booking = () => {
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              justifyContent: 'space-around',
-              paddingHorizontal: responsiveWidth(6),
               borderBottomWidth: responsiveHeight(0.05),
               borderBottomColor: 'gray',
             }}>
             <TouchableOpacity
               onPress={() => {
                 // setselect(false);
-                navigation.navigate('');
+                navigation.navigate('Upcoming');
               }}
               activeOpacity={0.8}
               style={{
                 borderBottomWidth: responsiveHeight(0.4),
                 paddingBottom: responsiveHeight(0.5),
                 borderBottomColor:
-                  state.index === 0 ? '#4361EE' : 'transparent',
+                  state.index === 0 ? '#9FED3A' : 'transparent',
                 borderRadius: responsiveHeight(0.2),
-                width: responsiveWidth(18),
+                width: responsiveWidth(50),
                 alignItems: 'center',
               }}>
-              <Text style={styles.subhead}>Shops</Text>
+              <Text style={styles.subhead}>Upcoming</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -72,12 +70,12 @@ const Booking = () => {
                 borderBottomWidth: responsiveHeight(0.4),
                 paddingBottom: responsiveHeight(0.5),
                 borderBottomColor:
-                  state.index === 1 ? '#4361EE' : 'transparent',
+                  state.index === 1 ? '#9FED3A' : 'transparent',
                 borderRadius: responsiveHeight(0.2),
-                width: responsiveWidth(24),
+                width: responsiveWidth(50),
                 alignItems: 'center',
               }}>
-              <Text style={styles.subhead}>Products</Text>
+              <Text style={styles.subhead}>Previous</Text>
             </TouchableOpacity>
           </View>
         )}>
