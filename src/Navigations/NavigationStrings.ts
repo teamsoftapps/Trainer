@@ -8,5 +8,7 @@ export default {
   PROFILE: 'Profile',
   FAVOURITES: 'Favourite',
   SEARCH: 'Search',
- 
+  BOOKING: 'Booking',
+  PREVIOUS: 'Previous',
+  UPCOMING: 'Upcoming',
 };

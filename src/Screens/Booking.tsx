@@ -1,65 +1,130 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import React, { useState } from 'react';
-import WrapperContainer from '../Components/Wrapper'
+import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import React, {useState} from 'react';
+import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
-import { responsiveFontSize, responsiveScreenWidth, responsiveWidth, responsiveHeight } from 'react-native-responsive-dimensions';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import {
+  responsiveFontSize,
+  responsiveScreenWidth,
+  responsiveWidth,
+  responsiveHeight,
+} from 'react-native-responsive-dimensions';
+import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import Upcoming from './Upcoming';
 import Previous from './Previous';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import {FontFamily} from '../utils/Images';
 
+const Tab = createMaterialTopTabNavigator();
 const Booking = () => {
-  const [first, setfirst] = useState(false)
+  const [first, setfirst] = useState(false);
+  const navigation = useNavigation();
+
   return (
-    <WrapperContainer style={{ backgroundColor: "#181818" }}>
-      <Header/>
+    <WrapperContainer style={{backgroundColor: '#181818'}}>
+      <Header />
       <View>
-        <Text style={{ color: "white", fontSize: responsiveFontSize(3.3), marginLeft: responsiveScreenWidth(8) }}>Bookings</Text>
+        <Text
+          style={{
+            color: 'white',
+            fontFamily: FontFamily.Extra_Bold,
+            fontSize: responsiveFontSize(3.3),
+            marginLeft: responsiveScreenWidth(8),
+          }}>
+          Bookings
+        </Text>
       </View>
 
+      <Tab.Navigator
+        tabBar={({navigation, state}) => (
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              marginTop: responsiveWidth(6),
+              justifyContent: 'space-around',
+              paddingHorizontal: responsiveWidth(6),
               borderBottomWidth: responsiveHeight(0.05),
               borderBottomColor: 'gray',
             }}>
             <TouchableOpacity
               onPress={() => {
-                setfirst(false)
+                // setselect(false);
+                navigation.navigate('');
               }}
               activeOpacity={0.8}
               style={{
                 borderBottomWidth: responsiveHeight(0.4),
                 paddingBottom: responsiveHeight(0.5),
                 borderBottomColor:
-                 first?"transparent": '#25CC0F',
+                  state.index === 0 ? '#4361EE' : 'transparent',
                 borderRadius: responsiveHeight(0.2),
-                width: responsiveWidth(50),
-                alignItems: 'center'
+                width: responsiveWidth(18),
+                alignItems: 'center',
               }}>
-              <Text style={styles.subhead}>Upcoming</Text>
+              <Text style={styles.subhead}>Shops</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                setfirst(true)
+                // setselect(true);
+                navigation.navigate('Previous');
               }}
               activeOpacity={0.8}
               style={{
                 borderBottomWidth: responsiveHeight(0.4),
                 paddingBottom: responsiveHeight(0.5),
                 borderBottomColor:
-                  first?'#25CC0F':"transparent",
+                  state.index === 1 ? '#4361EE' : 'transparent',
                 borderRadius: responsiveHeight(0.2),
-                width: responsiveWidth(50),
+                width: responsiveWidth(24),
                 alignItems: 'center',
               }}>
-              <Text style={styles.subhead}>Previous</Text>
+              <Text style={styles.subhead}>Products</Text>
             </TouchableOpacity>
           </View>
-          <Upcoming/>
-    
+        )}>
+        <Tab.Screen name="Upcoming" component={Upcoming} />
+        <Tab.Screen name="Previous" component={Previous} />
+      </Tab.Navigator>
+
+      {/* <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginTop: responsiveWidth(6),
+          borderBottomWidth: responsiveHeight(0.05),
+          borderBottomColor: 'gray',
+        }}>
+        <TouchableOpacity
+          onPress={() => {
+            setfirst(false);
+          }}
+          activeOpacity={0.8}
+          style={{
+            borderBottomWidth: responsiveHeight(0.4),
+            paddingBottom: responsiveHeight(0.5),
+            borderBottomColor: first ? 'transparent' : '#25CC0F',
+            borderRadius: responsiveHeight(0.2),
+            width: responsiveWidth(50),
+            alignItems: 'center',
+          }}>
+          <Text style={styles.subhead}>Upcoming</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setfirst(true);
+          }}
+          activeOpacity={0.8}
+          style={{
+            borderBottomWidth: responsiveHeight(0.4),
+            paddingBottom: responsiveHeight(0.5),
+            borderBottomColor: first ? '#25CC0F' : 'transparent',
+            borderRadius: responsiveHeight(0.2),
+            width: responsiveWidth(50),
+            alignItems: 'center',
+          }}>
+          <Text style={styles.subhead}>Previous</Text>
+        </TouchableOpacity>
+      </View> */}
+      {/* <Upcoming /> */}
     </WrapperContainer>
   );
 };
@@ -70,5 +135,5 @@ const styles = StyleSheet.create({
   subhead: {
     fontSize: responsiveFontSize(2),
     color: '#fff',
-  }
+  },
 });

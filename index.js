@@ -8,11 +8,12 @@ import {Provider} from 'react-redux';
 import {store} from './src/store/store';
 import App from './App';
 import InitialScreen from './src/Screens/InitialScreen';
+import Booking from './src/Screens/Booking';
 
 const Routes = () => {
   return (
     <Provider store={store}>
-      <InitialScreen />
+      <App />
     </Provider>
   );
 };
