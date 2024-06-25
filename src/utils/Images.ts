@@ -23,6 +23,17 @@ export const Images = {
   call_icon: require('../assets/Images/call_Icon.png'),
   chat_icon: require('../assets/Images/chatIcon.png'),
   edit: require('../assets/Images/edit.png'),
+  logo: require('../assets/Images/logo.png'),
+  eye_off: require('../assets/Images/eye-off.png'),
+  eye: require('../assets/Images/eye.png'),
+  checked: require('../assets/Images/checked(2).png'),
+  unchecked: require('../assets/Images/unchecked.png'),
+  bg: require("../assets/Images/Group.png"),
+  email: require("../assets/Images/email.png"),
+  dropdown: require("../assets/Images/Polygon.png"),
+  calendar: require("../assets/Images/calendar.png"),
+  user: require("../assets/Images/user.png")
+  
 };
 
 export const FontFamily = {

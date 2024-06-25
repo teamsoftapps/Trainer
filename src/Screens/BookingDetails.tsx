@@ -1,4 +1,11 @@
-import {Image, StyleSheet, Text, Touchable, View} from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  Touchable,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
@@ -10,7 +17,7 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {FontFamily, Images} from '../utils/Images';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+
 import ButtonComp from '../Components/ButtonComp';
 
 const BookingDetails = () => {
@@ -67,18 +74,24 @@ const BookingDetails = () => {
               gap: responsiveWidth(3),
               alignItems: 'center',
             }}>
-            <Image
-              source={Images.chat_icon}
-              style={{width: responsiveWidth(10), height: responsiveWidth(10)}}
-            />
-
-            <Image
-              source={Images.call_icon}
-              style={{
-                width: responsiveWidth(10),
-                height: responsiveWidth(10),
-              }}
-            />
+            <TouchableOpacity>
+              <Image
+                source={Images.chat_icon}
+                style={{
+                  width: responsiveWidth(10),
+                  height: responsiveWidth(10),
+                }}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <Image
+                source={Images.call_icon}
+                style={{
+                  width: responsiveWidth(10),
+                  height: responsiveWidth(10),
+                }}
+              />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -105,10 +118,12 @@ const BookingDetails = () => {
           </Text>
         </View>
         <View>
-          <Image
-            source={Images.edit}
-            style={{width: responsiveWidth(5), height: responsiveWidth(5)}}
-          />
+          <TouchableOpacity>
+            <Image
+              source={Images.edit}
+              style={{width: responsiveWidth(5), height: responsiveWidth(5)}}
+            />
+          </TouchableOpacity>
         </View>
       </View>
       <View
@@ -165,8 +180,8 @@ const BookingDetails = () => {
           marginTop: responsiveWidth(6),
           justifyContent: 'space-between',
           alignItems: 'center',
-                  flexDirection: 'row',
-          marginBottom:responsiveHeight(13)
+          flexDirection: 'row',
+          marginBottom: responsiveHeight(13),
         }}>
         <View>
           <Text
