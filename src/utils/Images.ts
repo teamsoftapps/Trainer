@@ -19,6 +19,10 @@ export const Images = {
   notification: require('../assets/Images/notification.png'),
   messages: require('../assets/Images/message.png'),
   trainer4: require('../assets/Images/trainer4.jpg'),
+  success: require('../assets/Images/success.png'),
+  call_icon: require('../assets/Images/call_Icon.png'),
+  chat_icon: require('../assets/Images/chatIcon.png'),
+  edit: require('../assets/Images/edit.png'),
 };
 
 export const FontFamily = {

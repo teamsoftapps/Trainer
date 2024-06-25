@@ -14,31 +14,50 @@ const Upcoming = () => {
 
       <FlatList showsVerticalScrollIndicator={false} data={upcoming} renderItem={({ item, index }) => {
         return (
-
           <View style={styles.border}>
-
             <View style={styles.container}>
               <View style={styles.left}>
                 <Image source={item.image} />
                 <View>
-                  <Text style={styles.whitetext} numberOfLines={1}>{item.name}</Text>
-                  <Text style={styles.whitetext} numberOfLines={1}>{item.date}</Text>
-                  <Text style={styles.greytext} numberOfLines={1}>{item.time}</Text>
+                  <Text style={styles.whitetext} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.whitetext} numberOfLines={1}>
+                    {item.date}
+                  </Text>
+                  <Text style={styles.greytext} numberOfLines={1}>
+                    {item.time}
+                  </Text>
                 </View>
               </View>
               <View style={styles.right}>
-                <Text style={styles.timeago}>
-                  {item.timeage}
-                </Text>
-                <View style={{ ...styles.curve,borderRadius:responsiveScreenWidth(10) ,backgroundColor: item.status === "Pending" ? "#B8B8B8" : item.status === "Confirmed" ? "#9FED3A" : item.status === "Cancelled" ? "red" : "none", }}>
-                  <Text style={item.status==="Cancelled"?styles.whitetext:styles.blacktext}>
+                <Text style={styles.timeago}>{item.timeage}</Text>
+                <View
+                  style={{
+                    ...styles.curve,
+                    borderRadius: responsiveScreenWidth(10),
+                    backgroundColor:
+                      item.status === 'Pending'
+                        ? '#B8B8B8'
+                        : item.status === 'Confirmed'
+                        ? '#9FED3A'
+                        : item.status === 'Cancelled'
+                        ? '#FF2D55'
+                        : 'none',
+                  }}>
+                  <Text
+                    style={
+                      item.status === 'Cancelled'
+                        ? styles.whitetext
+                        : styles.blacktext
+                    }>
                     {item.status}
                   </Text>
                 </View>
               </View>
             </View>
           </View>
-        )
+        );
       }} />
 
     </WrapperContainer>

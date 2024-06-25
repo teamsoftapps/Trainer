@@ -42,6 +42,7 @@ const Booking = () => {
               alignItems: 'center',
               borderBottomWidth: responsiveHeight(0.05),
               borderBottomColor: 'gray',
+              marginTop:responsiveHeight(2)
             }}>
             <TouchableOpacity
               onPress={() => {
