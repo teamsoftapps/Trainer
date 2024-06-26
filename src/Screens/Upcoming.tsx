@@ -4,9 +4,38 @@ import WrapperContainer from '../Components/Wrapper'
 import { Images } from '../utils/Images'
 import { responsiveHeight, responsiveScreenWidth } from 'react-native-responsive-dimensions'
 
-const upcoming = [{ id: 1, name: "Alex Morgan", date: "Monday, Oct, 23", time: "8:00 AM", timeage: "30 mins before", status: "Pending", image: Images.trainer2 },
-{ id: 2, name: "Barbra Michelle", date: "Monday, Oct, 2", time: "10:00 AM", timeage: "15 mins before", status: "Confirmed", image: Images.trainer },
-{ id: 3, name: "Mathues Pablo", date: "Sunday, Oct, 21", time: "12:00 PM", timeage: "None", status: "Cancelled", image: Images.trainer3 }]
+const upcoming = [
+  {
+    id: 1,
+    name: 'Alex Morgan',
+    date: 'Monday, Oct, 23',
+    time: '8:00 AM',
+    timeage: '30 mins before',
+    status: 'Pending',
+    image: Images.trainer2,
+    address: '4th Street, Blinken Ave, San Francisco, California',
+  },
+  {
+    id: 2,
+    name: 'Barbra Michelle',
+    date: 'Monday, Oct, 2',
+    time: '10:00 AM',
+    timeage: '15 mins before',
+    status: 'Confirmed',
+    image: Images.trainer,
+    address: '4th Street, Blinken Ave, San Francisco, California',
+  },
+  {
+    id: 3,
+    name: 'Mathues Pablo',
+    date: 'Sunday, Oct, 21',
+    time: '12:00 PM',
+    timeage: 'None',
+    status: 'Cancelled',
+    image: Images.trainer3,
+    address: '4th Street, Blinken Ave, San Francisco, California',
+  },
+];
 
 const Upcoming = () => {
   return (

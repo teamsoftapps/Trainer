@@ -6,7 +6,7 @@ import MainStack from './src/Navigations/MainStack';
 const App = () => {
   return (
     <NavigationContainer>
-      {true ? <AuthStack /> : <MainStack />}
+      {false ? <AuthStack /> : <MainStack />}
     </NavigationContainer>
   );
 };

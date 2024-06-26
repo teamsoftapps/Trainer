@@ -32,7 +32,12 @@ export const Images = {
   email: require("../assets/Images/email.png"),
   dropdown: require("../assets/Images/Polygon.png"),
   calendar: require("../assets/Images/calendar.png"),
-  user: require("../assets/Images/user.png")
+  user: require("../assets/Images/user.png"),
+  rightarrow: require("../assets/Images/right.png"),
+  visa: require("../assets/Images/visa.png"),
+  mastercard: require("../assets/Images/mastercard.png"),
+  card: require("../assets/Images/card.png"),
+  paypal:require("../assets/Images/cardd.png")
   
 };
 
