@@ -1,4 +1,4 @@
-import {StyleSheet, Text, Pressable} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity} from 'react-native';
 import React from 'react';
 import {
   responsiveFontSize,
@@ -12,7 +12,7 @@ const Button = ({
   onPress = () => {},
 }) => {
   return (
-    <Pressable style={[styles.container, containerstyles]} onPress={onPress}>
+    <TouchableOpacity style={[styles.container, containerstyles]} onPress={onPress}>
       <Text
         style={[
           {color: 'black', fontSize: responsiveFontSize(2), fontWeight: '600'},
@@ -20,7 +20,7 @@ const Button = ({
         ]}>
         {text}
       </Text>
-    </Pressable>
+    </TouchableOpacity>
   );
 };
 

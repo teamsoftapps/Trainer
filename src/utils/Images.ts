@@ -28,17 +28,24 @@ export const Images = {
   eye: require('../assets/Images/eye.png'),
   checked: require('../assets/Images/checked(2).png'),
   unchecked: require('../assets/Images/unchecked.png'),
-  bg: require("../assets/Images/Group.png"),
-  email: require("../assets/Images/email.png"),
-  dropdown: require("../assets/Images/Polygon.png"),
-  calendar: require("../assets/Images/calendar.png"),
-  user: require("../assets/Images/user.png"),
-  rightarrow: require("../assets/Images/right.png"),
-  visa: require("../assets/Images/visa.png"),
-  mastercard: require("../assets/Images/mastercard.png"),
-  card: require("../assets/Images/card.png"),
-  paypal:require("../assets/Images/cardd.png")
-  
+  bg: require('../assets/Images/Group.png'),
+  email: require('../assets/Images/email.png'),
+  dropdown: require('../assets/Images/Polygon.png'),
+  calendar: require('../assets/Images/calendar.png'),
+  user: require('../assets/Images/user.png'),
+  rightarrow: require('../assets/Images/right.png'),
+  visa: require('../assets/Images/visa.png'),
+  mastercard: require('../assets/Images/mastercard.png'),
+  card: require('../assets/Images/card.png'),
+  paypal: require('../assets/Images/cardd.png'),
+  checkbox: require('../assets/Images/Checkblack.png'),
+  crown: require('../assets/Images/Crown.png'),
+  checkboxCircle: require('../assets/Images/checkkkk.png'),
+  lock: require('../assets/Images/Bell.png'),
+  bell: require('../assets/Images/lock.png'),
+  language: require('../assets/Images/language.png'),
+  privacy: require("../assets/Images/privacy.png"),
+  currency:require("../assets/Images/currency.png")
 };
 
 export const FontFamily = {
