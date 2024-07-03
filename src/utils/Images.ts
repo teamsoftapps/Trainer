@@ -45,7 +45,8 @@ export const Images = {
   bell: require('../assets/Images/lock.png'),
   language: require('../assets/Images/language.png'),
   privacy: require("../assets/Images/privacy.png"),
-  currency:require("../assets/Images/currency.png")
+  currency: require("../assets/Images/currency.png"),
+  setting:require("../assets/Images/settings.png")
 };
 
 export const FontFamily = {
