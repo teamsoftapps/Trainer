@@ -49,6 +49,8 @@ export const Images = {
   setting: require('../assets/Images/settings.png'),
   visasilver: require('../assets/Images/visasilver.png'),
   mastersilver: require('../assets/Images/mastersilver.png'),
+  call_white: require("../assets/Images/Phone.png"),
+  video_white:require("../assets/Images/Video.png")
 };
 
 export const FontFamily = {
