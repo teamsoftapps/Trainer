@@ -8,11 +8,13 @@ import {Provider} from 'react-redux';
 import {store} from './src/store/store';
 import App from './App';
 import Message from './src/Screens/Message';
+import Account from './src/Screens/Account';
+import Search from './src/Screens/Search';
 
 const Routes = () => {
   return (
     <Provider store={store}>
-      <Message/>
+      <App/>
     </Provider>
   );
 };

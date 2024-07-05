@@ -2,220 +2,138 @@ import {
   StyleSheet,
   Text,
   View,
-  FlatList,
   TouchableOpacity,
   Image,
   TextInput,
 } from 'react-native';
 import React from 'react';
-import {
-  responsiveWidth,
-  responsiveHeight,
-  responsiveFontSize,
-  responsiveScreenFontSize,
-  responsiveScreenWidth,
-} from 'react-native-responsive-dimensions';
-
-import {TrainerProfile, UserImages} from '../utils/Dummy';
-import {FontFamily, Images} from '../utils/Images';
 import WrapperContainer from '../Components/Wrapper';
-import Header from '../Components/Header';
-const upcoming = [
-  {
-    id: 1,
-    name: 'Alex Morgan',
-    time: '8:00 AM',
-    image: Images.trainer2,
-    text: 'I hope youre doing great, I came across your profile',
-  },
-  {
-    id: 2,
-    name: 'Barbra Michelle',
-    time: '10:00 AM',
-    image: Images.trainer,
-    text: 'I hope youre doing great, I came across your profile',
-  },
-  {
-    id: 3,
-    name: 'Mathues Pablo',
-    time: '12:00 PM',
-    image: Images.trainer3,
-    text: 'I hope youre doing great, I came across your profile',
-  },
-];
+
+import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
+
+import {
+  responsiveHeight,
+  responsiveScreenFontSize,
+  responsiveWidth,
+} from 'react-native-responsive-dimensions';
+import {Images} from '../utils/Images';
+import Upcoming from './Upcoming';
+import Previous from './Previous';
+
 const Search = () => {
+  const Tab = createMaterialTopTabNavigator();
+
   return (
     <WrapperContainer>
-      <Header
-        text="Chat with Trainer"
-        textstyle={{color: 'white', fontFamily: FontFamily.Medium}}
-      />
-      <View
-        style={{
-          paddingHorizontal: responsiveWidth(6),
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-        }}>
-        <TouchableOpacity></TouchableOpacity>
-      </View>
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          gap: responsiveWidth(4),
+          justifyContent: 'space-between',
           marginHorizontal: responsiveWidth(8),
-          backgroundColor: '#232323',
-          paddingHorizontal: responsiveWidth(3),
-          borderRadius: 25,
+          marginTop: responsiveHeight(3),
         }}>
-        <Image
-          source={Images.search}
-          style={{width: responsiveWidth(6), height: responsiveWidth(6)}}
-        />
-        <TextInput
-          placeholder="Search for trainer"
-          placeholderTextColor={'white'}
+        <View
           style={{
-            fontSize: responsiveScreenFontSize(2),
-            width: responsiveWidth(60),
-            color: 'white',
-          }}
-        />
-      </View>
-      <View>
-        <Text
-          style={{
-            color: 'white',
-            paddingLeft: responsiveWidth(8),
-            marginVertical: responsiveHeight(3),
-            fontSize: responsiveScreenFontSize(2.4),
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: '#232323',
+            paddingHorizontal: responsiveWidth(4),
+            borderRadius: 25,
+            gap: responsiveWidth(4),
           }}>
-          All Active Trainer
-        </Text>
-        <FlatList
-          style={{paddingLeft: responsiveWidth(4)}}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={UserImages}
-          renderItem={({item, index}) => {
-            return (
-              <TouchableOpacity
-                activeOpacity={0.5}
+          <TouchableOpacity activeOpacity={0.6}>
+            <Image
+              source={Images.search}
+              style={{width: responsiveWidth(6), height: responsiveWidth(6)}}
+            />
+          </TouchableOpacity>
+          <TextInput
+            placeholder="Search"
+            placeholderTextColor={'white'}
+            style={{
+              fontSize: responsiveScreenFontSize(2.2),
+              width: responsiveWidth(52),
+              color: 'white',
+            }}
+          />
+        </View>
+        <TouchableOpacity activeOpacity={0.6} style={{}}>
+          <Text style={{color: 'white'}}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+      <Tab.Navigator
+        tabBar={({navigation, state}) => (
+          <View
+            style={{
+              flexDirection: 'row',
+              backgroundColor: '#222222',
+              marginVertical: responsiveHeight(2.1),
+              borderBottomColor: 'white',
+              borderBottomWidth: 1,
+            }}>
+            <TouchableOpacity
+              onPress={() => {
+                // setselect(false);
+                navigation.navigate('Upcoming');
+              }}
+              style={{
+                flex: 0.25,
+                borderBottomColor: '#9FED3A',
+                borderBottomWidth: state.index === 0 ? 2 : 0,
+                alignItems: 'center',
+                paddingVertical: responsiveHeight(2.1),
+              }}>
+              <Text
                 style={{
-                  marginHorizontal: responsiveWidth(4),
-                  width: responsiveWidth(14),
-                  gap: responsiveHeight(0.5),
+                  color: 'white',
                 }}>
-                <View style={styles.imageView}>
-                  <Image source={item.image} style={styles.storyImage} />
-                </View>
-                <Text style={styles.trainername} numberOfLines={1}>
-                  {item.name}
-                </Text>
-              </TouchableOpacity>
-            );
-          }}
-        />
-      </View>
-      <View style={{marginHorizontal: responsiveWidth(8)}}>
-        <Text
-          style={{
-            color: 'white',
-            marginVertical: responsiveHeight(3),
-            fontSize: responsiveScreenFontSize(2.4),
-          }}>
-          Chat
-        </Text>
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          data={upcoming}
-          renderItem={({item, index}) => {
-            return (
-              <TouchableOpacity activeOpacity={0.6} style={styles.container}>
-                <View style={styles.left}>
-                  <Image
-                    source={item.image}
-                    style={{
-                      width: responsiveHeight(8),
-                      height: responsiveHeight(8),
-                    }}
-                  />
-                  <View style={{flex: 1, gap: responsiveHeight(1)}}>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                      }}>
-                      <Text style={styles.whitetext} numberOfLines={1}>
-                        {item.name}
-                      </Text>
-
-                      <Text style={styles.greytext} numberOfLines={1}>
-                        {item.time}
-                      </Text>
-                    </View>
-                    <View>
-                      <Text numberOfLines={1} style={styles.timeago}>
-                        {item.text}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            );
-          }}
-        />
-      </View>
+                Top
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                // setselect(false);
+                navigation.navigate('Previous');
+              }}
+              style={{
+                flex: 0.25,
+                borderBottomColor: '#9FED3A',
+                borderBottomWidth: state.index === 1 ? 2 : 0,
+                alignItems: 'center',
+                paddingVertical: responsiveHeight(2.1),
+              }}>
+              <Text style={{color: 'white'}}>People</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                flex: 0.25,
+                borderBottomColor: '#9FED3A',
+                borderBottomWidth: 0,
+                alignItems: 'center',
+                paddingVertical: responsiveHeight(2.1),
+              }}>
+              <Text style={{color: 'white'}}>Suggestion</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                flex: 0.25,
+                borderBottomColor: '#9FED3A',
+                borderBottomWidth: 0,
+                alignItems: 'center',
+                paddingVertical: responsiveHeight(2),
+              }}>
+              <Text style={{color: 'white'}}>Places</Text>
+            </TouchableOpacity>
+          </View>
+        )}>
+        <Tab.Screen name="Upcoming" component={Upcoming} />
+        <Tab.Screen name="Previous" component={Previous} />
+      </Tab.Navigator>
     </WrapperContainer>
   );
 };
 
 export default Search;
 
-const styles = StyleSheet.create({
-  imageView: {
-    width: responsiveHeight(8.8),
-    height: responsiveHeight(8.8),
-    borderColor: '#9FED3A',
-    borderWidth: responsiveHeight(0.3),
-    borderRadius: responsiveHeight(8.8),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  storyImage: {
-    width: responsiveHeight(8),
-    height: responsiveHeight(8),
-    borderRadius: responsiveHeight(8),
-    borderColor: '#000',
-    borderWidth: responsiveHeight(0.3),
-  },
-  trainername: {
-    color: '#fff',
-    fontFamily: FontFamily.Regular,
-    fontSize: responsiveFontSize(1.7),
-  },
-  border: {borderBottomColor: '#B8B8B8', borderBottomWidth: 0.5},
-  container: {
-    flexDirection: 'row',
-    width: '100%',
-    paddingVertical: responsiveScreenWidth(3),
-  },
-  left: {
-    flexDirection: 'row',
-    gap: responsiveWidth(4),
-    alignItems: 'center',
-    flex: 1,
-  },
-  whitetext: {color: 'white', fontWeight: '500'},
-  blacktext: {color: 'black', fontWeight: '500'},
-  greytext: {color: '#B8B8B8', fontWeight: '400'},
-  right: {justifyContent: 'space-evenly', alignItems: 'flex-end'},
-  timeago: {color: '#B8B8B8', fontWeight: '400'},
-  curve: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: responsiveScreenWidth(1),
-    paddingHorizontal: responsiveScreenWidth(5),
-  },
-});
+const styles = StyleSheet.create({});
