@@ -13,7 +13,7 @@ interface Props {
   onRequestClose: () => void;
 }
 
-const PaymentModal: React.FC<Props> = ({modalstate, onRequestClose}) => {
+const SubscriptionModal: React.FC<Props> = ({modalstate, onRequestClose}) => {
   return (
     <Modal
       animationType="slide"
@@ -23,7 +23,7 @@ const PaymentModal: React.FC<Props> = ({modalstate, onRequestClose}) => {
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <View
           style={{
-            height: responsiveScreenHeight(35),
+            height: responsiveScreenHeight(50),
             width: responsiveScreenWidth(85),
             backgroundColor: '#9FED3A',
             justifyContent: 'center',
@@ -57,16 +57,44 @@ const PaymentModal: React.FC<Props> = ({modalstate, onRequestClose}) => {
                 }}
               />
             </View>
-            <Text style={{fontWeight: '600', color: 'black', fontSize:responsiveFontSize(2.5)}}>
-              Payment Method Added
+            <Text
+              style={{
+                fontWeight: '600',
+                color: 'black',
+                fontSize: responsiveFontSize(2.5),
+              }}>
+              Subscrition Confirmed
             </Text>
 
             <Text
-              style={{fontWeight: '500', color: 'black', textAlign: 'center', fontSize:responsiveFontSize(2)}}>
-              Your payment method is saved. You can now easily book and pay for
-              sessions.
+              style={{
+                fontWeight: '500',
+                color: 'black',
+                textAlign: 'center',
+                fontSize: responsiveFontSize(2),
+              }}>
+              You have successfully subscribed to our Premium Memebership.
+              Welcome to the Stern's Gym community!
             </Text>
-
+            <Text
+              style={{
+                fontWeight: '700',
+                color: 'black',
+                textAlign: 'center',
+                fontSize: responsiveFontSize(2.2),
+              }}>
+              Membership Benifits
+            </Text>
+            <Text
+              style={{
+                fontWeight: '500',
+                color: 'black',
+                textAlign: 'center',
+                fontSize: responsiveFontSize(2),
+              }}>
+              Access to premium features {'\n'}
+              Connect with more clients {'\n'} Exclusive training resources
+            </Text>
             <Button
               onPress={onRequestClose}
               textstyle={{
@@ -86,6 +114,6 @@ const PaymentModal: React.FC<Props> = ({modalstate, onRequestClose}) => {
   );
 };
 
-export default PaymentModal;
+export default SubscriptionModal;
 
 const styles = StyleSheet.create({});

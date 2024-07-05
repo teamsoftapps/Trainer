@@ -9,9 +9,15 @@ import {
 } from 'react-native-responsive-dimensions';
 import {FontFamily, Images} from '../utils/Images';
 import Button from '../Components/Button';
+import PaymentModal from '../Components/PaymentModal';
+import SubscriptionModal from '../Components/SubscriptionModal';
 
 const Membership = () => {
-  const [check, setcheck] = useState('');
+  const [check, setcheck] = useState('3');
+  const [modalVisible, setModalVisible] = useState(false);
+ const handleCloseModal = () => {
+   setModalVisible(false);
+ };
   return (
     <WrapperContainer>
       <View>
@@ -151,7 +157,7 @@ const Membership = () => {
         <View style={{alignItems: 'flex-end'}}>
           <Text
             style={{
-              color:check==="2"?"black":'white',
+              color: check === '2' ? 'black' : 'white',
               fontSize: responsiveFontSize(2.5),
               fontFamily: FontFamily.Bold,
             }}>
@@ -223,6 +229,7 @@ const Membership = () => {
       </Text>
       <View style={{alignItems: 'center'}}>
         <Button
+          onPress={() => setModalVisible(true)}
           text="Subscribe"
           textstyle={{
             fontSize: responsiveFontSize(2.5),
@@ -249,6 +256,10 @@ const Membership = () => {
         }}>
         Terms and Conditions
       </Text>
+      <SubscriptionModal
+        modalstate={modalVisible}
+        onRequestClose={handleCloseModal}
+      />
     </WrapperContainer>
   );
 };

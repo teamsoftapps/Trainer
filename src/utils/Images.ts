@@ -50,7 +50,9 @@ export const Images = {
   visasilver: require('../assets/Images/visasilver.png'),
   mastersilver: require('../assets/Images/mastersilver.png'),
   call_white: require("../assets/Images/Phone.png"),
-  video_white:require("../assets/Images/Video.png")
+  video_white: require("../assets/Images/Video.png"),
+  location: require("../assets/Images/location-m.png"),
+  placeIcon:require("../assets/Images/placeIcon.png")
 };
 
 export const FontFamily = {
