@@ -94,6 +94,7 @@ const Previous = () => {
 
 export default Previous;
 
+
 const styles = StyleSheet.create({
   border: {borderBottomColor: '#B8B8B8', borderBottomWidth: 0.5},
   container: {

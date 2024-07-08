@@ -64,7 +64,7 @@ const Booking = () => {
             <TouchableOpacity
               onPress={() => {
                 // setselect(true);
-                navigation.navigate('Previous');
+                navigation.navigate('Previous', {data: 'Ok'});
               }}
               activeOpacity={0.8}
               style={{
