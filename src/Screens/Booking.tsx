@@ -20,18 +20,8 @@ const Booking = () => {
 
   return (
     <WrapperContainer style={{backgroundColor: '#181818'}}>
-      <Header />
-      <View>
-        <Text
-          style={{
-            color: 'white',
-            fontFamily: FontFamily.Extra_Bold,
-            fontSize: responsiveFontSize(3.3),
-            marginLeft: responsiveScreenWidth(8),
-          }}>
-          Bookings
-        </Text>
-      </View>
+      <Header text='Bookings' textstyle={{fontSize:responsiveFontSize(3.5), color:"white"}} />
+      
 
       <Tab.Navigator
         tabBar={({navigation, state}) => (
@@ -41,7 +31,7 @@ const Booking = () => {
               alignItems: 'center',
               borderBottomWidth: responsiveHeight(0.05),
               borderBottomColor: 'gray',
-              marginTop:responsiveHeight(2)
+              marginTop:responsiveHeight(0.5)
             }}>
             <TouchableOpacity
               onPress={() => {

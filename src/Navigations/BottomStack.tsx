@@ -19,55 +19,68 @@ const BottomStack = () => {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
+        tabBarHideOnKeyboard: true,
         tabBarStyle: {
-          backgroundColor: "#000000"
-        }
+          backgroundColor: '#000000',
+        },
       }}>
-      <Bottom.Screen options={{
-        tabBarIcon: ({ focused }) => (
-          <Image
-            source={focused ? Images.home_filled : Images.home}
-            resizeMode="contain"
-            style={{
-              height: responsiveScreenHeight(3),
-              width: responsiveScreenHeight(3)
-            }}
-          />
-        ),
-      }} name={NavigationStrings.HOME} component={Home} />
-      <Bottom.Screen options={{
-        tabBarIcon: ({ focused }) => (
-          <Image
-            source={focused ? Images.message_filled : Images.message}
-            resizeMode="contain"
-            style={{
-              height: responsiveScreenHeight(3),
-              width: responsiveScreenHeight(3)
-            }}
-          />
-        ),
-      }} name={NavigationStrings.MESSAGE} component={Booking} />
-      <Bottom.Screen options={{
-        tabBarIcon: ({ focused }) => (
-          <Image
-            source={focused ? Images.search_filled : Images.search}
-            resizeMode="contain"
-            style={{
-              height: responsiveScreenHeight(3),
-              width: responsiveScreenHeight(3)
-            }}
-          />
-        ),
-      }} name={NavigationStrings.SEARCH} component={Search} />
       <Bottom.Screen
         options={{
-          tabBarIcon: ({ focused }) => (
+          tabBarIcon: ({focused}) => (
+            <Image
+              source={focused ? Images.home_filled : Images.home}
+              resizeMode="contain"
+              style={{
+                height: responsiveScreenHeight(3),
+                width: responsiveScreenHeight(3),
+              }}
+            />
+          ),
+        }}
+        name={NavigationStrings.HOME}
+        component={Home}
+      />
+      <Bottom.Screen
+        options={{
+          tabBarIcon: ({focused}) => (
+            <Image
+              source={focused ? Images.message_filled : Images.message}
+              resizeMode="contain"
+              style={{
+                height: responsiveScreenHeight(3),
+                width: responsiveScreenHeight(3),
+              }}
+            />
+          ),
+        }}
+        name={NavigationStrings.MESSAGE}
+        component={Booking}
+      />
+      <Bottom.Screen
+        options={{
+          tabBarIcon: ({focused}) => (
+            <Image
+              source={focused ? Images.search_filled : Images.search}
+              resizeMode="contain"
+              style={{
+                height: responsiveScreenHeight(3),
+                width: responsiveScreenHeight(3),
+              }}
+            />
+          ),
+        }}
+        name={NavigationStrings.SEARCH}
+        component={Search}
+      />
+      <Bottom.Screen
+        options={{
+          tabBarIcon: ({focused}) => (
             <Image
               source={focused ? Images.heart_filled : Images.heart}
               resizeMode="contain"
               style={{
                 height: responsiveScreenHeight(3),
-                width: responsiveScreenHeight(3)
+                width: responsiveScreenHeight(3),
               }}
             />
           ),
@@ -75,18 +88,22 @@ const BottomStack = () => {
         name={NavigationStrings.FAVOURITES}
         component={Favourites}
       />
-      <Bottom.Screen options={{
-        tabBarIcon: ({ focused }) => (
-          <Image
-            source={focused ? Images.profile_filled : Images.profile}
-            resizeMode="contain"
-            style={{
-              height: responsiveScreenHeight(3),
-              width: responsiveScreenHeight(3)
-            }}
-          />
-        ),
-      }} name={NavigationStrings.PROFILE} component={Profile} />
+      <Bottom.Screen
+        options={{
+          tabBarIcon: ({focused}) => (
+            <Image
+              source={focused ? Images.profile_filled : Images.profile}
+              resizeMode="contain"
+              style={{
+                height: responsiveScreenHeight(3),
+                width: responsiveScreenHeight(3),
+              }}
+            />
+          ),
+        }}
+        name={NavigationStrings.PROFILE}
+        component={Profile}
+      />
     </Bottom.Navigator>
   );
 };
