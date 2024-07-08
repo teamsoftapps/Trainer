@@ -19,11 +19,20 @@ import {
 import {FontFamily, Images} from '../utils/Images';
 
 import ButtonComp from '../Components/ButtonComp';
+import { useNavigation } from '@react-navigation/native';
 
-const BookingDetails = () => {
+const BookingDetails = ({route}) => {
+
+  const navigation = useNavigation()
+  const { data } = route.params;
+  console.log(data)
   return (
     <WrapperContainer>
-      <Header />
+      <Header
+        onPress={() => {
+          navigation.goBack();
+        }}
+      />
       <View
         style={{
           borderBlockColor: 'grey',
@@ -40,7 +49,7 @@ const BookingDetails = () => {
           }}>
           <View style={{flexDirection: 'row', gap: responsiveWidth(4)}}>
             <Image
-              source={Images.trainer4}
+              source={data.image}
               style={{
                 width: responsiveScreenWidth(24),
                 height: responsiveScreenWidth(24),
@@ -56,15 +65,22 @@ const BookingDetails = () => {
                   color: 'white',
                   maxWidth: responsiveWidth(34),
                 }}>
-                Alex Hales
+                {data.name}
               </Text>
               <View
                 style={{
                   ...styles.curve,
                   borderRadius: responsiveScreenWidth(10),
-                  backgroundColor: '#B8B8B8',
+                  backgroundColor:
+                    data.status === 'Pending'
+                      ? '#B8B8B8'
+                      : data.status === 'Confirmed'
+                      ? '#9FED3A'
+                      : data.status === 'Cancelled'
+                      ? '#FF2D55'
+                      : 'none',
                 }}>
-                <Text style={styles.blacktext}>Pending</Text>
+                <Text style={styles.blacktext}>{data.status}</Text>
               </View>
             </View>
           </View>
@@ -110,11 +126,11 @@ const BookingDetails = () => {
           </Text>
           <Text
             style={{color: 'white', fontSize: responsiveScreenFontSize(2.6)}}>
-            Monday, October 24
+            {data.date}
           </Text>
           <Text
             style={{color: 'white', fontSize: responsiveScreenFontSize(2.3)}}>
-            8:00 AM
+            {data.time}
           </Text>
         </View>
         <View>

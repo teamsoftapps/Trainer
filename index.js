@@ -7,6 +7,10 @@ import {name as appName} from './app.json';
 import {Provider} from 'react-redux';
 import {store} from './src/store/store';
 import App from './App';
+import Message from './src/Screens/Message';
+import Account from './src/Screens/Account';
+import Search from './src/Screens/Search';
+import Membership from './src/Screens/Membership';
 
 const Routes = () => {
   return (

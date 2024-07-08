@@ -5,16 +5,17 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { Images } from '../utils/Images';
+import {Images} from '../utils/Images';
 
-const Header = ({text = '', style = {}, textstyle = {}}) => {
+const Header = ({
+  text = '',
+  style = {},
+  textstyle = {},
+  onPress = () => {},
+}) => {
   return (
     <View style={{...styles.container, ...style}}>
-      <TouchableOpacity
-        onPress={() => {
-          
-        }}
-        style={{}}>
+      <TouchableOpacity onPress={onPress} style={{}}>
         <Image
           source={Images.back}
           style={{
@@ -43,7 +44,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: responsiveWidth(8),
     flexDirection: 'row',
     alignItems: 'center',
-    
   },
   textstyle: {
     fontSize: responsiveFontSize(2.5),
