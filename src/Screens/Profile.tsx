@@ -76,16 +76,7 @@ const Profile = () => {
               />
             </View>
             <TouchableOpacity>
-              <View
-                style={{
-                  width: responsiveWidth(10),
-                  height: responsiveWidth(10),
-                  borderRadius: responsiveWidth(10),
-                  backgroundColor: '#9FED3A',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  right: 15,
-                }}>
+              <View style={styles.favIcons}>
                 <Text style={{color: 'black', fontSize: responsiveFontSize(2)}}>
                   +{UserImages.length - 3}
                 </Text>
@@ -110,29 +101,14 @@ const Profile = () => {
         </View>
 
         <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginVertical: responsiveHeight(3),
-          }}>
-          <Text style={{color: '#9FED3A', fontSize: responsiveFontSize(2.5)}}>
+          style={styles.containers}>
+          <Text style={styles.textgreen}>
             Add new address
           </Text>
           <TouchableOpacity
-            style={{
-              backgroundColor: '#9FED3A',
-              borderRadius: 50,
-              width: responsiveWidth(7),
-              height: responsiveWidth(7),
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
+            style={styles.plus}>
             <Text
-              style={{
-                fontWeight: '900',
-                fontSize: responsiveFontSize(2.5),
-                color: 'black',
-              }}>
+              style={styles.plustext}>
               +
             </Text>
           </TouchableOpacity>
@@ -172,32 +148,10 @@ const Profile = () => {
             <Image source={Images.rightarrow} />
           </TouchableOpacity>
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginVertical: responsiveHeight(3),
-          }}>
-          <Text style={{color: '#9FED3A', fontSize: responsiveFontSize(2.5)}}>
-            Add new card
-          </Text>
-          <TouchableOpacity
-            style={{
-              backgroundColor: '#9FED3A',
-              borderRadius: 50,
-              width: responsiveWidth(7),
-              height: responsiveWidth(7),
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <Text
-              style={{
-                fontWeight: '900',
-                fontSize: responsiveFontSize(2.5),
-                color: 'black',
-              }}>
-              +
-            </Text>
+        <View style={styles.containers}>
+          <Text style={styles.textgreen}>Add new card</Text>
+          <TouchableOpacity style={styles.plus}>
+            <Text style={styles.plustext}>+</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -208,6 +162,40 @@ const Profile = () => {
 export default Profile;
 
 const styles = StyleSheet.create({
+  plustext: {
+    backgroundColor: '#9FED3A',
+    borderRadius: 50,
+    width: responsiveWidth(7),
+    height: responsiveWidth(7),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  plus: {
+    backgroundColor: '#9FED3A',
+    borderRadius: 50,
+    width: responsiveWidth(7),
+    height: responsiveWidth(7),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  textgreen: {
+    color: '#9FED3A',
+    fontSize: responsiveFontSize(2.5),
+  },
+  containers: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: responsiveHeight(3),
+  },
+  favIcons: {
+    width: responsiveWidth(10),
+    height: responsiveWidth(10),
+    borderRadius: responsiveWidth(10),
+    backgroundColor: '#9FED3A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    right: 15,
+  },
   image: {
     width: responsiveWidth(10),
     height: responsiveWidth(10),

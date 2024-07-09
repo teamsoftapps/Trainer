@@ -8,6 +8,8 @@ import BookingDetails from '../Screens/BookingDetails';
 import Upcoming from '../Screens/Upcoming';
 import Previous from '../Screens/Previous';
 import ReviewBooking from '../Screens/ReviewBooking';
+import Message from '../Screens/Message';
+import TrainerProfile from '../Screens/TrainerProfile';
 
 const Stack = createNativeStackNavigator();
 const MainStack = () => {
@@ -18,7 +20,10 @@ const MainStack = () => {
       <Stack.Screen name="BookingDetails" component={BookingDetails} />
       <Stack.Screen name="Upcoming" component={Upcoming} />
       <Stack.Screen name="Previous" component={Previous} />
-      <Stack.Screen name="ReviewBooking" component={ReviewBooking}/>
+      <Stack.Screen name="ReviewBooking" component={ReviewBooking} />
+      <Stack.Screen name="Messages" component={Message} />
+      <Stack.Screen name="TrainerProfile" component={TrainerProfile} />
+    
     </Stack.Navigator>
   );
 };

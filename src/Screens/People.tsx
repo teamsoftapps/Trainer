@@ -1,4 +1,4 @@
-import {FlatList, Image, StyleSheet, Text, View} from 'react-native';
+import {FlatList, Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import {Images} from '../utils/Images';
@@ -9,6 +9,7 @@ import {
 } from 'react-native-responsive-dimensions';
 
 import {AirbnbRating} from 'react-native-ratings';
+import { useNavigation } from '@react-navigation/native';
 
 const upcoming = [
   {
@@ -64,6 +65,8 @@ const upcoming = [
 ];
 
 const People = () => {
+  
+  const navigation = useNavigation();
   return (
     <WrapperContainer style={{backgroundColor: '#181818'}}>
       <FlatList
@@ -76,7 +79,11 @@ const People = () => {
                 borderTopColor: '#B8B8B8',
                 borderTopWidth: item.id === 1 ? 0 : 0.5,
               }}>
-              <View style={styles.container}>
+              <Pressable
+                onPress={() => {
+                  navigation.navigate('TrainerProfile', {data: item});
+                }}
+                style={styles.container}>
                 <View style={styles.left}>
                   <Image
                     source={item.image}
@@ -128,7 +135,7 @@ const People = () => {
                     </View>
                   </View>
                 </View>
-              </View>
+              </Pressable>
             </View>
           );
         }}

@@ -49,10 +49,15 @@ export const Images = {
   setting: require('../assets/Images/settings.png'),
   visasilver: require('../assets/Images/visasilver.png'),
   mastersilver: require('../assets/Images/mastersilver.png'),
-  call_white: require("../assets/Images/Phone.png"),
-  video_white: require("../assets/Images/Video.png"),
-  location: require("../assets/Images/location-m.png"),
-  placeIcon:require("../assets/Images/placeIcon.png")
+  call_white: require('../assets/Images/Phone.png'),
+  video_white: require('../assets/Images/Video.png'),
+  location: require('../assets/Images/location-m.png'),
+  placeIcon: require('../assets/Images/placeIcon.png'),
+  ProfileBG: require('../assets/Images/profilebg.png'),
+  fav_heart: require('../assets/Images/heart_outline.png'),
+  Sort: require('../assets/Images/Sortt.png'),
+  Heart_filled: require('../assets/Images/Heart(2).png'),
+  Star: require('../assets/Images/Starrr.png'),
 };
 
 export const FontFamily = {

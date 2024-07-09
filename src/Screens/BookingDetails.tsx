@@ -90,7 +90,7 @@ const BookingDetails = ({route}) => {
               gap: responsiveWidth(3),
               alignItems: 'center',
             }}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={()=>{navigation.navigate('Messages', {data: data});}}>
               <Image
                 source={Images.chat_icon}
                 style={{

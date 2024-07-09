@@ -1,4 +1,4 @@
-import {FlatList, Image, StyleSheet, Text, View} from 'react-native';
+import {FlatList, Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import {FontFamily, Images} from '../utils/Images';
@@ -10,6 +10,7 @@ import {
 } from 'react-native-responsive-dimensions';
 
 import {AirbnbRating} from 'react-native-ratings';
+import { useNavigation } from '@react-navigation/native';
 
 const recent = [
   {name: 'Louis Hamilton'},
@@ -22,7 +23,7 @@ const upcoming = [
     id: 1,
     name: 'Alex Morgan',
     distance: '0.43 miles away',
-    rate: '$20/hr',
+    rate: '$20',
     expertise: 'Body Building',
     image: Images.trainer2,
     rating: 5,
@@ -32,7 +33,7 @@ const upcoming = [
     id: 2,
     name: 'Barbra Michelle',
     distance: '1.2 miles away',
-    rate: '$70/hr',
+    rate: '$70',
     expertise: 'Boxing',
     image: Images.trainer,
     rating: 4.5,
@@ -42,7 +43,7 @@ const upcoming = [
     id: 3,
     name: 'Mathues Pablo',
     distance: '2.5 miles away',
-    rate: '$30/hr',
+    rate: '$30',
     expertise: 'Aerobics',
     image: Images.trainer3,
     rating: 4,
@@ -51,6 +52,7 @@ const upcoming = [
 ];
 
 const Top = () => {
+  const navigation=useNavigation()
   return (
     <WrapperContainer style={{backgroundColor: '#181818'}}>
       <View>
@@ -64,7 +66,7 @@ const Top = () => {
                   borderTopColor: '#B8B8B8',
                   borderTopWidth: item.id === 1 ? 0 : 0.5,
                 }}>
-                <View style={styles.container}>
+                <Pressable onPress={()=>{navigation.navigate("TrainerProfile",{data:item})}}  style={styles.container}>
                   <View style={styles.left}>
                     <Image
                       source={item.image}
@@ -114,11 +116,11 @@ const Top = () => {
                           {item.reviews}+
                         </Text>
                         {item.rate && <Text style={styles.greytext}>·</Text>}
-                        <Text style={styles.greytext}>{item.rate}</Text>
+                        <Text style={styles.greytext}>{item.rate}/hr</Text>
                       </View>
                     </View>
                   </View>
-                </View>
+                </Pressable>
               </View>
             );
           }}

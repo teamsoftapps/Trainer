@@ -7,22 +7,28 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
+import { useNavigation } from '@react-navigation/native';
 
-const Message = () => {
+const Message = ({route}) => {
+  const navigation = useNavigation();
+   const {data} = route.params;
   return (
     <WrapperContainer>
       <View style={styles.top}>
         <View style={styles.left_container}>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.goBack();
+            }}>
             <Image
               source={Images.back}
               tintColor={'white'}
               style={styles.back}
             />
           </TouchableOpacity>
-          <Image source={Images.trainer} style={styles.profile_image} />
+          <Image source={data.image} style={styles.profile_image} />
           <View>
-            <Text style={styles.user}>Martin Mork</Text>
+            <Text style={styles.user}>{data.name}</Text>
             <View style={styles.online}>
               <View style={styles.dot}></View>
               <Text style={styles.online_text}>Online</Text>
