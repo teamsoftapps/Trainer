@@ -3153,6 +3153,7 @@ __metadata:
     "@types/react-test-renderer": ^18.0.0
     axios: ^1.7.2
     babel-jest: ^29.6.3
+    credit-card-type: ^10.0.1
     jest: ^29.6.3
     react: 18.2.0
     react-native: 0.74.2
@@ -3160,6 +3161,7 @@ __metadata:
     react-native-gesture-handler: ^2.16.2
     react-native-image-crop-picker: ^0.41.2
     react-native-linear-gradient: ^2.8.3
+    react-native-mask-input: ^1.2.3
     react-native-mmkv: ^2.12.2
     react-native-modal: ^13.0.1
     react-native-pager-view: ^6.3.3
@@ -4166,6 +4168,13 @@ __metadata:
   bin:
     create-jest: bin/create-jest.js
   checksum: 1427d49458adcd88547ef6fa39041e1fe9033a661293aa8d2c3aa1b4967cb5bf4f0c00436c7a61816558f28ba2ba81a94d5c962e8022ea9a883978fc8e1f2945
+  languageName: node
+  linkType: hard
+
+"credit-card-type@npm:^10.0.1":
+  version: 10.0.1
+  resolution: "credit-card-type@npm:10.0.1"
+  checksum: 4d96149d163b7bd8019989f722dddcf4d168022007f114f55c04de7f59c8f4c785b8da98e2f899bb593464d127d28e7405df5e29ef657d2aaf3daeff251d683f
   languageName: node
   linkType: hard
 
@@ -8049,6 +8058,16 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: f980d324e551bbc475c6406bdc5250a08242020cbe653412fa169bbdf51e28a502e225de105b4d696d6a1a1b733d44782469020f4936d8b3ce0e2c78e51cf58f
+  languageName: node
+  linkType: hard
+
+"react-native-mask-input@npm:^1.2.3":
+  version: 1.2.3
+  resolution: "react-native-mask-input@npm:1.2.3"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 245e74342430b25826459c0c89368d32afc2bea95b5894216d650f3c116cf8cb89baec5c29443694d08c7c2e27e18c1932314032bd4ff52cf4eef8b8a8325a69
   languageName: node
   linkType: hard
 

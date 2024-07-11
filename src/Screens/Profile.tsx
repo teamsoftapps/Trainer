@@ -100,15 +100,15 @@ const Profile = () => {
           <Image source={Images.rightarrow} />
         </View>
 
-        <View
-          style={styles.containers}>
-          <Text style={styles.textgreen}>
-            Add new address
-          </Text>
-          <TouchableOpacity
-            style={styles.plus}>
+        <View style={styles.containers}>
+          <Text style={styles.textgreen}>Add new address</Text>
+          <TouchableOpacity style={styles.plus}>
             <Text
-              style={styles.plustext}>
+              style={{
+                fontSize: responsiveFontSize(2),
+                color: 'black',
+                fontFamily: FontFamily.Extra_Bold,
+              }}>
               +
             </Text>
           </TouchableOpacity>
@@ -151,7 +151,14 @@ const Profile = () => {
         <View style={styles.containers}>
           <Text style={styles.textgreen}>Add new card</Text>
           <TouchableOpacity style={styles.plus}>
-            <Text style={styles.plustext}>+</Text>
+            <Text
+              style={{
+                fontSize: responsiveFontSize(2),
+                color: 'black',
+                fontFamily: FontFamily.Extra_Bold,
+              }}>
+              +
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -162,14 +169,6 @@ const Profile = () => {
 export default Profile;
 
 const styles = StyleSheet.create({
-  plustext: {
-    backgroundColor: '#9FED3A',
-    borderRadius: 50,
-    width: responsiveWidth(7),
-    height: responsiveWidth(7),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   plus: {
     backgroundColor: '#9FED3A',
     borderRadius: 50,

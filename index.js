@@ -8,11 +8,12 @@ import {Provider} from 'react-redux';
 import {store} from './src/store/store';
 import App from './App';
 import Favourites from './src/Screens/Favourites';
+import AddCard from './src/Screens/AddCard';
 
 const Routes = () => {
   return (
     <Provider store={store}>
-      <App/>
+      <AddCard/>
     </Provider>
   );
 };
