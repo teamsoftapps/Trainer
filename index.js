@@ -13,7 +13,7 @@ import AddCard from './src/Screens/AddCard';
 const Routes = () => {
   return (
     <Provider store={store}>
-      <AddCard/>
+      <App/>
     </Provider>
   );
 };

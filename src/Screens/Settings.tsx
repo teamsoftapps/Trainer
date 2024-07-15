@@ -17,12 +17,14 @@ import {
 } from 'react-native-responsive-dimensions';
 import {FontFamily, Images} from '../utils/Images';
 import Button from '../Components/Button';
+import { useNavigation } from '@react-navigation/native';
 
 const Settings = () => {
+  const navigation=useNavigation()
   return (
     <WrapperContainer>
       <ScrollView>
-        <Header />
+        <Header onPress={()=>{navigation.goBack()}} />
         <View>
           <Text
             style={{

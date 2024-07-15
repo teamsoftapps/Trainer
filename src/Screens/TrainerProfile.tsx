@@ -1,6 +1,7 @@
 import {
   Image,
   ImageBackground,
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -20,11 +21,14 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import Button from '../Components/Button';
 
 const TrainerProfile = ({route}) => {
-  const [readmore, setreadmore] = useState(false);
-  const navigation=useNavigation()
+  const [readmore, setreadmore] = useState(true);
+  const [follow, setfollow] = useState(false);
+  const [heart, setheart] = useState(false);
+  const navigation = useNavigation();
   const {data} = route.params;
   console.log(data);
   return (
@@ -50,11 +54,25 @@ const TrainerProfile = ({route}) => {
                   paddingHorizontal: responsiveHeight(3),
                   marginTop: responsiveHeight(5),
                 }}>
-                <TouchableOpacity onPress={()=>{navigation.goBack()}}>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.goBack();
+                  }}>
                   <Image source={Images.back} tintColor={'white'} />
                 </TouchableOpacity>
-                <TouchableOpacity>
-                  <Image source={Images.fav_heart} tintColor={'white'} />
+                <TouchableOpacity
+                  onPress={() => {
+                    setheart(!follow);
+                  }}>
+                  <Image
+                    source={heart ? Images.heart_filled : Images.fav_heart}
+                    tintColor={heart ? '#9FED3A' : 'white'}
+                    resizeMode="contain"
+                    style={{
+                      width: responsiveWidth(8),
+                      height: responsiveWidth(8),
+                    }}
+                  />
                 </TouchableOpacity>
               </View>
               <View
@@ -133,13 +151,18 @@ const TrainerProfile = ({route}) => {
                     alignItems: 'center',
                   }}>
                   <TouchableOpacity
+                    onPress={() => {
+                      setfollow(!follow);
+                    }}
                     style={{
                       ...styles.curve,
                       borderRadius: responsiveScreenWidth(10),
-                      backgroundColor: 'white',
+                      backgroundColor: follow ? '#9FED3A' : 'white',
                       marginBottom: responsiveHeight(1),
                     }}>
-                    <Text style={styles.blacktext}>Follow +</Text>
+                    <Text style={styles.blacktext}>
+                      {follow ? 'Following' : 'Follow +'}
+                    </Text>
                   </TouchableOpacity>
                   <Text
                     style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
@@ -160,6 +183,7 @@ const TrainerProfile = ({route}) => {
                       ...styles.curve,
                       borderRadius: responsiveScreenWidth(10),
                       backgroundColor: '#9FED3A',
+                      marginBottom: responsiveHeight(1),
                     }}>
                     <Text style={styles.blacktext}>Message</Text>
                   </View>
@@ -173,20 +197,8 @@ const TrainerProfile = ({route}) => {
                   </Text>
                 </View>
               </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-evenly',
-                  marginTop: responsiveHeight(1.5),
-                }}>
-                <View
-                  style={{
-                    borderWidth: 1,
-                    borderColor: 'grey',
-                    padding: 13,
-                    width: '40%',
-                    borderRadius: 7,
-                  }}>
+              <View style={styles.BoxContainer}>
+                <View style={styles.box}>
                   <Text
                     style={{color: '#9FED3A', fontSize: responsiveFontSize(2)}}>
                     Hourly Rate
@@ -202,14 +214,7 @@ const TrainerProfile = ({route}) => {
                     <Text style={{color: 'grey'}}> per hour</Text>
                   </View>
                 </View>
-                <View
-                  style={{
-                    borderWidth: 1,
-                    borderColor: 'grey',
-                    padding: 13,
-                    width: '40%',
-                    borderRadius: 7,
-                  }}>
+                <View style={styles.box}>
                   <Text
                     style={{color: '#9FED3A', fontSize: responsiveFontSize(2)}}>
                     Hired
@@ -229,49 +234,20 @@ const TrainerProfile = ({route}) => {
             </LinearGradient>
           </SafeAreaView>
         </ImageBackground>
-        <View style={{paddingHorizontal: responsiveWidth(7)}}>
-          <Text
-            style={{
-              color: 'white',
-              fontSize: responsiveFontSize(2.2),
-              fontFamily: FontFamily.Bold,
-            }}>
-            Specialities
-          </Text>
-          <Text style={{color: 'white', fontSize: responsiveFontSize(2)}}>
-            {' '}
-            • Strength Training
-          </Text>
-          <Text style={{color: 'white', fontSize: responsiveFontSize(2)}}>
-            {' '}
-            • Weight Loss
-          </Text>
-          <Text style={{color: 'white', fontSize: responsiveFontSize(2)}}>
+        <View style={styles.SpecialitiesContainer}>
+          <Text style={styles.heading}>Specialities</Text>
+          <Text style={styles.whiteText}> • Strength Training</Text>
+          <Text style={styles.whiteText}> • Weight Loss</Text>
+          <Text style={styles.whiteText}>
             {' '}
             • High-Intensity Interval Training (HIIT)
           </Text>
-          <Text style={{color: 'white', fontSize: responsiveFontSize(2)}}>
-            {' '}
-            • Functional Fitness
-          </Text>
+          <Text style={styles.whiteText}> • Functional Fitness</Text>
         </View>
-        <View
-          style={{
-            paddingHorizontal: responsiveWidth(7),
-            marginTop: responsiveHeight(1),
-          }}>
-          <Text
-            style={{
-              color: 'white',
-              fontSize: responsiveFontSize(2.2),
-              fontFamily: FontFamily.Bold,
-            }}>
-            Description
-          </Text>
+        <View style={styles.BioContainer}>
+          <Text style={styles.heading}>Description</Text>
 
-          <Text
-            numberOfLines={readmore ? 4 : 13}
-            style={{color: 'white', fontSize: responsiveFontSize(2)}}>
+          <Text numberOfLines={readmore ? 4 : 13} style={styles.whiteText}>
             {' '}
             Hi, I'm Alex, and I've been a gym trainer for over 10 years. My
             passion is helping people like you achieve their fitness goals and
@@ -294,25 +270,23 @@ const TrainerProfile = ({route}) => {
             {readmore ? 'Read more' : 'See less'}
           </Text>
         </View>
-        <View
-          style={{
-            paddingHorizontal: responsiveWidth(7),
-            marginTop: responsiveHeight(1),
-          }}>
-          <Text
-            style={{
-              color: 'white',
-              fontSize: responsiveFontSize(2.2),
-              fontFamily: FontFamily.Bold,
-            }}>
-            Location
-          </Text>
+        <View style={styles.addressContainer}>
+          <Text style={styles.heading}>Location</Text>
 
-          <Text
-            numberOfLines={readmore ? 4 : 13}
-            style={{color: 'white', fontSize: responsiveFontSize(2)}}>
+          <Text numberOfLines={readmore ? 4 : 13} style={styles.whiteText}>
             43 Bourke Street, Newbridge NSW 837 raffles place, Boat Band M83
           </Text>
+        </View>
+        <View
+          style={{
+            marginBottom: responsiveHeight(5),
+          }}>
+          <Button
+            text="Book Now"
+            containerstyles={{
+              marginLeft: responsiveWidth(6),
+            }}
+          />
         </View>
       </ScrollView>
     </WrapperContainer>
@@ -322,6 +296,34 @@ const TrainerProfile = ({route}) => {
 export default TrainerProfile;
 
 const styles = StyleSheet.create({
+  BoxContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginTop: responsiveHeight(1.5),
+  },
+  box: {
+    borderWidth: 1,
+    borderColor: 'grey',
+    padding: 13,
+    width: '40%',
+    borderRadius: 7,
+  },
+  SpecialitiesContainer: {paddingHorizontal: responsiveWidth(7)},
+  BioContainer: {
+    paddingHorizontal: responsiveWidth(7),
+    marginTop: responsiveHeight(1),
+  },
+  addressContainer: {
+    paddingHorizontal: responsiveWidth(7),
+    marginTop: responsiveHeight(1),
+    marginBottom: responsiveHeight(2),
+  },
+  heading: {
+    color: 'white',
+    fontSize: responsiveFontSize(2.2),
+    fontFamily: FontFamily.Bold,
+  },
+  whiteText: {color: 'white', fontSize: responsiveFontSize(2)},
   blacktext: {
     color: 'black',
     fontWeight: '500',

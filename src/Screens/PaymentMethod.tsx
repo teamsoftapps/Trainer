@@ -16,8 +16,7 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {FontFamily, Images} from '../utils/Images';
-import Button from '../Components/Button';
+import { FontFamily, Images } from '../utils/Images';
 
 const userCards = [
   {
@@ -102,18 +101,19 @@ const PaymentMethod = () => {
               </View>
               <View style={styles.address_icon}>
                 <TouchableOpacity
-      onPress={() => {
-                    setcardcheckbox(item.id)
+                  onPress={() => {
+                    setcardcheckbox(item.id);
                   }}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-      }}>
-      <View style={styles.checkbox_outer}>
-        {cardcheckbox === item.id && <View style={styles.checkbox_inner} />}
-      </View>
-    </TouchableOpacity>
-                     
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}>
+                  <View style={styles.checkbox_outer}>
+                    {cardcheckbox === item.id && (
+                      <View style={styles.checkbox_inner} />
+                    )}
+                  </View>
+                </TouchableOpacity>
               </View>
             </View>
           )}

@@ -10,6 +10,8 @@ import Previous from '../Screens/Previous';
 import ReviewBooking from '../Screens/ReviewBooking';
 import Message from '../Screens/Message';
 import TrainerProfile from '../Screens/TrainerProfile';
+import AddCard from '../Screens/AddCard';
+import Settings from '../Screens/Settings';
 
 const Stack = createNativeStackNavigator();
 const MainStack = () => {
@@ -23,6 +25,8 @@ const MainStack = () => {
       <Stack.Screen name="ReviewBooking" component={ReviewBooking} />
       <Stack.Screen name="Messages" component={Message} />
       <Stack.Screen name="TrainerProfile" component={TrainerProfile} />
+      <Stack.Screen name="AddCard" component={AddCard} />
+      <Stack.Screen name='Settings' component={Settings}/>
     
     </Stack.Navigator>
   );

@@ -1,4 +1,11 @@
-import {Image, StyleSheet, Text, TextInput, View} from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
@@ -10,6 +17,7 @@ import {
 } from 'react-native-responsive-dimensions';
 import {Images} from '../utils/Images';
 import Button from '../Components/Button';
+import { useNavigation } from '@react-navigation/native';
 var creditCardType = require('credit-card-type');
 
 const AddCard = () => {
@@ -17,6 +25,7 @@ const AddCard = () => {
   const [CardHoldername, setCardHoldername] = React.useState('');
   const [CardNumber, setCardNumber] = React.useState('');
   const [CVV, setCVV] = React.useState('');
+  const [checkbox, setcheckbox] = React.useState(false);
 
   const handleExpirationDateChange = (masked, unmasked) => {
     const month = unmasked.slice(0, 2);
@@ -26,12 +35,13 @@ const AddCard = () => {
     }
   };
   var visaCards = creditCardType(CardNumber);
-  if (visaCards[0]?.type!=undefined || visaCards[0]?.type!=null) {
+  if (visaCards[0]?.type != undefined || visaCards[0]?.type != null) {
     console.log(visaCards[0].type); // 'visa'
-  }
+  } 
+  const navigation=useNavigation()
   return (
     <WrapperContainer>
-      <Header />
+      <Header onPress={()=>{navigation.goBack()}} />
       <Text
         style={{
           fontSize: responsiveFontSize(3.5),
@@ -162,9 +172,37 @@ const AddCard = () => {
               />
             </View>
           </View>
-        </View>
-          <Button containerstyles={{marginLeft:responsiveWidth(4), marginTop:responsiveHeight(25)}} text='Add Payment Method'/>
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: responsiveWidth(5),
+              marginTop: responsiveHeight(2),
+              alignItems:"center"
+            }}>
+            <TouchableOpacity
+              onPress={() => {
+                setcheckbox(!checkbox);
+              }}>
+              <Image
+                source={
+                  checkbox ? Images.Checkboxgreen : Images.Blank_Checkboxgreen
+                }
+                style={{width:responsiveWidth(5), height:responsiveWidth(5)}}
+              />
+            </TouchableOpacity>
+            <Text style={{fontSize: responsiveFontSize(1.8), color: 'grey'}}>
+              Remember this card
+            </Text>
           </View>
+        </View>
+        <Button
+          containerstyles={{
+            marginLeft: responsiveWidth(4),
+            marginTop: responsiveHeight(22),
+          }}
+          text="Add Payment Method"
+        />
+      </View>
     </WrapperContainer>
   );
 };

@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Image,
   FlatList,
+  Pressable,
 } from 'react-native';
 import React from 'react';
 import WrapperContainer from '../Components/Wrapper';
@@ -15,9 +16,12 @@ import {
 } from 'react-native-responsive-dimensions';
 import {FontFamily, Images} from '../utils/Images';
 import {UserImages} from '../utils/Dummy';
+import {useNavigation} from '@react-navigation/native';
+import NavigationStrings from '../Navigations/NavigationStrings';
 
 const Profile = () => {
   const limitedUserImages = UserImages.slice(0, 3);
+  const navigation = useNavigation();
   return (
     <WrapperContainer>
       <View style={styles.top}>
@@ -40,7 +44,10 @@ const Profile = () => {
               nicolefoster@mail.com
             </Text>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('Settings');
+            }}>
             <Image source={Images.setting} />
           </TouchableOpacity>
         </View>
@@ -48,7 +55,11 @@ const Profile = () => {
       <View style={styles.address}>
         <View style={styles.addresstext}>
           <Text style={styles.heading}>Favourite</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <Pressable
+            onPress={() => {
+              navigation.navigate(NavigationStrings.FAVOURITES);
+            }}
+            style={{flexDirection: 'row', alignItems: 'center'}}>
             <View style={{left: 25}}>
               <FlatList
                 horizontal
@@ -87,7 +98,7 @@ const Profile = () => {
                 <Image source={Images.rightarrow} />
               </TouchableOpacity>
             </View>
-          </View>
+          </Pressable>
         </View>
       </View>
       <View style={styles.address}>
@@ -150,7 +161,11 @@ const Profile = () => {
         </View>
         <View style={styles.containers}>
           <Text style={styles.textgreen}>Add new card</Text>
-          <TouchableOpacity style={styles.plus}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('AddCard');
+            }}
+            style={styles.plus}>
             <Text
               style={{
                 fontSize: responsiveFontSize(2),
