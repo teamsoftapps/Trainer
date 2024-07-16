@@ -23,6 +23,7 @@ const Schedule = () => {
   const [selectedTime, setSelectedTime] = useState('');
   const newMarkedDates = {};
 
+
   const renderItem = ({item}) => (
     <TouchableOpacity
       style={{

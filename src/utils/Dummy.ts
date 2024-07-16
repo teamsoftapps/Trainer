@@ -64,3 +64,32 @@ export const TrainerProfile = [
     isFollow: false,
   },
 ];
+  export const availableTimes = [
+    '08:00 AM',
+    '10:00 AM',
+    '11:00 AM',
+    '12:00 PM',
+    '03:00 PM',
+    '4:00 PM',
+  ];
+  export const TimeSlots = [
+    '08:00 AM',
+    '09:00 AM',
+    '10:00 AM',
+    '11:00 PM',
+    '12:00 PM',
+    '1:00 PM',
+    '2:00 PM',
+    '3:00 PM',
+    '4:00 PM',
+  ];
+
+  export const datesToMark = [
+    '2024-07-01',
+    '2024-07-02',
+    '2024-07-03',
+    '2024-07-08',
+    '2024-07-10',
+    '2024-07-15',
+    '2024-07-26',
+  ];

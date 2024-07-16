@@ -21,6 +21,7 @@
     "credit-card-type": "^10.0.1",
     "react": "18.2.0",
     "react-native": "0.74.2",
+    "react-native-calendars": "^1.1305.0",
     "react-native-elements": "^3.4.3",
     "react-native-gesture-handler": "^2.16.2",
     "react-native-image-crop-picker": "^0.41.2",

@@ -7,13 +7,12 @@ import {name as appName} from './app.json';
 import {Provider} from 'react-redux';
 import {store} from './src/store/store';
 import App from './App';
-import Favourites from './src/Screens/Favourites';
-import AddCard from './src/Screens/AddCard';
+import Schedule from './src/Screens/Schedule';
 
 const Routes = () => {
   return (
     <Provider store={store}>
-      <App/>
+      <Schedule />
     </Provider>
   );
 };

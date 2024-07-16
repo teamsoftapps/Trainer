@@ -9,10 +9,11 @@ const Button = ({
   textstyle = {},
   containerstyles = {},
   text = 'Cancel',
-  onPress = () => {},
+  onPress = () => { },
+  disabled=false
 }) => {
   return (
-    <TouchableOpacity style={[styles.container, containerstyles]} onPress={onPress}>
+    <TouchableOpacity disabled={disabled} style={[styles.container, containerstyles]} onPress={onPress}>
       <Text
         style={[
           {color: 'black', fontSize: responsiveFontSize(2), fontWeight: '600'},
