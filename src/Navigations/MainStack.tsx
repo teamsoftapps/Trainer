@@ -12,6 +12,7 @@ import Message from '../Screens/Message';
 import TrainerProfile from '../Screens/TrainerProfile';
 import AddCard from '../Screens/AddCard';
 import Settings from '../Screens/Settings';
+import SearchInput from '../Screens/SearchInput';
 
 const Stack = createNativeStackNavigator();
 const MainStack = () => {
@@ -26,7 +27,8 @@ const MainStack = () => {
       <Stack.Screen name="Messages" component={Message} />
       <Stack.Screen name="TrainerProfile" component={TrainerProfile} />
       <Stack.Screen name="AddCard" component={AddCard} />
-      <Stack.Screen name='Settings' component={Settings}/>
+      <Stack.Screen name='Settings' component={Settings} />
+      <Stack.Screen name="SearchInput" component={SearchInput}/>
     
     </Stack.Navigator>
   );

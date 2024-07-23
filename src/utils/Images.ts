@@ -60,7 +60,8 @@ export const Images = {
   Star: require('../assets/Images/Starrr.png'),
   Cardwhite: require("../assets/Images/card2.png"),
   Checkboxgreen:require("../assets/Images/checkbox.png"),
-  Blank_Checkboxgreen:require("../assets/Images/black_checkbox.png")
+  Blank_Checkboxgreen: require("../assets/Images/black_checkbox.png"),
+  filterr:require("../assets/Images/filterrrrr.png")
 };
 
 export const FontFamily = {

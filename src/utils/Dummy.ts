@@ -26,6 +26,38 @@ export const UserImages = [
     name: 'Ruben Neves',
   },
 ];
+export const upcoming = [
+  {
+    id: 1,
+    name: 'Alex Morgan',
+    distance: '0.43 miles away',
+    rate: '$20',
+    expertise: 'Body Building',
+    image: Images.trainer2,
+    rating: 5,
+    reviews: 65,
+  },
+  {
+    id: 2,
+    name: 'Barbra Michelle',
+    distance: '1.2 miles away',
+    rate: '$70',
+    expertise: 'Boxing',
+    image: Images.trainer,
+    rating: 4.5,
+    reviews: 50,
+  },
+  {
+    id: 3,
+    name: 'Mathues Pablo',
+    distance: '2.5 miles away',
+    rate: '$30',
+    expertise: 'Aerobics',
+    image: Images.trainer3,
+    rating: 4,
+    reviews: 45,
+  },
+];
 export const TrainerProfile = [
   {
     id: 0,

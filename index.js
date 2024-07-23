@@ -12,7 +12,7 @@ import Schedule from './src/Screens/Schedule';
 const Routes = () => {
   return (
     <Provider store={store}>
-      <Schedule />
+      <App />
     </Provider>
   );
 };

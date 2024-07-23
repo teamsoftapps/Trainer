@@ -87,16 +87,23 @@ const Home = () => {
           height: responsiveHeight(8),
           flexDirection: 'row',
           alignItems: 'center',
-          justifyContent: 'flex-end',
-          gap: responsiveWidth(5),
-          paddingRight: responsiveWidth(7),
+          justifyContent: 'space-between',
+          paddingHorizontal: responsiveWidth(7),
         }}>
-        <TouchableOpacity activeOpacity={0.8}>
-          <Image source={Images.notification} style={styles.notifiaction} />
-        </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.8}>
-          <Image source={Images.messages} style={styles.notifiaction} />
-        </TouchableOpacity>
+        <Image source={Images.logo} style={{width:responsiveWidth(15)}}  resizeMode='contain'/>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: responsiveWidth(5),
+          }}>
+          <TouchableOpacity activeOpacity={0.8}>
+            <Image source={Images.notification} style={styles.notifiaction} />
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.8}>
+            <Image source={Images.messages} style={styles.notifiaction} />
+          </TouchableOpacity>
+        </View>
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View
@@ -107,6 +114,7 @@ const Home = () => {
             borderColor: '#fff',
             gap: responsiveHeight(2.5),
             justifyContent: 'center',
+            marginTop:responsiveHeight(1)
           }}>
           <Text style={styles.trainer}>Stories from trainers</Text>
 
