@@ -90,7 +90,14 @@ const Home = () => {
           justifyContent: 'space-between',
           paddingHorizontal: responsiveWidth(7),
         }}>
-        <Image source={Images.logo} style={{width:responsiveWidth(15)}}  resizeMode='contain'/>
+        <Image
+          source={Images.logo}
+          style={{
+            width: responsiveWidth(12),
+            height: responsiveHeight(12),
+            resizeMode: 'contain',
+          }}
+        />
         <View
           style={{
             flexDirection: 'row',
@@ -114,7 +121,7 @@ const Home = () => {
             borderColor: '#fff',
             gap: responsiveHeight(2.5),
             justifyContent: 'center',
-            marginTop:responsiveHeight(1)
+            marginTop: responsiveHeight(1),
           }}>
           <Text style={styles.trainer}>Stories from trainers</Text>
 

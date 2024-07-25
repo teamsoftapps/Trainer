@@ -15,6 +15,8 @@ export const Images = {
   trainer: require('../assets/Images/2.png'),
   trainer2: require('../assets/Images/3.png'),
   trainer3: require('../assets/Images/Mask.png'),
+  trainerpost: require('../assets/Images/Trainerpost.png'),
+  Trainerpost1: require('../assets/Images/Trainerpost1.png'),
   filter: require('../assets/Images/filter.png'),
   notification: require('../assets/Images/notification.png'),
   messages: require('../assets/Images/message.png'),
@@ -58,10 +60,12 @@ export const Images = {
   Sort: require('../assets/Images/Sortt.png'),
   Heart_filled: require('../assets/Images/Heart(2).png'),
   Star: require('../assets/Images/Starrr.png'),
-  Cardwhite: require("../assets/Images/card2.png"),
-  Checkboxgreen:require("../assets/Images/checkbox.png"),
-  Blank_Checkboxgreen: require("../assets/Images/black_checkbox.png"),
-  filterr:require("../assets/Images/filterrrrr.png")
+  Cardwhite: require('../assets/Images/card2.png'),
+  Checkboxgreen: require('../assets/Images/checkbox.png'),
+  Blank_Checkboxgreen: require('../assets/Images/black_checkbox.png'),
+  filterr: require('../assets/Images/filterrrrr.png'),
+  clock: require('../assets/Images/clock.png'),
+  pin: require('../assets/Images/pin.png'),
 };
 
 export const FontFamily = {
