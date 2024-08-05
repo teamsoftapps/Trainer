@@ -11,4 +11,5 @@ export default {
   BOOKING: 'Booking',
   PREVIOUS: 'Previous',
   UPCOMING: 'Upcoming',
+  SEARCH_TRAINER: 'SearchTrainer',
 };

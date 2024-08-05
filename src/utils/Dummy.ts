@@ -70,7 +70,7 @@ export const TrainerProfile = [
   },
   {
     id: 1,
-    ProfileImage: Images.trainer5,
+    ProfileImage: Images.trainer4,
     cate: 'Crossfit',
     ProfileName: 'Alex Morgan',
     location: `${0.43} mi away`,
@@ -79,7 +79,7 @@ export const TrainerProfile = [
   },
   {
     id: 2,
-    ProfileImage: Images.trainer6,
+    ProfileImage: Images.trainer4,
     cate: 'Crossfit',
     ProfileName: 'Alex Morgan',
     location: `${0.43} mi away`,
@@ -88,7 +88,7 @@ export const TrainerProfile = [
   },
   {
     id: 3,
-    ProfileImage: Images.trainer7,
+    ProfileImage: Images.trainer4,
     cate: 'Crossfit',
     ProfileName: 'Alex Morgan',
     location: `${0.43} mi away`,
@@ -96,32 +96,76 @@ export const TrainerProfile = [
     isFollow: false,
   },
 ];
-  export const availableTimes = [
-    '08:00 AM',
-    '10:00 AM',
-    '11:00 AM',
-    '12:00 PM',
-    '03:00 PM',
-    '4:00 PM',
-  ];
-  export const TimeSlots = [
-    '08:00 AM',
-    '09:00 AM',
-    '10:00 AM',
-    '11:00 PM',
-    '12:00 PM',
-    '1:00 PM',
-    '2:00 PM',
-    '3:00 PM',
-    '4:00 PM',
-  ];
+export const availableTimes = [
+  '08:00 AM',
+  '10:00 AM',
+  '11:00 AM',
+  '12:00 PM',
+  '03:00 PM',
+  '4:00 PM',
+];
+export const TimeSlots = [
+  '08:00 AM',
+  '09:00 AM',
+  '10:00 AM',
+  '11:00 PM',
+  '12:00 PM',
+  '1:00 PM',
+  '2:00 PM',
+  '3:00 PM',
+  '4:00 PM',
+];
 
-  export const datesToMark = [
-    '2024-07-01',
-    '2024-07-02',
-    '2024-07-03',
-    '2024-07-08',
-    '2024-07-10',
-    '2024-07-15',
-    '2024-07-26',
-  ];
+export const datesToMark = [
+  '2024-07-01',
+  '2024-07-02',
+  '2024-07-03',
+  '2024-07-08',
+  '2024-07-10',
+  '2024-07-15',
+  '2024-07-26',
+];
+export const Seartrainer = [
+  {
+    id: 1,
+    name: 'Alex Morgan',
+    location: '0.43 miles away',
+    rate: '$20',
+    expertise: 'Body Building',
+    image: Images.trainer4,
+    rating: 5,
+    reviews: 65,
+    claender: Images.calendar,
+    days: 'MON-FRI',
+    time: Images.clock,
+    timing: '10:00-18:00',
+  },
+  {
+    id: 2,
+    name: 'Alex Morgan',
+    location: '0.43 miles away',
+    rate: '$20',
+    expertise: 'Body Building',
+    image: Images.Trainerpost1,
+    rating: 2,
+    reviews: 65,
+    claender: Images.calendar,
+    days: 'MON-FRI',
+    time: Images.clock,
+    timing: '10:00-18:00',
+  },
+  {
+    id: 3,
+    name: 'Alex Morgan',
+    location: '0.43 miles away',
+    rate: '$20',
+    expertise: 'Body Building',
+    image: Images.trainerpost,
+    rating: 1,
+    reviews: 65,
+    claender: Images.calendar,
+    days: 'MON-FRI',
+    time: Images.clock,
+    timing: '10:00-18:00',
+  },
+];

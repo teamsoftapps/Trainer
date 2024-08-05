@@ -37,9 +37,9 @@ const TrainerProfile = ({route}) => {
         <ImageBackground
           resizeMode="cover"
           source={Images.ProfileBG}
-          style={{width: responsiveWidth(100), height: responsiveHeight(63)}}>
+          style={{width: responsiveWidth(100)}}>
           <StatusBar hidden />
-          <SafeAreaView style={{flex: 1}}>
+          <View style={{flex: 1}}>
             <LinearGradient
               colors={['transparent', '#000', '#000']}
               start={{x: 0, y: 0}}
@@ -80,6 +80,7 @@ const TrainerProfile = ({route}) => {
                   justifyContent: 'center',
                   alignItems: 'center',
                   gap: responsiveHeight(1.3),
+                  // backgroundColor: 'green',
                 }}>
                 <Image
                   source={data.image}
@@ -121,6 +122,7 @@ const TrainerProfile = ({route}) => {
                   flexDirection: 'row',
                   justifyContent: 'space-evenly',
                   marginTop: responsiveHeight(2),
+                  // backgroundColor: 'red',
                 }}>
                 <View
                   style={{
@@ -203,36 +205,35 @@ const TrainerProfile = ({route}) => {
                     style={{color: '#9FED3A', fontSize: responsiveFontSize(2)}}>
                     Hourly Rate
                   </Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <Text
-                      style={{
-                        color: 'white',
-                        fontSize: responsiveFontSize(2.2),
-                      }}>
-                      {data.rate}
-                    </Text>
-                    <Text style={{color: 'grey'}}> per hour</Text>
-                  </View>
+
+                  <Text
+                    style={{
+                      color: 'white',
+                      fontSize: responsiveFontSize(2.2),
+                    }}>
+                    {data.rate} <Text style={{color: 'grey'}}> per hour</Text>
+                  </Text>
                 </View>
                 <View style={styles.box}>
                   <Text
                     style={{color: '#9FED3A', fontSize: responsiveFontSize(2)}}>
                     Hired
                   </Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <Text
-                      style={{
-                        color: 'white',
-                        fontSize: responsiveFontSize(2.2),
-                      }}>
-                      362
-                    </Text>
-                    <Text style={{color: 'grey'}}> times</Text>
-                  </View>
+                  {/* <View style={{flexDirection: 'row', alignItems: 'center'}}> */}
+                  <Text
+                    style={{
+                      color: 'white',
+                      fontSize: responsiveFontSize(2.2),
+                      verticalAlign: 'middle',
+                    }}>
+                    362 <Text style={{color: 'grey'}}>times</Text>
+                  </Text>
+
+                  {/* </View> */}
                 </View>
               </View>
             </LinearGradient>
-          </SafeAreaView>
+          </View>
         </ImageBackground>
         <View style={styles.SpecialitiesContainer}>
           <Text style={styles.heading}>Specialities</Text>
@@ -256,18 +257,15 @@ const TrainerProfile = ({route}) => {
             coaching. My approach is holistic, focusing not just on physical
             fitness but also on creating sustainable, healthy habits. I believe
             that fitness is a unique journey for each person, and I'm here to
-            provide personalized guidance and support every step of the way.{' '}
-            {/* {!readmore && ( */}
-            {/* )} */}
+            provide personalized guidance and support every step of the way.
           </Text>
-
           <Text
             onPress={() => {
               setreadmore(!readmore);
               console.log('OK');
             }}
             style={{color: '#9FED3A'}}>
-            {readmore ? 'Read more' : 'See less'}
+            {readmore ? 'See less' : 'Read more'}
           </Text>
         </View>
         <View style={styles.addressContainer}>

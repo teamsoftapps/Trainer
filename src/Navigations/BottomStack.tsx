@@ -1,16 +1,17 @@
 /* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable prettier/prettier */
-import { Image, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import NavigationStrings from './NavigationStrings'
+import {Image, StyleSheet, Text, View} from 'react-native';
+import React from 'react';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import NavigationStrings from './NavigationStrings';
 import Home from '../Screens/Home';
 import Search from '../Screens/Search';
 import Favourites from '../Screens/Favourites';
 import Profile from '../Screens/Profile';
-import { Images } from '../utils/Images';
-import { responsiveScreenHeight } from 'react-native-responsive-dimensions';
+import {Images} from '../utils/Images';
+import {responsiveScreenHeight} from 'react-native-responsive-dimensions';
 import Booking from '../Screens/Booking';
+import SearchTrainer from '../Screens/SearchTrainer';
 
 const BottomStack = () => {
   const Bottom = createBottomTabNavigator();
@@ -69,8 +70,8 @@ const BottomStack = () => {
             />
           ),
         }}
-        name={NavigationStrings.SEARCH}
-        component={Search}
+        name={NavigationStrings.SEARCH_TRAINER}
+        component={SearchTrainer}
       />
       <Bottom.Screen
         options={{
