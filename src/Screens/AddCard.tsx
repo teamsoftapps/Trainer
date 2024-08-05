@@ -17,7 +17,9 @@ import {
 } from 'react-native-responsive-dimensions';
 import {Images} from '../utils/Images';
 import Button from '../Components/Button';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import SubscriptionModal from '../Components/SubscriptionModal';
+import {useDispatch} from 'react-redux';
 var creditCardType = require('credit-card-type');
 
 const AddCard = () => {
@@ -26,7 +28,8 @@ const AddCard = () => {
   const [CardNumber, setCardNumber] = React.useState('');
   const [CVV, setCVV] = React.useState('');
   const [checkbox, setcheckbox] = React.useState(false);
-
+  const [modalVisible, setModalVisible] = React.useState(false);
+  const dispatch = useDispatch();
   const handleExpirationDateChange = (masked, unmasked) => {
     const month = unmasked.slice(0, 2);
     const year = unmasked.slice(2);
@@ -37,11 +40,15 @@ const AddCard = () => {
   var visaCards = creditCardType(CardNumber);
   if (visaCards[0]?.type != undefined || visaCards[0]?.type != null) {
     console.log(visaCards[0].type); // 'visa'
-  } 
-  const navigation=useNavigation()
+  }
+  // const navigation = useNavigation();
   return (
     <WrapperContainer>
-      <Header onPress={()=>{navigation.goBack()}} />
+      <Header
+        onPress={() => {
+          // navigation.goBack();
+        }}
+      />
       <Text
         style={{
           fontSize: responsiveFontSize(3.5),
@@ -177,7 +184,7 @@ const AddCard = () => {
               flexDirection: 'row',
               gap: responsiveWidth(5),
               marginTop: responsiveHeight(2),
-              alignItems:"center"
+              alignItems: 'center',
             }}>
             <TouchableOpacity
               onPress={() => {
@@ -187,7 +194,7 @@ const AddCard = () => {
                 source={
                   checkbox ? Images.Checkboxgreen : Images.Blank_Checkboxgreen
                 }
-                style={{width:responsiveWidth(5), height:responsiveWidth(5)}}
+                style={{width: responsiveWidth(5), height: responsiveWidth(5)}}
               />
             </TouchableOpacity>
             <Text style={{fontSize: responsiveFontSize(1.8), color: 'grey'}}>
@@ -196,6 +203,9 @@ const AddCard = () => {
           </View>
         </View>
         <Button
+          onPress={() => {
+            setModalVisible(true);
+          }}
           containerstyles={{
             marginLeft: responsiveWidth(4),
             marginTop: responsiveHeight(22),
@@ -203,6 +213,10 @@ const AddCard = () => {
           text="Add Payment Method"
         />
       </View>
+      <SubscriptionModal
+        modalstate={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      />
     </WrapperContainer>
   );
 };

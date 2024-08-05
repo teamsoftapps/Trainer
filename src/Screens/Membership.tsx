@@ -11,13 +11,15 @@ import {FontFamily, Images} from '../utils/Images';
 import Button from '../Components/Button';
 import PaymentModal from '../Components/PaymentModal';
 import SubscriptionModal from '../Components/SubscriptionModal';
+import {useNavigation} from '@react-navigation/native';
 
 const Membership = () => {
+  const navigation = useNavigation();
   const [check, setcheck] = useState('3');
   const [modalVisible, setModalVisible] = useState(false);
- const handleCloseModal = () => {
-   setModalVisible(false);
- };
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
   return (
     <WrapperContainer>
       <View>
@@ -229,7 +231,7 @@ const Membership = () => {
       </Text>
       <View style={{alignItems: 'center'}}>
         <Button
-          onPress={() => setModalVisible(true)}
+          onPress={() => navigation.navigate("AddCard")}
           text="Subscribe"
           textstyle={{
             fontSize: responsiveFontSize(2.5),

@@ -5,6 +5,9 @@ import NavigationStrings from './NavigationStrings';
 import Signup from '../Screens/Signup';
 import Welcome from '../Screens/Welcome';
 import Signin from '../Screens/Signin';
+import CompleteProfile from '../Screens/CompleteProfile';
+import Membership from '../Screens/Membership';
+import AddCard from '../Screens/AddCard';
 
 const Stack = createNativeStackNavigator();
 
@@ -14,6 +17,9 @@ const AuthStack = () => {
       <Stack.Screen name={NavigationStrings.Welcome} component={Welcome} />
       <Stack.Screen name={NavigationStrings.LOG_IN} component={Signin} />
       <Stack.Screen name={NavigationStrings.SIGN_UP} component={Signup} />
+      <Stack.Screen name={'CompleteProfile'} component={CompleteProfile} />
+      <Stack.Screen name={'Membership'} component={Membership} />
+      <Stack.Screen name={'AddCard'} component={AddCard} />
     </Stack.Navigator>
   );
 };

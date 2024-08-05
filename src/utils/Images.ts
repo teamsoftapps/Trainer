@@ -58,10 +58,11 @@ export const Images = {
   Sort: require('../assets/Images/Sortt.png'),
   Heart_filled: require('../assets/Images/Heart(2).png'),
   Star: require('../assets/Images/Starrr.png'),
-  Cardwhite: require("../assets/Images/card2.png"),
-  Checkboxgreen:require("../assets/Images/checkbox.png"),
-  Blank_Checkboxgreen: require("../assets/Images/black_checkbox.png"),
-  filterr:require("../assets/Images/filterrrrr.png")
+  Cardwhite: require('../assets/Images/card2.png'),
+  Checkboxgreen: require('../assets/Images/checkbox.png'),
+  Blank_Checkboxgreen: require('../assets/Images/black_checkbox.png'),
+  filterr: require('../assets/Images/filterrrrr.png'),
+  placeholder: require('../assets/Images/PlaceholderImage.png'),
 };
 
 export const FontFamily = {

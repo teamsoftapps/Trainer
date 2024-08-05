@@ -25,10 +25,13 @@ const Signin = () => {
   const [secure, setsecure] = useState(false);
   const [remember, setremember] = useState(false);
 
-  const navigation= useNavigation()
+  const navigation = useNavigation();
   return (
     <WrapperContainer>
-      <ImageBackground resizeMode="cover" source={Images.bg} style={{height:responsiveHeight(100)}}>
+      <ImageBackground
+        resizeMode="cover"
+        source={Images.bg}
+        style={{height: responsiveHeight(100)}}>
         <View
           style={{
             alignItems: 'center',
@@ -178,7 +181,12 @@ const Signin = () => {
               marginTop: responsiveHeight(5),
             }}
           />
-          <View style={{width: '85%', marginTop: responsiveHeight(1), flexDirection:"row"}}>
+          <View
+            style={{
+              width: '85%',
+              marginTop: responsiveHeight(1),
+              flexDirection: 'row',
+            }}>
             <Text
               style={{
                 color: 'white',
@@ -187,16 +195,19 @@ const Signin = () => {
               }}>
               Don't have an account?{' '}
             </Text>
-              <TouchableOpacity onPress={()=>{navigation.navigate(NavigationStrings.SIGN_UP)}}>
-                <Text
-                  style={{
-                    color: '#9FED3A',
-                    textDecorationLine: 'underline',
-                    fontFamily: FontFamily.Extra_Bold,
-                  }}>
-                  Sign up.
-                </Text>
-              </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate(NavigationStrings.SIGN_UP);
+              }}>
+              <Text
+                style={{
+                  color: '#9FED3A',
+                  textDecorationLine: 'underline',
+                  fontFamily: FontFamily.Extra_Bold,
+                }}>
+                Sign up.
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ImageBackground>

@@ -6,10 +6,17 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 
-const ButtonComp = ({text = '', mainStyle = {}, textstyle = {}, onPress=()=>{}}) => {
+const ButtonComp = ({
+  text = '',
+  mainStyle = {},
+  textstyle = {},
+  onPress = () => {},
+  isDisable = false,
+}) => {
   return (
     <TouchableOpacity
       onPress={onPress}
+      disabled={isDisable}
       activeOpacity={0.9}
       style={{...styles.main, ...mainStyle}}>
       <Text style={{...styles.text, ...textstyle}}>{text || 'SignUp'}</Text>
