@@ -8,7 +8,7 @@ const App = () => {
   const authData = useSelector(state => state.Auth.data);
   return (
     <NavigationContainer>
-      {true ? <AuthStack /> : <MainStack />}
+      {false ? <AuthStack /> : <MainStack />}
     </NavigationContainer>
   );
 };
