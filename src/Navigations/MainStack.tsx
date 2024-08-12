@@ -13,6 +13,8 @@ import TrainerProfile from '../Screens/TrainerProfile';
 import AddCard from '../Screens/AddCard';
 import Settings from '../Screens/Settings';
 import SearchInput from '../Screens/SearchInput';
+import Schedule from '../Screens/Schedule';
+import PaymentMethod from '../Screens/PaymentMethod';
 
 const Stack = createNativeStackNavigator();
 const MainStack = () => {
@@ -27,9 +29,10 @@ const MainStack = () => {
       <Stack.Screen name="Messages" component={Message} />
       <Stack.Screen name="TrainerProfile" component={TrainerProfile} />
       <Stack.Screen name="AddCard" component={AddCard} />
-      <Stack.Screen name='Settings' component={Settings} />
-      <Stack.Screen name="SearchInput" component={SearchInput}/>
-    
+      <Stack.Screen name="PaymentMethod" component={PaymentMethod} />
+      <Stack.Screen name="Settings" component={Settings} />
+      <Stack.Screen name="SearchInput" component={SearchInput} />
+      <Stack.Screen name="Schedule" component={Schedule} />
     </Stack.Navigator>
   );
 };

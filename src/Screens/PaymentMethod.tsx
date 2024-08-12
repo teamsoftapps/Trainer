@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Image,
   FlatList,
+  Pressable,
 } from 'react-native';
 import React, {useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
@@ -16,7 +17,9 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { FontFamily, Images } from '../utils/Images';
+import {FontFamily, Images} from '../utils/Images';
+import Button from '../Components/Button';
+import {useNavigation} from '@react-navigation/native';
 
 const userCards = [
   {
@@ -41,10 +44,14 @@ const userCards = [
 
 const PaymentMethod = () => {
   const [cardcheckbox, setcardcheckbox] = useState(0);
-
+  console.log(cardcheckbox);
+  const navigation = useNavigation();
   return (
     <WrapperContainer>
-      <Header style={{height: responsiveHeight(7)}} />
+      <Header
+        onPress={() => navigation.goBack()}
+        style={{height: responsiveHeight(7)}}
+      />
       <View>
         <Text
           style={{
@@ -134,16 +141,35 @@ const PaymentMethod = () => {
               }}
             />
           </View>
-          <View style={styles.address}>
+          <Pressable
+            onPress={() => navigation.navigate('AddCard')}
+            style={styles.address}>
             <Text numberOfLines={1} style={styles.address_top}>
               Add New Card
             </Text>
-          </View>
+          </Pressable>
           <View style={styles.address_icon}>
             <Image source={Images.rightarrow} />
           </View>
         </View>
       </View>
+      <Button
+        disabled={cardcheckbox == 0 ? true : false}
+        text="Next"
+        containerstyles={{
+          marginTop: responsiveHeight(24),
+          marginLeft: responsiveWidth(5),
+          backgroundColor: cardcheckbox == 0 ? '#181818' : '#9FED3A',
+          borderWidth: 1,
+          borderColor: '#9FED3A',
+        }}
+        onPress={() => navigation.navigate('ReviewBooking')}
+        textstyle={{
+          fontSize: responsiveFontSize(2.3),
+          fontFamily: FontFamily.Medium,
+          color: cardcheckbox == 0 ? 'white' : '#181818',
+        }}
+      />
     </WrapperContainer>
   );
 };

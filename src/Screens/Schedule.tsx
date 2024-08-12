@@ -13,14 +13,16 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {Calendar, LocaleConfig} from 'react-native-calendars';
+import {Calendar} from 'react-native-calendars';
 import {FontFamily, Images} from '../utils/Images';
 import Button from '../Components/Button';
 import {availableTimes, TimeSlots, datesToMark} from '../utils/Dummy';
+import {useNavigation} from '@react-navigation/native';
 
 const Schedule = () => {
   const [selected, setSelected] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
+  const navigation = useNavigation();
   const newMarkedDates = {};
 
   const renderItem = ({item}) => (
@@ -71,7 +73,7 @@ const Schedule = () => {
 
   return (
     <WrapperContainer>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.goBack()}>
         <Text
           style={{
             color: 'grey',
@@ -185,6 +187,7 @@ const Schedule = () => {
             borderWidth: 1,
             borderColor: '#9FED3A',
           }}
+          onPress={() => navigation.navigate('ReviewBooking')}
           textstyle={{
             fontSize: responsiveFontSize(2.3),
             fontFamily: FontFamily.Medium,
