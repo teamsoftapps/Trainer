@@ -3,6 +3,7 @@ import {thunk} from 'redux-thunk';
 import Reducers from './Slices';
 import {MMKV} from 'react-native-mmkv';
 import {persistReducer, persistStore} from 'redux-persist';
+import {TrainerAuth} from './Slices/Auth';
 
 const storage = new MMKV();
 const reduxPersistStorage = {
@@ -32,6 +33,8 @@ const persistedReducer = persistReducer(persistConfig, Reducers);
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: getdefaultMiddleware =>
-    getdefaultMiddleware({serializableCheck: false}).concat(thunk),
+    getdefaultMiddleware({serializableCheck: false}).concat(
+      TrainerAuth.middleware
+    ),
 });
 export const persistore = persistStore(store);
