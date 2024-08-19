@@ -18,9 +18,12 @@ import {FontFamily, Images} from '../utils/Images';
 import MapView from 'react-native-maps';
 import {Seartrainer} from '../utils/Dummy';
 import {AirbnbRating} from 'react-native-ratings';
+import { useNavigation } from '@react-navigation/native';
 
 const SearchTrainer = () => {
   const [Search, setSearch] = useState('');
+  const navigation = useNavigation()
+  
   return (
     <WrapperContainer style={{flex: 1}}>
       <View style={styles.header}>
@@ -64,7 +67,10 @@ const SearchTrainer = () => {
 
             paddingHorizontal: responsiveWidth(6),
           }}>
-          <TouchableOpacity activeOpacity={0.9} style={styles.trainerSearch}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('SearchInput')}
+            activeOpacity={0.9}
+            style={styles.trainerSearch}>
             <Image source={Images.search} style={styles.searchimage} />
             <Text
               style={{

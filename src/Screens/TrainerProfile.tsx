@@ -1,4 +1,5 @@
 import {
+  FlatList,
   Image,
   ImageBackground,
   Platform,
@@ -23,14 +24,51 @@ import {
 } from 'react-native-responsive-dimensions';
 import {useNavigation} from '@react-navigation/native';
 import Button from '../Components/Button';
+import {availableTimes, TimeSlots} from '../utils/Dummy';
 
 const TrainerProfile = ({route}) => {
   const [readmore, setreadmore] = useState(true);
   const [follow, setfollow] = useState(false);
   const [heart, setheart] = useState(false);
+  const [selected, setSelected] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  const newMarkedDates = {};
+
   const navigation = useNavigation();
   const {data} = route.params;
-  console.log(data);
+
+  const renderItem = ({item}) => (
+    <TouchableOpacity
+      style={{
+        paddingVertical: 5,
+        paddingHorizontal: 25,
+        borderRadius: responsiveWidth(2),
+        marginHorizontal: 5,
+        borderWidth: 1,
+        backgroundColor: availableTimes.includes(item) ? '#9FED3A' : '#BBBBBB',
+        borderColor: availableTimes.includes(item) ? '#9FED3A' : '#ccc',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+      disabled={true}>
+      <Text
+        style={{
+          color: 'black',
+          fontSize: responsiveFontSize(1.6),
+          fontFamily: FontFamily.Extra_Bold,
+        }}>
+        {item}
+      </Text>
+      <Text
+        style={{
+          color: 'black',
+          fontSize: responsiveFontSize(1.6),
+          fontFamily: FontFamily.Semi_Bold,
+        }}>
+        {availableTimes.includes(item) ? 'Available' : 'Booked'}
+      </Text>
+    </TouchableOpacity>
+  );
   return (
     <WrapperContainer style={{backgroundColor: 'black'}}>
       <ScrollView>
@@ -69,8 +107,8 @@ const TrainerProfile = ({route}) => {
                     tintColor={heart ? '#9FED3A' : 'white'}
                     resizeMode="contain"
                     style={{
-                      width: responsiveWidth(8),
-                      height: responsiveWidth(8),
+                      width: responsiveWidth(6),
+                      height: responsiveWidth(6),
                     }}
                   />
                 </TouchableOpacity>
@@ -79,15 +117,15 @@ const TrainerProfile = ({route}) => {
                 style={{
                   justifyContent: 'center',
                   alignItems: 'center',
-                  gap: responsiveHeight(1.3),
+                  gap: responsiveHeight(1),
                   // backgroundColor: 'green',
                 }}>
                 <Image
                   source={data.image}
                   style={{
-                    width: responsiveWidth(32),
+                    width: responsiveWidth(28),
                     borderRadius: 70,
-                    height: responsiveWidth(32),
+                    height: responsiveWidth(28),
                     borderWidth: 1.4,
                     borderColor: 'white',
                   }}
@@ -99,10 +137,19 @@ const TrainerProfile = ({route}) => {
                 </Text>
 
                 <Text
-                  style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
+                  style={{
+                    fontSize: responsiveFontSize(1.8),
+                    color: 'white',
+                    marginTop: responsiveHeight(-1.2),
+                  }}>
                   Certified Personal trainer
                 </Text>
-                <View style={{flexDirection: 'row', gap: responsiveWidth(4)}}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    gap: responsiveWidth(4),
+                    marginTop: responsiveHeight(1.5),
+                  }}>
                   <Text
                     style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
                     Strength Training
@@ -211,7 +258,15 @@ const TrainerProfile = ({route}) => {
                       color: 'white',
                       fontSize: responsiveFontSize(2.2),
                     }}>
-                    {data.rate} <Text style={{color: 'grey'}}> per hour</Text>
+                    {data.rate}{' '}
+                    <Text
+                      style={{
+                        color: 'grey',
+                        fontSize: responsiveFontSize(1.8),
+                      }}>
+                      {' '}
+                      per hour
+                    </Text>
                   </Text>
                 </View>
                 <View style={styles.box}>
@@ -226,7 +281,14 @@ const TrainerProfile = ({route}) => {
                       fontSize: responsiveFontSize(2.2),
                       verticalAlign: 'middle',
                     }}>
-                    362 <Text style={{color: 'grey'}}>times</Text>
+                    362{' '}
+                    <Text
+                      style={{
+                        color: 'grey',
+                        fontSize: responsiveFontSize(1.8),
+                      }}>
+                      times
+                    </Text>
                   </Text>
 
                   {/* </View> */}
@@ -262,11 +324,30 @@ const TrainerProfile = ({route}) => {
           <Text
             onPress={() => {
               setreadmore(!readmore);
-              console.log('OK');
             }}
             style={{color: '#9FED3A'}}>
             {readmore ? 'See less' : 'Read more'}
           </Text>
+        </View>
+        <View style={{marginTop: responsiveHeight(1.5)}}>
+          <Text
+            style={{
+              paddingHorizontal: responsiveWidth(7),
+              color: 'white',
+              fontSize: responsiveFontSize(2.2),
+              fontFamily: FontFamily.Bold,
+              marginBottom: responsiveHeight(1.5),
+            }}>
+            Schedule
+          </Text>
+          <FlatList
+            data={TimeSlots}
+            renderItem={renderItem}
+            keyExtractor={item => item}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{alignItems: 'center'}}
+          />
         </View>
         <View style={styles.addressContainer}>
           <Text style={styles.heading}>Location</Text>
@@ -281,6 +362,7 @@ const TrainerProfile = ({route}) => {
           }}>
           <Button
             text="Book Now"
+            onPress={() => navigation.navigate('Schedule')}
             containerstyles={{
               marginLeft: responsiveWidth(6),
             }}
@@ -305,6 +387,7 @@ const styles = StyleSheet.create({
     padding: 13,
     width: '40%',
     borderRadius: 7,
+    gap: responsiveHeight(0.7),
   },
   SpecialitiesContainer: {paddingHorizontal: responsiveWidth(7)},
   BioContainer: {
@@ -320,8 +403,9 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: responsiveFontSize(2.2),
     fontFamily: FontFamily.Bold,
+    marginBottom: responsiveHeight(1),
   },
-  whiteText: {color: 'white', fontSize: responsiveFontSize(2)},
+  whiteText: {color: 'white', fontSize: responsiveFontSize(1.7)},
   blacktext: {
     color: 'black',
     fontWeight: '500',

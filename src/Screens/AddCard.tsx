@@ -20,6 +20,7 @@ import Button from '../Components/Button';
 import {useNavigation} from '@react-navigation/native';
 import SubscriptionModal from '../Components/SubscriptionModal';
 import {useDispatch} from 'react-redux';
+import PaymentModal from '../Components/PaymentModal';
 var creditCardType = require('credit-card-type');
 
 const AddCard = () => {
@@ -29,6 +30,10 @@ const AddCard = () => {
   const [CVV, setCVV] = React.useState('');
   const [checkbox, setcheckbox] = React.useState(false);
   const [modalVisible, setModalVisible] = React.useState(false);
+  const [CVVformik, setCVVformik] = React.useState(false);
+  const [Expformik, setExpformik] = React.useState(false);
+  const [Cardformik, setCardformik] = React.useState(false);
+  const [Nameformik, setNameformik] = React.useState(false);
   const dispatch = useDispatch();
   const handleExpirationDateChange = (masked, unmasked) => {
     const month = unmasked.slice(0, 2);
@@ -37,16 +42,45 @@ const AddCard = () => {
       setExpirationDate(unmasked);
     }
   };
+  const currentDate = new Date();
+  const currentMonth = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+  const currentYear = currentDate.getFullYear().toString();
+  const expiryMonth = expirationDate.slice(0, 2);
+  const expiryYear = expirationDate.slice(2);
+  const condition1 = expirationDate != '';
+  const condition6 =
+    expiryYear < currentYear ||
+    (expiryYear === currentYear && expiryMonth < currentMonth);
+  const condition2 = CardHoldername != '';
+  const condition3 = CardNumber != '';
+  const condition4 = CVV != '';
+  const AddCard = () => {
+    if (condition1 && condition2 && condition3 && condition4 ) {
+      setCVVformik(false);
+      setCardformik(false);
+      setExpformik(false);
+      setNameformik(false);
+      setModalVisible(true);
+    } else {
+      if (!condition4) setCVVformik(true);
+      if (!condition3) setCardformik(true);
+      if (!condition2) setNameformik(true);
+      if (!condition1) setExpformik(true);
+
+    }
+  };
+
+  console.log(expirationDate);
   var visaCards = creditCardType(CardNumber);
   if (visaCards[0]?.type != undefined || visaCards[0]?.type != null) {
     console.log(visaCards[0].type); // 'visa'
   }
-  // const navigation = useNavigation();
+  const navigation = useNavigation();
   return (
     <WrapperContainer>
       <Header
         onPress={() => {
-          // navigation.goBack();
+          navigation.goBack();
         }}
       />
       <Text
@@ -94,7 +128,7 @@ const AddCard = () => {
               fontSize: responsiveFontSize(2),
               color: 'white',
               borderWidth: 0.7,
-              borderColor: 'white',
+              borderColor: Nameformik ? 'red' : 'white',
               borderRadius: 7,
               paddingLeft: responsiveWidth(5),
             }}
@@ -112,7 +146,7 @@ const AddCard = () => {
               fontSize: responsiveFontSize(2),
               color: 'white',
               borderWidth: 0.7,
-              borderColor: 'white',
+              borderColor: Cardformik ? 'red' : 'white',
               borderRadius: 7,
               paddingLeft: responsiveWidth(5),
             }}
@@ -139,7 +173,7 @@ const AddCard = () => {
                   fontSize: responsiveFontSize(2),
                   color: 'white',
                   borderWidth: 0.7,
-                  borderColor: 'white',
+                  borderColor: CVVformik ? 'red' : 'white',
                   borderRadius: 7,
                   paddingLeft: responsiveWidth(5),
                 }}
@@ -172,7 +206,7 @@ const AddCard = () => {
                   fontSize: responsiveFontSize(2),
                   color: 'white',
                   borderWidth: 0.7,
-                  borderColor: 'white',
+                  borderColor: Expformik ? 'red' : 'white',
                   borderRadius: 7,
                   paddingLeft: responsiveWidth(5),
                 }}
@@ -204,7 +238,7 @@ const AddCard = () => {
         </View>
         <Button
           onPress={() => {
-            setModalVisible(true);
+            AddCard();
           }}
           containerstyles={{
             marginLeft: responsiveWidth(4),
@@ -213,7 +247,7 @@ const AddCard = () => {
           text="Add Payment Method"
         />
       </View>
-      <SubscriptionModal
+      <PaymentModal
         modalstate={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       />

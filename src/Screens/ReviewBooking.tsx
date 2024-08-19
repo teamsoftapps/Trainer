@@ -1,4 +1,11 @@
-import {StyleSheet, Text, View, TouchableOpacity, Image} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  Pressable,
+} from 'react-native';
 import React from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
@@ -11,11 +18,16 @@ import {
 } from 'react-native-responsive-dimensions';
 import {FontFamily, Images} from '../utils/Images';
 import Button from '../Components/Button';
+import {useNavigation} from '@react-navigation/native';
 
 const ReviewBooking = () => {
+  const navigation = useNavigation();
   return (
     <WrapperContainer>
-      <Header style={{height: responsiveHeight(7)}} />
+      <Header
+        onPress={() => navigation.goBack()}
+        style={{height: responsiveHeight(7)}}
+      />
       <View>
         <Text
           style={{
@@ -146,7 +158,7 @@ const ReviewBooking = () => {
           borderBottomColor: '#686868',
           borderBottomWidth: 0.5,
         }}>
-        <View>
+        <Pressable onPress={() => navigation.navigate('PaymentMethod')}>
           <Text
             style={{color: '#A4A4A4', fontSize: responsiveScreenFontSize(2)}}>
             Payment Method
@@ -159,7 +171,7 @@ const ReviewBooking = () => {
             <Image source={Images.visa} />
             <Image source={Images.mastercard} />
           </View>
-        </View>
+        </Pressable>
         <View>
           <TouchableOpacity>
             <Image
@@ -208,7 +220,13 @@ const ReviewBooking = () => {
           </Text>
         </View>
       </View>
-      <Button text="Confirm" containerstyles={{marginHorizontal:responsiveScreenWidth(6), marginTop:responsiveHeight(17)}} />
+      <Button
+        text="Confirm"
+        containerstyles={{
+          marginHorizontal: responsiveScreenWidth(6),
+          marginTop: responsiveHeight(12),
+        }}
+      />
     </WrapperContainer>
   );
 };

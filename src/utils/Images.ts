@@ -66,6 +66,7 @@ export const Images = {
   filterr: require('../assets/Images/filterrrrr.png'),
   clock: require('../assets/Images/clock.png'),
   pin: require('../assets/Images/pin.png'),
+  placeholderimage: require('../assets/Images/PlaceholderImage.png'),
 };
 
 export const FontFamily = {
