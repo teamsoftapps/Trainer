@@ -1,6 +1,6 @@
-import {StyleSheet, Text, View} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import BottomStack from './BottomStack';
 
 import Booking from '../Screens/Booking';
@@ -15,11 +15,13 @@ import Settings from '../Screens/Settings';
 import SearchInput from '../Screens/SearchInput';
 import Schedule from '../Screens/Schedule';
 import PaymentMethod from '../Screens/PaymentMethod';
+import CompleteProfile from '../Screens/CompleteProfile';
+import Membership from '../Screens/Membership';
 
 const Stack = createNativeStackNavigator();
 const MainStack = () => {
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Bottom" component={BottomStack} />
       <Stack.Screen name="Booking" component={Booking} />
       <Stack.Screen name="BookingDetails" component={BookingDetails} />
@@ -33,6 +35,8 @@ const MainStack = () => {
       <Stack.Screen name="Settings" component={Settings} />
       <Stack.Screen name="SearchInput" component={SearchInput} />
       <Stack.Screen name="Schedule" component={Schedule} />
+      <Stack.Screen name={'CompleteProfile'} component={CompleteProfile} />
+      <Stack.Screen name={'Membership'} component={Membership} />
     </Stack.Navigator>
   );
 };

@@ -10,7 +10,7 @@ import {
   Pressable,
   Dimensions,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   responsiveHeight,
   responsiveWidth,
@@ -18,9 +18,9 @@ import {
   responsiveScreenWidth,
 } from 'react-native-responsive-dimensions';
 import WrapperContainer from '../Components/Wrapper';
-import {FontFamily, Images} from '../utils/Images';
-import {TrainerProfile, UserImages} from '../utils/Dummy';
-import {AirbnbRating} from 'react-native-ratings';
+import { FontFamily, Images } from '../utils/Images';
+import { TrainerProfile, UserImages } from '../utils/Dummy';
+import { AirbnbRating } from 'react-native-ratings';
 import LinearGradient from 'react-native-linear-gradient';
 import Animated, {
   interpolate,
@@ -29,10 +29,37 @@ import Animated, {
   withSpring,
   withClamp,
 } from 'react-native-reanimated';
+import axiosBaseURL from '../utils/AxiosBaseURL';
+import { useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
 
 const Home = () => {
+
+  const navigation = useNavigation()
   const [modal, setmodal] = useState(Number);
   const [usersData, setusersData] = useState(TrainerProfile);
+  const [APIUserData, setAPIUserData] = useState({})
+  const Email = useSelector(state => state.Auth.data);
+
+
+  useEffect(() => {
+    axiosBaseURL
+      .post('/trainer/GetTrainer', {
+        email: Email
+      })
+      .then(response => {
+        console.log('User found', response.data.data.Bio);
+        console.log('User found', response.data.data);
+        setAPIUserData(response.data.data)
+        if (response.data.data.Bio === null) {
+          navigation.navigate("CompleteProfile", { data: response.data.data })
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error.response.data.message);
+
+      });
+  }, [])
 
   const screenWidth = Dimensions.get('screen').width;
 
@@ -127,11 +154,11 @@ const Home = () => {
 
           <View>
             <FlatList
-              style={{paddingLeft: responsiveWidth(4)}}
+              style={{ paddingLeft: responsiveWidth(4) }}
               horizontal
               showsHorizontalScrollIndicator={false}
               data={UserImages}
-              renderItem={({item, index}) => {
+              renderItem={({ item, index }) => {
                 return (
                   <TouchableOpacity
                     activeOpacity={0.9}
@@ -160,10 +187,10 @@ const Home = () => {
             <FlatList
               scrollEnabled={false}
               data={usersData}
-              renderItem={({item, index}) => {
+              renderItem={({ item, index }) => {
                 return (
                   <ImageBackground
-                    imageStyle={{borderRadius: responsiveWidth(1.5)}}
+                    imageStyle={{ borderRadius: responsiveWidth(1.5) }}
                     source={item.ProfileImage}
                     style={styles.Trainer}>
                     <Pressable
@@ -201,8 +228,8 @@ const Home = () => {
 
                     <LinearGradient
                       colors={['transparent', '#000', '#000']}
-                      start={{x: 0, y: 0}}
-                      end={{x: 0, y: 1.5}}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 0, y: 1.5 }}
                       style={styles.LinearMainView}>
                       <View>
                         <Text

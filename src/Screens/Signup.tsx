@@ -1,4 +1,4 @@
-import {Dropdown} from 'react-native-element-dropdown';
+import { Dropdown } from 'react-native-element-dropdown';
 import {
   ImageBackground,
   TouchableOpacity,
@@ -9,30 +9,30 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import ButtonComp from '../Components/ButtonComp';
-import {FontFamily, Images} from '../utils/Images';
+import { FontFamily, Images } from '../utils/Images';
 import WrapperContainer from '../Components/Wrapper';
-import MaskInput, {Masks} from 'react-native-mask-input';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import NavigationStrings from '../Navigations/NavigationStrings';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import axiosBaseURL from '../utils/AxiosBaseURL';
 import FlashMessage from 'react-native-flash-message';
-import {showMessage} from 'react-native-flash-message';
-import {useDispatch, useSelector} from 'react-redux';
-import {IsLogin} from '../store/Slices/AuthSlice';
+import { showMessage } from 'react-native-flash-message';
+import { useDispatch, useSelector } from 'react-redux';
+import { IsLogin } from '../store/Slices/AuthSlice';
 
 const Signup = () => {
   const dispatch = useDispatch();
   const authData = useSelector(state => state.Auth.data);
   const navigation = useNavigation();
-  const [name, setname] = useState('');
-  const [email, setemail] = useState('');
+  const [name, setname] = useState('test def');
+  const [email, setemail] = useState('test@gmail.com');
   const [password, setpassword] = useState('');
   const [confirmpassword, setconfirmpassword] = useState('');
   const [DoB, setDoB] = useState('');
@@ -52,8 +52,8 @@ const Signup = () => {
   const [Weightdisabled, setWeightdisable] = useState(false);
   const [Heightdisabled, setHeightdisable] = useState(false);
   const data = [
-    {label: 'Male', value: 'Male'},
-    {label: 'Female', value: 'Female'},
+    { label: 'Male', value: 'Male' },
+    { label: 'Female', value: 'Female' },
   ];
 
   if (!authData) {
@@ -82,6 +82,8 @@ const Signup = () => {
   const condition7 = height != '';
 
   const fetchData = () => {
+
+
     if (
       condition1 &&
       condition2 &&
@@ -99,7 +101,7 @@ const Signup = () => {
       setWeightdisable(false);
       setHeightdisable(false);
       axiosBaseURL
-        .post('/userSignup', {
+        .post('/trainer/trainerSignup', {
           email: email,
           fullname: name,
           password: password,
@@ -122,7 +124,6 @@ const Signup = () => {
             type: 'danger',
           });
         });
-      navigation.navigate('CompleteProfile');
     } else {
       if (!condition1) setnamedisable(true);
       if (!condition2) setemaildisable(true);
@@ -134,12 +135,12 @@ const Signup = () => {
     }
   };
   return (
-    <ScrollView style={{flexGrow: 1}}>
+    <ScrollView style={{ flexGrow: 1 }}>
       <WrapperContainer>
         <ImageBackground
           resizeMode="cover"
           source={Images.bg}
-          style={{flex: 1}}>
+          style={{ flex: 1 }}>
           <View
             style={{
               alignItems: 'center',
@@ -164,7 +165,7 @@ const Signup = () => {
               Create An Account
             </Text>
 
-            <View style={{gap: responsiveHeight(3)}}>
+            <View style={{ gap: responsiveHeight(3) }}>
               <View
                 style={{
                   width: responsiveWidth(85),
@@ -177,7 +178,7 @@ const Signup = () => {
                   alignItems: 'center',
                 }}>
                 <View>
-                  <Text style={{color: '#908C8D'}}>Full name</Text>
+                  <Text style={{ color: '#908C8D' }}>Full name</Text>
                   <TextInput
                     ref={nameRef}
                     placeholder="Enter name"
@@ -217,7 +218,7 @@ const Signup = () => {
                   alignItems: 'center',
                 }}>
                 <View>
-                  <Text style={{color: '#908C8D'}}>Email</Text>
+                  <Text style={{ color: '#908C8D' }}>Email</Text>
                   <TextInput
                     ref={emailRef}
                     placeholder="Enter email"
@@ -238,7 +239,7 @@ const Signup = () => {
                 <TouchableOpacity onPress={handleEmailInput}>
                   <Image
                     source={Images.email}
-                    style={{width: responsiveWidth(5)}}
+                    style={{ width: responsiveWidth(5) }}
                   />
                 </TouchableOpacity>
               </View>
@@ -254,7 +255,7 @@ const Signup = () => {
                   alignItems: 'center',
                 }}>
                 <View>
-                  <Text style={{color: '#908C8D'}}>Password</Text>
+                  <Text style={{ color: '#908C8D' }}>Password</Text>
                   <TextInput
                     placeholder="Enter Password"
                     secureTextEntry={secure}
@@ -278,7 +279,7 @@ const Signup = () => {
                   }}>
                   <Image
                     source={secure ? Images.eye_off : Images.eye}
-                    style={{width: responsiveWidth(6)}}
+                    style={{ width: responsiveWidth(6) }}
                     resizeMode="contain"
                   />
                 </TouchableOpacity>
@@ -295,7 +296,7 @@ const Signup = () => {
                   alignItems: 'center',
                 }}>
                 <View>
-                  <Text style={{color: '#908C8D'}}>Confirm Password</Text>
+                  <Text style={{ color: '#908C8D' }}>Confirm Password</Text>
                   <TextInput
                     placeholder="Enter Password"
                     secureTextEntry={secure2}
@@ -319,7 +320,7 @@ const Signup = () => {
                   }}>
                   <Image
                     source={secure2 ? Images.eye_off : Images.eye}
-                    style={{width: responsiveWidth(6)}}
+                    style={{ width: responsiveWidth(6) }}
                     resizeMode="contain"
                   />
                 </TouchableOpacity>
@@ -343,8 +344,8 @@ const Signup = () => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{width: responsiveWidth(34)}}>
-                  <Text style={{color: '#908C8D'}}>Gender</Text>
+                <View style={{ width: responsiveWidth(34) }}>
+                  <Text style={{ color: '#908C8D' }}>Gender</Text>
                   <Dropdown
                     style={styles.dropdown}
                     placeholderStyle={styles.placeholderStyle}
@@ -353,7 +354,7 @@ const Signup = () => {
                     renderRightIcon={() => (
                       <Image
                         source={Images.dropdown}
-                        style={{width: responsiveWidth(5)}}
+                        style={{ width: responsiveWidth(5) }}
                         resizeMode="contain"
                       />
                     )}
@@ -380,8 +381,8 @@ const Signup = () => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{width: responsiveWidth(27)}}>
-                  <Text style={{color: '#908C8D'}}>Date of Birth</Text>
+                <View style={{ width: responsiveWidth(27) }}>
+                  <Text style={{ color: '#908C8D' }}>Date of Birth</Text>
                   <MaskInput
                     ref={dobRef}
                     value={DoB}
@@ -403,7 +404,7 @@ const Signup = () => {
                 <TouchableOpacity onPress={handledobInput}>
                   <Image
                     source={Images.calendar}
-                    style={{width: responsiveWidth(4.5)}}
+                    style={{ width: responsiveWidth(4.5) }}
                     resizeMode="contain"
                   />
                 </TouchableOpacity>
@@ -427,8 +428,8 @@ const Signup = () => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{width: responsiveWidth(27)}}>
-                  <Text style={{color: '#908C8D'}}>Weight in lbs</Text>
+                <View style={{ width: responsiveWidth(27) }}>
+                  <Text style={{ color: '#908C8D' }}>Weight in lbs</Text>
                   <TextInput
                     keyboardType="numeric"
                     placeholder="Your Weight"
@@ -456,8 +457,8 @@ const Signup = () => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{width: responsiveWidth(27)}}>
-                  <Text style={{color: '#908C8D'}}>Height in ft</Text>
+                <View style={{ width: responsiveWidth(27) }}>
+                  <Text style={{ color: '#908C8D' }}>Height in ft</Text>
                   <TextInput
                     keyboardType="numeric"
                     placeholder="Your Height"

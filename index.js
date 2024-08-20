@@ -15,7 +15,7 @@ import AddCard from './src/Screens/AddCard';
 const Routes = () => {
   return (
     <Provider store={store}>
-      <App />
+      <CompleteProfile />
     </Provider>
   );
 };

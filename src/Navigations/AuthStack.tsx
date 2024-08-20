@@ -17,9 +17,6 @@ const AuthStack = () => {
       <Stack.Screen name={NavigationStrings.Welcome} component={Welcome} />
       <Stack.Screen name={NavigationStrings.LOG_IN} component={Signin} />
       <Stack.Screen name={NavigationStrings.SIGN_UP} component={Signup} />
-      <Stack.Screen name={'CompleteProfile'} component={CompleteProfile} />
-      <Stack.Screen name={'Membership'} component={Membership} />
-      <Stack.Screen name={'AddCard'} component={AddCard} />
     </Stack.Navigator>
   );
 };

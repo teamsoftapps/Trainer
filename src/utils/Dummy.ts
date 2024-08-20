@@ -104,6 +104,14 @@ export const availableTimes = [
   '03:00 PM',
   '4:00 PM',
 ];
+export const Specialities = [
+  {key: 1, value: 'Strength Training'},
+  {key: 2, value: 'Yoga'},
+  {key: 3, value: 'Cardio Fitness'},
+  {key: 4, value: 'Weight Loss Coaching'},
+  {key: 5, value: 'Bodybuilding'},
+  {key: 6, value: 'Crossfit'},
+];
 export const TimeSlots = [
   '08:00 AM',
   '09:00 AM',
