@@ -112,10 +112,16 @@ const Signup = () => {
         })
         .then(response => {
           console.log('User Created', response.data);
-          dispatch(IsLogin(response.data.data.email));
+          showMessage({
+            message: 'Success',
+            description: 'Account has been created successfully',
+            type: 'success',
+          });
+
+          navigation.navigate(NavigationStrings.LOG_IN);
         })
         .catch(error => {
-          console.error('Error fetching data:', error.response.data.message);
+          console.log('Error fetching data:', error?.response.data.message);
           showMessage({
             message: 'Login Error',
             description:

@@ -12,4 +12,5 @@ export default {
   PREVIOUS: 'Previous',
   UPCOMING: 'Upcoming',
   SEARCH_TRAINER: 'SearchTrainer',
+  COMPLETE_PROFILE: 'CompleteProfile',
 };

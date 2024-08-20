@@ -19,13 +19,54 @@ import ButtonComp from '../Components/ButtonComp';
 import {useNavigation} from '@react-navigation/native';
 import NavigationStrings from '../Navigations/NavigationStrings';
 import WrapperContainer from '../Components/Wrapper';
+import {useDispatch, useSelector} from 'react-redux';
+import {useSignInMutation} from '../store/Slices/Auth';
+import {IsLogin} from '../store/Slices/AuthSlice';
+import {showMessage} from 'react-native-flash-message';
 const Signin = () => {
   const [email, setemail] = useState('');
   const [password, setpassword] = useState('');
   const [secure, setsecure] = useState(false);
   const [remember, setremember] = useState(false);
-
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const St = useSelector(state => state);
+  console.log('State', St);
+  const [SignIn, {data}] = useSignInMutation();
+
+  const handleSignin = async () => {
+    let payload = {
+      email: email,
+      password: password,
+    };
+    try {
+      let res = await SignIn(payload);
+
+      if (res.data) {
+        showMessage({
+          message: 'Success',
+          description: 'User logged in successfully',
+          type: 'success',
+        });
+        dispatch(IsLogin(res.data?.data.token));
+      }
+      if (res.error) {
+        showMessage({
+          message: 'Error',
+          description: res.error?.data.message,
+          type: 'danger',
+        });
+      }
+    } catch (error) {
+      console.log('Errorrrr', error.message);
+      showMessage({
+        message: 'Error',
+        description: 'error.message',
+        type: 'danger',
+      });
+    }
+  };
+
   return (
     <WrapperContainer>
       <ImageBackground
@@ -175,6 +216,7 @@ const Signin = () => {
             </Text>
           </View>
           <ButtonComp
+            onPress={handleSignin}
             text="Sign In"
             mainStyle={{
               width: responsiveWidth(85),

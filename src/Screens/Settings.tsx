@@ -5,6 +5,7 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from 'react-native';
 import React from 'react';
 import WrapperContainer from '../Components/Wrapper';
@@ -17,14 +18,46 @@ import {
 } from 'react-native-responsive-dimensions';
 import {FontFamily, Images} from '../utils/Images';
 import Button from '../Components/Button';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import {useDispatch} from 'react-redux';
+import {SignOut} from '../store/Slices/AuthSlice';
+import {showMessage} from 'react-native-flash-message';
 
 const Settings = () => {
-  const navigation=useNavigation()
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const handleSignout = async () => {
+    let res = await Alert.alert('Info', 'Are you sure you want to Signout', [
+      {
+        text: 'Yes',
+        onPress: () => {
+          dispatch(SignOut());
+        },
+      },
+
+      {
+        text: 'No',
+        onPress: () => {
+          return;
+        },
+      },
+    ]);
+    console.log('REEE', res);
+    // if(res){
+    // showMessage({
+    //   message: 'Info',
+    //   description: 'User Sined Out',
+    //   type: 'info',
+    // })};
+  };
   return (
     <WrapperContainer>
       <ScrollView>
-        <Header onPress={()=>{navigation.goBack()}} />
+        <Header
+          onPress={() => {
+            navigation.goBack();
+          }}
+        />
         <View>
           <Text
             style={{
@@ -182,7 +215,11 @@ const Settings = () => {
           </TouchableOpacity>
         </View>
         <View style={{alignItems: 'center', marginTop: responsiveHeight(5)}}>
-          <Button text='Sign Out' textstyle={{fontSize:responsiveFontSize(2.5)}}/>
+          <Button
+            text="Sign Out"
+            textstyle={{fontSize: responsiveFontSize(2.5)}}
+            onPress={handleSignout}
+          />
         </View>
       </ScrollView>
     </WrapperContainer>

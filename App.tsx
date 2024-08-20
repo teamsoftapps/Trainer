@@ -9,7 +9,7 @@ const App = () => {
   console.log(authData)
   return (
     <NavigationContainer>
-      {true ? <MainStack /> : <AuthStack />}
+      {!authData ? <AuthStack /> : <MainStack />}
     </NavigationContainer>
   );
 };
