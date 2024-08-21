@@ -3,6 +3,7 @@ import React from 'react';
 import {
   responsiveFontSize,
   responsiveScreenHeight,
+  responsiveScreenWidth,
 } from 'react-native-responsive-dimensions';
 
 const Button = ({
@@ -31,7 +32,8 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#9FED3A',
     borderRadius: responsiveScreenHeight(20),
-    width: '90%',
+    width: responsiveScreenWidth(80),
+    
     height: responsiveScreenHeight(7),
     alignItems: 'center',
     justifyContent: 'center',

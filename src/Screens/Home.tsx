@@ -42,24 +42,24 @@ const Home = () => {
   const Email = useSelector(state => state.Auth.data);
 
 
-  useEffect(() => {
-    axiosBaseURL
-      .post('/trainer/GetTrainer', {
-        email: Email
-      })
-      .then(response => {
-        console.log('User found', response.data.data.Bio);
-        console.log('User found', response.data.data);
-        setAPIUserData(response.data.data)
-        if (response.data.data.Bio === null) {
-          navigation.navigate("CompleteProfile", { data: response.data.data })
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error.response.data.message);
+  // useEffect(() => {
+  //   axiosBaseURL
+  //     .post('/trainer/GetTrainer', {
+  //       email: Email
+  //     })
+  //     .then(response => {
+  //       console.log('User found', response.data.data.Bio);
+  //       console.log('User found', response.data.data);
+  //       setAPIUserData(response.data.data)
+  //       if (response.data.data.Bio === null) {
+  //         navigation.navigate("CompleteProfile", { data: response.data.data })
+  //       }
+  //     })
+  //     .catch(error => {
+  //       console.error('Error fetching data:', error.response.data.message);
 
-      });
-  }, [])
+  //     });
+  // }, [])
 
   const screenWidth = Dimensions.get('screen').width;
 

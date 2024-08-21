@@ -2296,6 +2296,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-community/clipboard@npm:^1.2.2":
+  version: 1.5.1
+  resolution: "@react-native-community/clipboard@npm:1.5.1"
+  peerDependencies:
+    react: ">=16.0"
+    react-native: ">=0.57.0"
+  checksum: 61f993b864804ef43de3a4b33b080d2310d491d7d13bc504e75326a841e0f2715b7c65212cae420fa200688be8881ed4b6731e0f4bad8de2d340c401f598bcea
+  languageName: node
+  linkType: hard
+
 "@react-native-masked-view/masked-view@npm:^0.3.1":
   version: 0.3.1
   resolution: "@react-native-masked-view/masked-view@npm:0.3.1"
@@ -2743,6 +2753,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@twotalltotems/react-native-otp-input@npm:^1.3.11":
+  version: 1.3.11
+  resolution: "@twotalltotems/react-native-otp-input@npm:1.3.11"
+  dependencies:
+    "@react-native-community/clipboard": ^1.2.2
+  checksum: 80f2464b2cb061c10006db75912573329a93d82e39e943d4dcec895a668a8cbce2cc990a74f46907372371767de6b443265c0d3f9a2ab49b2b58d8653c7e2215
+  languageName: node
+  linkType: hard
+
 "@types/babel__core@npm:^7.1.14":
   version: 7.20.5
   resolution: "@types/babel__core@npm:7.20.5"
@@ -3156,6 +3175,7 @@ __metadata:
     "@react-navigation/native-stack": ^6.9.26
     "@react-navigation/stack": ^6.3.29
     "@reduxjs/toolkit": ^2.2.5
+    "@twotalltotems/react-native-otp-input": ^1.3.11
     "@types/react": ^18.2.6
     "@types/react-test-renderer": ^18.0.0
     axios: ^1.7.3
@@ -3175,6 +3195,7 @@ __metadata:
     react-native-mask-input: ^1.2.3
     react-native-mmkv: ^2.12.2
     react-native-modal: ^13.0.1
+    react-native-otp-entry: ^1.7.1
     react-native-pager-view: ^6.3.3
     react-native-picker-select: ^9.2.0
     react-native-ratings: ^8.1.0
@@ -8179,6 +8200,13 @@ __metadata:
     react: "*"
     react-native: ">=0.65.0"
   checksum: 15985fd6aaae7a2134ec1003c63abd384f4a17beabd0a80b74033c98eccee29161aa07150f479373fb43106cfb33b5837b7a4f1d2b721ff03b3727490c830a07
+  languageName: node
+  linkType: hard
+
+"react-native-otp-entry@npm:^1.7.1":
+  version: 1.7.1
+  resolution: "react-native-otp-entry@npm:1.7.1"
+  checksum: 3a585c9607cbbd42487b5cf00322985a904606ee3885c8b67616993b9faec22b4b571d7a69f4e77a727c9548c1af4baa409d4824b8b92ec338bd12368ba3957d
   languageName: node
   linkType: hard
 

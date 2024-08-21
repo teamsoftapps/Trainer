@@ -67,6 +67,8 @@ export const Images = {
   clock: require('../assets/Images/clock.png'),
   pin: require('../assets/Images/pin.png'),
   placeholderimage: require('../assets/Images/PlaceholderImage.png'),
+  LockImage: require('../assets/Images/forgetpassword.png'),
+  OTPImage: require('../assets/Images/OTP.png'),
 };
 
 export const FontFamily = {

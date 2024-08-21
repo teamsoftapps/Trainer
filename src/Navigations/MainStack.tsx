@@ -17,6 +17,10 @@ import Schedule from '../Screens/Schedule';
 import PaymentMethod from '../Screens/PaymentMethod';
 import CompleteProfile from '../Screens/CompleteProfile';
 import Membership from '../Screens/Membership';
+import Notification from '../Screens/Notification';
+import ForgotPassword from '../Screens/ForgotPassword';
+import ConfirmNewPassword from '../Screens/ConfirmNewPassword';
+import VerifyOTP from '../Screens/VerifyOTP';
 
 const Stack = createNativeStackNavigator();
 const MainStack = () => {
@@ -37,6 +41,11 @@ const MainStack = () => {
       <Stack.Screen name="Schedule" component={Schedule} />
       <Stack.Screen name={'CompleteProfile'} component={CompleteProfile} />
       <Stack.Screen name={'Membership'} component={Membership} />
+      <Stack.Screen name={'Notification'} component={Notification} />
+      <Stack.Screen name={"ForgotPassword"} component={ForgotPassword} />
+      <Stack.Screen name={"ConfirmNewPassword"} component={ConfirmNewPassword} />
+      <Stack.Screen name={"VerifyOTP"} component={VerifyOTP} />
+
     </Stack.Navigator>
   );
 };

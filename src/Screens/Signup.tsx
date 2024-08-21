@@ -121,7 +121,7 @@ const Signup = () => {
           navigation.navigate(NavigationStrings.LOG_IN);
         })
         .catch(error => {
-          console.log('Error fetching data:', error?.response.data.message);
+          console.log('Error fetching data:', error);
           showMessage({
             message: 'Login Error',
             description:
