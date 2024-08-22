@@ -1,4 +1,5 @@
 import {
+  Alert,
   Image,
   ImageBackground,
   StatusBar,
@@ -20,10 +21,18 @@ import { useNavigation } from '@react-navigation/native';
 import NavigationStrings from '../Navigations/NavigationStrings';
 import WrapperContainer from '../Components/Wrapper';
 import { useDispatch, useSelector } from 'react-redux';
-import { useSignInMutation } from '../store/Slices/Auth';
+import {
+  useSignInUserMutation,
+  useSignUpUserMutation,
+} from '../store/Slices/userAuth';
+import {
+  useSignInTrainerMutation,
+  useSignUpTrainerMutation,
+} from '../store/Slices/trainerAuth';
 import { IsLogin } from '../store/Slices/AuthSlice';
 import { showMessage } from 'react-native-flash-message';
-const Signin = () => {
+const Signin = ({ route }) => {
+  const { user } = route.params;
   const [email, setemail] = useState('');
   const [password, setpassword] = useState('');
   const [secure, setsecure] = useState(false);
@@ -32,7 +41,8 @@ const Signin = () => {
   const dispatch = useDispatch();
   const St = useSelector(state => state);
   console.log('State', St);
-  const [SignIn, { data }] = useSignInMutation();
+  const [SignInUser] = useSignInUserMutation();
+  const [SignInTrainer] = useSignInTrainerMutation();
 
   const handleSignin = async () => {
     let payload = {
@@ -40,23 +50,57 @@ const Signin = () => {
       password: password,
     };
     try {
-      let res = await SignIn(payload);
+      if (user == 'user') {
+        let res = await SignInUser(payload);
+        if (res.data) {
+          showMessage({
+            message: 'Success',
+            description: 'User logged in successfully',
+            type: 'success',
+          });
+          dispatch(IsLogin(res.data?.data.token));
+        }
+        if (res.error) {
+          showMessage({
+            message: 'Error',
+            description: res.error?.data.message,
+            type: 'danger',
+          });
+        }
+      } else {
+        let res = await SignInTrainer(payload);
+        if (res.data) {
+          showMessage({
+            message: 'Success',
+            description: 'Trainer logged in successfully',
+            type: 'success',
+          });
+          dispatch(IsLogin(res.data?.data.token));
+        }
+        if (res.error) {
+          showMessage({
+            message: 'Error',
+            description: res.error?.data.message,
+            type: 'danger',
+          });
+        }
+      }
 
-      if (res.data) {
-        showMessage({
-          message: 'Success',
-          description: 'User logged in successfully',
-          type: 'success',
-        });
-        dispatch(IsLogin(res.data?.data.token));
-      }
-      if (res.error) {
-        showMessage({
-          message: 'Error',
-          description: res.error?.data.message,
-          type: 'danger',
-        });
-      }
+      // if (res.data) {
+      //   showMessage({
+      //     message: 'Success',
+      //     description: 'User logged in successfully',
+      //     type: 'success',
+      //   });
+      //   dispatch(IsLogin(res.data?.data.token));
+      // }
+      // if (res.error) {
+      //   showMessage({
+      //     message: 'Error',
+      //     description: res.error?.data.message,
+      //     type: 'danger',
+      //   });
+      // }
     } catch (error) {
       console.log('Errorrrr', error.message);
       showMessage({
@@ -205,7 +249,7 @@ const Signin = () => {
                 Remember me
               </Text>
             </View>
-            <TouchableOpacity onPress={() => {  }}>
+            <TouchableOpacity onPress={() => { }}>
               <Text
                 style={{
                   color: '#9FED3A',
@@ -241,7 +285,7 @@ const Signin = () => {
             </Text>
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate(NavigationStrings.SIGN_UP);
+                navigation.navigate(NavigationStrings.SIGN_UP, { user: user });
               }}>
               <Text
                 style={{

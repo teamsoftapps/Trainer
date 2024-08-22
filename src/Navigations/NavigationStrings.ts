@@ -13,4 +13,5 @@ export default {
   UPCOMING: 'Upcoming',
   SEARCH_TRAINER: 'SearchTrainer',
   COMPLETE_PROFILE: 'CompleteProfile',
+  FILTER:"Filter"
 };

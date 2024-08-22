@@ -69,22 +69,43 @@ const ConfirmNewPassword = ({ route }) => {
 
         }
     }
+
     return (
-        <WrapperContainer >
+        <WrapperContainer>
             <ScrollView>
                 <TouchableWithoutFeedback style={{ flex: 1 }}>
                     <KeyboardAvoidingView>
-
-                        <Header text='Create New Password' textstyle={{ color: "white" }} onPress={() => { navigation.goBack() }} />
-                        <View style={{ alignItems: "center" }}><Image source={Images.LockImage} style={{ width: responsiveWidth(30) }} resizeMode='contain' /></View>
-                        <View style={{ marginTop: responsiveWidth(7) }}>
-                            <Text style={{ color: "grey", textAlign: "center", fontSize: responsiveFontSize(2.2) }}>Please enter your email address to recieve {'\n'} a verification code</Text>
+                        <Header
+                            text="Forgot Password"
+                            textstyle={{ color: 'white' }}
+                            onPress={() => {
+                                navigation.goBack();
+                            }}
+                        />
+                        <View style={{ alignItems: 'center' }}>
+                            <Image
+                                source={Images.LockImage}
+                                style={{ width: responsiveWidth(30) }}
+                                resizeMode="contain"
+                            />
                         </View>
-                        <View style={{
-                            alignItems: "center",
-                            gap: responsiveHeight(3),
-                            marginTop: responsiveWidth(7)
-                        }}>
+                        <View style={{ marginTop: responsiveWidth(7) }}>
+                            <Text
+                                style={{
+                                    color: 'grey',
+                                    textAlign: 'center',
+                                    fontSize: responsiveFontSize(2.2),
+                                }}>
+                                Please enter your email address to recieve {'\n'} a verification
+                                code
+                            </Text>
+                        </View>
+                        <View
+                            style={{
+                                alignItems: 'center',
+                                gap: responsiveHeight(3),
+                                marginTop: responsiveWidth(7),
+                            }}>
                             <View
                                 style={{
                                     width: responsiveWidth(85),
@@ -169,19 +190,25 @@ const ConfirmNewPassword = ({ route }) => {
                             </View>
                         </View>
 
-
-
-
-                        <View style={{ alignItems: "center", marginTop: responsiveWidth(50), marginBottom: responsiveWidth(5) }}>
-                            <Button text='Send' onPress={() => { Onclick() }} />
+                        <View
+                            style={{
+                                alignItems: 'center',
+                                marginTop: responsiveWidth(50),
+                                marginBottom: responsiveWidth(5),
+                            }}>
+                            <Button
+                                text="Send"
+                                onPress={() => {
+                                    Onclick();
+                                }}
+                            />
                         </View>
                     </KeyboardAvoidingView>
                 </TouchableWithoutFeedback>
             </ScrollView>
         </WrapperContainer>
-    )
-}
+    );
+};
+export default ConfirmNewPassword;
 
-export default ConfirmNewPassword
-
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({});

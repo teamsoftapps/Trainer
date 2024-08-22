@@ -3,7 +3,6 @@ import {
   Image,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -14,16 +13,16 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
+
 import {FontFamily, Images} from '../utils/Images';
-import MapView from 'react-native-maps';
+import MapView, {Marker} from 'react-native-maps';
 import {Seartrainer} from '../utils/Dummy';
 import {AirbnbRating} from 'react-native-ratings';
-import { useNavigation } from '@react-navigation/native';
-
+import {useNavigation} from '@react-navigation/native';
 const SearchTrainer = () => {
   const [Search, setSearch] = useState('');
-  const navigation = useNavigation()
-  
+  const navigation = useNavigation();
+
   return (
     <WrapperContainer style={{flex: 1}}>
       <View style={styles.header}>
@@ -57,8 +56,13 @@ const SearchTrainer = () => {
             longitude: -122.4324,
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
-          }}
-        />
+          }}>
+          <Marker
+            coordinate={{latitude: 37.78825, longitude: -122.4324}}
+            title="Marker Title"
+            description="Marker Description"
+          />
+        </MapView>
         <View
           style={{
             flexDirection: 'row',
@@ -81,7 +85,11 @@ const SearchTrainer = () => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity activeOpacity={0.9}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => {
+              navigation.navigate(NavigationStrings.FILTER);
+            }}>
             <Image
               source={Images.filterr}
               style={{
@@ -101,8 +109,8 @@ const SearchTrainer = () => {
               return (
                 <View
                   style={{
-                    width: responsiveHeight(30),
-                    height: responsiveHeight(30),
+                    width: responsiveWidth(60),
+                    height: responsiveWidth(60),
                     borderRadius: responsiveWidth(4),
                     backgroundColor: '#fff',
                     marginHorizontal: responsiveWidth(2),
@@ -110,7 +118,7 @@ const SearchTrainer = () => {
                   }}>
                   <View
                     style={{
-                      height: '50%', // Image height as 50% of container height
+                      height: '50%',
                       overflow: 'hidden',
                       borderTopLeftRadius: 10,
                       borderTopRightRadius: 10,
@@ -125,6 +133,7 @@ const SearchTrainer = () => {
                       }}
                     />
                   </View>
+
                   <View style={{padding: responsiveWidth(2)}}>
                     <View
                       style={{
@@ -140,18 +149,67 @@ const SearchTrainer = () => {
                       </View>
 
                       <View>
-                        <View style={styles.bottomSubView}>
+                        <View style={[{...styles.bottomSubView}]}>
                           <AirbnbRating
-                            size={responsiveHeight(2)}
+                            size={responsiveHeight(1.4)}
                             selectedColor="#9FED3A"
                             showRating={false}
                             isDisabled
                             defaultRating={item.rating}
                           />
                         </View>
-                        <View style={styles.bottomSubView}>
+                        <View style={[{...styles.bottomSubView}]}>
                           <Image source={Images.pin} style={styles.pin} />
                           <Text style={styles.rating}>{item.location}</Text>
+                        </View>
+                      </View>
+                    </View>
+                    <View
+                      style={{
+                        width: '100%',
+                        height: responsiveHeight(0.1),
+                        backgroundColor: 'lightgray',
+                        marginVertical: responsiveHeight(2),
+                      }}></View>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                      }}>
+                      <View
+                        style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <View>
+                          <Image
+                            source={require('../assets/Images/calendar.png')}
+                            style={{
+                              tintColor: '#9FED3A',
+                              resizeMode: 'contain',
+                              marginRight: responsiveWidth(1),
+                              height: responsiveHeight(3),
+                              width: responsiveWidth(3),
+                            }}
+                          />
+                        </View>
+                        <View>
+                          <Text>MON - FRI</Text>
+                        </View>
+                      </View>
+                      <View
+                        style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <View>
+                          <Image
+                            source={require('../assets/Images/clock.png')}
+                            style={{
+                              tintColor: '#9FED3A',
+                              resizeMode: 'cover',
+                              marginRight: responsiveWidth(1),
+                              height: responsiveHeight(2),
+                              width: responsiveWidth(3),
+                            }}
+                          />
+                        </View>
+                        <View>
+                          <Text>10:00 - 18:00</Text>
                         </View>
                       </View>
                     </View>
@@ -203,21 +261,26 @@ const styles = StyleSheet.create({
   },
   desc: {
     color: 'gray',
-    fontSize: responsiveFontSize(1.5),
+    fontSize: responsiveFontSize(1.7),
+    marginTop: responsiveHeight(0.5),
   },
   bottomSubView: {
     flexDirection: 'row',
+    alignSelf: 'flex-end',
     alignItems: 'center',
     gap: responsiveWidth(2),
   },
   rating: {
     color: 'gray',
-    fontSize: responsiveFontSize(1.5),
+    fontSize: responsiveFontSize(1.7),
   },
   pin: {
     width: responsiveWidth(4),
     height: responsiveWidth(4),
     resizeMode: 'contain',
     tintColor: '#9FED3A',
+  },
+  font: {
+    fontSize: responsiveFontSize(1.7),
   },
 });
