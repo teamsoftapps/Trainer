@@ -16,12 +16,11 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import ButtonComp from '../Components/ButtonComp';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import NavigationStrings from '../Navigations/NavigationStrings';
 
-
 const Welcome = () => {
-  const navigation=useNavigation()
+  const navigation = useNavigation();
   return (
     <ImageBackground
       resizeMode="cover"
@@ -58,9 +57,17 @@ const Welcome = () => {
             the perfect trainer, we have you covered. Choose your path below to
             begin.
           </Text>
-          <ButtonComp text="Sign In as Trainer" onPress={()=>{navigation.navigate(NavigationStrings.LOG_IN)}} />
+          <ButtonComp
+            text="Sign In as Trainer"
+            onPress={() => {
+              navigation.navigate(NavigationStrings.LOG_IN, {user: 'trainer'});
+            }}
+          />
 
           <ButtonComp
+            onPress={() => {
+              navigation.navigate(NavigationStrings.LOG_IN, {user: 'user'});
+            }}
             mainStyle={{
               backgroundColor: '#fff',
               marginTop: responsiveHeight(2),

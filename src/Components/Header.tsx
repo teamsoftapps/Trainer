@@ -12,6 +12,7 @@ const Header = ({
   style = {},
   textstyle = {},
   onPress = () => {},
+  rightView,
 }) => {
   return (
     <View style={{...styles.container, ...style}}>
@@ -34,6 +35,7 @@ const Header = ({
           {text}
         </Text>
       </View>
+      {rightView ? <TouchableOpacity>{rightView}</TouchableOpacity> : null}
     </View>
   );
 };

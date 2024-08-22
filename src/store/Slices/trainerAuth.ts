@@ -4,16 +4,23 @@ export const TrainerAuth = createApi({
   reducerPath: 'TrainerAuth',
 
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://192.168.0.101:3000',
+    baseUrl: 'http://192.168.0.117:6000',
     prepareHeaders: header => {
       header.set('Accept', 'application/json');
     },
   }),
 
   endpoints: builder => ({
-    SignIn: builder.mutation({
+    SignInTrainer: builder.mutation({
       query: body => ({
         url: '/trainer/trainerLogin',
+        method: 'POST',
+        body,
+      }),
+    }),
+    SignUpTrainer: builder.mutation({
+      query: body => ({
+        url: '/trainer/trainerSignup',
         method: 'POST',
         body,
       }),
@@ -21,4 +28,4 @@ export const TrainerAuth = createApi({
   }),
 });
 
-export const {useSignInMutation} = TrainerAuth;
+export const {useSignInTrainerMutation, useSignUpTrainerMutation} = TrainerAuth;
