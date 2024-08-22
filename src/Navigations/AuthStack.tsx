@@ -8,6 +8,9 @@ import Signin from '../Screens/Signin';
 import CompleteProfile from '../Screens/CompleteProfile';
 import Membership from '../Screens/Membership';
 import AddCard from '../Screens/AddCard';
+import ForgotPassword from '../Screens/ForgotPassword';
+import ConfirmNewPassword from '../Screens/ConfirmNewPassword';
+import VerifyOTP from '../Screens/VerifyOTP';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +26,7 @@ const AuthStack = () => {
       />
       <Stack.Screen name={'Membership'} component={Membership} />
       <Stack.Screen name={'AddCard'} component={AddCard} />
+
     </Stack.Navigator>
   );
 };

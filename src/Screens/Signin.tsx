@@ -8,21 +8,21 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
-import {FontFamily, Images} from '../utils/Images';
+import React, { useState } from 'react';
+import { FontFamily, Images } from '../utils/Images';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import ButtonComp from '../Components/ButtonComp';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import NavigationStrings from '../Navigations/NavigationStrings';
 import WrapperContainer from '../Components/Wrapper';
-import {useDispatch, useSelector} from 'react-redux';
-import {useSignInMutation} from '../store/Slices/Auth';
-import {IsLogin} from '../store/Slices/AuthSlice';
-import {showMessage} from 'react-native-flash-message';
+import { useDispatch, useSelector } from 'react-redux';
+import { useSignInMutation } from '../store/Slices/Auth';
+import { IsLogin } from '../store/Slices/AuthSlice';
+import { showMessage } from 'react-native-flash-message';
 const Signin = () => {
   const [email, setemail] = useState('');
   const [password, setpassword] = useState('');
@@ -32,7 +32,7 @@ const Signin = () => {
   const dispatch = useDispatch();
   const St = useSelector(state => state);
   console.log('State', St);
-  const [SignIn, {data}] = useSignInMutation();
+  const [SignIn, { data }] = useSignInMutation();
 
   const handleSignin = async () => {
     let payload = {
@@ -72,7 +72,7 @@ const Signin = () => {
       <ImageBackground
         resizeMode="cover"
         source={Images.bg}
-        style={{height: responsiveHeight(100)}}>
+        style={{ height: responsiveHeight(100) }}>
         <View
           style={{
             alignItems: 'center',
@@ -102,7 +102,7 @@ const Signin = () => {
             }}>
             Sign in To Continue
           </Text>
-          <View style={{gap: responsiveHeight(3)}}>
+          <View style={{ gap: responsiveHeight(3) }}>
             <View
               style={{
                 width: responsiveWidth(85),
@@ -112,7 +112,7 @@ const Signin = () => {
                 borderColor: '#908C8D',
                 borderRadius: 17,
               }}>
-              <Text style={{color: '#908C8D'}}>Email</Text>
+              <Text style={{ color: '#908C8D' }}>Email</Text>
               <TextInput
                 placeholder="Enter Email"
                 value={email || undefined}
@@ -141,7 +141,7 @@ const Signin = () => {
                 alignItems: 'center',
               }}>
               <View>
-                <Text style={{color: '#908C8D'}}>Password</Text>
+                <Text style={{ color: '#908C8D' }}>Password</Text>
                 <TextInput
                   placeholder="Enter Password"
                   secureTextEntry={secure}
@@ -165,7 +165,7 @@ const Signin = () => {
                 }}>
                 <Image
                   source={secure ? Images.eye_off : Images.eye}
-                  style={{width: responsiveWidth(6)}}
+                  style={{ width: responsiveWidth(6) }}
                 />
               </TouchableOpacity>
             </View>
@@ -205,15 +205,17 @@ const Signin = () => {
                 Remember me
               </Text>
             </View>
-            <Text
-              style={{
-                color: '#9FED3A',
-                textDecorationLine: 'underline',
-                fontSize: responsiveFontSize(2),
-                fontFamily: FontFamily.Semi_Bold,
-              }}>
-              Forgot password?
-            </Text>
+            <TouchableOpacity onPress={() => {  }}>
+              <Text
+                style={{
+                  color: '#9FED3A',
+                  textDecorationLine: 'underline',
+                  fontSize: responsiveFontSize(2),
+                  fontFamily: FontFamily.Semi_Bold,
+                }}>
+                Forgot password?
+              </Text>
+            </TouchableOpacity>
           </View>
           <ButtonComp
             onPress={handleSignin}

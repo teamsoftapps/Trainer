@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import axiosBaseURL from '../utils/AxiosBaseURL'
 import { SignOut } from '../store/Slices/AuthSlice'
 
-const ConfirmNewPassword = ({ route }) => {
+const ChangePassword = ({ route }) => {
     const { data } = route.params;
     const dispatch = useDispatch();
 
@@ -182,6 +182,6 @@ const ConfirmNewPassword = ({ route }) => {
     )
 }
 
-export default ConfirmNewPassword
+export default ChangePassword
 
 const styles = StyleSheet.create({})

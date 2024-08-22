@@ -6,7 +6,6 @@ import MainStack from './src/Navigations/MainStack';
 import { useSelector } from 'react-redux';
 const App = () => {
   const authData = useSelector(state => state.Auth.data);
-  console.log(authData)
   return (
     <NavigationContainer>
       {!authData ? <AuthStack /> : <MainStack />}
