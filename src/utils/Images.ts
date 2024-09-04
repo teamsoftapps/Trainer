@@ -69,6 +69,13 @@ export const Images = {
   placeholderimage: require('../assets/Images/PlaceholderImage.png'),
   LockImage: require('../assets/Images/forgetpassword.png'),
   OTPImage: require('../assets/Images/OTP.png'),
+  DicoverCard: require('../assets/Images/discover.png'),
+  AmericanExpressCard: require('../assets/Images/american-express.png'),
+  JCBCard: require('../assets/Images/jcb.png'),
+  Cross: require('../assets/Images/cross.png'),
+  LocationPin: require('../assets/Images/locationPin.png'),
+  DeleteBin: require('../assets/Images/delete.png'),
+  RemoveCard:require('../assets/Images/removeCard.png')
 };
 
 export const FontFamily = {

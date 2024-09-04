@@ -15,10 +15,11 @@ import {
   responsiveScreenFontSize,
   responsiveScreenWidth,
 } from 'react-native-responsive-dimensions';
-import {TrainerProfile, UserImages} from '../utils/Dummy';
-import {FontFamily, Images} from '../utils/Images';
+import { TrainerProfile, UserImages } from '../utils/Dummy';
+import { FontFamily, Images } from '../utils/Images';
 import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
+import { useNavigation } from '@react-navigation/native';
 
 const upcoming = [
   {
@@ -44,11 +45,13 @@ const upcoming = [
   },
 ];
 const Chats = () => {
+  const navigation = useNavigation()
   return (
     <WrapperContainer>
       <Header
         text="Chat with Trainer"
-        textstyle={{color: 'white', fontFamily: FontFamily.Medium}}
+        textstyle={{ color: 'white', fontFamily: FontFamily.Medium }}
+        onPress={() => { navigation.goBack() }}
       />
       <View
         style={{
@@ -63,7 +66,7 @@ const Chats = () => {
         <TouchableOpacity>
           <Image
             source={Images.search}
-            style={{width: responsiveWidth(6), height: responsiveWidth(6)}}
+            style={{ width: responsiveWidth(6), height: responsiveWidth(6) }}
           />
         </TouchableOpacity>
         <TextInput
@@ -87,11 +90,11 @@ const Chats = () => {
           All Active Trainer
         </Text>
         <FlatList
-          style={{paddingLeft: responsiveWidth(4)}}
+          style={{ paddingLeft: responsiveWidth(4) }}
           horizontal
           showsHorizontalScrollIndicator={false}
           data={UserImages}
-          renderItem={({item, index}) => {
+          renderItem={({ item, index }) => {
             return (
               <TouchableOpacity
                 activeOpacity={0.5}
@@ -111,7 +114,7 @@ const Chats = () => {
           }}
         />
       </View>
-      <View style={{marginHorizontal: responsiveWidth(8)}}>
+      <View style={{ marginHorizontal: responsiveWidth(8) }}>
         <Text
           style={{
             color: 'white',
@@ -123,9 +126,9 @@ const Chats = () => {
         <FlatList
           showsVerticalScrollIndicator={false}
           data={upcoming}
-          renderItem={({item, index}) => {
+          renderItem={({ item, index }) => {
             return (
-              <TouchableOpacity activeOpacity={0.6} style={styles.container}>
+              <TouchableOpacity activeOpacity={0.6} style={styles.container} onPress={() => { navigation.navigate("Messages", { data: item }) }}>
                 <View style={styles.left}>
                   <Image
                     source={item.image}
@@ -134,7 +137,7 @@ const Chats = () => {
                       height: responsiveHeight(8),
                     }}
                   />
-                  <View style={{flex: 1, gap: responsiveHeight(1)}}>
+                  <View style={{ flex: 1, gap: responsiveHeight(1) }}>
                     <View
                       style={{
                         flexDirection: 'row',
@@ -188,7 +191,7 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.Regular,
     fontSize: responsiveFontSize(1.7),
   },
-  border: {borderBottomColor: '#B8B8B8', borderBottomWidth: 0.5},
+  border: { borderBottomColor: '#B8B8B8', borderBottomWidth: 0.5 },
   container: {
     flexDirection: 'row',
     width: '100%',
@@ -200,11 +203,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
-  whitetext: {color: 'white', fontWeight: '500'},
-  blacktext: {color: 'black', fontWeight: '500'},
-  greytext: {color: '#B8B8B8', fontWeight: '400'},
-  right: {justifyContent: 'space-evenly', alignItems: 'flex-end'},
-  timeago: {color: '#B8B8B8', fontWeight: '400'},
+  whitetext: { color: 'white', fontWeight: '500' },
+  blacktext: { color: 'black', fontWeight: '500' },
+  greytext: { color: '#B8B8B8', fontWeight: '400' },
+  right: { justifyContent: 'space-evenly', alignItems: 'flex-end' },
+  timeago: { color: '#B8B8B8', fontWeight: '400' },
   curve: {
     width: '100%',
     alignItems: 'center',

@@ -1,4 +1,5 @@
-import {Dropdown} from 'react-native-element-dropdown';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { Dropdown } from 'react-native-element-dropdown';
 import {
   ImageBackground,
   TouchableOpacity,
@@ -10,44 +11,52 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import ButtonComp from '../Components/ButtonComp';
-import {FontFamily, Images} from '../utils/Images';
+import { FontFamily, Images } from '../utils/Images';
 import WrapperContainer from '../Components/Wrapper';
-import MaskInput, {Masks} from 'react-native-mask-input';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import NavigationStrings from '../Navigations/NavigationStrings';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import FlashMessage from 'react-native-flash-message';
-import {showMessage} from 'react-native-flash-message';
-import {useDispatch, useSelector} from 'react-redux';
-import {IsLogin} from '../store/Slices/AuthSlice';
-import {useSignUpUserMutation} from '../store/Slices/userAuth';
-import {useSignUpTrainerMutation} from '../store/Slices/trainerAuth';
+import { showMessage } from 'react-native-flash-message';
+import { useDispatch, useSelector } from 'react-redux';
+import { IsLogin } from '../store/Slices/AuthSlice';
+import { useSignUpUserMutation } from '../store/Slices/userAuth';
+import { useSignUpTrainerMutation } from '../store/Slices/trainerAuth';
 
-const Signup = ({route}) => {
-  const {user} = route.params;
+const Signup = ({ route }) => {
+  const { user } = route.params;
   console.log('Rute', user);
   const dispatch = useDispatch();
   const [SignUpUser] = useSignUpUserMutation();
   const [SignUpTrainer] = useSignUpTrainerMutation();
   const authData = useSelector(state => state.Auth.data);
   const navigation = useNavigation();
-  const [name, setname] = useState('tester3');
-  const [email, setemail] = useState('tester3@gmail.com');
-  const [password, setpassword] = useState('123456');
+
+  // States for signnup
+  const [name, setname] = useState('John snow');
+  const [email, setemail] = useState('Johnsnow@gmail.com');
+  const [password, setpassword] = useState('1234656');
   const [confirmpassword, setconfirmpassword] = useState('1234656');
   const [DoB, setDoB] = useState('');
   const [weight, setweight] = useState('10');
   const [height, setheight] = useState('20');
+  const [address, setAddress] = useState("43 Bourke street, WA, 7563")
+  const [Gender, setGender] = useState('');
+
+  // Icon touch activate Input 
   const dobRef = useRef(null);
   const nameRef = useRef(null);
   const emailRef = useRef(null);
-  const [Gender, setGender] = useState('');
+  const addressRef = useRef(null);
+
+  // Formik states to ensure correct details are entered
   const [secure, setsecure] = useState(false);
   const [secure2, setsecure2] = useState(false);
   const [namedisabled, setnamedisable] = useState(false);
@@ -57,16 +66,13 @@ const Signup = ({route}) => {
   const [DOBdisabled, setDOBdisable] = useState(false);
   const [Weightdisabled, setWeightdisable] = useState(false);
   const [Heightdisabled, setHeightdisable] = useState(false);
+  const [Addressdisabled, setaddressdisabled] = useState(false)
+
   const data = [
-    {label: 'Male', value: 'Male'},
-    {label: 'Female', value: 'Female'},
+    { label: 'Male', value: 'Male' },
+    { label: 'Female', value: 'Female' },
   ];
 
-  if (!authData) {
-    // console.log('no Data saved in store');
-  } else {
-    // console.log('Data found in store::', authData);
-  }
 
   const handledobInput = () => {
     dobRef.current?.focus();
@@ -77,8 +83,8 @@ const Signup = ({route}) => {
   const handleEmailInput = () => {
     emailRef.current?.focus();
   };
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const condition1 = name.includes(' ') && name.length > 3;
   const condition2 = emailPattern.test(email);
   const condition3 = password === confirmpassword && password != '';
@@ -86,64 +92,8 @@ const Signup = ({route}) => {
   const condition5 = DoB != '';
   const condition6 = weight != '';
   const condition7 = height != '';
+  const condition8 = address != "";
 
-  // const fetchData = () => {
-  //   if (
-  //     condition1 &&
-  //     condition2 &&
-  //     condition3 &&
-  //     condition4 &&
-  //     condition5 &&
-  //     condition6 &&
-  //     condition7
-  //   ) {
-  //     setnamedisable(false);
-  //     setemaildisable(false);
-  //     setpassworddisable(false);
-  //     setgenderdisable(false);
-  //     setDOBdisable(false);
-  //     setWeightdisable(false);
-  //     setHeightdisable(false);
-  //     axiosBaseURL
-  //       .post('/user/userSignup', {
-  //         email: email,
-  //         fullname: name,
-  //         password: password,
-  //         gender: Gender,
-  //         Dob: DoB,
-  //         weight: weight,
-  //         height: height,
-  //       })
-  //       .then(response => {
-  //         console.log('User Created', response.data);
-  //         showMessage({
-  //           message: 'Success',
-  //           description: 'Account has been created successfully',
-  //           type: 'success',
-  //         });
-
-  //         navigation.navigate(NavigationStrings.LOG_IN);
-  //       })
-  //       .catch(error => {
-  //         console.log('Error fetching data:', error?.response.data.message);
-  //         showMessage({
-  //           message: 'Login Error',
-  //           description:
-  //             error?.response?.data?.message ||
-  //             'An error occurred while logging in',
-  //           type: 'danger',
-  //         });
-  //       });
-  //   } else {
-  //     if (!condition1) setnamedisable(true);
-  //     if (!condition2) setemaildisable(true);
-  //     if (!condition3) setpassworddisable(true);
-  //     if (!condition4) setgenderdisable(true);
-  //     if (!condition5) setDOBdisable(true);
-  //     if (!condition6) setWeightdisable(true);
-  //     if (!condition7) setHeightdisable(true);
-  //   }
-  // };
 
   const handleSignup = async () => {
     let payload = {
@@ -155,61 +105,99 @@ const Signup = ({route}) => {
       Dob: DoB,
       weight: weight,
       height: height,
+      Address: address
     };
-    try {
-      if (user === 'user') {
-        let res = await SignUpUser(payload);
-        if (res.data) {
-          showMessage({
-            message: 'Success',
-            description: 'User created in successfully',
-            type: 'success',
-          });
-          dispatch(IsLogin(res.data?.data.token));
+    console.log("condition 7 & 8", condition7, condition8)
+    if (condition1 &&
+      condition2 &&
+      condition3 &&
+      condition4 &&
+      condition5 &&
+      condition6 &&
+      condition7 &&
+      condition8) {
+      setnamedisable(false);
+      setemaildisable(false);
+      setpassworddisable(false);
+      setgenderdisable(false);
+      setDOBdisable(false);
+      setWeightdisable(false);
+      setHeightdisable(false);
+      setaddressdisabled(false)
+      try {
+        if (user === 'user') {
+          let res = await SignUpUser(payload);
+          if (res.data) {
+            showMessage({
+              message: 'Success',
+              description: 'User created in successfully',
+              type: 'success',
+            });
+            dispatch(IsLogin(res.data?.data.token));
+          }
+          if (res.error) {
+            showMessage({
+              message: 'Error',
+              description: res.error?.data.message,
+              type: 'danger',
+            });
+          }
+        } else {
+          let res = await SignUpTrainer(payload);
+          if (res.data) {
+            showMessage({
+              message: 'Success',
+              description: 'Trainer created in successfully',
+              type: 'success',
+            });
+            dispatch(IsLogin(res.data?.data.token));
+          }
+          if (res.error) {
+            console.log('Errorsssssss//////', res.error);
+            showMessage({
+              message: 'Error',
+              description: res.error?.data.message,
+              type: 'danger',
+            });
+          }
         }
-        if (res.error) {
-          showMessage({
-            message: 'Error',
-            description: res.error?.data.message,
-            type: 'danger',
-          });
-        }
-      } else {
-        let res = await SignUpTrainer(payload);
-        if (res.data) {
-          showMessage({
-            message: 'Success',
-            description: 'Trainer created in successfully',
-            type: 'success',
-          });
-          dispatch(IsLogin(res.data?.data.token));
-        }
-        if (res.error) {
-          console.log('Errorsssssss//////', res.error);
-          showMessage({
-            message: 'Error',
-            description: res.error?.data.message,
-            type: 'danger',
-          });
-        }
+      } catch (error) {
+        console.log('Errorrrr', error.message);
+        showMessage({
+          message: 'Error',
+          description: 'error.message',
+          type: 'danger',
+        });
       }
-    } catch (error) {
-      console.log('Errorrrr', error.message);
-      showMessage({
-        message: 'Error',
-        description: 'error.message',
-        type: 'danger',
-      });
+    } else {
+      if (!condition1) setnamedisable(true);
+      if (!condition2) setemaildisable(true);
+      if (!condition3) setpassworddisable(true);
+      if (!condition4) setgenderdisable(true);
+      if (!condition5) setDOBdisable(true);
+      if (!condition6) setWeightdisable(true);
+      if (!condition7) setHeightdisable(true);
+      if (!condition8) setaddressdisabled(true);
+
+      if (condition1) setnamedisable(false);
+      if (condition2) setemaildisable(false);
+      if (condition3) setpassworddisable(false);
+      if (condition4) setgenderdisable(false);
+      if (condition5) setDOBdisable(false);
+      if (condition6) setWeightdisable(false);
+      if (condition7) setHeightdisable(false);
+      if (condition8) setaddressdisabled(false);
     }
+
   };
 
   return (
-    <ScrollView style={{flexGrow: 1}}>
+    <ScrollView style={{ flexGrow: 1 }}>
       <WrapperContainer>
         <ImageBackground
           resizeMode="cover"
           source={Images.bg}
-          style={{flex: 1}}>
+          style={{ flex: 1 }}>
           <View
             style={{
               alignItems: 'center',
@@ -234,7 +222,7 @@ const Signup = ({route}) => {
               Create An Account
             </Text>
 
-            <View style={{gap: responsiveHeight(3)}}>
+            <View style={{ gap: responsiveHeight(3) }}>
               <View
                 style={{
                   width: responsiveWidth(85),
@@ -245,9 +233,10 @@ const Signup = ({route}) => {
                   borderRadius: 17,
                   flexDirection: 'row',
                   alignItems: 'center',
+                  justifyContent: "space-between"
                 }}>
                 <View>
-                  <Text style={{color: '#908C8D'}}>Full name</Text>
+                  <Text style={{ color: '#908C8D' }}>Full name</Text>
                   <TextInput
                     ref={nameRef}
                     placeholder="Enter name"
@@ -259,10 +248,9 @@ const Signup = ({route}) => {
                       color: 'white',
                       fontSize: responsiveFontSize(2),
                       width: responsiveWidth(68),
-                      height: responsiveHeight(3),
                     }}
                     numberOfLines={1}
-                    placeholderTextColor={'white'}
+                    placeholderTextColor={'#908C8D'}
                   />
                 </View>
                 <TouchableOpacity onPress={handleNameInput}>
@@ -285,9 +273,10 @@ const Signup = ({route}) => {
                   borderRadius: 17,
                   flexDirection: 'row',
                   alignItems: 'center',
+                  justifyContent: "space-between"
                 }}>
                 <View>
-                  <Text style={{color: '#908C8D'}}>Email</Text>
+                  <Text style={{ color: '#908C8D' }}>Email</Text>
                   <TextInput
                     ref={emailRef}
                     placeholder="Enter email"
@@ -299,16 +288,15 @@ const Signup = ({route}) => {
                       color: 'white',
                       fontSize: responsiveFontSize(2),
                       width: responsiveWidth(68),
-                      height: responsiveHeight(3),
                     }}
                     numberOfLines={1}
-                    placeholderTextColor={'white'}
+                    placeholderTextColor={'#908C8D'}
                   />
                 </View>
                 <TouchableOpacity onPress={handleEmailInput}>
                   <Image
                     source={Images.email}
-                    style={{width: responsiveWidth(5)}}
+                    style={{ width: responsiveWidth(5) }}
                   />
                 </TouchableOpacity>
               </View>
@@ -322,9 +310,10 @@ const Signup = ({route}) => {
                   borderRadius: 17,
                   flexDirection: 'row',
                   alignItems: 'center',
+                  justifyContent: "space-between"
                 }}>
                 <View>
-                  <Text style={{color: '#908C8D'}}>Password</Text>
+                  <Text style={{ color: '#908C8D' }}>Password</Text>
                   <TextInput
                     placeholder="Enter Password"
                     secureTextEntry={secure}
@@ -336,10 +325,9 @@ const Signup = ({route}) => {
                       color: 'white',
                       fontSize: responsiveFontSize(2),
                       width: responsiveWidth(67),
-                      height: responsiveHeight(3),
                     }}
                     numberOfLines={1}
-                    placeholderTextColor={'white'}
+                    placeholderTextColor={'#908C8D'}
                   />
                 </View>
                 <TouchableOpacity
@@ -348,7 +336,7 @@ const Signup = ({route}) => {
                   }}>
                   <Image
                     source={secure ? Images.eye_off : Images.eye}
-                    style={{width: responsiveWidth(6)}}
+                    style={{ width: responsiveWidth(6) }}
                     resizeMode="contain"
                   />
                 </TouchableOpacity>
@@ -363,9 +351,10 @@ const Signup = ({route}) => {
                   borderRadius: 17,
                   flexDirection: 'row',
                   alignItems: 'center',
+                  justifyContent: "space-between"
                 }}>
                 <View>
-                  <Text style={{color: '#908C8D'}}>Confirm Password</Text>
+                  <Text style={{ color: '#908C8D' }}>Confirm Password</Text>
                   <TextInput
                     placeholder="Enter Password"
                     secureTextEntry={secure2}
@@ -377,10 +366,9 @@ const Signup = ({route}) => {
                       color: 'white',
                       fontSize: responsiveFontSize(2),
                       width: responsiveWidth(67),
-                      height: responsiveHeight(3),
                     }}
                     numberOfLines={1}
-                    placeholderTextColor={'white'}
+                    placeholderTextColor={'#908C8D'}
                   />
                 </View>
                 <TouchableOpacity
@@ -389,7 +377,7 @@ const Signup = ({route}) => {
                   }}>
                   <Image
                     source={secure2 ? Images.eye_off : Images.eye}
-                    style={{width: responsiveWidth(6)}}
+                    style={{ width: responsiveWidth(6) }}
                     resizeMode="contain"
                   />
                 </TouchableOpacity>
@@ -413,8 +401,8 @@ const Signup = ({route}) => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{width: responsiveWidth(34)}}>
-                  <Text style={{color: '#908C8D'}}>Gender</Text>
+                <View style={{ width: responsiveWidth(34) }}>
+                  <Text style={{ color: '#908C8D' }}>Gender</Text>
                   <Dropdown
                     style={styles.dropdown}
                     placeholderStyle={styles.placeholderStyle}
@@ -423,7 +411,7 @@ const Signup = ({route}) => {
                     renderRightIcon={() => (
                       <Image
                         source={Images.dropdown}
-                        style={{width: responsiveWidth(5)}}
+                        style={{ width: responsiveWidth(5) }}
                         resizeMode="contain"
                       />
                     )}
@@ -450,13 +438,13 @@ const Signup = ({route}) => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{width: responsiveWidth(27)}}>
-                  <Text style={{color: '#908C8D'}}>Date of Birth</Text>
+                <View style={{ width: responsiveWidth(27) }}>
+                  <Text style={{ color: '#908C8D' }}>Date of Birth</Text>
                   <MaskInput
                     ref={dobRef}
                     value={DoB}
                     keyboardType="numeric"
-                    placeholderTextColor="#fff"
+                    placeholderTextColor="#908C8D"
                     focusable={true}
                     onChangeText={setDoB}
                     mask={Masks.DATE_DDMMYYYY}
@@ -473,7 +461,7 @@ const Signup = ({route}) => {
                 <TouchableOpacity onPress={handledobInput}>
                   <Image
                     source={Images.calendar}
-                    style={{width: responsiveWidth(4.5)}}
+                    style={{ width: responsiveWidth(4.5) }}
                     resizeMode="contain"
                   />
                 </TouchableOpacity>
@@ -497,12 +485,12 @@ const Signup = ({route}) => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{width: responsiveWidth(27)}}>
-                  <Text style={{color: '#908C8D'}}>Weight in lbs</Text>
+                <View style={{ width: responsiveWidth(27) }}>
+                  <Text style={{ color: '#908C8D' }}>Weight in lbs</Text>
                   <TextInput
                     keyboardType="numeric"
                     placeholder="Your Weight"
-                    placeholderTextColor={'#fff'}
+                    placeholderTextColor={'#908C8D'}
                     value={weight}
                     onChangeText={setweight}
                     style={{
@@ -526,12 +514,12 @@ const Signup = ({route}) => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{width: responsiveWidth(27)}}>
-                  <Text style={{color: '#908C8D'}}>Height in ft</Text>
+                <View style={{ width: responsiveWidth(27) }}>
+                  <Text style={{ color: '#908C8D' }}>Height in ft</Text>
                   <TextInput
                     keyboardType="numeric"
                     placeholder="Your Height"
-                    placeholderTextColor={'#fff'}
+                    placeholderTextColor={'#908C8D'}
                     value={height}
                     onChangeText={setheight}
                     style={{
@@ -544,6 +532,46 @@ const Signup = ({route}) => {
                   />
                 </View>
               </View>
+            </View>
+            <View
+              style={{
+                width: responsiveWidth(85),
+                paddingHorizontal: responsiveWidth(5),
+                paddingVertical: responsiveWidth(2),
+                marginTop: responsiveHeight(3),
+                borderWidth: 1,
+                borderColor: Addressdisabled ? 'red' : '#908C8D',
+                borderRadius: 17,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: "space-between"
+              }}>
+              <View>
+                <Text style={{ color: '#908C8D' }}>Address</Text>
+                <TextInput
+                  ref={addressRef}
+                  placeholder="i.e 43 Bourke street, NSW 987"
+                  value={address}
+                  onChangeText={setAddress}
+                  style={{
+                    padding: 0,
+                    fontFamily: FontFamily.Semi_Bold,
+                    color: 'white',
+                    fontSize: responsiveFontSize(2),
+                    width: responsiveWidth(68),
+                  }}
+                  numberOfLines={1}
+                  placeholderTextColor={'#908C8D'}
+                />
+              </View>
+              <TouchableOpacity onPress={handleEmailInput}>
+                <Image
+                  source={Images.LocationPin}
+
+                  resizeMode='contain'
+                  style={{ width: responsiveWidth(5), height: responsiveWidth(5), tintColor: '#908C8D' }}
+                />
+              </TouchableOpacity>
             </View>
             <ButtonComp
               text="Sign Up"
