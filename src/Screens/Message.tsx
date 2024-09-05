@@ -1,17 +1,22 @@
-import {StyleSheet, Text, View, TouchableOpacity, Image} from 'react-native';
-import React from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
 import WrapperContainer from '../Components/Wrapper';
-import {Images} from '../utils/Images';
+import { Images } from '../utils/Images';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import { useNavigation } from '@react-navigation/native';
+import { GiftedChat } from 'react-native-gifted-chat'
 
-const Message = ({route}) => {
+const Message = ({ route }) => {
+  const [messages, setMessages] = useState([]);
   const navigation = useNavigation();
-   const {data} = route.params;
+  const { data } = route.params;
+
+
+
   return (
     <WrapperContainer>
       <View style={styles.top}>
@@ -45,18 +50,19 @@ const Message = ({route}) => {
             <Image
               source={Images.video_white}
               resizeMode="contain"
-              style={{width: responsiveWidth(7), height: responsiveWidth(7)}}
+              style={{ width: responsiveWidth(7), height: responsiveWidth(7) }}
             />
           </TouchableOpacity>
           <TouchableOpacity>
             <Image
               source={Images.call_white}
               resizeMode="contain"
-              style={{width: responsiveWidth(6), height: responsiveWidth(6)}}
+              style={{ width: responsiveWidth(6), height: responsiveWidth(6) }}
             />
           </TouchableOpacity>
         </View>
       </View>
+      <View style={{ flex: 1 }}></View>
     </WrapperContainer>
   );
 };

@@ -270,8 +270,8 @@ const Home = () => {
           <TouchableOpacity activeOpacity={0.8}>
             <Image source={Images.notification} style={styles.notifiaction} />
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.8}>
-            <Image source={Images.messages} style={styles.notifiaction} />
+          <TouchableOpacity activeOpacity={0.8} onPress={()=>{navigation.navigate("Chats")}}>
+            <Image source={Images.messages} style={styles.notifiaction}/>
           </TouchableOpacity>
         </View>
       </View>

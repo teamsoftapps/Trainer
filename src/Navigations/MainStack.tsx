@@ -1,6 +1,6 @@
-import {StyleSheet, Text, View} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import BottomStack from './BottomStack';
 
 import Booking from '../Screens/Booking';
@@ -22,11 +22,12 @@ import ForgotPassword from '../Screens/ForgotPassword';
 import ConfirmNewPassword from '../Screens/ConfirmNewPassword';
 import VerifyOTP from '../Screens/VerifyOTP';
 import StoryViewer from '../Screens/storyViewer';
+import Chats from '../Screens/Chats';
 
 const Stack = createNativeStackNavigator();
 const MainStack = () => {
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Bottom" component={BottomStack} />
       <Stack.Screen name="Booking" component={Booking} />
       <Stack.Screen name="BookingDetails" component={BookingDetails} />
@@ -45,6 +46,7 @@ const MainStack = () => {
       <Stack.Screen name={'Notification'} component={Notification} />
       <Stack.Screen name={'ForgotPassword'} component={ForgotPassword} />
       <Stack.Screen name={'StoryViewer'} component={StoryViewer} />
+      <Stack.Screen name={'Chats'} component={Chats} />
       <Stack.Screen
         name={'ConfirmNewPassword'}
         component={ConfirmNewPassword}

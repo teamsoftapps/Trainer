@@ -6,35 +6,38 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
-import MaskInput, {Masks} from 'react-native-mask-input';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {Images} from '../utils/Images';
+import { Images } from '../utils/Images';
 import Button from '../Components/Button';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import SubscriptionModal from '../Components/SubscriptionModal';
-import {useDispatch} from 'react-redux';
+import { useSelector } from 'react-redux';
 import PaymentModal from '../Components/PaymentModal';
+import axiosBaseURL from '../utils/AxiosBaseURL';
+import { showMessage } from 'react-native-flash-message';
 var creditCardType = require('credit-card-type');
 
 const AddCard = () => {
-  const [expirationDate, setExpirationDate] = React.useState('');
-  const [CardHoldername, setCardHoldername] = React.useState('');
-  const [CardNumber, setCardNumber] = React.useState('');
-  const [CVV, setCVV] = React.useState('');
-  const [checkbox, setcheckbox] = React.useState(false);
-  const [modalVisible, setModalVisible] = React.useState(false);
-  const [CVVformik, setCVVformik] = React.useState(false);
-  const [Expformik, setExpformik] = React.useState(false);
-  const [Cardformik, setCardformik] = React.useState(false);
-  const [Nameformik, setNameformik] = React.useState(false);
-  const dispatch = useDispatch();
+  const authData = useSelector(state => state.Auth.data);
+  const [expirationDate, setExpirationDate] = useState('');
+  const [CardHoldername, setCardHoldername] = useState('');
+  const [CardNumber, setCardNumber] = useState('');
+  const [CVV, setCVV] = useState('');
+  const [checkbox, setcheckbox] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [CVVformik, setCVVformik] = useState(false);
+  const [Expformik, setExpformik] = useState(false);
+  const [Cardformik, setCardformik] = useState(false);
+  const [Nameformik, setNameformik] = useState(false);
+
   const handleExpirationDateChange = (masked, unmasked) => {
     const month = unmasked.slice(0, 2);
     const year = unmasked.slice(2);
@@ -42,6 +45,12 @@ const AddCard = () => {
       setExpirationDate(unmasked);
     }
   };
+  // to get card type i.e Visa or mastercard
+  var visaCards = creditCardType(CardNumber);
+  if (visaCards[0]?.type != undefined || visaCards[0]?.type != null) {
+    console.log(visaCards[0].type);
+  }
+  // Formik Confitions
   const currentDate = new Date();
   const currentMonth = (currentDate.getMonth() + 1).toString().padStart(2, '0');
   const currentYear = currentDate.getFullYear().toString();
@@ -49,32 +58,62 @@ const AddCard = () => {
   const expiryYear = expirationDate.slice(2);
   const condition1 = expirationDate != '';
   const condition6 =
-    expiryYear < currentYear ||
-    (expiryYear === currentYear && expiryMonth < currentMonth);
+    expiryYear > currentYear ||
+    (expiryYear === currentYear && expiryMonth > currentMonth) || (expiryYear === currentYear && expiryMonth === currentMonth)
   const condition2 = CardHoldername != '';
-  const condition3 = CardNumber != '';
+  const condition3 = CardNumber != '' && (visaCards[0]?.type != undefined || visaCards[0]?.type != null)
   const condition4 = CVV != '';
+
+
+
+
+  // Main function
   const AddCard = () => {
-    if (condition1 && condition2 && condition3 && condition4 ) {
+    if (condition1 && condition2 && condition3 && condition4 && condition6) {
       setCVVformik(false);
       setCardformik(false);
       setExpformik(false);
       setNameformik(false);
       setModalVisible(true);
+      axiosBaseURL
+        .post('/Common/AddCardDetail', {
+          token: authData,
+          CardholderName: CardHoldername,
+          CardNumber: CardNumber,
+          CVV: CVV,
+          ExpDate: expirationDate,
+          CardType: visaCards[0].type
+        })
+        .then(response => {
+          showMessage({
+            message: 'Details enter successfully',
+            type: 'success',
+          });
+        })
+        .catch(error => {
+          showMessage({
+            message: 'Incorrect Email',
+            description: "Please enter correct email",
+            type: 'danger',
+          });
+        });
+
+
     } else {
       if (!condition4) setCVVformik(true);
       if (!condition3) setCardformik(true);
       if (!condition2) setNameformik(true);
-      if (!condition1) setExpformik(true);
+      if (!condition1 || !condition6) setExpformik(true);
+      if (condition4) setCVVformik(false);
+      if (condition3) setCardformik(false);
+      if (condition2) setNameformik(false);
+      if (condition1 && condition6) setExpformik(false);
 
     }
   };
 
-  console.log(expirationDate);
-  var visaCards = creditCardType(CardNumber);
-  if (visaCards[0]?.type != undefined || visaCards[0]?.type != null) {
-    console.log(visaCards[0].type); // 'visa'
-  }
+
+
   const navigation = useNavigation();
   return (
     <WrapperContainer>
@@ -92,7 +131,7 @@ const AddCard = () => {
         }}>
         Add Card
       </Text>
-      <View style={{marginHorizontal: responsiveWidth(8)}}>
+      <View style={{ marginHorizontal: responsiveWidth(8) }}>
         <View
           style={{
             flexDirection: 'row',
@@ -106,9 +145,9 @@ const AddCard = () => {
           <Image
             source={Images.Cardwhite}
             resizeMode="contain"
-            style={{width: responsiveWidth(10)}}
+            style={{ width: responsiveWidth(10) }}
           />
-          <Text style={{color: 'white', fontSize: responsiveFontSize(2.3)}}>
+          <Text style={{ color: 'white', fontSize: responsiveFontSize(2.3) }}>
             Credit or Debit Card
           </Text>
         </View>
@@ -158,8 +197,8 @@ const AddCard = () => {
             onChangeText={setCardNumber}
             mask={Masks.CREDIT_CARD}
           />
-          <View style={{flexDirection: 'row', gap: responsiveWidth(4)}}>
-            <View style={{flex: 1}}>
+          <View style={{ flexDirection: 'row', gap: responsiveWidth(4) }}>
+            <View style={{ flex: 1 }}>
               <Text
                 style={{
                   marginVertical: responsiveHeight(2),
@@ -186,7 +225,7 @@ const AddCard = () => {
                 placeholderTextColor="#888"
               />
             </View>
-            <View style={{flex: 1}}>
+            <View style={{ flex: 1 }}>
               <Text
                 style={{
                   marginVertical: responsiveHeight(2),
@@ -228,10 +267,10 @@ const AddCard = () => {
                 source={
                   checkbox ? Images.Checkboxgreen : Images.Blank_Checkboxgreen
                 }
-                style={{width: responsiveWidth(5), height: responsiveWidth(5)}}
+                style={{ width: responsiveWidth(5), height: responsiveWidth(5) }}
               />
             </TouchableOpacity>
-            <Text style={{fontSize: responsiveFontSize(1.8), color: 'grey'}}>
+            <Text style={{ fontSize: responsiveFontSize(1.8), color: 'grey' }}>
               Remember this card
             </Text>
           </View>
