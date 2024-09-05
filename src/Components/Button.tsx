@@ -1,7 +1,13 @@
-import {StyleSheet, Text, TouchableOpacity} from 'react-native';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+} from 'react-native';
 import React from 'react';
 import {
   responsiveFontSize,
+  responsiveHeight,
   responsiveScreenHeight,
   responsiveScreenWidth,
 } from 'react-native-responsive-dimensions';
@@ -10,18 +16,30 @@ const Button = ({
   textstyle = {},
   containerstyles = {},
   text = 'Cancel',
-  onPress = () => { },
-  disabled=false
+  onPress = () => {},
+  disabled = false,
+  isloading = false,
 }) => {
   return (
-    <TouchableOpacity disabled={disabled} style={[styles.container, containerstyles]} onPress={onPress}>
-      <Text
-        style={[
-          {color: 'black', fontSize: responsiveFontSize(2), fontWeight: '600'},
-          textstyle,
-        ]}>
-        {text}
-      </Text>
+    <TouchableOpacity
+      disabled={disabled}
+      style={[styles.container, containerstyles]}
+      onPress={onPress}>
+      {!!isloading ? (
+        <ActivityIndicator color={'#000'} size={responsiveHeight(5)} />
+      ) : (
+        <Text
+          style={[
+            {
+              color: 'black',
+              fontSize: responsiveFontSize(2),
+              fontWeight: '600',
+            },
+            textstyle,
+          ]}>
+          {text}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };
@@ -33,7 +51,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#9FED3A',
     borderRadius: responsiveScreenHeight(20),
     width: responsiveScreenWidth(80),
-    
+
     height: responsiveScreenHeight(7),
     alignItems: 'center',
     justifyContent: 'center',

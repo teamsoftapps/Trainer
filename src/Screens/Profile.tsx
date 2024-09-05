@@ -17,7 +17,7 @@ import {
 import {FontFamily, Images} from '../utils/Images';
 import {UserImages} from '../utils/Dummy';
 import {useNavigation} from '@react-navigation/native';
-import NavigationStrings from '../Navigations/NavigationStrings';
+// import NavigationStrings from '../Navigations/NavigationStrings';
 
 const Profile = () => {
   const limitedUserImages = UserImages.slice(0, 3);

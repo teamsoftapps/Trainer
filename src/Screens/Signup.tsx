@@ -20,7 +20,6 @@ import ButtonComp from '../Components/ButtonComp';
 import {FontFamily, Images} from '../utils/Images';
 import WrapperContainer from '../Components/Wrapper';
 import MaskInput, {Masks} from 'react-native-mask-input';
-import NavigationStrings from '../Navigations/NavigationStrings';
 import {useNavigation} from '@react-navigation/native';
 import FlashMessage from 'react-native-flash-message';
 import {showMessage} from 'react-native-flash-message';
@@ -28,15 +27,23 @@ import {useDispatch, useSelector} from 'react-redux';
 import {IsLogin} from '../store/Slices/AuthSlice';
 import {useSignUpUserMutation} from '../store/Slices/userAuth';
 import {useSignUpTrainerMutation} from '../store/Slices/trainerAuth';
+import useToast from '../Hooks/Toast';
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from '@react-navigation/native-stack';
+import {RootProps} from '../Navigations/AuthStack';
 
-const Signup = ({route}) => {
-  const {user} = route.params;
-  console.log('Rute', user);
+type Props = NativeStackScreenProps<RootProps, 'signup'>;
+
+const Signup: React.FC<Props> = ({route, navigation}) => {
+  const user = route.params;
+  const {showToast} = useToast();
   const dispatch = useDispatch();
-  const [SignUpUser] = useSignUpUserMutation();
+  const [SignUpUser, {isLoading: SignupUserLoading}] = useSignUpUserMutation();
   const [SignUpTrainer] = useSignUpTrainerMutation();
-  const authData = useSelector(state => state.Auth.data);
-  const navigation = useNavigation();
+  const authData = useSelector(state => state.Auth);
+  console.log('CHECKCTATUS', user.checkUser);
   const [name, setname] = useState('tester3');
   const [email, setemail] = useState('tester3@gmail.com');
   const [password, setpassword] = useState('123456');
@@ -62,12 +69,6 @@ const Signup = ({route}) => {
     {label: 'Female', value: 'Female'},
   ];
 
-  if (!authData) {
-    // console.log('no Data saved in store');
-  } else {
-    // console.log('Data found in store::', authData);
-  }
-
   const handledobInput = () => {
     dobRef.current?.focus();
   };
@@ -79,7 +80,7 @@ const Signup = ({route}) => {
   };
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const condition1 = name.includes(' ') && name.length > 3;
+  const condition1 = name.length > 3;
   const condition2 = emailPattern.test(email);
   const condition3 = password === confirmpassword && password != '';
   const condition4 = Gender != '';
@@ -157,49 +158,29 @@ const Signup = ({route}) => {
       height: height,
     };
     try {
-      if (user === 'user') {
-        let res = await SignUpUser(payload);
+      if (user.checkUser === 'user') {
+        let res: any = await SignUpUser(payload);
         if (res.data) {
-          showMessage({
-            message: 'Success',
-            description: 'User created in successfully',
-            type: 'success',
-          });
-          dispatch(IsLogin(res.data?.data.token));
+          showToast('Success', 'User created in successfully', 'success');
+          // dispatch(IsLogin(res.data?.data.token));
         }
         if (res.error) {
-          showMessage({
-            message: 'Error',
-            description: res.error?.data.message,
-            type: 'danger',
-          });
+          showToast('Error', res.error?.data?.message, 'danger');
         }
-      } else {
-        let res = await SignUpTrainer(payload);
+      }
+      if (user.checkUser === 'trainer') {
+        let res: any = await SignUpTrainer(payload);
         if (res.data) {
-          showMessage({
-            message: 'Success',
-            description: 'Trainer created in successfully',
-            type: 'success',
-          });
+          showToast('Success', 'Trainer created in successfully', 'success');
           dispatch(IsLogin(res.data?.data.token));
         }
         if (res.error) {
           console.log('Errorsssssss//////', res.error);
-          showMessage({
-            message: 'Error',
-            description: res.error?.data.message,
-            type: 'danger',
-          });
+          showToast('Error', res.error?.data.message, 'danger');
         }
       }
-    } catch (error) {
-      console.log('Errorrrr', error.message);
-      showMessage({
-        message: 'Error',
-        description: 'error.message',
-        type: 'danger',
-      });
+    } catch (error: any) {
+      showToast('Error', error?.message, 'danger');
     }
   };
 
@@ -436,6 +417,7 @@ const Signup = ({route}) => {
                     onChange={item => {
                       setGender(item.value);
                     }}
+                    itemTextStyle={{color: '#000'}}
                   />
                 </View>
               </View>
@@ -553,9 +535,8 @@ const Signup = ({route}) => {
               }}
               onPress={() => {
                 handleSignup();
-                // fetchData();
-                // navigation.navigate(NavigationStrings.COMPLETE_PROFILE);
               }}
+              isLoading={SignupUserLoading}
             />
             <View
               style={{
@@ -574,7 +555,9 @@ const Signup = ({route}) => {
               </Text>
               <TouchableOpacity
                 onPress={() => {
-                  navigation.navigate(NavigationStrings.LOG_IN);
+                  navigation.navigate('signin', {
+                    checkUser: user.checkUser === 'user' ? 'user' : 'trainer',
+                  });
                 }}>
                 <Text
                   style={{

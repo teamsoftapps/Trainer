@@ -3,7 +3,6 @@
 import {Image, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import NavigationStrings from './NavigationStrings';
 import Home from '../Screens/Home';
 import Search from '../Screens/Search';
 import Favourites from '../Screens/Favourites';
@@ -38,7 +37,7 @@ const BottomStack = () => {
             />
           ),
         }}
-        name={NavigationStrings.HOME}
+        name={'Home'}
         component={Home}
       />
       <Bottom.Screen
@@ -54,7 +53,7 @@ const BottomStack = () => {
             />
           ),
         }}
-        name={NavigationStrings.MESSAGE}
+        name={'Booking'}
         component={Booking}
       />
       <Bottom.Screen
@@ -70,7 +69,7 @@ const BottomStack = () => {
             />
           ),
         }}
-        name={NavigationStrings.SEARCH_TRAINER}
+        name={'SearchTrainer'}
         component={SearchTrainer}
       />
       <Bottom.Screen
@@ -86,7 +85,7 @@ const BottomStack = () => {
             />
           ),
         }}
-        name={NavigationStrings.FAVOURITES}
+        name={'Favourites'}
         component={Favourites}
       />
       <Bottom.Screen
@@ -102,7 +101,7 @@ const BottomStack = () => {
             />
           ),
         }}
-        name={NavigationStrings.PROFILE}
+        name={'Profile'}
         component={Profile}
       />
     </Bottom.Navigator>

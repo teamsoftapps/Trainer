@@ -1,4 +1,10 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React from 'react';
 import {
   responsiveFontSize,
@@ -12,6 +18,7 @@ const ButtonComp = ({
   textstyle = {},
   onPress = () => {},
   isDisable = false,
+  isLoading = false,
 }) => {
   return (
     <TouchableOpacity
@@ -19,7 +26,11 @@ const ButtonComp = ({
       disabled={isDisable}
       activeOpacity={0.9}
       style={{...styles.main, ...mainStyle}}>
-      <Text style={{...styles.text, ...textstyle}}>{text || 'SignUp'}</Text>
+      {!!isLoading ? (
+        <ActivityIndicator color={'#000'} size={responsiveHeight(5)} />
+      ) : (
+        <Text style={{...styles.text, ...textstyle}}>{text || 'SignUp'}</Text>
+      )}
     </TouchableOpacity>
   );
 };

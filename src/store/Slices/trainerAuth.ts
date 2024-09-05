@@ -4,10 +4,10 @@ export const TrainerAuth = createApi({
   reducerPath: 'TrainerAuth',
 
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://192.168.0.117:6000',
-    prepareHeaders: header => {
-      header.set('Accept', 'application/json');
-    },
+    baseUrl: 'http://192.168.0.189:3000',
+    // prepareHeaders: header => {
+    //   header.set('Accept', 'application/json');
+    // },
   }),
 
   endpoints: builder => ({
@@ -25,7 +25,39 @@ export const TrainerAuth = createApi({
         body,
       }),
     }),
+
+    TrainerForgetPass: builder.mutation({
+      query: body => ({
+        url: '/trainer/forgetPassword',
+        method: 'POST',
+        body,
+      }),
+    }),
+
+    TrainerVerifyOtp: builder.mutation({
+      query: body => {
+        console.log('BOdy', body);
+        return {
+          url: `/trainer/VerifyOTP/${body._id}`,
+          method: 'POST',
+          body: body.data,
+        };
+      },
+    }),
+    TrainerChangePass: builder.mutation({
+      query: body => ({
+        url: `/trainer/resetPassword/${body.id}`,
+        method: 'PATCH',
+        body: body.data,
+      }),
+    }),
   }),
 });
 
-export const {useSignInTrainerMutation, useSignUpTrainerMutation} = TrainerAuth;
+export const {
+  useSignInTrainerMutation,
+  useSignUpTrainerMutation,
+  useTrainerChangePassMutation,
+  useTrainerForgetPassMutation,
+  useTrainerVerifyOtpMutation,
+} = TrainerAuth;

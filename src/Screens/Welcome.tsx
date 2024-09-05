@@ -17,10 +17,19 @@ import {
 } from 'react-native-responsive-dimensions';
 import ButtonComp from '../Components/ButtonComp';
 import {useNavigation} from '@react-navigation/native';
-import NavigationStrings from '../Navigations/NavigationStrings';
+import {
+  NativeStackScreenProps,
+  NativeStackNavigationProp,
+} from '@react-navigation/native-stack';
+import {RootProps} from '../Navigations/AuthStack';
 
-const Welcome = () => {
-  const navigation = useNavigation();
+interface Props {
+  navigation: NativeStackNavigationProp<RootProps, 'Welcome'>;
+}
+
+const Welcome = ({navigation}: Props) => {
+  // const navigation =
+  //   useNavigation();
   return (
     <ImageBackground
       resizeMode="cover"
@@ -60,13 +69,13 @@ const Welcome = () => {
           <ButtonComp
             text="Sign In as Trainer"
             onPress={() => {
-              navigation.navigate(NavigationStrings.LOG_IN, {user: 'trainer'});
+              navigation.navigate('signin', {checkUser: 'trainer'});
             }}
           />
 
           <ButtonComp
             onPress={() => {
-              navigation.navigate(NavigationStrings.LOG_IN, {user: 'user'});
+              navigation.navigate('signin', {checkUser: 'user'});
             }}
             mainStyle={{
               backgroundColor: '#fff',

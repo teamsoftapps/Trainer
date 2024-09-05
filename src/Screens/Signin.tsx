@@ -9,18 +9,18 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useState } from 'react';
-import { FontFamily, Images } from '../utils/Images';
+import React, {useState} from 'react';
+import {FontFamily, Images} from '../utils/Images';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import ButtonComp from '../Components/ButtonComp';
-import { useNavigation } from '@react-navigation/native';
-import NavigationStrings from '../Navigations/NavigationStrings';
+import {useNavigation, useRoute} from '@react-navigation/native';
+
 import WrapperContainer from '../Components/Wrapper';
-import { useDispatch, useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   useSignInUserMutation,
   useSignUpUserMutation,
@@ -29,18 +29,24 @@ import {
   useSignInTrainerMutation,
   useSignUpTrainerMutation,
 } from '../store/Slices/trainerAuth';
-import { IsLogin } from '../store/Slices/AuthSlice';
-import { showMessage } from 'react-native-flash-message';
-const Signin = ({ route }) => {
-  const { user } = route.params;
+import {IsLogin} from '../store/Slices/AuthSlice';
+import {showMessage} from 'react-native-flash-message';
+import Toast from '../Hooks/Toast';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {RootProps} from '../Navigations/AuthStack';
+
+type Props = NativeStackScreenProps<RootProps, 'signin'>;
+
+const Signin: React.FC<Props> = ({route, navigation}) => {
   const [email, setemail] = useState('');
   const [password, setpassword] = useState('');
   const [secure, setsecure] = useState(false);
   const [remember, setremember] = useState(false);
-  const navigation = useNavigation();
+  const data = route.params;
+  console.log('ADSASAD', data.checkUser);
+  const {showToast} = Toast();
   const dispatch = useDispatch();
   const St = useSelector(state => state);
-  console.log('State', St);
   const [SignInUser] = useSignInUserMutation();
   const [SignInTrainer] = useSignInTrainerMutation();
 
@@ -49,65 +55,34 @@ const Signin = ({ route }) => {
       email: email,
       password: password,
     };
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     try {
-      if (user == 'user') {
-        let res = await SignInUser(payload);
-        if (res.data) {
-          showMessage({
-            message: 'Success',
-            description: 'User logged in successfully',
-            type: 'success',
-          });
-          dispatch(IsLogin(res.data?.data.token));
-        }
-        if (res.error) {
-          showMessage({
-            message: 'Error',
-            description: res.error?.data.message,
-            type: 'danger',
-          });
-        }
-      } else {
-        let res = await SignInTrainer(payload);
-        if (res.data) {
-          showMessage({
-            message: 'Success',
-            description: 'Trainer logged in successfully',
-            type: 'success',
-          });
-          dispatch(IsLogin(res.data?.data.token));
-        }
-        if (res.error) {
-          showMessage({
-            message: 'Error',
-            description: res.error?.data.message,
-            type: 'danger',
-          });
-        }
+      if (!emailPattern.test(email)) {
+        return showToast('Error', 'Please Enter Valid Email', 'danger');
       }
 
-      // if (res.data) {
-      //   showMessage({
-      //     message: 'Success',
-      //     description: 'User logged in successfully',
-      //     type: 'success',
-      //   });
-      //   dispatch(IsLogin(res.data?.data.token));
-      // }
-      // if (res.error) {
-      //   showMessage({
-      //     message: 'Error',
-      //     description: res.error?.data.message,
-      //     type: 'danger',
-      //   });
-      // }
-    } catch (error) {
-      console.log('Errorrrr', error.message);
-      showMessage({
-        message: 'Error',
-        description: 'error.message',
-        type: 'danger',
-      });
+      if (data.checkUser == 'user') {
+        let res: any = await SignInUser(payload);
+        if (res.data) {
+          showToast('Success', 'User logged In Successfully', 'success');
+          dispatch(IsLogin(res.data?.data.token));
+        }
+        if (res.error) {
+          showToast('Error', res.error?.data.message, 'danger');
+        }
+      } else {
+        let res: any = await SignInTrainer(payload);
+        if (res.data) {
+          showToast('Success', 'Trainer logged in successfully', 'success');
+          dispatch(IsLogin(res.data?.data.token));
+        }
+        if (res.error) {
+          showToast('Error', res.error?.data.message, 'danger');
+        }
+      }
+    } catch (error: any) {
+      console.log('Errorrrr', error?.message);
+      showToast('Error', error?.message, 'danger');
     }
   };
 
@@ -116,7 +91,7 @@ const Signin = ({ route }) => {
       <ImageBackground
         resizeMode="cover"
         source={Images.bg}
-        style={{ height: responsiveHeight(100) }}>
+        style={{height: responsiveHeight(100)}}>
         <View
           style={{
             alignItems: 'center',
@@ -146,7 +121,7 @@ const Signin = ({ route }) => {
             }}>
             Sign in To Continue
           </Text>
-          <View style={{ gap: responsiveHeight(3) }}>
+          <View style={{gap: responsiveHeight(3)}}>
             <View
               style={{
                 width: responsiveWidth(85),
@@ -156,7 +131,7 @@ const Signin = ({ route }) => {
                 borderColor: '#908C8D',
                 borderRadius: 17,
               }}>
-              <Text style={{ color: '#908C8D' }}>Email</Text>
+              <Text style={{color: '#908C8D'}}>Email</Text>
               <TextInput
                 placeholder="Enter Email"
                 value={email || undefined}
@@ -185,7 +160,7 @@ const Signin = ({ route }) => {
                 alignItems: 'center',
               }}>
               <View>
-                <Text style={{ color: '#908C8D' }}>Password</Text>
+                <Text style={{color: '#908C8D'}}>Password</Text>
                 <TextInput
                   placeholder="Enter Password"
                   secureTextEntry={secure}
@@ -209,7 +184,7 @@ const Signin = ({ route }) => {
                 }}>
                 <Image
                   source={secure ? Images.eye_off : Images.eye}
-                  style={{ width: responsiveWidth(6) }}
+                  style={{width: responsiveWidth(6)}}
                 />
               </TouchableOpacity>
             </View>
@@ -249,7 +224,12 @@ const Signin = ({ route }) => {
                 Remember me
               </Text>
             </View>
-            <TouchableOpacity onPress={() => { }}>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('ForgotPassword', {
+                  checkUser: data.checkUser,
+                });
+              }}>
               <Text
                 style={{
                   color: '#9FED3A',
@@ -285,7 +265,7 @@ const Signin = ({ route }) => {
             </Text>
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate(NavigationStrings.SIGN_UP, { user: user });
+                navigation.navigate('signup', {checkUser: data.checkUser});
               }}>
               <Text
                 style={{
