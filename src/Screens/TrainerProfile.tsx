@@ -11,9 +11,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import WrapperContainer from '../Components/Wrapper';
-import {FontFamily, Images} from '../utils/Images';
+import { FontFamily, Images } from '../utils/Images';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   responsiveFontSize,
@@ -22,11 +22,11 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import Button from '../Components/Button';
-import {availableTimes, TimeSlots} from '../utils/Dummy';
+import { availableTimes, TimeSlots } from '../utils/Dummy';
 
-const TrainerProfile = ({route}) => {
+const TrainerProfile = ({ route }) => {
   const [readmore, setreadmore] = useState(true);
   const [follow, setfollow] = useState(false);
   const [heart, setheart] = useState(false);
@@ -35,9 +35,9 @@ const TrainerProfile = ({route}) => {
   const newMarkedDates = {};
 
   const navigation = useNavigation();
-  const {data} = route.params;
+  const { data } = route.params;
 
-  const renderItem = ({item}) => (
+  const renderItem = ({ item }) => (
     <TouchableOpacity
       style={{
         paddingVertical: 5,
@@ -70,18 +70,18 @@ const TrainerProfile = ({route}) => {
     </TouchableOpacity>
   );
   return (
-    <WrapperContainer style={{backgroundColor: 'black'}}>
+    <WrapperContainer style={{ backgroundColor: 'black' }}>
       <ScrollView>
         <ImageBackground
           resizeMode="cover"
           source={Images.ProfileBG}
-          style={{width: responsiveWidth(100)}}>
+          style={{ width: responsiveWidth(100) }}>
           <StatusBar hidden />
-          <View style={{flex: 1}}>
+          <View style={{ flex: 1 }}>
             <LinearGradient
               colors={['transparent', '#000', '#000']}
-              start={{x: 0, y: 0}}
-              end={{x: 0, y: 1.4}}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1.4 }}
               style={{
                 flex: 1,
               }}>
@@ -132,7 +132,7 @@ const TrainerProfile = ({route}) => {
                   resizeMode="contain"
                 />
                 <Text
-                  style={{fontSize: responsiveFontSize(3.5), color: 'white'}}>
+                  style={{ fontSize: responsiveFontSize(3.5), color: 'white' }}>
                   {data.name}
                 </Text>
 
@@ -151,15 +151,15 @@ const TrainerProfile = ({route}) => {
                     marginTop: responsiveHeight(1.5),
                   }}>
                   <Text
-                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
+                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
                     Strength Training
                   </Text>
                   <Text
-                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
+                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
                     •
                   </Text>
                   <Text
-                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
+                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
                     7 Year Experience
                   </Text>
                 </View>
@@ -186,11 +186,11 @@ const TrainerProfile = ({route}) => {
                     <Text style={styles.blacktext}>Available</Text>
                   </View>
                   <Text
-                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
+                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
                     {data.rating}
                   </Text>
                   <Text
-                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
+                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
                     Rating
                   </Text>
                 </View>
@@ -214,11 +214,11 @@ const TrainerProfile = ({route}) => {
                     </Text>
                   </TouchableOpacity>
                   <Text
-                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
+                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
                     92
                   </Text>
                   <Text
-                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
+                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
                     Followers
                   </Text>
                 </View>
@@ -237,11 +237,11 @@ const TrainerProfile = ({route}) => {
                     <Text style={styles.blacktext}>Message</Text>
                   </View>
                   <Text
-                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
+                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
                     24
                   </Text>
                   <Text
-                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
+                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
                     Years old
                   </Text>
                 </View>
@@ -249,7 +249,7 @@ const TrainerProfile = ({route}) => {
               <View style={styles.BoxContainer}>
                 <View style={styles.box}>
                   <Text
-                    style={{color: '#9FED3A', fontSize: responsiveFontSize(2)}}>
+                    style={{ color: '#9FED3A', fontSize: responsiveFontSize(2) }}>
                     Hourly Rate
                   </Text>
 
@@ -271,7 +271,7 @@ const TrainerProfile = ({route}) => {
                 </View>
                 <View style={styles.box}>
                   <Text
-                    style={{color: '#9FED3A', fontSize: responsiveFontSize(2)}}>
+                    style={{ color: '#9FED3A', fontSize: responsiveFontSize(2) }}>
                     Hired
                   </Text>
                   {/* <View style={{flexDirection: 'row', alignItems: 'center'}}> */}
@@ -325,11 +325,11 @@ const TrainerProfile = ({route}) => {
             onPress={() => {
               setreadmore(!readmore);
             }}
-            style={{color: '#9FED3A'}}>
+            style={{ color: '#9FED3A' }}>
             {readmore ? 'See less' : 'Read more'}
           </Text>
         </View>
-        <View style={{marginTop: responsiveHeight(1.5)}}>
+        <View style={{ marginTop: responsiveHeight(1.5) }}>
           <Text
             style={{
               paddingHorizontal: responsiveWidth(7),
@@ -346,7 +346,7 @@ const TrainerProfile = ({route}) => {
             keyExtractor={item => item}
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{alignItems: 'center'}}
+            contentContainerStyle={{ alignItems: 'center' }}
           />
         </View>
         <View style={styles.addressContainer}>
@@ -359,12 +359,12 @@ const TrainerProfile = ({route}) => {
         <View
           style={{
             marginBottom: responsiveHeight(5),
+            alignItems: "center"
           }}>
           <Button
             text="Book Now"
             onPress={() => navigation.navigate('Schedule')}
             containerstyles={{
-              marginLeft: responsiveWidth(6),
             }}
           />
         </View>
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     gap: responsiveHeight(0.7),
   },
-  SpecialitiesContainer: {paddingHorizontal: responsiveWidth(7)},
+  SpecialitiesContainer: { paddingHorizontal: responsiveWidth(7) },
   BioContainer: {
     paddingHorizontal: responsiveWidth(7),
     marginTop: responsiveHeight(1),
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.Bold,
     marginBottom: responsiveHeight(1),
   },
-  whiteText: {color: 'white', fontSize: responsiveFontSize(1.7)},
+  whiteText: { color: 'white', fontSize: responsiveFontSize(1.7) },
   blacktext: {
     color: 'black',
     fontWeight: '500',

@@ -20,31 +20,30 @@ import {
 import ButtonComp from '../Components/ButtonComp';
 import { FontFamily, Images } from '../utils/Images';
 import WrapperContainer from '../Components/Wrapper';
-import MaskInput, {Masks} from 'react-native-mask-input';
-import {useNavigation} from '@react-navigation/native';
+import MaskInput, { Masks } from 'react-native-mask-input';
+import { useNavigation } from '@react-navigation/native';
 import FlashMessage from 'react-native-flash-message';
-import {showMessage} from 'react-native-flash-message';
-import {useDispatch, useSelector} from 'react-redux';
-import {IsLogin} from '../store/Slices/AuthSlice';
-import {useSignUpUserMutation} from '../store/Slices/userAuth';
-import {useSignUpTrainerMutation} from '../store/Slices/trainerAuth';
+import { showMessage } from 'react-native-flash-message';
+import { useDispatch, useSelector } from 'react-redux';
+import { IsLogin } from '../store/Slices/AuthSlice';
+import { useSignUpUserMutation } from '../store/Slices/userAuth';
+import { useSignUpTrainerMutation } from '../store/Slices/trainerAuth';
 import useToast from '../Hooks/Toast';
 import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
-import {RootProps} from '../Navigations/AuthStack';
+import { RootProps } from '../Navigations/AuthStack';
 
 type Props = NativeStackScreenProps<RootProps, 'signup'>;
 
-const Signup: React.FC<Props> = ({route, navigation}) => {
+const Signup: React.FC<Props> = ({ route, navigation }) => {
   const user = route.params;
-  const {showToast} = useToast();
+  const { showToast } = useToast();
   const dispatch = useDispatch();
-  const [SignUpUser, {isLoading: SignupUserLoading}] = useSignUpUserMutation();
+  const [SignUpUser, { isLoading: SignupUserLoading }] = useSignUpUserMutation();
   const [SignUpTrainer] = useSignUpTrainerMutation();
   const authData = useSelector(state => state.Auth);
-  console.log('CHECKCTATUS', user.checkUser);
   const [name, setname] = useState('tester3');
   const [email, setemail] = useState('tester3@gmail.com');
   const [password, setpassword] = useState('123456');
@@ -89,7 +88,7 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
   };
 
   const condition1 = name.length > 3;
-  const condition2 = emailPattern.test(email);
+  // const condition2 = emailPattern.test(email);
   const condition3 = password === confirmpassword && password != '';
   const condition4 = Gender != '';
   const condition5 = DoB != '';
@@ -116,6 +115,8 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
         if (res.data) {
           showToast('Success', 'User created in successfully', 'success');
           // dispatch(IsLogin(res.data?.data.token));
+          navigation.navigate("signin", { checkUser: 'trainer' })
+
         }
         if (res.error) {
           showToast('Error', res.error?.data?.message, 'danger');
@@ -126,18 +127,11 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
         if (res.data) {
           showToast('Success', 'Trainer created in successfully', 'success');
           dispatch(IsLogin(res.data?.data.token));
+          navigation.navigate("signin", { checkUser: 'trainer' })
         }
         if (res.error) {
-          console.log('Errorsssssss//////', res.error);
           showToast('Error', res.error?.data.message, 'danger');
         }
-      } catch (error) {
-        console.log('Errorrrr', error.message);
-        showMessage({
-          message: 'Error',
-          description: 'error.message',
-          type: 'danger',
-        });
       }
     } catch (error: any) {
       showToast('Error', error?.message, 'danger');
@@ -378,7 +372,7 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
                     onChange={item => {
                       setGender(item.value);
                     }}
-                    itemTextStyle={{color: '#000'}}
+                    itemTextStyle={{ color: '#000' }}
                   />
                 </View>
               </View>

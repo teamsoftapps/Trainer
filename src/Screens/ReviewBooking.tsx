@@ -5,8 +5,9 @@ import {
   TouchableOpacity,
   Image,
   Pressable,
+  TextInput,
 } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
 import {
@@ -16,17 +17,57 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {FontFamily, Images} from '../utils/Images';
+import { FontFamily, Images } from '../utils/Images';
 import Button from '../Components/Button';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { fetchPaymentSheetparams, formatDate } from '../utils/Dummy';
+import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
 
-const ReviewBooking = () => {
+const ReviewBooking = ({ route }) => {
+  const [Hourly, setHourly] = useState('1');
+  const [CardDetails, setCardDetails] = useState([])
+
+  const { Data, Card } = route.params;
+
   const navigation = useNavigation();
+
+  useEffect(() => {
+    initializepaymentsheet()
+  }, [])
+
+
+
+  const initializepaymentsheet = async () => {
+    const { customer, ephemeralKey, paymentIntent } = await fetchPaymentSheetparams()
+    console.log(customer, "step 2 done")
+    const { error } = await initPaymentSheet({
+      customerId: customer,
+      customerEphemeralKeySecret: ephemeralKey,
+      paymentIntentClientSecret: paymentIntent,
+      merchantDisplayName: "Stern's GYM",
+      allowsDelayedPaymentMethods: true,
+      allowsRemovalOfLastSavedPaymentMethod: true
+    })
+  }
+
+  const ConfirmBooking = async () => {
+    const { error } = await presentPaymentSheet()
+    if (error) {
+      console.log("maa chud gai")
+    } else {
+      navigation.navigate("BookingSuccessfull", { Data: { ...Data } })
+    }
+  }
+
+
+
+
+  const FormatedDate = formatDate(Data?.Date)
   return (
     <WrapperContainer>
       <Header
         onPress={() => navigation.goBack()}
-        style={{height: responsiveHeight(7)}}
+        style={{ height: responsiveHeight(7) }}
       />
       <View>
         <Text
@@ -39,10 +80,12 @@ const ReviewBooking = () => {
           Review Booking
         </Text>
       </View>
-      <View
+      <Pressable
+        onPress={() => { navigation.goBack() }}
         style={{
           marginHorizontal: responsiveScreenWidth(8),
-          paddingVertical: responsiveHeight(2),
+          marginVertical: responsiveHeight(2),
+          paddingBottom: responsiveHeight(2),
           justifyContent: 'space-between',
           alignItems: 'center',
           flexDirection: 'row',
@@ -51,26 +94,25 @@ const ReviewBooking = () => {
         }}>
         <View>
           <Text
-            style={{color: '#A4A4A4', fontSize: responsiveScreenFontSize(2)}}>
+            style={{ color: '#A4A4A4', fontSize: responsiveScreenFontSize(2) }}>
             Date & Time
           </Text>
           <Text
-            style={{color: 'white', fontSize: responsiveScreenFontSize(2.4)}}>
-            Monday, October 24
+            style={{ color: 'white', fontSize: responsiveScreenFontSize(2.4) }}>
+            {FormatedDate}
           </Text>
-          <Text style={{color: 'white', fontSize: responsiveScreenFontSize(2)}}>
-            8:00 AM
+          <Text style={{ color: 'white', fontSize: responsiveScreenFontSize(2) }}>
+            {Data?.time}
           </Text>
         </View>
         <View>
-          <TouchableOpacity>
-            <Image
-              source={Images.rightarrow}
-              style={{height: responsiveWidth(4)}}
-            />
-          </TouchableOpacity>
+
+          <Image
+            source={Images.rightarrow}
+            style={{ height: responsiveWidth(4) }}
+          />
         </View>
-      </View>
+      </Pressable>
       <View
         style={{
           marginHorizontal: responsiveScreenWidth(8),
@@ -83,14 +125,14 @@ const ReviewBooking = () => {
         }}>
         <View>
           <Text
-            style={{color: '#A4A4A4', fontSize: responsiveScreenFontSize(2)}}>
+            style={{ color: '#A4A4A4', fontSize: responsiveScreenFontSize(2) }}>
             Trainer
           </Text>
           <Text
-            style={{color: 'white', fontSize: responsiveScreenFontSize(2.4)}}>
+            style={{ color: 'white', fontSize: responsiveScreenFontSize(2.4) }}>
             Alex Morgan
           </Text>
-          <Text style={{color: 'white', fontSize: responsiveScreenFontSize(2)}}>
+          <Text style={{ color: 'white', fontSize: responsiveScreenFontSize(2) }}>
             Fitness
           </Text>
         </View>
@@ -108,79 +150,10 @@ const ReviewBooking = () => {
               borderRadius: responsiveScreenWidth(10),
             }}
           />
-          <TouchableOpacity>
-            <Image
-              source={Images.rightarrow}
-              style={{height: responsiveWidth(4)}}
-            />
-          </TouchableOpacity>
+
         </View>
       </View>
-      <View
-        style={{
-          marginHorizontal: responsiveScreenWidth(8),
-          paddingVertical: responsiveHeight(2),
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexDirection: 'row',
-          borderBottomColor: '#686868',
-          borderBottomWidth: 0.5,
-        }}>
-        <View>
-          <Text
-            style={{color: '#A4A4A4', fontSize: responsiveScreenFontSize(2)}}>
-            Address
-          </Text>
-          <Text
-            style={{color: 'white', fontSize: responsiveScreenFontSize(2.4)}}>
-            San Francisco, California
-          </Text>
-          <Text style={{color: 'white', fontSize: responsiveScreenFontSize(2)}}>
-            0.31 mi away
-          </Text>
-        </View>
-        <View>
-          <TouchableOpacity>
-            <Image
-              source={Images.rightarrow}
-              style={{height: responsiveWidth(4)}}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-      <View
-        style={{
-          marginHorizontal: responsiveScreenWidth(8),
-          paddingVertical: responsiveHeight(2),
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexDirection: 'row',
-          borderBottomColor: '#686868',
-          borderBottomWidth: 0.5,
-        }}>
-        <Pressable onPress={() => navigation.navigate('PaymentMethod')}>
-          <Text
-            style={{color: '#A4A4A4', fontSize: responsiveScreenFontSize(2)}}>
-            Payment Method
-          </Text>
-          <Text
-            style={{color: 'white', fontSize: responsiveScreenFontSize(2.4)}}>
-            Credit or Debit Card
-          </Text>
-          <View style={{flexDirection: 'row', gap: 5, alignItems: 'center'}}>
-            <Image source={Images.visa} />
-            <Image source={Images.mastercard} />
-          </View>
-        </Pressable>
-        <View>
-          <TouchableOpacity>
-            <Image
-              source={Images.rightarrow}
-              style={{height: responsiveWidth(4)}}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
+
       <View
         style={{
           paddingHorizontal: responsiveScreenWidth(8),
@@ -188,20 +161,32 @@ const ReviewBooking = () => {
         }}>
         <Text
           style={{
-            color: 'white',
-            fontSize: responsiveScreenFontSize(1.8),
+            color: '#A4A4A4',
+            fontSize: responsiveScreenFontSize(2),
           }}>
           Price
         </Text>
-        <Text
-          style={{
-            color: 'white',
-            fontSize: responsiveFontSize(2),
-            fontFamily: FontFamily.Semi_Bold,
-          }}>
-          $60/ hour * 1 hour
-        </Text>
-        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: responsiveHeight(2) }}>
+
+          <Text
+            style={{
+              color: 'white',
+              fontSize: responsiveFontSize(2),
+              fontFamily: FontFamily.Semi_Bold,
+            }}>
+            $60/ hour  *
+          </Text>
+          <TextInput
+            keyboardType="numeric"
+            style={{ paddingVertical: 0, color: 'white', width: responsiveWidth(5), fontSize: responsiveFontSize(2) }}
+            value={Hourly}
+            onChangeText={setHourly}
+          />
+        </View>
+        <View style={{
+          flexDirection: 'row', justifyContent: 'space-between', paddingTop: responsiveHeight(1), borderTopColor: '#686868',
+          borderTopWidth: 0.5,
+        }}>
           <Text
             style={{
               color: 'white',
@@ -220,14 +205,17 @@ const ReviewBooking = () => {
           </Text>
         </View>
       </View>
-      <Button
-        text="Confirm"
-        containerstyles={{
-          marginHorizontal: responsiveScreenWidth(6),
-          marginTop: responsiveHeight(12),
-        }}
-      />
-    </WrapperContainer>
+      <View style={{ alignItems: "center" }}>
+
+        <Button
+          text="Confirm"
+          onPress={() => { ConfirmBooking() }}
+          containerstyles={{
+            marginTop: responsiveHeight(32),
+          }}
+        />
+      </View>
+    </WrapperContainer >
   );
 };
 

@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
 import MaskInput, { Masks } from 'react-native-mask-input';
@@ -23,6 +23,7 @@ import { useSelector } from 'react-redux';
 import PaymentModal from '../Components/PaymentModal';
 import axiosBaseURL from '../utils/AxiosBaseURL';
 import { showMessage } from 'react-native-flash-message';
+import { usePaymentSheet, presentPaymentSheet, initPaymentSheet } from '@stripe/stripe-react-native';
 var creditCardType = require('credit-card-type');
 
 const AddCard = () => {
@@ -64,52 +65,81 @@ const AddCard = () => {
   const condition3 = CardNumber != '' && (visaCards[0]?.type != undefined || visaCards[0]?.type != null)
   const condition4 = CVV != '';
 
+  useEffect(() => {
+    initializepaymentsheet()
+  }, [])
 
-
-
-  // Main function
-  const AddCard = () => {
-    if (condition1 && condition2 && condition3 && condition4 && condition6) {
-      setCVVformik(false);
-      setCardformik(false);
-      setExpformik(false);
-      setNameformik(false);
-      setModalVisible(true);
-      axiosBaseURL
-        .post('/Common/AddCardDetail', {
-          token: authData,
-          CardholderName: CardHoldername,
-          CardNumber: CardNumber,
-          CVV: CVV,
-          ExpDate: expirationDate,
-          CardType: visaCards[0].type
-        })
-        .then(response => {
-          showMessage({
-            message: 'Details enter successfully',
-            type: 'success',
-          });
-        })
-        .catch(error => {
-          showMessage({
-            message: 'Incorrect Email',
-            description: "Please enter correct email",
-            type: 'danger',
-          });
-        });
-
-
-    } else {
-      if (!condition4) setCVVformik(true);
-      if (!condition3) setCardformik(true);
-      if (!condition2) setNameformik(true);
-      if (!condition1 || !condition6) setExpformik(true);
-      if (condition4) setCVVformik(false);
-      if (condition3) setCardformik(false);
-      if (condition2) setNameformik(false);
-      if (condition1 && condition6) setExpformik(false);
-
+  const fetchPaymentSheetparams = async () => {
+    const response = await axiosBaseURL.post("/Common/InitializeStripe")
+    const { customer, ephemeralKey, paymentIntent } = await response.data.data
+    console.log("step 1 done")
+    return {
+      customer, ephemeralKey, paymentIntent
     }
+  }
+
+  const initializepaymentsheet = async () => {
+    const { customer, ephemeralKey, paymentIntent } = await fetchPaymentSheetparams()
+    console.log(customer, "step 2 done")
+    const { error } = await initPaymentSheet({
+      customerId: customer,
+      customerEphemeralKeySecret: ephemeralKey,
+      paymentIntentClientSecret: paymentIntent,
+      merchantDisplayName: "Stern's GYM",
+      allowsDelayedPaymentMethods: true,
+      allowsRemovalOfLastSavedPaymentMethod: true
+    })
+  }
+  // Main function
+  const AddCard = async () => {
+
+    const { error } = await presentPaymentSheet()
+    if (error) {
+      console.log("maa chud gai")
+    } else {
+      console.log("oh yehhh")
+    }
+    // if (condition1 && condition2 && condition3 && condition4 && condition6) {
+    //   setCVVformik(false);
+    //   setCardformik(false);
+    //   setExpformik(false);
+    //   setNameformik(false);
+    //   setModalVisible(true);
+    //   axiosBaseURL
+    //     .post('/Common/AddCardDetail', {
+    //       token: authData,
+    //       CardholderName: CardHoldername,
+    //       CardNumber: CardNumber,
+    //       CVV: CVV,
+    //       ExpDate: expirationDate,
+    //       CardType: visaCards[0].type
+    //     })
+    //     .then(response => {
+    //       showMessage({
+    //         message: 'Details enter successfully',
+    //         type: 'success',
+    //       });
+    //     })
+    //     .catch(error => {
+    //       showMessage({
+    //         message: 'Incorrect Email',
+    //         description: "Please enter correct email",
+    //         type: 'danger',
+    //       });
+    //     });
+
+
+    // } else {
+    //   if (!condition4) setCVVformik(true);
+    //   if (!condition3) setCardformik(true);
+    //   if (!condition2) setNameformik(true);
+    //   if (!condition1 || !condition6) setExpformik(true);
+    //   if (condition4) setCVVformik(false);
+    //   if (condition3) setCardformik(false);
+    //   if (condition2) setNameformik(false);
+    //   if (condition1 && condition6) setExpformik(false);
+
+    // }
   };
 
 
@@ -277,7 +307,7 @@ const AddCard = () => {
         </View>
         <Button
           onPress={() => {
-            AddCard();
+            AddCard()
           }}
           containerstyles={{
             marginLeft: responsiveWidth(4),

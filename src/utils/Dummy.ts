@@ -1,3 +1,4 @@
+import axiosBaseURL from './AxiosBaseURL';
 import {Images} from './Images';
 
 export const UserImages = [
@@ -123,16 +124,60 @@ export const TimeSlots = [
   '3:00 PM',
   '4:00 PM',
 ];
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  addMonths,
+  eachDayOfInterval,
+  isWeekend,
+} from 'date-fns';
 
-export const datesToMark = [
-  '2024-07-01',
-  '2024-07-02',
-  '2024-07-03',
-  '2024-07-08',
-  '2024-07-10',
-  '2024-07-15',
-  '2024-07-26',
-];
+export const generateDatesToMark = () => {
+  const today = new Date();
+
+  const startCurrentMonth = startOfMonth(today);
+  const endCurrentMonth = endOfMonth(today);
+
+  const startNextMonth = startOfMonth(addMonths(today, 1));
+  const endNextMonth = endOfMonth(addMonths(today, 1));
+
+  const allDates = [
+    ...eachDayOfInterval({start: today, end: endCurrentMonth}),
+    ...eachDayOfInterval({start: startNextMonth, end: endNextMonth}),
+  ];
+
+  const datesToMark = allDates
+    .filter(date => !isWeekend(date))
+    .map(date => format(date, 'yyyy-MM-dd'));
+
+  return datesToMark;
+};
+
+export const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const options = {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'long',
+    year: '2-digit',
+  };
+
+  const formattedDate = date.toLocaleDateString('en-GB', options);
+  const [weekday, day, month, year] = formattedDate.split(' ');
+  return `${weekday} ${day} ${month}, ${year}`;
+};
+
+export const fetchPaymentSheetparams = async () => {
+  const response = await axiosBaseURL.post('/Common/InitializeStripe');
+  const {customer, ephemeralKey, paymentIntent} = await response.data.data;
+  console.log('step 1 done');
+  return {
+    customer,
+    ephemeralKey,
+    paymentIntent,
+  };
+};
 export const Seartrainer = [
   {
     id: 1,

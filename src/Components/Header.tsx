@@ -1,21 +1,21 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {Images} from '../utils/Images';
+import { Images } from '../utils/Images';
 
 const Header = ({
   text = '',
   style = {},
   textstyle = {},
-  onPress = () => {},
-  rightView,
+  onPress = () => { },
+  rightView = null,
 }) => {
   return (
-    <View style={{...styles.container, ...style}}>
+    <View style={{ ...styles.container, ...style }}>
       <TouchableOpacity onPress={onPress} style={{}}>
         <Image
           source={Images.back}
@@ -26,7 +26,7 @@ const Header = ({
           }}
         />
       </TouchableOpacity>
-      <View style={{flex: 0.9}}>
+      <View style={{ flex: 0.9 }}>
         <Text
           style={{
             ...styles.textstyle,

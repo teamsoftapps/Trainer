@@ -1,14 +1,14 @@
 /* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable prettier/prettier */
-import {Image, StyleSheet, Text, View} from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import React from 'react';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from '../Screens/Home';
 import Search from '../Screens/Search';
 import Favourites from '../Screens/Favourites';
 import Profile from '../Screens/Profile';
-import {Images} from '../utils/Images';
-import {responsiveScreenHeight} from 'react-native-responsive-dimensions';
+import { Images } from '../utils/Images';
+import { responsiveScreenHeight } from 'react-native-responsive-dimensions';
 import Booking from '../Screens/Booking';
 import SearchTrainer from '../Screens/SearchTrainer';
 
@@ -26,7 +26,7 @@ const BottomStack = () => {
       }}>
       <Bottom.Screen
         options={{
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <Image
               source={focused ? Images.home_filled : Images.home}
               resizeMode="contain"
@@ -42,7 +42,7 @@ const BottomStack = () => {
       />
       <Bottom.Screen
         options={{
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <Image
               source={focused ? Images.message_filled : Images.message}
               resizeMode="contain"
@@ -58,7 +58,7 @@ const BottomStack = () => {
       />
       <Bottom.Screen
         options={{
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <Image
               source={focused ? Images.search_filled : Images.search}
               resizeMode="contain"
@@ -74,7 +74,7 @@ const BottomStack = () => {
       />
       <Bottom.Screen
         options={{
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <Image
               source={focused ? Images.heart_filled : Images.heart}
               resizeMode="contain"
@@ -90,7 +90,7 @@ const BottomStack = () => {
       />
       <Bottom.Screen
         options={{
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <Image
               source={focused ? Images.profile_filled : Images.profile}
               resizeMode="contain"

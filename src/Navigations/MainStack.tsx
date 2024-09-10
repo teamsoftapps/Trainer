@@ -23,12 +23,14 @@ import ConfirmNewPassword from '../Screens/ConfirmNewPassword';
 import VerifyOTP from '../Screens/VerifyOTP';
 import StoryViewer from '../Screens/storyViewer';
 import Chats from '../Screens/Chats';
+import BookingConfirmed from '../Screens/BookingConfirmed';
 
 const Stack = createNativeStackNavigator();
 const MainStack = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Bottom" component={BottomStack} />
+      <Stack.Screen name="BookingSuccessfull" component={BookingConfirmed} />
       <Stack.Screen name="Booking" component={Booking} />
       <Stack.Screen name="BookingDetails" component={BookingDetails} />
       <Stack.Screen name="Upcoming" component={Upcoming} />
@@ -44,14 +46,8 @@ const MainStack = () => {
       <Stack.Screen name={'CompleteProfile'} component={CompleteProfile} />
       <Stack.Screen name={'Membership'} component={Membership} />
       <Stack.Screen name={'Notification'} component={Notification} />
-      <Stack.Screen name={'ForgotPassword'} component={ForgotPassword} />
       <Stack.Screen name={'StoryViewer'} component={StoryViewer} />
       <Stack.Screen name={'Chats'} component={Chats} />
-      <Stack.Screen
-        name={'ConfirmNewPassword'}
-        component={ConfirmNewPassword}
-      />
-      <Stack.Screen name={'VerifyOTP'} component={VerifyOTP} />
     </Stack.Navigator>
   );
 };

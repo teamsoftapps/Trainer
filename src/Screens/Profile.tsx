@@ -8,18 +8,17 @@ import {
   Pressable,
   ScrollView,
 } from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {FontFamily, Images} from '../utils/Images';
-import {UserImages} from '../utils/Dummy';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import NavigationStrings from '../Navigations/NavigationStrings';
-import {useSelector} from 'react-redux';
+import { FontFamily, Images } from '../utils/Images';
+import { UserImages } from '../utils/Dummy';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 import axiosBaseURL from '../utils/AxiosBaseURL';
 import EditAddressModal from '../Components/EditAddressModal';
 import DeleteCardModal from '../Components/DeleteCardModal';
@@ -43,7 +42,7 @@ const Profile = () => {
         .then(response => {
           setCardDetails(response.data.data);
         })
-        .catch(error => {});
+        .catch(error => { });
       axiosBaseURL
         .get(`/common/GetProfile/${authData}`)
         .then(response => {
@@ -99,14 +98,13 @@ const Profile = () => {
             <Text style={styles.heading}>Favourite</Text>
             <Pressable
               onPress={() => {
-                navigation.navigate(NavigationStrings.FAVOURITES);
               }}
-              style={{flexDirection: 'row', alignItems: 'center'}}>
-              <View style={{left: 25}}>
+              style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ left: 25 }}>
                 <FlatList
                   horizontal
                   data={limitedUserImages}
-                  renderItem={({item, index}) => {
+                  renderItem={({ item, index }) => {
                     return (
                       <Image
                         source={item.image}
@@ -118,10 +116,10 @@ const Profile = () => {
                             index === 0
                               ? null
                               : index === 1
-                              ? 15
-                              : index === 2
-                              ? 25
-                              : null,
+                                ? 15
+                                : index === 2
+                                  ? 25
+                                  : null,
                         }}
                       />
                     );
@@ -131,7 +129,7 @@ const Profile = () => {
               <TouchableOpacity>
                 <View style={styles.favIcons}>
                   <Text
-                    style={{color: 'black', fontSize: responsiveFontSize(2)}}>
+                    style={{ color: 'black', fontSize: responsiveFontSize(2) }}>
                     +{UserImages.length - 3}
                   </Text>
                 </View>
@@ -164,8 +162,8 @@ const Profile = () => {
               scrollEnabled={false}
               showsVerticalScrollIndicator={false}
               data={CardDetails}
-              contentContainerStyle={{gap: 10}}
-              renderItem={({item, index}) => (
+              contentContainerStyle={{ gap: 10 }}
+              renderItem={({ item, index }) => (
                 <View key={item._id} style={styles.container2}>
                   <View
                     style={{
@@ -179,10 +177,10 @@ const Profile = () => {
                         item.CardType === 'mastercard'
                           ? Images.mastersilver
                           : item.CardType === 'visa'
-                          ? Images.visasilver
-                          : item.CardType === 'jcb'
-                          ? Images.JCBCard
-                          : Images.AmericanExpressCard
+                            ? Images.visasilver
+                            : item.CardType === 'jcb'
+                              ? Images.JCBCard
+                              : Images.AmericanExpressCard
                       }
                       resizeMode="contain"
                       style={{
@@ -190,7 +188,7 @@ const Profile = () => {
                         height: responsiveWidth(10),
                       }}
                     />
-                    <View style={{justifyContent: 'center'}}>
+                    <View style={{ justifyContent: 'center' }}>
                       <Text
                         style={{
                           fontSize: responsiveFontSize(2.3),
@@ -326,7 +324,7 @@ const styles = StyleSheet.create({
     fontSize: responsiveFontSize(2),
     marginVertical: responsiveHeight(1),
   },
-  heading: {fontSize: responsiveFontSize(2.5), color: 'white'},
+  heading: { fontSize: responsiveFontSize(2.5), color: 'white' },
   email: {
     color: '#A7A7A7',
     fontSize: responsiveFontSize(1.5),

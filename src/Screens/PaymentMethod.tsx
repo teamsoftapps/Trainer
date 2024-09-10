@@ -7,7 +7,7 @@ import {
   FlatList,
   Pressable,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, { useCallback, useState } from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
 import {
@@ -17,40 +17,51 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {FontFamily, Images} from '../utils/Images';
+import { FontFamily, Images } from '../utils/Images';
 import Button from '../Components/Button';
-import {useNavigation} from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import axiosBaseURL from '../utils/AxiosBaseURL';
+import { useSelector } from 'react-redux';
+import { useStripe } from '@stripe/stripe-react-native';
 
-const userCards = [
-  {
-    type: 'Credit Card',
-    number: '1234 **** **** ****',
-    brand: 'MasterCard',
-    id: 1,
-  },
-  {
-    type: 'Debit Card',
-    number: '1234 **** **** ****',
-    brand: 'Visa',
-    id: 2,
-  },
-  {
-    type: 'Paypal',
-    number: 'Eleanor Pena',
-    brand: 'Paypal',
-    id: 3,
-  },
-];
 
-const PaymentMethod = () => {
+const PaymentMethod = ({ route }) => {
   const [cardcheckbox, setcardcheckbox] = useState(0);
-  console.log(cardcheckbox);
+  const [CardDetails, setCardDetails] = useState([])
+
+  const { Data } = route.params;
+
+
+  const authData = useSelector(state => state.Auth.data);
+  const onPress = () => {
+    const selectedCard = CardDetails.find((item) => item._id === cardcheckbox)
+    navigation.navigate('ReviewBooking', { Card: selectedCard, Data: Data })
+  }
+  useFocusEffect(
+    useCallback(() => {
+      axiosBaseURL
+        .post('/Common/GetCardDetail', {
+          token: authData
+        })
+        .then(response => {
+          setCardDetails(response.data.data)
+          if (CardDetails.length > 0) {
+            setcardcheckbox(CardDetails[0]._id);
+          }
+        })
+        .catch(error => {
+
+        });
+
+    }, [authData])
+  );
+
   const navigation = useNavigation();
   return (
     <WrapperContainer>
       <Header
         onPress={() => navigation.goBack()}
-        style={{height: responsiveHeight(7)}}
+        style={{ height: responsiveHeight(7) }}
       />
       <View>
         <Text
@@ -65,11 +76,11 @@ const PaymentMethod = () => {
       </View>
       <View style={styles.shipping_container}>
         <FlatList
-          data={userCards}
-          renderItem={({item}) => (
+          data={CardDetails}
+          renderItem={({ item }) => (
             <View style={styles.address_container}>
               <View style={styles.address_left}>
-                {item.brand === 'Visa' ? (
+                {item.CardType === 'visa' ? (
                   <Image
                     source={Images.visa}
                     resizeMode="contain"
@@ -78,7 +89,7 @@ const PaymentMethod = () => {
                       height: responsiveScreenWidth(8),
                     }}
                   />
-                ) : item.brand === 'Paypal' ? (
+                ) : item.CardType === 'Paypal' ? (
                   <Image
                     source={Images.paypal}
                     resizeMode="contain"
@@ -87,7 +98,7 @@ const PaymentMethod = () => {
                       height: responsiveScreenWidth(10),
                     }}
                   />
-                ) : (
+                ) : item.CardType === 'mastercard' ? (
                   <Image
                     source={Images.mastercard}
                     resizeMode="contain"
@@ -95,28 +106,44 @@ const PaymentMethod = () => {
                       width: responsiveScreenWidth(10),
                       height: responsiveScreenWidth(6),
                     }}
+                  />) : item.CardType === 'jcb' ?
+                  (<Image
+                    source={Images.JCBCard}
+                    resizeMode="contain"
+                    style={{
+                      width: responsiveScreenWidth(10),
+                      height: responsiveScreenWidth(6),
+                    }}
+                  />) : (<Image
+                    source={Images.AmericanExpressCard}
+                    resizeMode="contain"
+                    style={{
+                      width: responsiveScreenWidth(10),
+                      height: responsiveScreenWidth(6),
+                    }}
                   />
-                )}
+                  )}
               </View>
               <View style={styles.address}>
                 <Text numberOfLines={1} style={styles.address_top}>
-                  {item.type}
+                  {item.CardholderName}
                 </Text>
                 <Text numberOfLines={1} style={styles.address_Bottom}>
-                  {item.number}
+                  {item.CardNumber}
                 </Text>
               </View>
               <View style={styles.address_icon}>
                 <TouchableOpacity
                   onPress={() => {
-                    setcardcheckbox(item.id);
+
+                    setcardcheckbox(item._id);
                   }}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
                   }}>
                   <View style={styles.checkbox_outer}>
-                    {cardcheckbox === item.id && (
+                    {cardcheckbox === item._id && (
                       <View style={styles.checkbox_inner} />
                     )}
                   </View>
@@ -153,23 +180,26 @@ const PaymentMethod = () => {
           </View>
         </View>
       </View>
-      <Button
-        disabled={cardcheckbox == 0 ? true : false}
-        text="Next"
-        containerstyles={{
-          marginTop: responsiveHeight(24),
-          marginLeft: responsiveWidth(5),
-          backgroundColor: cardcheckbox == 0 ? '#181818' : '#9FED3A',
-          borderWidth: 1,
-          borderColor: '#9FED3A',
-        }}
-        onPress={() => navigation.navigate('ReviewBooking')}
-        textstyle={{
-          fontSize: responsiveFontSize(2.3),
-          fontFamily: FontFamily.Medium,
-          color: cardcheckbox == 0 ? 'white' : '#181818',
-        }}
-      />
+      <View style={{ alignItems: "center" }}>
+
+        <Button
+          disabled={cardcheckbox == 0 ? true : false}
+          text="Next"
+          containerstyles={{
+            marginTop: responsiveHeight(24),
+            marginLeft: responsiveWidth(5),
+            backgroundColor: cardcheckbox == 0 ? '#181818' : '#9FED3A',
+            borderWidth: 1,
+            borderColor: '#9FED3A',
+          }}
+          onPress={() => onPress()}
+          textstyle={{
+            fontSize: responsiveFontSize(2.3),
+            fontFamily: FontFamily.Medium,
+            color: cardcheckbox == 0 ? 'white' : '#181818',
+          }}
+        />
+      </View>
     </WrapperContainer>
   );
 };
