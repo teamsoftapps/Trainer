@@ -9,42 +9,39 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
-import {FontFamily, Images} from '../utils/Images';
+import React, { useState } from 'react';
+import { FontFamily, Images } from '../utils/Images';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import ButtonComp from '../Components/ButtonComp';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 import WrapperContainer from '../Components/Wrapper';
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   useSignInUserMutation,
-  useSignUpUserMutation,
 } from '../store/Slices/userAuth';
 import {
   useSignInTrainerMutation,
-  useSignUpTrainerMutation,
 } from '../store/Slices/trainerAuth';
-import {IsLogin} from '../store/Slices/AuthSlice';
-import {showMessage} from 'react-native-flash-message';
-import Toast from '../Hooks/Toast';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {RootProps} from '../Navigations/AuthStack';
+import { IsLogin } from '../store/Slices/AuthSlice';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootProps } from '../Navigations/AuthStack';
+import useToast from '../Hooks/Toast';
 
 type Props = NativeStackScreenProps<RootProps, 'signin'>;
 
-const Signin: React.FC<Props> = ({route, navigation}) => {
+const Signin: React.FC<Props> = ({ route, navigation }) => {
   const [email, setemail] = useState('');
   const [password, setpassword] = useState('');
   const [secure, setsecure] = useState(false);
   const [remember, setremember] = useState(false);
   const data = route.params;
   console.log('ADSASAD', data.checkUser);
-  const {showToast} = Toast();
+  const { showToast } = useToast();
   const dispatch = useDispatch();
   const St = useSelector(state => state);
   const [SignInUser] = useSignInUserMutation();
@@ -91,7 +88,7 @@ const Signin: React.FC<Props> = ({route, navigation}) => {
       <ImageBackground
         resizeMode="cover"
         source={Images.bg}
-        style={{height: responsiveHeight(100)}}>
+        style={{ height: responsiveHeight(100) }}>
         <View
           style={{
             alignItems: 'center',
@@ -121,7 +118,7 @@ const Signin: React.FC<Props> = ({route, navigation}) => {
             }}>
             Sign in To Continue
           </Text>
-          <View style={{gap: responsiveHeight(3)}}>
+          <View style={{ gap: responsiveHeight(3) }}>
             <View
               style={{
                 width: responsiveWidth(85),
@@ -131,7 +128,7 @@ const Signin: React.FC<Props> = ({route, navigation}) => {
                 borderColor: '#908C8D',
                 borderRadius: 17,
               }}>
-              <Text style={{color: '#908C8D'}}>Email</Text>
+              <Text style={{ color: '#908C8D' }}>Email</Text>
               <TextInput
                 placeholder="Enter Email"
                 value={email || undefined}
@@ -160,7 +157,7 @@ const Signin: React.FC<Props> = ({route, navigation}) => {
                 alignItems: 'center',
               }}>
               <View>
-                <Text style={{color: '#908C8D'}}>Password</Text>
+                <Text style={{ color: '#908C8D' }}>Password</Text>
                 <TextInput
                   placeholder="Enter Password"
                   secureTextEntry={secure}
@@ -184,7 +181,7 @@ const Signin: React.FC<Props> = ({route, navigation}) => {
                 }}>
                 <Image
                   source={secure ? Images.eye_off : Images.eye}
-                  style={{width: responsiveWidth(6)}}
+                  style={{ width: responsiveWidth(6) }}
                 />
               </TouchableOpacity>
             </View>
@@ -265,7 +262,7 @@ const Signin: React.FC<Props> = ({route, navigation}) => {
             </Text>
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate('signup', {checkUser: data.checkUser});
+                navigation.navigate('signup', { checkUser: data.checkUser });
               }}>
               <Text
                 style={{

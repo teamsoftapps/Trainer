@@ -22,10 +22,12 @@ import Button from '../Components/Button';
 import { useNavigation } from '@react-navigation/native';
 import { fetchPaymentSheetparams, formatDate } from '../utils/Dummy';
 import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
+import useToast from '../Hooks/Toast';
 
 const ReviewBooking = ({ route }) => {
   const [Hourly, setHourly] = useState('1');
   const [CardDetails, setCardDetails] = useState([])
+  const { showToast } = useToast();
 
   const { Data, Card } = route.params;
 
@@ -39,7 +41,6 @@ const ReviewBooking = ({ route }) => {
 
   const initializepaymentsheet = async () => {
     const { customer, ephemeralKey, paymentIntent } = await fetchPaymentSheetparams()
-    console.log(customer, "step 2 done")
     const { error } = await initPaymentSheet({
       customerId: customer,
       customerEphemeralKeySecret: ephemeralKey,
@@ -53,7 +54,7 @@ const ReviewBooking = ({ route }) => {
   const ConfirmBooking = async () => {
     const { error } = await presentPaymentSheet()
     if (error) {
-      console.log("maa chud gai")
+      showToast('Try later', 'Unexpected Server error', 'success');
     } else {
       navigation.navigate("BookingSuccessfull", { Data: { ...Data } })
     }

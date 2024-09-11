@@ -5,6 +5,7 @@ import AuthStack from './src/Navigations/AuthStack';
 import MainStack from './src/Navigations/MainStack';
 import { useSelector } from 'react-redux';
 import { StripeProvider } from '@stripe/stripe-react-native';
+import TrainerStack from './src/Navigations/TrainerStack';
 
 const App = () => {
   const authData = useSelector(state => state.Auth.data);

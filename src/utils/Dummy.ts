@@ -169,13 +169,24 @@ export const formatDate = (dateString: string) => {
 };
 
 export const fetchPaymentSheetparams = async () => {
-  const response = await axiosBaseURL.post('/Common/InitializeStripe');
+  const response = await axiosBaseURL.post('/Common/InitializePaymentIntent');
   const {customer, ephemeralKey, paymentIntent} = await response.data.data;
   console.log('step 1 done');
   return {
     customer,
     ephemeralKey,
     paymentIntent,
+  };
+};
+export const fetchSetupSheetparams = async (email: string) => {
+  const response = await axiosBaseURL.post('/Common/InitializeSetupIntent', {
+    Email: email,
+  });
+  const {customer, ephemeralKey, setupIntents} = await response.data;
+  return {
+    customer,
+    ephemeralKey,
+    setupIntents,
   };
 };
 export const Seartrainer = [

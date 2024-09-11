@@ -86,7 +86,6 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
   const handleEmailInput = () => {
     emailRef.current?.focus();
   };
-
   const condition1 = name.length > 3;
   // const condition2 = emailPattern.test(email);
   const condition3 = password === confirmpassword && password != '';
@@ -114,11 +113,11 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
         let res: any = await SignUpUser(payload);
         if (res.data) {
           showToast('Success', 'User created in successfully', 'success');
-          // dispatch(IsLogin(res.data?.data.token));
+          dispatch(IsLogin(res.data?.data.token));
           navigation.navigate("signin", { checkUser: 'trainer' })
-
         }
         if (res.error) {
+
           showToast('Error', res.error?.data?.message, 'danger');
         }
       }
@@ -130,6 +129,8 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
           navigation.navigate("signin", { checkUser: 'trainer' })
         }
         if (res.error) {
+          console.log("errorr")
+
           showToast('Error', res.error?.data.message, 'danger');
         }
       }

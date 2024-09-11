@@ -16,12 +16,14 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import { FontFamily, Images } from '../utils/Images';
-import { UserImages } from '../utils/Dummy';
+import { fetchSetupSheetparams, UserImages } from '../utils/Dummy';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import axiosBaseURL from '../utils/AxiosBaseURL';
 import EditAddressModal from '../Components/EditAddressModal';
 import DeleteCardModal from '../Components/DeleteCardModal';
+import { usePaymentSheet } from '@stripe/stripe-react-native';
+import useToast from '../Hooks/Toast';
 
 const Profile = () => {
   const [CardDetails, setCardDetails] = useState([]);
@@ -32,6 +34,34 @@ const Profile = () => {
   const [CardModal, setCardModal] = useState(false);
   const [CardData, SetCardData] = useState('');
   const authData = useSelector(state => state.Auth.data);
+
+  const { showToast } = useToast();
+
+  const { initPaymentSheet, presentPaymentSheet } = usePaymentSheet()
+
+  const initializepaymentsheet = async (email) => {
+    const { customer,
+      ephemeralKey,
+      setupIntents } = await fetchSetupSheetparams(email)
+    const { error } = await initPaymentSheet({
+      customerId: customer,
+      customerEphemeralKeySecret: ephemeralKey,
+      setupIntentClientSecret: setupIntents,
+      merchantDisplayName: "Stern's GYM",
+      allowsDelayedPaymentMethods: true,
+      allowsRemovalOfLastSavedPaymentMethod: true
+    })
+  }
+
+  const AddCardStripe = async () => {
+    await initializepaymentsheet(email)
+    const { error } = await presentPaymentSheet()
+    if (error) {
+      showToast('Try later', 'maa chud gai', 'danger');
+    } else {
+      showToast('Try later', 'Unexpected Server error', 'success');
+    }
+  }
 
   useFocusEffect(
     useCallback(() => {
@@ -229,7 +259,7 @@ const Profile = () => {
             <Text style={styles.textgreen}>Add new card</Text>
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate('AddCard');
+                AddCardStripe()
               }}
               style={styles.plus}>
               <Text
