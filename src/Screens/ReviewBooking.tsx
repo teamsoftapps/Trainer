@@ -7,7 +7,7 @@ import {
   Pressable,
   TextInput,
 } from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
 import {
@@ -17,31 +17,35 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {FontFamily, Images} from '../utils/Images';
+import { FontFamily, Images } from '../utils/Images';
 import Button from '../Components/Button';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import {fetchPaymentSheetparams, formatDate} from '../utils/Dummy';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { fetchPaymentSheetparams, formatDate } from '../utils/Dummy';
 import {
   initPaymentSheet,
   presentPaymentSheet,
 } from '@stripe/stripe-react-native';
 import useToast from '../Hooks/Toast';
 import axiosBaseURL from '../utils/AxiosBaseURL';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 
-const ReviewBooking = ({route}) => {
+const ReviewBooking = ({ route }) => {
   const [CardDetails, setCardDetails] = useState([]);
-  const {showToast} = useToast();
+  const { showToast } = useToast();
   const [stripeId, setStripeId] = useState('');
-  const [trainerRatePerHour, settrainerRatePerHour] = useState(60);
-  const [hours, setHours] = useState(0);
+  const [hours, setHours] = useState("1");
   const [totalAmount, setTotalAmount] = useState();
-  const {Data, Card} = route.params;
+  const { Data } = route.params;
+  const [trainerRatePerHour, settrainerRatePerHour] = useState(Data.rate.replace("$", ""));
   const authData = useSelector(state => state.Auth.data);
   const navigation = useNavigation();
+
   useEffect(() => {
-    setTotalAmount(trainerRatePerHour * hours);
+    const isValidHours = !(hours.includes(",") || hours.includes(".") || hours.includes("-") || hours == "");
+    const parsedHours = isValidHours ? parseInt(hours) : 0;
+    setTotalAmount(trainerRatePerHour * parsedHours);
   }, [trainerRatePerHour, hours]);
+
 
   useEffect(() => {
     fetchData();
@@ -49,15 +53,9 @@ const ReviewBooking = ({route}) => {
 
   const fetchData = async () => {
     try {
-      const cardResponse = await axiosBaseURL.post('/Common/GetCardDetail', {
-        token: authData.isToken,
-      });
-      setCardDetails(cardResponse.data.data);
-
       const profileResponse = await axiosBaseURL.get(
         `/common/GetProfile/${authData.isToken}`
       );
-      console.log('User found', profileResponse.data.data);
       setStripeId(profileResponse.data.data.stripeCustomerID);
     } catch (error) {
       console.error(
@@ -71,12 +69,12 @@ const ReviewBooking = ({route}) => {
     if (!stripeId) return;
 
     try {
-      const {ephemeralKey, paymentIntent} = await fetchPaymentSheetparams(
+      const { ephemeralKey, paymentIntent } = await fetchPaymentSheetparams(
         stripeId,
         totalAmount
       );
 
-      const {error} = await initPaymentSheet({
+      const { error } = await initPaymentSheet({
         customerId: stripeId,
         customerEphemeralKeySecret: ephemeralKey,
         paymentIntentClientSecret: paymentIntent,
@@ -100,11 +98,12 @@ const ReviewBooking = ({route}) => {
 
   const ConfirmBooking = async () => {
     await initializePaymentsheet();
-    const {error} = await presentPaymentSheet();
+    const { error } = await presentPaymentSheet();
     if (error) {
       showToast('Try later', error.message, 'danger');
     } else {
-      navigation.navigate('BookingSuccessfull', {Data: {...Data}});
+
+      navigation.navigate('BookingSuccessfull', { Data: { ...Data } });
     }
   };
 
@@ -169,11 +168,12 @@ const ReviewBooking = ({route}) => {
   // };
 
   const FormatedDate = formatDate(Data?.Date);
+  console.log("Value of Totoal Amount", totalAmount)
   return (
     <WrapperContainer>
       <Header
         onPress={() => navigation.goBack()}
-        style={{height: responsiveHeight(7)}}
+        style={{ height: responsiveHeight(7) }}
       />
       <View>
         <Text
@@ -202,21 +202,21 @@ const ReviewBooking = ({route}) => {
         }}>
         <View>
           <Text
-            style={{color: '#A4A4A4', fontSize: responsiveScreenFontSize(2)}}>
+            style={{ color: '#A4A4A4', fontSize: responsiveScreenFontSize(2) }}>
             Date & Time
           </Text>
           <Text
-            style={{color: 'white', fontSize: responsiveScreenFontSize(2.4)}}>
+            style={{ color: 'white', fontSize: responsiveScreenFontSize(2.4) }}>
             {FormatedDate}
           </Text>
-          <Text style={{color: 'white', fontSize: responsiveScreenFontSize(2)}}>
+          <Text style={{ color: 'white', fontSize: responsiveScreenFontSize(2) }}>
             {Data?.time}
           </Text>
         </View>
         <View>
           <Image
             source={Images.rightarrow}
-            style={{height: responsiveWidth(4)}}
+            style={{ height: responsiveWidth(4) }}
           />
         </View>
       </Pressable>
@@ -232,14 +232,14 @@ const ReviewBooking = ({route}) => {
         }}>
         <View>
           <Text
-            style={{color: '#A4A4A4', fontSize: responsiveScreenFontSize(2)}}>
+            style={{ color: '#A4A4A4', fontSize: responsiveScreenFontSize(2) }}>
             Trainer
           </Text>
           <Text
-            style={{color: 'white', fontSize: responsiveScreenFontSize(2.4)}}>
+            style={{ color: 'white', fontSize: responsiveScreenFontSize(2.4) }}>
             Alex Morgan
           </Text>
-          <Text style={{color: 'white', fontSize: responsiveScreenFontSize(2)}}>
+          <Text style={{ color: 'white', fontSize: responsiveScreenFontSize(2) }}>
             Fitness
           </Text>
         </View>
@@ -289,9 +289,10 @@ const ReviewBooking = ({route}) => {
             {'/ hour * '}
           </Text>
           <TextInput
+
             maxLength={2}
             editable={true}
-            keyboardType="numeric"
+            keyboardType="number-pad"
             style={{
               paddingVertical: 0,
               color: 'white',
@@ -325,12 +326,13 @@ const ReviewBooking = ({route}) => {
               fontSize: responsiveFontSize(2),
               fontFamily: FontFamily.Semi_Bold,
             }}>
+            {/* {totalAmount === NaN ? "ok" : "n"} */}
             {totalAmount}
             {'$'}
           </Text>
         </View>
       </View>
-      <View style={{alignItems: 'center'}}>
+      <View style={{ alignItems: 'center' }}>
         <Button
           text="Confirm"
           onPress={() => {

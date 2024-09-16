@@ -19,13 +19,14 @@ import Button from '../Components/Button';
 import { availableTimes, generateDatesToMark, TimeSlots } from '../utils/Dummy';
 import { useNavigation } from '@react-navigation/native';
 
-const Schedule = () => {
+const Schedule = ({ route }) => {
   const [selected, setSelected] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const navigation = useNavigation();
   const datesToMark = generateDatesToMark()
   const newMarkedDates = {};
-
+  const { Data } = route.params;
+  console.log(Data)
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={{
@@ -188,7 +189,7 @@ const Schedule = () => {
             borderWidth: 1,
             borderColor: '#9FED3A',
           }}
-          onPress={() => navigation.navigate('ReviewBooking', { Data: { Date: selected, time: selectedTime } })}
+          onPress={() => navigation.navigate('ReviewBooking', { Data: { Date: selected, time: selectedTime, rate: Data } })}
           textstyle={{
             fontSize: responsiveFontSize(2.3),
             fontFamily: FontFamily.Medium,

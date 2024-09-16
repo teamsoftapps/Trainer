@@ -363,7 +363,7 @@ const TrainerProfile = ({ route }) => {
           }}>
           <Button
             text="Book Now"
-            onPress={() => navigation.navigate('Schedule')}
+            onPress={() => navigation.navigate('Schedule', { Data: data.rate })}
             containerstyles={{
             }}
           />

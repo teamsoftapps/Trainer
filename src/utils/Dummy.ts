@@ -173,9 +173,7 @@ export const fetchPaymentSheetparams = async (CustomerID: string, amount) => {
     customerID: CustomerID,
     amount: amount,
   });
-  console.log('payment Cus ID:', CustomerID, amount);
   const {ephemeralKey, paymentIntent, customer} = await response.data.data;
-  console.log('step 1 done', response);
   return {
     ephemeralKey,
     paymentIntent,
