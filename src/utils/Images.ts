@@ -75,7 +75,9 @@ export const Images = {
   Cross: require('../assets/Images/cross.png'),
   LocationPin: require('../assets/Images/locationPin.png'),
   DeleteBin: require('../assets/Images/delete.png'),
-  RemoveCard:require('../assets/Images/removeCard.png')
+  RemoveCard: require('../assets/Images/removeCard.png'),
+  DinersClub: require('../assets/Images/Dinersclub.png'),
+  UnionPay: require('../assets/Images/unionpay.png'),
 };
 
 export const FontFamily = {

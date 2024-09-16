@@ -4,10 +4,10 @@ export const TrainerAuth = createApi({
   reducerPath: 'TrainerAuth',
 
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://192.168.0.101:3000',
-    // prepareHeaders: header => {
-    //   header.set('Accept', 'application/json');
-    // },
+    baseUrl: 'http://192.168.0.117:6000',
+    prepareHeaders: header => {
+      header.set('Accept', 'application/json');
+    },
   }),
 
   endpoints: builder => ({

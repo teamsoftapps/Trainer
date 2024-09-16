@@ -16,12 +16,12 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { FontFamily, Images } from '../utils/Images';
+import {FontFamily, Images} from '../utils/Images';
 import Button from '../Components/Button';
-import { useNavigation } from '@react-navigation/native';
-import { useDispatch } from 'react-redux';
-import { SignOut } from '../store/Slices/AuthSlice';
-import { showMessage } from 'react-native-flash-message';
+import {useNavigation} from '@react-navigation/native';
+import {useDispatch, useSelector} from 'react-redux';
+import {SignOut} from '../store/Slices/AuthSlice';
+import {showMessage} from 'react-native-flash-message';
 
 const Settings = () => {
   const navigation = useNavigation();
@@ -69,7 +69,7 @@ const Settings = () => {
             Settings
           </Text>
         </View>
-        <View style={{ paddingHorizontal: responsiveScreenWidth(8) }}>
+        <View style={{paddingHorizontal: responsiveScreenWidth(8)}}>
           <Text
             style={{
               fontSize: responsiveFontSize(2.4),
@@ -90,7 +90,7 @@ const Settings = () => {
               borderBottomColor: '#2E2E2E',
               paddingVertical: responsiveHeight(2.5),
             }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 20}}>
               <Image
                 source={Images.lock}
                 style={{
@@ -98,7 +98,7 @@ const Settings = () => {
                   height: responsiveScreenWidth(10),
                 }}
               />
-              <Text style={{ color: 'white', fontSize: responsiveFontSize(2.4) }}>
+              <Text style={{color: 'white', fontSize: responsiveFontSize(2.4)}}>
                 Change Password
               </Text>
             </View>
@@ -116,7 +116,7 @@ const Settings = () => {
               borderBottomColor: '#2E2E2E',
               paddingVertical: responsiveHeight(2.5),
             }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 20}}>
               <Image
                 source={Images.bell}
                 style={{
@@ -124,7 +124,7 @@ const Settings = () => {
                   height: responsiveScreenWidth(10),
                 }}
               />
-              <Text style={{ color: 'white', fontSize: responsiveFontSize(2.4) }}>
+              <Text style={{color: 'white', fontSize: responsiveFontSize(2.4)}}>
                 Notifications
               </Text>
             </View>
@@ -139,7 +139,7 @@ const Settings = () => {
               borderBottomColor: '#2E2E2E',
               paddingVertical: responsiveHeight(2.5),
             }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 20}}>
               <Image
                 source={Images.privacy}
                 style={{
@@ -147,7 +147,7 @@ const Settings = () => {
                   height: responsiveScreenWidth(10),
                 }}
               />
-              <Text style={{ color: 'white', fontSize: responsiveFontSize(2.4) }}>
+              <Text style={{color: 'white', fontSize: responsiveFontSize(2.4)}}>
                 Privacy Settings
               </Text>
             </View>
@@ -170,7 +170,7 @@ const Settings = () => {
               borderBottomColor: '#2E2E2E',
               paddingVertical: responsiveHeight(2.5),
             }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 20}}>
               <Image
                 source={Images.language}
                 style={{
@@ -178,13 +178,13 @@ const Settings = () => {
                   height: responsiveScreenWidth(10),
                 }}
               />
-              <Text style={{ color: 'white', fontSize: responsiveFontSize(2.4) }}>
+              <Text style={{color: 'white', fontSize: responsiveFontSize(2.4)}}>
                 Languages
               </Text>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
               <Text
-                style={{ color: '#909090', fontSize: responsiveFontSize(2.4) }}>
+                style={{color: '#909090', fontSize: responsiveFontSize(2.4)}}>
                 English
               </Text>
               <Image source={Images.rightarrow} resizeMode="contain" />
@@ -199,7 +199,7 @@ const Settings = () => {
               borderBottomColor: '#2E2E2E',
               paddingVertical: responsiveHeight(2.5),
             }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 20}}>
               <Image
                 source={Images.currency}
                 style={{
@@ -207,23 +207,23 @@ const Settings = () => {
                   height: responsiveScreenWidth(10),
                 }}
               />
-              <Text style={{ color: 'white', fontSize: responsiveFontSize(2.4) }}>
+              <Text style={{color: 'white', fontSize: responsiveFontSize(2.4)}}>
                 Currency
               </Text>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
               <Text
-                style={{ color: '#909090', fontSize: responsiveFontSize(2.4) }}>
+                style={{color: '#909090', fontSize: responsiveFontSize(2.4)}}>
                 $-USD
               </Text>
               <Image source={Images.rightarrow} resizeMode="contain" />
             </View>
           </TouchableOpacity>
         </View>
-        <View style={{ alignItems: 'center', marginTop: responsiveHeight(5) }}>
+        <View style={{alignItems: 'center', marginTop: responsiveHeight(5)}}>
           <Button
             text="Sign Out"
-            textstyle={{ fontSize: responsiveFontSize(2.5) }}
+            textstyle={{fontSize: responsiveFontSize(2.5)}}
             onPress={handleSignout}
           />
         </View>

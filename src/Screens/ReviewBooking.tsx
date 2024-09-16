@@ -7,7 +7,7 @@ import {
   Pressable,
   TextInput,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
 import {
@@ -17,58 +17,163 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { FontFamily, Images } from '../utils/Images';
+import {FontFamily, Images} from '../utils/Images';
 import Button from '../Components/Button';
-import { useNavigation } from '@react-navigation/native';
-import { fetchPaymentSheetparams, formatDate } from '../utils/Dummy';
-import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {fetchPaymentSheetparams, formatDate} from '../utils/Dummy';
+import {
+  initPaymentSheet,
+  presentPaymentSheet,
+} from '@stripe/stripe-react-native';
 import useToast from '../Hooks/Toast';
+import axiosBaseURL from '../utils/AxiosBaseURL';
+import {useSelector} from 'react-redux';
 
-const ReviewBooking = ({ route }) => {
-  const [Hourly, setHourly] = useState('1');
-  const [CardDetails, setCardDetails] = useState([])
-  const { showToast } = useToast();
-
-  const { Data, Card } = route.params;
-
+const ReviewBooking = ({route}) => {
+  const [CardDetails, setCardDetails] = useState([]);
+  const {showToast} = useToast();
+  const [stripeId, setStripeId] = useState('');
+  const [trainerRatePerHour, settrainerRatePerHour] = useState(60);
+  const [hours, setHours] = useState(0);
+  const [totalAmount, setTotalAmount] = useState();
+  const {Data, Card} = route.params;
+  const authData = useSelector(state => state.Auth.data);
   const navigation = useNavigation();
+  useEffect(() => {
+    setTotalAmount(trainerRatePerHour * hours);
+  }, [trainerRatePerHour, hours]);
 
   useEffect(() => {
-    initializepaymentsheet()
-  }, [])
+    fetchData();
+  }, [authData.isToken, stripeId]);
 
+  const fetchData = async () => {
+    try {
+      const cardResponse = await axiosBaseURL.post('/Common/GetCardDetail', {
+        token: authData.isToken,
+      });
+      setCardDetails(cardResponse.data.data);
 
+      const profileResponse = await axiosBaseURL.get(
+        `/common/GetProfile/${authData.isToken}`
+      );
+      console.log('User found', profileResponse.data.data);
+      setStripeId(profileResponse.data.data.stripeCustomerID);
+    } catch (error) {
+      console.error(
+        'Error fetching data:',
+        error.response?.data?.message || error.message
+      );
+    }
+  };
 
-  const initializepaymentsheet = async () => {
-    const { customer, ephemeralKey, paymentIntent } = await fetchPaymentSheetparams()
-    const { error } = await initPaymentSheet({
-      customerId: customer,
-      customerEphemeralKeySecret: ephemeralKey,
-      paymentIntentClientSecret: paymentIntent,
-      merchantDisplayName: "Stern's GYM",
-      allowsDelayedPaymentMethods: true,
-      allowsRemovalOfLastSavedPaymentMethod: true
-    })
-  }
+  const initializePaymentsheet = async () => {
+    if (!stripeId) return;
+
+    try {
+      const {ephemeralKey, paymentIntent} = await fetchPaymentSheetparams(
+        stripeId,
+        totalAmount
+      );
+
+      const {error} = await initPaymentSheet({
+        customerId: stripeId,
+        customerEphemeralKeySecret: ephemeralKey,
+        paymentIntentClientSecret: paymentIntent,
+        merchantDisplayName: "Stern's GYM",
+        allowsDelayedPaymentMethods: true,
+        allowsRemovalOfLastSavedPaymentMethod: true,
+      });
+
+      if (error) {
+        console.error('Error initializing payment sheet:', error.message);
+      } else {
+        console.log('Payment sheet initialized successfully');
+      }
+    } catch (error) {
+      console.error(
+        'Error during payment sheet initialization:',
+        error.message
+      );
+    }
+  };
 
   const ConfirmBooking = async () => {
-    const { error } = await presentPaymentSheet()
+    await initializePaymentsheet();
+    const {error} = await presentPaymentSheet();
     if (error) {
-      showToast('Try later', 'Unexpected Server error', 'success');
+      showToast('Try later', error.message, 'danger');
     } else {
-      navigation.navigate("BookingSuccessfull", { Data: { ...Data } })
+      navigation.navigate('BookingSuccessfull', {Data: {...Data}});
     }
-  }
+  };
 
+  // Dependency array
+  // useEffect(() => {
+  //   axiosBaseURL
+  //     .post('/Common/GetCardDetail', {
+  //       token: authData.isToken,
+  //     })
+  //     .then(response => {
+  //       setCardDetails(response.data.data);
+  //     })
+  //     .catch(error => {});
+  //   axiosBaseURL
+  //     .get(`/common/GetProfile/${authData.isToken}`)
+  //     .then(response => {
+  //       console.log('User found', response.data.data);
 
+  //       setStriprId(response.data.data.stripeCustomerID);
+  //     })
+  //     .catch(error => {
+  //       console.error('Error fetching data:', error.response.data.message);
+  //     });
+  //   initializepaymentsheet();
+  // }, []);
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     axiosBaseURL
+  //       .post('/Common/GetCardDetail', {
+  //         token: authData.isToken,
+  //       })
+  //       .then(response => {
+  //         setCardDetails(response.data.data);
+  //       })
+  //       .catch(error => {});
+  //     axiosBaseURL
+  //       .get(`/common/GetProfile/${authData.isToken}`)
+  //       .then(response => {
+  //         console.log('User found', response.data.data);
 
+  //         setStriprId(response.data.data.stripeCustomerID);
+  //       })
+  //       .catch(error => {
+  //         console.error('Error fetching data:', error.response.data.message);
+  //       });
+  //   }, [])
+  // );
 
-  const FormatedDate = formatDate(Data?.Date)
+  // const initializepaymentsheet = async () => {
+  //   // const customerID = ;
+  //   const {ephemeralKey, paymentIntent} = await fetchPaymentSheetparams(
+  //     stripeId
+  //   );
+  //   const {error} = await initPaymentSheet({
+  //     customerId: stripeId,
+  //     customerEphemeralKeySecret: ephemeralKey,
+  //     paymentIntentClientSecret: paymentIntent,
+  //     merchantDisplayName: "Stern's GYM",
+  //     allowsDelayedPaymentMethods: true,
+  //     allowsRemovalOfLastSavedPaymentMethod: true,
+  //   });
+  // };
+
+  const FormatedDate = formatDate(Data?.Date);
   return (
     <WrapperContainer>
       <Header
         onPress={() => navigation.goBack()}
-        style={{ height: responsiveHeight(7) }}
+        style={{height: responsiveHeight(7)}}
       />
       <View>
         <Text
@@ -82,7 +187,9 @@ const ReviewBooking = ({ route }) => {
         </Text>
       </View>
       <Pressable
-        onPress={() => { navigation.goBack() }}
+        onPress={() => {
+          navigation.goBack();
+        }}
         style={{
           marginHorizontal: responsiveScreenWidth(8),
           marginVertical: responsiveHeight(2),
@@ -95,22 +202,21 @@ const ReviewBooking = ({ route }) => {
         }}>
         <View>
           <Text
-            style={{ color: '#A4A4A4', fontSize: responsiveScreenFontSize(2) }}>
+            style={{color: '#A4A4A4', fontSize: responsiveScreenFontSize(2)}}>
             Date & Time
           </Text>
           <Text
-            style={{ color: 'white', fontSize: responsiveScreenFontSize(2.4) }}>
+            style={{color: 'white', fontSize: responsiveScreenFontSize(2.4)}}>
             {FormatedDate}
           </Text>
-          <Text style={{ color: 'white', fontSize: responsiveScreenFontSize(2) }}>
+          <Text style={{color: 'white', fontSize: responsiveScreenFontSize(2)}}>
             {Data?.time}
           </Text>
         </View>
         <View>
-
           <Image
             source={Images.rightarrow}
-            style={{ height: responsiveWidth(4) }}
+            style={{height: responsiveWidth(4)}}
           />
         </View>
       </Pressable>
@@ -126,14 +232,14 @@ const ReviewBooking = ({ route }) => {
         }}>
         <View>
           <Text
-            style={{ color: '#A4A4A4', fontSize: responsiveScreenFontSize(2) }}>
+            style={{color: '#A4A4A4', fontSize: responsiveScreenFontSize(2)}}>
             Trainer
           </Text>
           <Text
-            style={{ color: 'white', fontSize: responsiveScreenFontSize(2.4) }}>
+            style={{color: 'white', fontSize: responsiveScreenFontSize(2.4)}}>
             Alex Morgan
           </Text>
-          <Text style={{ color: 'white', fontSize: responsiveScreenFontSize(2) }}>
+          <Text style={{color: 'white', fontSize: responsiveScreenFontSize(2)}}>
             Fitness
           </Text>
         </View>
@@ -151,7 +257,6 @@ const ReviewBooking = ({ route }) => {
               borderRadius: responsiveScreenWidth(10),
             }}
           />
-
         </View>
       </View>
 
@@ -167,27 +272,45 @@ const ReviewBooking = ({ route }) => {
           }}>
           Price
         </Text>
-        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: responsiveHeight(2) }}>
-
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: responsiveHeight(2),
+          }}>
           <Text
             style={{
               color: 'white',
               fontSize: responsiveFontSize(2),
               fontFamily: FontFamily.Semi_Bold,
             }}>
-            $60/ hour  *
+            {/* $60/ hour * */}
+            {trainerRatePerHour}
+            {'/ hour * '}
           </Text>
           <TextInput
+            maxLength={2}
+            editable={true}
             keyboardType="numeric"
-            style={{ paddingVertical: 0, color: 'white', width: responsiveWidth(5), fontSize: responsiveFontSize(2) }}
-            value={Hourly}
-            onChangeText={setHourly}
+            style={{
+              paddingVertical: 0,
+              color: 'white',
+              height: responsiveHeight(5),
+              width: responsiveWidth(10),
+              fontSize: responsiveFontSize(2),
+            }}
+            value={hours}
+            onChangeText={setHours}
           />
         </View>
-        <View style={{
-          flexDirection: 'row', justifyContent: 'space-between', paddingTop: responsiveHeight(1), borderTopColor: '#686868',
-          borderTopWidth: 0.5,
-        }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingTop: responsiveHeight(1),
+            borderTopColor: '#686868',
+            borderTopWidth: 0.5,
+          }}>
           <Text
             style={{
               color: 'white',
@@ -202,21 +325,23 @@ const ReviewBooking = ({ route }) => {
               fontSize: responsiveFontSize(2),
               fontFamily: FontFamily.Semi_Bold,
             }}>
-            $60
+            {totalAmount}
+            {'$'}
           </Text>
         </View>
       </View>
-      <View style={{ alignItems: "center" }}>
-
+      <View style={{alignItems: 'center'}}>
         <Button
           text="Confirm"
-          onPress={() => { ConfirmBooking() }}
+          onPress={() => {
+            ConfirmBooking();
+          }}
           containerstyles={{
             marginTop: responsiveHeight(32),
           }}
         />
       </View>
-    </WrapperContainer >
+    </WrapperContainer>
   );
 };
 

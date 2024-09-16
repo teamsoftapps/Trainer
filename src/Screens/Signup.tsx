@@ -1,5 +1,5 @@
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import { Dropdown } from 'react-native-element-dropdown';
+import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
+import {Dropdown} from 'react-native-element-dropdown';
 import {
   ImageBackground,
   TouchableOpacity,
@@ -11,50 +11,46 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import ButtonComp from '../Components/ButtonComp';
-import { FontFamily, Images } from '../utils/Images';
+import {FontFamily, Images} from '../utils/Images';
 import WrapperContainer from '../Components/Wrapper';
-import MaskInput, { Masks } from 'react-native-mask-input';
-import { useNavigation } from '@react-navigation/native';
+import MaskInput, {Masks} from 'react-native-mask-input';
+import {useNavigation} from '@react-navigation/native';
 import FlashMessage from 'react-native-flash-message';
-import { showMessage } from 'react-native-flash-message';
-import { useDispatch, useSelector } from 'react-redux';
-import { IsLogin } from '../store/Slices/AuthSlice';
-import { useSignUpUserMutation } from '../store/Slices/userAuth';
-import { useSignUpTrainerMutation } from '../store/Slices/trainerAuth';
+import {showMessage} from 'react-native-flash-message';
+import {useDispatch, useSelector} from 'react-redux';
+import {IsLogin} from '../store/Slices/AuthSlice';
+import {useSignUpUserMutation} from '../store/Slices/userAuth';
+import {useSignUpTrainerMutation} from '../store/Slices/trainerAuth';
 import useToast from '../Hooks/Toast';
-import {
-  NativeStackNavigationProp,
-  NativeStackScreenProps,
-} from '@react-navigation/native-stack';
-import { RootProps } from '../Navigations/AuthStack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {RootProps} from '../Navigations/AuthStack';
 
 type Props = NativeStackScreenProps<RootProps, 'signup'>;
 
-const Signup: React.FC<Props> = ({ route, navigation }) => {
+const Signup: React.FC<Props> = ({route, navigation}) => {
   const user = route.params;
-  const { showToast } = useToast();
+  const {showToast} = useToast();
   const dispatch = useDispatch();
-  const [SignUpUser, { isLoading: SignupUserLoading }] = useSignUpUserMutation();
+  const [SignUpUser, {isLoading: SignupUserLoading}] = useSignUpUserMutation();
   const [SignUpTrainer] = useSignUpTrainerMutation();
-  const authData = useSelector(state => state.Auth);
-  const [name, setname] = useState('tester3');
-  const [email, setemail] = useState('tester3@gmail.com');
+  const [name, setname] = useState('tester devv');
+  const [email, setemail] = useState('testerdevv@gmail.com');
   const [password, setpassword] = useState('123456');
-  const [confirmpassword, setconfirmpassword] = useState('1234656');
+  const [confirmpassword, setconfirmpassword] = useState('123456');
   const [DoB, setDoB] = useState('');
   const [weight, setweight] = useState('10');
   const [height, setheight] = useState('20');
-  const [address, setAddress] = useState("43 Bourke street, WA, 7563")
+  const [address, setAddress] = useState('43 Bourke street, WA, 7563');
   const [Gender, setGender] = useState('');
 
-  // Icon touch activate Input 
+  // Icon touch activate Input
   const dobRef = useRef(null);
   const nameRef = useRef(null);
   const emailRef = useRef(null);
@@ -70,11 +66,11 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
   const [DOBdisabled, setDOBdisable] = useState(false);
   const [Weightdisabled, setWeightdisable] = useState(false);
   const [Heightdisabled, setHeightdisable] = useState(false);
-  const [Addressdisabled, setaddressdisabled] = useState(false)
+  const [Addressdisabled, setaddressdisabled] = useState(false);
 
   const data = [
-    { label: 'Male', value: 'Male' },
-    { label: 'Female', value: 'Female' },
+    {label: 'Male', value: 'Male'},
+    {label: 'Female', value: 'Female'},
   ];
 
   const handledobInput = () => {
@@ -86,15 +82,6 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
   const handleEmailInput = () => {
     emailRef.current?.focus();
   };
-  const condition1 = name.length > 3;
-  // const condition2 = emailPattern.test(email);
-  const condition3 = password === confirmpassword && password != '';
-  const condition4 = Gender != '';
-  const condition5 = DoB != '';
-  const condition6 = weight != '';
-  const condition7 = height != '';
-  const condition8 = address != "";
-
 
   const handleSignup = async () => {
     let payload = {
@@ -106,30 +93,30 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
       Dob: DoB,
       weight: weight,
       height: height,
-      Address: address
+      Address: address,
     };
     try {
       if (user.checkUser === 'user') {
         let res: any = await SignUpUser(payload);
+        console.log('userssssss data', res);
         if (res.data) {
           showToast('Success', 'User created in successfully', 'success');
-          dispatch(IsLogin(res.data?.data.token));
-          navigation.navigate("signin", { checkUser: 'trainer' })
+          navigation.navigate('signin', {checkUser: 'user'});
         }
         if (res.error) {
-
           showToast('Error', res.error?.data?.message, 'danger');
         }
       }
       if (user.checkUser === 'trainer') {
         let res: any = await SignUpTrainer(payload);
+        console.log('------------------', res);
         if (res.data) {
           showToast('Success', 'Trainer created in successfully', 'success');
-          dispatch(IsLogin(res.data?.data.token));
-          navigation.navigate("signin", { checkUser: 'trainer' })
+          // dispatch(IsLogin(res.data?.data.token));
+          navigation.navigate('signin', {checkUser: 'trainer'});
         }
         if (res.error) {
-          console.log("errorr")
+          console.log('errorr');
 
           showToast('Error', res.error?.data.message, 'danger');
         }
@@ -137,16 +124,15 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
     } catch (error: any) {
       showToast('Error', error?.message, 'danger');
     }
-
   };
 
   return (
-    <ScrollView style={{ flexGrow: 1 }}>
+    <ScrollView style={{flexGrow: 1}}>
       <WrapperContainer>
         <ImageBackground
           resizeMode="cover"
           source={Images.bg}
-          style={{ flex: 1 }}>
+          style={{flex: 1}}>
           <View
             style={{
               alignItems: 'center',
@@ -171,7 +157,7 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
               Create An Account
             </Text>
 
-            <View style={{ gap: responsiveHeight(3) }}>
+            <View style={{gap: responsiveHeight(3)}}>
               <View
                 style={{
                   width: responsiveWidth(85),
@@ -182,10 +168,10 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
                   borderRadius: 17,
                   flexDirection: 'row',
                   alignItems: 'center',
-                  justifyContent: "space-between"
+                  justifyContent: 'space-between',
                 }}>
                 <View>
-                  <Text style={{ color: '#908C8D' }}>Full name</Text>
+                  <Text style={{color: '#908C8D'}}>Full name</Text>
                   <TextInput
                     ref={nameRef}
                     placeholder="Enter name"
@@ -222,10 +208,10 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
                   borderRadius: 17,
                   flexDirection: 'row',
                   alignItems: 'center',
-                  justifyContent: "space-between"
+                  justifyContent: 'space-between',
                 }}>
                 <View>
-                  <Text style={{ color: '#908C8D' }}>Email</Text>
+                  <Text style={{color: '#908C8D'}}>Email</Text>
                   <TextInput
                     ref={emailRef}
                     placeholder="Enter email"
@@ -245,7 +231,7 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
                 <TouchableOpacity onPress={handleEmailInput}>
                   <Image
                     source={Images.email}
-                    style={{ width: responsiveWidth(5) }}
+                    style={{width: responsiveWidth(5)}}
                   />
                 </TouchableOpacity>
               </View>
@@ -259,10 +245,10 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
                   borderRadius: 17,
                   flexDirection: 'row',
                   alignItems: 'center',
-                  justifyContent: "space-between"
+                  justifyContent: 'space-between',
                 }}>
                 <View>
-                  <Text style={{ color: '#908C8D' }}>Password</Text>
+                  <Text style={{color: '#908C8D'}}>Password</Text>
                   <TextInput
                     placeholder="Enter Password"
                     secureTextEntry={secure}
@@ -285,7 +271,7 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
                   }}>
                   <Image
                     source={secure ? Images.eye_off : Images.eye}
-                    style={{ width: responsiveWidth(6) }}
+                    style={{width: responsiveWidth(6)}}
                     resizeMode="contain"
                   />
                 </TouchableOpacity>
@@ -300,10 +286,10 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
                   borderRadius: 17,
                   flexDirection: 'row',
                   alignItems: 'center',
-                  justifyContent: "space-between"
+                  justifyContent: 'space-between',
                 }}>
                 <View>
-                  <Text style={{ color: '#908C8D' }}>Confirm Password</Text>
+                  <Text style={{color: '#908C8D'}}>Confirm Password</Text>
                   <TextInput
                     placeholder="Enter Password"
                     secureTextEntry={secure2}
@@ -326,7 +312,7 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
                   }}>
                   <Image
                     source={secure2 ? Images.eye_off : Images.eye}
-                    style={{ width: responsiveWidth(6) }}
+                    style={{width: responsiveWidth(6)}}
                     resizeMode="contain"
                   />
                 </TouchableOpacity>
@@ -350,8 +336,8 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{ width: responsiveWidth(34) }}>
-                  <Text style={{ color: '#908C8D' }}>Gender</Text>
+                <View style={{width: responsiveWidth(34)}}>
+                  <Text style={{color: '#908C8D'}}>Gender</Text>
                   <Dropdown
                     style={styles.dropdown}
                     placeholderStyle={styles.placeholderStyle}
@@ -360,7 +346,7 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
                     renderRightIcon={() => (
                       <Image
                         source={Images.dropdown}
-                        style={{ width: responsiveWidth(5) }}
+                        style={{width: responsiveWidth(5)}}
                         resizeMode="contain"
                       />
                     )}
@@ -373,7 +359,7 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
                     onChange={item => {
                       setGender(item.value);
                     }}
-                    itemTextStyle={{ color: '#000' }}
+                    itemTextStyle={{color: '#000'}}
                   />
                 </View>
               </View>
@@ -388,8 +374,8 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{ width: responsiveWidth(27) }}>
-                  <Text style={{ color: '#908C8D' }}>Date of Birth</Text>
+                <View style={{width: responsiveWidth(27)}}>
+                  <Text style={{color: '#908C8D'}}>Date of Birth</Text>
                   <MaskInput
                     ref={dobRef}
                     value={DoB}
@@ -411,7 +397,7 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
                 <TouchableOpacity onPress={handledobInput}>
                   <Image
                     source={Images.calendar}
-                    style={{ width: responsiveWidth(4.5) }}
+                    style={{width: responsiveWidth(4.5)}}
                     resizeMode="contain"
                   />
                 </TouchableOpacity>
@@ -435,8 +421,8 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{ width: responsiveWidth(27) }}>
-                  <Text style={{ color: '#908C8D' }}>Weight in lbs</Text>
+                <View style={{width: responsiveWidth(27)}}>
+                  <Text style={{color: '#908C8D'}}>Weight in lbs</Text>
                   <TextInput
                     keyboardType="numeric"
                     placeholder="Your Weight"
@@ -464,8 +450,8 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{ width: responsiveWidth(27) }}>
-                  <Text style={{ color: '#908C8D' }}>Height in ft</Text>
+                <View style={{width: responsiveWidth(27)}}>
+                  <Text style={{color: '#908C8D'}}>Height in ft</Text>
                   <TextInput
                     keyboardType="numeric"
                     placeholder="Your Height"
@@ -494,10 +480,10 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
                 borderRadius: 17,
                 flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: "space-between"
+                justifyContent: 'space-between',
               }}>
               <View>
-                <Text style={{ color: '#908C8D' }}>Address</Text>
+                <Text style={{color: '#908C8D'}}>Address</Text>
                 <TextInput
                   ref={addressRef}
                   placeholder="i.e 43 Bourke street, NSW 987"
@@ -517,9 +503,12 @@ const Signup: React.FC<Props> = ({ route, navigation }) => {
               <TouchableOpacity onPress={handleEmailInput}>
                 <Image
                   source={Images.LocationPin}
-
-                  resizeMode='contain'
-                  style={{ width: responsiveWidth(5), height: responsiveWidth(5), tintColor: '#908C8D' }}
+                  resizeMode="contain"
+                  style={{
+                    width: responsiveWidth(5),
+                    height: responsiveWidth(5),
+                    tintColor: '#908C8D',
+                  }}
                 />
               </TouchableOpacity>
             </View>

@@ -22,14 +22,13 @@ import {
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
 import {RootProps} from '../Navigations/AuthStack';
+import {useSelector} from 'react-redux';
 
 interface Props {
   navigation: NativeStackNavigationProp<RootProps, 'Welcome'>;
 }
 
 const Welcome = ({navigation}: Props) => {
-  // const navigation =
-  //   useNavigation();
   return (
     <ImageBackground
       resizeMode="cover"

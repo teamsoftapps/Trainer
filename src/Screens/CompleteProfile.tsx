@@ -10,7 +10,7 @@ import {
   Modal,
   Alert,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import {
   responsiveFontSize,
@@ -27,14 +27,21 @@ import axiosBaseURL from '../utils/AxiosBaseURL';
 // import {availableTimes, TimeSlots} from '../utils/Dummy';
 // import {useNavigation} from '@react-navigation/native';
 import ImageCropPicker from 'react-native-image-crop-picker';
+import axios from 'axios';
+import {showMessage} from 'react-native-flash-message';
+import {useDispatch, useSelector} from 'react-redux';
+import {saveProfileImage} from '../store/Slices/profileImage';
 
 const CompleteProfile = ({route}) => {
-  // const { data } = route.params;
-  // const Name = data.fullname.split(' ');
+  const {data} = route.params;
+  console.log('data from route:', data.email);
+  //Spliting fullName in to first and lst name.
+  const setFullName = data.fullName.split(' ');
+  const firstName = setFullName[0];
+  const lastName = setFullName[1];
 
   // Data States
   const [firstname, setfirstname] = useState('');
-
   const [secondname, setsecondname] = useState('');
   const [Speciality, setSpeciality] = useState([]);
   const [Email, setEmail] = useState('');
@@ -49,7 +56,7 @@ const CompleteProfile = ({route}) => {
   const [timeformik, settimeformik] = useState(false);
 
   // Formik Conditions
-  const condition1 = Hourly !== '0';
+  const condition1 = Hourly !== '0' && Hourly !== '';
   const condition2 = selectedTime.length !== 0;
   const condition3 = Bio != '';
   const condition4 = Speciality.length !== 0;
@@ -57,9 +64,12 @@ const CompleteProfile = ({route}) => {
   const [isModal, setModal] = useState(false);
   const openModal = () => setModal(true);
   const closeModal = () => setModal(false);
-  const [imageUri, setImageUri] = useState(null);
-  // const navigation = useNavigation();
-
+  const [imageUri, setImageUri] = useState(data.profileImage);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const logedInTrainerEmail = useSelector(state => state.Auth.data);
+  console.log('sasasasasafdfdf', logedInTrainerEmail);
+  const dispatch = useDispatch();
   const handlePress = item => {
     setSelectedTime(prevSelectedItems => {
       if (prevSelectedItems.includes(item)) {
@@ -77,26 +87,69 @@ const CompleteProfile = ({route}) => {
     })
       .then(image => {
         setImageUri(image.path);
-        // navigation.navigate('CropPhoto', {imageUri: image.path});
+        uploadImage(image);
+        dispatch(saveProfileImage(image.path));
+        console.log('Image Object', image);
+        setModal(false);
       })
       .catch(error => {
-        console.log('ImagePicker Error: ', error.message);
+        console.error('ImagePicker Error: ', error.message);
       });
   };
 
-  const handleTakePhoto = () => {
+  const handleTakePhoto = async () => {
     ImageCropPicker.openCamera({
       mediaType: 'photo',
       cropping: true,
     })
       .then(image => {
         setImageUri(image.path);
+
+        uploadImage(image);
+        dispatch(saveProfileImage(image.path));
+        console.log('Image Object', image);
+        setModal(false);
       })
       .catch(error => {
-        console.log('ImagePicker Error: ', error.message);
+        console.error('ImagePicker Error: ', error.message);
       });
   };
 
+  const uploadImage = async image => {
+    try {
+      const formData = new FormData();
+
+      formData.append('profileImage', {
+        uri: image.path,
+        type: image.mime,
+        name: `profileImage-${Date.now()}.jpg`,
+      });
+      formData.append('email', logedInTrainerEmail.res_EMAIL);
+
+      const response = await axiosBaseURL.post(
+        '/trainer/uploadProfileImage',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      showMessage({
+        message: 'Update Successful',
+        description: 'Your image has been updated!',
+        type: 'success',
+      });
+      console.log('Upload successful:', response.data);
+    } catch (error) {
+      showMessage({
+        message: 'Upload Failed',
+        description: 'Failed to upload image.',
+        type: 'danger',
+      });
+      console.error('Error uploading file:', error);
+    }
+  };
   const Specialsity = [
     {key: 1, value: 'Strength Training'},
     {key: 2, value: 'Yoga'},
@@ -105,30 +158,33 @@ const CompleteProfile = ({route}) => {
     {key: 5, value: 'Bodybuilding'},
     {key: 6, value: 'Crossfit'},
   ];
-  // const navigation = useNavigation();
 
-  const Function = () => {
+  const Function = async () => {
     if (condition1 && condition2 && condition3 && condition4) {
       setspecialityformik(false);
       setBioformik(false);
       settimeformik(false);
       setHourlyformik(false);
-
-      // API
-      axiosBaseURL
-        .post('/trainer/update', {
-          email: Email,
+      try {
+        const response = await axiosBaseURL.post('/trainer/update', {
+          email: logedInTrainerEmail.res_EMAIL,
           Bio: Bio,
           Speciality: Speciality,
           Hourlyrate: Hourly,
           Availiblity: selectedTime,
-        })
-        .then(response => {
-          console.log('User Created', response.data);
-        })
-        .catch(error => {
-          console.log('Error fetching data:', error);
         });
+        showMessage({
+          message: 'Updates Succesfully',
+          description: 'your data has been updated!',
+          type: 'success',
+        });
+        console.log('Upload successful:', response.data);
+      } catch (error) {
+        setUploadError('Upload failed.');
+        console.error('Error uploading file:', error);
+      } finally {
+        setUploading(false);
+      }
     } else {
       if (!condition4) setspecialityformik(true);
       if (!condition3) setBioformik(true);
@@ -226,7 +282,8 @@ const CompleteProfile = ({route}) => {
             <View style={styles.FirstNameH}>
               <Text style={{color: '#908C8D'}}>First Name</Text>
               <TextInput
-                value={firstname}
+                editable={false}
+                value={firstName}
                 onChangeText={setfirstname}
                 placeholder="Enter First Name"
                 style={styles.FirstNameInput}
@@ -237,8 +294,9 @@ const CompleteProfile = ({route}) => {
             <View style={styles.LastNameContainer}>
               <Text style={{color: '#908C8D'}}>Last Name</Text>
               <TextInput
+                editable={false}
                 placeholder="Enter Last Name"
-                value={secondname}
+                value={lastName}
                 onChangeText={setsecondname}
                 style={styles.LastNameInput}
                 numberOfLines={1}
@@ -248,8 +306,9 @@ const CompleteProfile = ({route}) => {
             <View style={styles.EmailContainer}>
               <Text style={{color: '#908C8D'}}>Email</Text>
               <TextInput
+                editable={false}
                 placeholder="Enter Email"
-                value={Email}
+                value={logedInTrainerEmail.res_EMAIL}
                 onChangeText={setEmail}
                 style={styles.EmailInput}
                 numberOfLines={1}
@@ -274,7 +333,7 @@ const CompleteProfile = ({route}) => {
                 <TextInput
                   placeholder="A brief introduction about yourself and your training philosophy"
                   onChangeText={setBio}
-                  value={Bio}
+                  value={data.Bio}
                   style={[
                     {...styles.BioInput},
                     {height: Bio.length == 0 ? responsiveHeight(7) : 'auto'},

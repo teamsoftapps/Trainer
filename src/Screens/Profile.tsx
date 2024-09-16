@@ -7,24 +7,29 @@ import {
   FlatList,
   Pressable,
   ScrollView,
+  Modal,
 } from 'react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { FontFamily, Images } from '../utils/Images';
-import { fetchSetupSheetparams, UserImages } from '../utils/Dummy';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
+import {FontFamily, Images} from '../utils/Images';
+import {fetchSetupSheetparams, UserImages} from '../utils/Dummy';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
 import axiosBaseURL from '../utils/AxiosBaseURL';
 import EditAddressModal from '../Components/EditAddressModal';
 import DeleteCardModal from '../Components/DeleteCardModal';
-import { usePaymentSheet } from '@stripe/stripe-react-native';
 import useToast from '../Hooks/Toast';
-
+import ImageCropPicker from 'react-native-image-crop-picker';
+import {showMessage} from 'react-native-flash-message';
+import {
+  initPaymentSheet,
+  presentPaymentSheet,
+} from '@stripe/stripe-react-native';
 const Profile = () => {
   const [CardDetails, setCardDetails] = useState([]);
   const [Address, setAddress] = useState('');
@@ -33,59 +38,193 @@ const Profile = () => {
   const [AddressModal, setAddressModal] = useState(false);
   const [CardModal, setCardModal] = useState(false);
   const [CardData, SetCardData] = useState('');
+  const [stripeId, setStripeId] = useState(null);
+  const [StripeCardDetails, setStripeCardDetails] = useState([]);
+  const [StripeCardData, setStripeCardData] = useState('');
+
   const authData = useSelector(state => state.Auth.data);
 
-  const { showToast } = useToast();
+  const {showToast} = useToast();
 
-  const { initPaymentSheet, presentPaymentSheet } = usePaymentSheet()
+  // const {initPaymentSheet, presentPaymentSheet} = usePaymentSheet();
 
-  const initializepaymentsheet = async (email) => {
-    const { customer,
-      ephemeralKey,
-      setupIntents } = await fetchSetupSheetparams(email)
-    const { error } = await initPaymentSheet({
-      customerId: customer,
-      customerEphemeralKeySecret: ephemeralKey,
-      setupIntentClientSecret: setupIntents,
-      merchantDisplayName: "Stern's GYM",
-      allowsDelayedPaymentMethods: true,
-      allowsRemovalOfLastSavedPaymentMethod: true
+  const trainerImage = useSelector(state => state.Image.PROFILE_IMAGE);
+
+  // console.log('trainerImage', trainerImage);
+  const openModal = () => setModal(true);
+  const closeModal = () => setModal(false);
+  const [imageUri, setImageUri] = useState(null);
+  const [isModal, setModal] = useState(false);
+  const handleChoosePhoto = () => {
+    ImageCropPicker.openPicker({
+      mediaType: 'photo',
+      cropping: true,
     })
-  }
+      .then(image => {
+        setImageUri(image.path);
+        uploadImage(image);
+        // console.log('Image Object', image);
+        setModal(false);
+      })
+      .catch(error => {
+        console.error('ImagePicker Error: ', error.message);
+      });
+  };
 
-  const AddCardStripe = async () => {
-    await initializepaymentsheet(email)
-    const { error } = await presentPaymentSheet()
-    if (error) {
-      showToast('Try later', 'maa chud gai', 'danger');
-    } else {
-      showToast('Try later', 'Unexpected Server error', 'success');
+  const handleTakePhoto = async () => {
+    ImageCropPicker.openCamera({
+      mediaType: 'photo',
+      cropping: true,
+    })
+      .then(image => {
+        setImageUri(image.path);
+        uploadImage(image);
+        // console.log('Image Object', image);
+        setModal(false);
+      })
+      .catch(error => {
+        console.error('ImagePicker Error: ', error.message);
+      });
+  };
+
+  const uploadImage = async image => {
+    try {
+      const formData = new FormData();
+
+      formData.append('profileImage', {
+        uri: image.path,
+        type: image.mime,
+        name: `profileImage-${Date.now()}.jpg`,
+      });
+      formData.append('email', email);
+
+      const response = await axiosBaseURL.post(
+        '/trainer/uploadProfileImage',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      showMessage({
+        message: 'Update Successful',
+        description: 'Your image has been updated!',
+        type: 'success',
+      });
+      console.log('Upload successful:', response.data);
+    } catch (error) {
+      showMessage({
+        message: 'Upload Failed',
+        description: 'Failed to upload image.',
+        type: 'danger',
+      });
+      console.error('Error uploading file:', error);
     }
-  }
+  };
+
+  const fetchStripeCards = async () => {
+    if (!stripeId) return;
+    try {
+      const response = await axiosBaseURL.post('/Common/GetStripeCards', {
+        customerId: stripeId,
+      });
+      if (response.data) {
+        setStripeCardDetails(response.data.data);
+        console.log('Data received:', response.data.data);
+      } else {
+        console.log('No Data Found');
+      }
+    } catch (error) {
+      console.error('Error fetching Stripe cards:', error.message);
+    }
+  };
+  useEffect(() => {
+    fetchStripeCards();
+  }, [stripeId]);
 
   useFocusEffect(
     useCallback(() => {
-      axiosBaseURL
-        .post('/Common/GetCardDetail', {
-          token: authData,
-        })
-        .then(response => {
-          setCardDetails(response.data.data);
-        })
-        .catch(error => { });
-      axiosBaseURL
-        .get(`/common/GetProfile/${authData}`)
-        .then(response => {
-          console.log('User found', response.data.data);
-          setAddress(response.data.data.Address);
-          setname(response.data.data.fullName);
-          setemail(response.data.data.email);
-        })
-        .catch(error => {
-          console.error('Error fetching data:', error.response.data.message);
-        });
-    }, [AddressModal, CardModal])
+      const fetchData = async () => {
+        try {
+          const cardResponse = await axiosBaseURL.post(
+            '/Common/GetCardDetail',
+            {
+              token: authData.isToken,
+            }
+          );
+          setCardDetails(cardResponse.data.data);
+          console.log('Card Details:', cardResponse.data);
+
+          const profileResponse = await axiosBaseURL.get(
+            `/Common/GetProfile/${authData.isToken}`
+          );
+          const userData = profileResponse.data.data;
+          setImageUri(userData.profileImage);
+          setAddress(userData.Address);
+          setname(userData.fullName);
+          setemail(userData.email);
+          setStripeId(userData.stripeCustomerID);
+        } catch (error) {
+          console.error(
+            'Error fetching data:',
+            error.response?.data?.message || error.message
+          );
+        }
+      };
+
+      fetchData();
+    }, [authData.isToken])
   );
+
+  const initializepaymentsheet = async () => {
+    if (!stripeId) return;
+    try {
+      const {ephemeralKey, setupIntents} = await fetchSetupSheetparams(
+        stripeId
+      );
+      const {error} = await initPaymentSheet({
+        customerId: stripeId,
+        customerEphemeralKeySecret: ephemeralKey,
+        setupIntentClientSecret: setupIntents,
+        merchantDisplayName: "Stern's GYM",
+        allowsDelayedPaymentMethods: true,
+        allowsRemovalOfLastSavedPaymentMethod: true,
+      });
+      if (error) {
+        console.error('Error initializing payment sheet:', error.message);
+      } else {
+        console.log('Payment sheet initialized successfully');
+      }
+    } catch (error) {
+      console.error(
+        'Error during payment sheet initialization:',
+        error.message
+      );
+    }
+  };
+
+  const AddCardStripe = async () => {
+    await initializepaymentsheet();
+    const {error} = await presentPaymentSheet();
+    if (error) {
+      showToast('Try later', error.message, 'danger');
+    } else {
+      showToast('Added Successfully!', 'Your card has been added', 'success');
+      await fetchStripeCards();
+    }
+  };
+
+  // const AddCardStripe = async () => {
+  //   await initializepaymentsheet();
+  //   console.log('is running ', email);
+  //   const {error} = await presentPaymentSheet();
+  //   if (error) {
+  //     showToast('Try later', error.message, 'danger');
+  //   } else {
+  //     showToast('Added Successfully!', 'Your card hase been added', 'success');
+  //   }
+  // };
 
   const limitedUserImages = UserImages.slice(0, 3);
   const navigation = useNavigation();
@@ -94,11 +233,18 @@ const Profile = () => {
       <ScrollView>
         <View style={styles.top}>
           <View style={styles.topimage}>
-            <Image
-              source={Images.placeholderimage}
-              style={styles.profile_image}
-            />
-            <TouchableOpacity style={styles.editImage}>
+            {trainerImage ? (
+              <Image
+                source={{uri: trainerImage}}
+                style={styles.profile_image}
+              />
+            ) : (
+              <Image
+                source={require('../assets/Images/PlaceholderImage.png')}
+                style={styles.profile_image}
+              />
+            )}
+            <TouchableOpacity onPress={openModal} style={styles.editImage}>
               <Image
                 source={Images.edit}
                 tintColor={'black'}
@@ -106,6 +252,55 @@ const Profile = () => {
               />
             </TouchableOpacity>
           </View>
+          <Modal
+            transparent={true}
+            animationType="slide"
+            visible={isModal}
+            onRequestClose={closeModal}>
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'baseline',
+                  }}>
+                  <Text style={styles.modalText}>Select Option</Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      handleTakePhoto();
+                    }}
+                    style={styles.closeButton}>
+                    <Text style={styles.closeButtonText}>Open Camera</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      handleChoosePhoto();
+                    }}
+                    style={styles.closeButton}>
+                    <Text style={styles.closeButtonText}>Open Gallery</Text>
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity onPress={closeModal}>
+                  <Text
+                    style={{
+                      marginLeft: responsiveWidth(2),
+                      fontSize: responsiveFontSize(2),
+                      fontWeight: '500',
+                      color: 'red',
+                    }}>
+                    Close
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
           <View style={styles.right}>
             <View>
               <Text numberOfLines={1} style={styles.name}>
@@ -123,18 +318,18 @@ const Profile = () => {
             </TouchableOpacity>
           </View>
         </View>
+
         <View style={styles.address}>
           <View style={styles.addresstext}>
             <Text style={styles.heading}>Favourite</Text>
             <Pressable
-              onPress={() => {
-              }}
-              style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View style={{ left: 25 }}>
+              onPress={() => {}}
+              style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View style={{left: 25}}>
                 <FlatList
                   horizontal
                   data={limitedUserImages}
-                  renderItem={({ item, index }) => {
+                  renderItem={({item, index}) => {
                     return (
                       <Image
                         source={item.image}
@@ -146,10 +341,10 @@ const Profile = () => {
                             index === 0
                               ? null
                               : index === 1
-                                ? 15
-                                : index === 2
-                                  ? 25
-                                  : null,
+                              ? 15
+                              : index === 2
+                              ? 25
+                              : null,
                         }}
                       />
                     );
@@ -159,7 +354,7 @@ const Profile = () => {
               <TouchableOpacity>
                 <View style={styles.favIcons}>
                   <Text
-                    style={{ color: 'black', fontSize: responsiveFontSize(2) }}>
+                    style={{color: 'black', fontSize: responsiveFontSize(2)}}>
                     +{UserImages.length - 3}
                   </Text>
                 </View>
@@ -191,9 +386,9 @@ const Profile = () => {
             <FlatList
               scrollEnabled={false}
               showsVerticalScrollIndicator={false}
-              data={CardDetails}
-              contentContainerStyle={{ gap: 10 }}
-              renderItem={({ item, index }) => (
+              data={StripeCardDetails}
+              contentContainerStyle={{gap: 10}}
+              renderItem={({item, index}) => (
                 <View key={item._id} style={styles.container2}>
                   <View
                     style={{
@@ -204,13 +399,19 @@ const Profile = () => {
                     }}>
                     <Image
                       source={
-                        item.CardType === 'mastercard'
+                        item.card.brand === 'mastercard'
                           ? Images.mastersilver
-                          : item.CardType === 'visa'
-                            ? Images.visasilver
-                            : item.CardType === 'jcb'
-                              ? Images.JCBCard
-                              : Images.AmericanExpressCard
+                          : item.card.brand === 'visa'
+                          ? Images.visasilver
+                          : item.card.brand === 'jcb'
+                          ? Images.JCBCard
+                          : item.card.brand === 'amex'
+                          ? Images.AmericanExpressCard
+                          : item.card.brand === 'diners'
+                          ? Images.DinersClub
+                          : item.card.brand === 'UnionPay'
+                          ? Images.UnionPay
+                          : Images.DicoverCard
                       }
                       resizeMode="contain"
                       style={{
@@ -218,26 +419,29 @@ const Profile = () => {
                         height: responsiveWidth(10),
                       }}
                     />
-                    <View style={{ justifyContent: 'center' }}>
+                    <View style={{justifyContent: 'center'}}>
                       <Text
                         style={{
                           fontSize: responsiveFontSize(2.3),
                           color: 'white',
                         }}>
-                        {item.CardholderName}
+                        {'**** **** ****'} {item.card.last4}
                       </Text>
                       <Text
                         style={{
                           color: '#A7A7A7',
                           fontSize: responsiveFontSize(2),
                         }}>
-                        {item.CardNumber}
+                        {'Expires'} {item.card.exp_month}
+                        {'/'}
+                        {item.card.exp_year}
                       </Text>
                     </View>
                   </View>
                   <TouchableOpacity
                     onPress={() => {
-                      SetCardData(item._id);
+                      setStripeCardData(item.id);
+                      console.log('id we send:', StripeCardData);
                       setCardModal(true);
                     }}>
                     <Image
@@ -259,7 +463,7 @@ const Profile = () => {
             <Text style={styles.textgreen}>Add new card</Text>
             <TouchableOpacity
               onPress={() => {
-                AddCardStripe()
+                AddCardStripe();
               }}
               style={styles.plus}>
               <Text
@@ -283,7 +487,7 @@ const Profile = () => {
         )}
         <DeleteCardModal
           modalstate={CardModal}
-          CardData={CardData}
+          paymentId={StripeCardData}
           onRequestClose={() => setCardModal(false)}
         />
       </ScrollView>
@@ -354,7 +558,7 @@ const styles = StyleSheet.create({
     fontSize: responsiveFontSize(2),
     marginVertical: responsiveHeight(1),
   },
-  heading: { fontSize: responsiveFontSize(2.5), color: 'white' },
+  heading: {fontSize: responsiveFontSize(2.5), color: 'white'},
   email: {
     color: '#A7A7A7',
     fontSize: responsiveFontSize(1.5),
@@ -409,5 +613,37 @@ const styles = StyleSheet.create({
     height: responsiveHeight(16),
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: responsiveWidth(80),
+    height: responsiveHeight(30),
+    justifyContent: 'space-around',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 20,
+    color: '#000',
+    fontWeight: '600',
+  },
+  closeButton: {
+    padding: 10,
+    backgroundColor: '#000',
+    borderRadius: 5,
+    marginHorizontal: responsiveWidth(1),
+  },
+  closeButtonText: {
+    color: '#9FED3A',
+    fontSize: responsiveFontSize(1.7),
+    fontWeight: '600',
   },
 });

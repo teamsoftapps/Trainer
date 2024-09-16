@@ -4,7 +4,7 @@ export const userAuth = createApi({
   reducerPath: 'userAuth',
 
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://192.168.0.101:3000',
+    baseUrl: 'http://192.168.0.117:6000',
     // prepareHeaders: header => {
     //   header.set('Accept', 'application/json');
     // },

@@ -168,23 +168,28 @@ export const formatDate = (dateString: string) => {
   return `${weekday} ${day} ${month}, ${year}`;
 };
 
-export const fetchPaymentSheetparams = async () => {
-  const response = await axiosBaseURL.post('/Common/InitializePaymentIntent');
-  const {customer, ephemeralKey, paymentIntent} = await response.data.data;
-  console.log('step 1 done');
+export const fetchPaymentSheetparams = async (CustomerID: string, amount) => {
+  const response = await axiosBaseURL.post('/Common/InitializePaymentIntent', {
+    customerID: CustomerID,
+    amount: amount,
+  });
+  console.log('payment Cus ID:', CustomerID, amount);
+  const {ephemeralKey, paymentIntent, customer} = await response.data.data;
+  console.log('step 1 done', response);
   return {
-    customer,
     ephemeralKey,
     paymentIntent,
+    customer,
   };
 };
-export const fetchSetupSheetparams = async (email: string) => {
+export const fetchSetupSheetparams = async (stripeId: string) => {
+  console.log('helloo stripe: ', stripeId);
   const response = await axiosBaseURL.post('/Common/InitializeSetupIntent', {
-    Email: email,
+    customerID: stripeId,
   });
-  const {customer, ephemeralKey, setupIntents} = await response.data;
+  const {ephemeralKey, setupIntents} = await response.data.data;
+  console.log('is data going:', response.data);
   return {
-    customer,
     ephemeralKey,
     setupIntents,
   };

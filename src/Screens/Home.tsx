@@ -9,18 +9,16 @@ import {
   ScrollView,
   Pressable,
   Dimensions,
-  TextInput,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {
   responsiveHeight,
   responsiveWidth,
   responsiveFontSize,
-  responsiveScreenWidth,
 } from 'react-native-responsive-dimensions';
 import WrapperContainer from '../Components/Wrapper';
 import {FontFamily, Images} from '../utils/Images';
-import {TrainerProfile, UserImages} from '../utils/Dummy';
+import {TrainerProfile} from '../utils/Dummy';
 import {AirbnbRating} from 'react-native-ratings';
 import LinearGradient from 'react-native-linear-gradient';
 import Animated, {
@@ -28,16 +26,11 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  withClamp,
 } from 'react-native-reanimated';
 import axiosBaseURL from '../utils/AxiosBaseURL';
 import {useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
-import InstagramStories, {
-  InstagramStoriesPublicMethods,
-} from '@birdwingo/react-native-instagram-stories';
 import InstaStory from 'react-native-insta-story';
-import Button from '../Components/Button';
 
 const StoriesData = [
   {
@@ -177,72 +170,53 @@ const Home = () => {
   const [modal, setmodal] = useState(Number);
   const [usersData, setusersData] = useState(TrainerProfile);
   const [APIUserData, setAPIUserData] = useState({});
-  const Email = useSelector(state => state.Auth.data);
+  const datafromsignup = useSelector(state => state.Auth.data);
+  console.log('datafromsignup', datafromsignup);
+  // const screenWidth = Dimensions.get('screen').width;
 
-  // useEffect(() => {
-  //   axiosBaseURL
-  //     .post('/trainer/GetTrainer', {
-  //       email: Email
-  //     })
-  //     .then(response => {
-  //       console.log('User found', response.data.data.Bio);
-  //       console.log('User found', response.data.data);
-  //       setAPIUserData(response.data.data)
-  //       if (response.data.data.Bio === null) {
-  //         navigation.navigate("CompleteProfile", { data: response.data.data })
-  //       }
-  //     })
-  //     .catch(error => {
-  //       console.error('Error fetching data:', error.response.data.message);
+  // const workletResponsiveScreenWidth = () => {
+  //   'worklet';
+  //   return (value: any) => (value / 375) * screenWidth;
+  // };
 
-  //     });
-  // }, [])
+  // const Follow = (userID: number) => {
+  //   const updateUser = usersData.map(item => {
+  //     if (userID === item.id) {
+  //       return {
+  //         ...item,
+  //         isFollow: true,
+  //       };
+  //     }
+  //     return item;
+  //   });
+  //   setusersData(updateUser);
+  // };
 
-  const screenWidth = Dimensions.get('screen').width;
+  // const unFollow = (userID: number) => {
+  //   const updatedUser = usersData.map(item => {
+  //     if (userID === item.id) {
+  //       return {
+  //         ...item,
+  //         isFollow: false,
+  //       };
+  //     }
+  //     return item;
+  //   });
+  //   setusersData(updatedUser);
+  // };
 
-  const workletResponsiveScreenWidth = () => {
-    'worklet';
-    return (value: any) => (value / 375) * screenWidth;
-  };
+  // const animation = useSharedValue(0);
 
-  const Follow = (userID: number) => {
-    const updateUser = usersData.map(item => {
-      if (userID === item.id) {
-        return {
-          ...item,
-          isFollow: true,
-        };
-      }
-      return item;
-    });
-    setusersData(updateUser);
-  };
-
-  const unFollow = (userID: number) => {
-    const updatedUser = usersData.map(item => {
-      if (userID === item.id) {
-        return {
-          ...item,
-          isFollow: false,
-        };
-      }
-      return item;
-    });
-    setusersData(updatedUser);
-  };
-
-  const animation = useSharedValue(0);
-
-  const animatedstyle = useAnimatedStyle(() => {
-    const width = interpolate(
-      animation.value,
-      [0, 1],
-      [workletResponsiveScreenWidth()(110), workletResponsiveScreenWidth()(130)]
-    );
-    return {
-      width,
-    };
-  });
+  // const animatedstyle = useAnimatedStyle(() => {
+  //   const width = interpolate(
+  //     animation.value,
+  //     [0, 1],
+  //     [workletResponsiveScreenWidth()(110), workletResponsiveScreenWidth()(130)]
+  //   );
+  //   return {
+  //     width,
+  //   };
+  // });
   return (
     <WrapperContainer>
       <View
@@ -270,8 +244,12 @@ const Home = () => {
           <TouchableOpacity activeOpacity={0.8}>
             <Image source={Images.notification} style={styles.notifiaction} />
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.8} onPress={()=>{navigation.navigate("Chats")}}>
-            <Image source={Images.messages} style={styles.notifiaction}/>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              navigation.navigate('Chats');
+            }}>
+            <Image source={Images.messages} style={styles.notifiaction} />
           </TouchableOpacity>
         </View>
       </View>
@@ -352,19 +330,20 @@ const Home = () => {
                     source={item.ProfileImage}
                     style={styles.Trainer}>
                     <Pressable
-                      onPress={() => {
-                        !item.isFollow ? Follow(item.id) : unFollow(item.id);
-                        setmodal(item.id);
+                    // onPress={() => {
+                    //   !item.isFollow ? Follow(item.id) : unFollow(item.id);
+                    //   setmodal(item.id);
 
-                        if (!item.isFollow) {
-                          Follow(item.id);
-                          animation.value = withSpring(1); // Animate to expanded state
-                        } else {
-                          unFollow(item.id);
-                          animation.value = withSpring(0); // Animate to collapsed state
-                        }
-                      }}>
-                      <Animated.View style={[styles.Follow, animatedstyle]}>
+                    //   if (!item.isFollow) {
+                    //     Follow(item.id);
+                    //     animation.value = withSpring(1); // Animate to expanded state
+                    //   } else {
+                    //     unFollow(item.id);
+                    //     animation.value = withSpring(0); // Animate to collapsed state
+                    //   }
+                    // }}
+                    >
+                      {/* <Animated.View style={[styles.Follow, animatedstyle]}>
                         <Text
                           style={{
                             color: '#000',
@@ -381,7 +360,7 @@ const Home = () => {
                             height: responsiveHeight(2),
                           }}
                         />
-                      </Animated.View>
+                      </Animated.View> */}
                     </Pressable>
 
                     <LinearGradient
@@ -542,9 +521,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 10,
-    backgroundColor: 'white', // Adjust the background color as needed
+    backgroundColor: 'white',
     borderTopWidth: 1,
-    borderTopColor: '#ccc', // Adjust the border color as needed
+    borderTopColor: '#ccc',
   },
   textInput: {
     height: 40,

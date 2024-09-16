@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View } from 'react-native';
+import {StyleSheet} from 'react-native';
 import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import BottomStack from './BottomStack';
 
 import Booking from '../Screens/Booking';
@@ -18,9 +18,6 @@ import PaymentMethod from '../Screens/PaymentMethod';
 import CompleteProfile from '../Screens/CompleteProfile';
 import Membership from '../Screens/Membership';
 import Notification from '../Screens/Notification';
-import ForgotPassword from '../Screens/ForgotPassword';
-import ConfirmNewPassword from '../Screens/ConfirmNewPassword';
-import VerifyOTP from '../Screens/VerifyOTP';
 import StoryViewer from '../Screens/storyViewer';
 import Chats from '../Screens/Chats';
 import BookingConfirmed from '../Screens/BookingConfirmed';
@@ -28,7 +25,7 @@ import BookingConfirmed from '../Screens/BookingConfirmed';
 const Stack = createNativeStackNavigator();
 const MainStack = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name="Bottom" component={BottomStack} />
       <Stack.Screen name="BookingSuccessfull" component={BookingConfirmed} />
       <Stack.Screen name="Booking" component={Booking} />

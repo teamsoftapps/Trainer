@@ -13,9 +13,8 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-
+import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import {FontFamily, Images} from '../utils/Images';
-import MapView, {Marker} from 'react-native-maps';
 import {Seartrainer} from '../utils/Dummy';
 import {AirbnbRating} from 'react-native-ratings';
 import {useNavigation} from '@react-navigation/native';
@@ -50,19 +49,14 @@ const SearchTrainer = () => {
           paddingVertical: responsiveHeight(3),
         }}>
         <MapView
-          style={StyleSheet.absoluteFill}
-          initialRegion={{
+          provider={PROVIDER_GOOGLE} // remove if not using Google Maps
+          style={styles.map}
+          region={{
             latitude: 37.78825,
             longitude: -122.4324,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}>
-          <Marker
-            coordinate={{latitude: 37.78825, longitude: -122.4324}}
-            title="Marker Title"
-            description="Marker Description"
-          />
-        </MapView>
+            latitudeDelta: 0.015,
+            longitudeDelta: 0.0121,
+          }}></MapView>
         <View
           style={{
             flexDirection: 'row',
@@ -282,5 +276,8 @@ const styles = StyleSheet.create({
   },
   font: {
     fontSize: responsiveFontSize(1.7),
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
   },
 });
