@@ -95,79 +95,23 @@ const ReviewBooking = ({ route }) => {
       );
     }
   };
-
+  const FormatedDate = formatDate(Data?.Date);
   const ConfirmBooking = async () => {
     await initializePaymentsheet();
     const { error } = await presentPaymentSheet();
     if (error) {
       showToast('Try later', error.message, 'danger');
     } else {
-
+      await axiosBaseURL.post(
+        "/user/CreateBooking",
+        { token: authData.isToken, Amount: totalAmount, Time: Data?.time, Date: FormatedDate, Reminder: "30 mins" }
+      )
       navigation.navigate('BookingSuccessfull', { Data: { ...Data } });
     }
   };
 
-  // Dependency array
-  // useEffect(() => {
-  //   axiosBaseURL
-  //     .post('/Common/GetCardDetail', {
-  //       token: authData.isToken,
-  //     })
-  //     .then(response => {
-  //       setCardDetails(response.data.data);
-  //     })
-  //     .catch(error => {});
-  //   axiosBaseURL
-  //     .get(`/common/GetProfile/${authData.isToken}`)
-  //     .then(response => {
-  //       console.log('User found', response.data.data);
 
-  //       setStriprId(response.data.data.stripeCustomerID);
-  //     })
-  //     .catch(error => {
-  //       console.error('Error fetching data:', error.response.data.message);
-  //     });
-  //   initializepaymentsheet();
-  // }, []);
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     axiosBaseURL
-  //       .post('/Common/GetCardDetail', {
-  //         token: authData.isToken,
-  //       })
-  //       .then(response => {
-  //         setCardDetails(response.data.data);
-  //       })
-  //       .catch(error => {});
-  //     axiosBaseURL
-  //       .get(`/common/GetProfile/${authData.isToken}`)
-  //       .then(response => {
-  //         console.log('User found', response.data.data);
 
-  //         setStriprId(response.data.data.stripeCustomerID);
-  //       })
-  //       .catch(error => {
-  //         console.error('Error fetching data:', error.response.data.message);
-  //       });
-  //   }, [])
-  // );
-
-  // const initializepaymentsheet = async () => {
-  //   // const customerID = ;
-  //   const {ephemeralKey, paymentIntent} = await fetchPaymentSheetparams(
-  //     stripeId
-  //   );
-  //   const {error} = await initPaymentSheet({
-  //     customerId: stripeId,
-  //     customerEphemeralKeySecret: ephemeralKey,
-  //     paymentIntentClientSecret: paymentIntent,
-  //     merchantDisplayName: "Stern's GYM",
-  //     allowsDelayedPaymentMethods: true,
-  //     allowsRemovalOfLastSavedPaymentMethod: true,
-  //   });
-  // };
-
-  const FormatedDate = formatDate(Data?.Date);
   console.log("Value of Totoal Amount", totalAmount)
   return (
     <WrapperContainer>

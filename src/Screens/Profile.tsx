@@ -43,6 +43,7 @@ const Profile = () => {
   const [StripeCardData, setStripeCardData] = useState('');
 
   const authData = useSelector(state => state.Auth.data);
+  console.log("object", authData)
 
   const { showToast } = useToast();
 
@@ -144,15 +145,6 @@ const Profile = () => {
     useCallback(() => {
       const fetchData = async () => {
         try {
-          const cardResponse = await axiosBaseURL.post(
-            '/Common/GetCardDetail',
-            {
-              token: authData.isToken,
-            }
-          );
-          setCardDetails(cardResponse.data.data);
-          console.log('Card Details:', cardResponse.data);
-
           const profileResponse = await axiosBaseURL.get(
             `/Common/GetProfile/${authData.isToken}`
           );
@@ -196,7 +188,7 @@ const Profile = () => {
     } catch (error) {
       console.error(
         'Error during payment sheet initialization:',
-        error.message
+        error.message,
       );
     }
   };
