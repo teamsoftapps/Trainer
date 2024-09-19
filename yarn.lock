@@ -3437,6 +3437,7 @@ __metadata:
     react: 18.2.0
     react-native: 0.74.2
     react-native-calendars: ^1.1305.0
+    react-native-circular-progress: ^1.4.0
     react-native-circular-progress-indicator: ^4.4.2
     react-native-dotenv: ^3.4.11
     react-native-element-dropdown: ^2.12.1
@@ -8551,6 +8552,19 @@ __metadata:
     react-native-reanimated: ">=2.2.0"
     react-native-svg: ">=12.1.1"
   checksum: 6d86f774fe3749cb81e51f3639e6c153aff66e3fbf153e53fba69f4400c00cff97bafd1f66eff5c82dc0c696a4cb9b572058e2d372a545afb7afc56130d01a67
+  languageName: node
+  linkType: hard
+
+"react-native-circular-progress@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "react-native-circular-progress@npm:1.4.0"
+  dependencies:
+    prop-types: ^15.8.1
+  peerDependencies:
+    react: ">=16.0.0"
+    react-native: ">=0.50.0"
+    react-native-svg: ">=7.0.0"
+  checksum: e98425c57c82964be1b0bf8378f3fa85513013b9c9c7c3a7d4be9d193ce683cbc9877f454f08f5322d07e620faa1381a9fe8ff64f78fc295278909f329a47861
   languageName: node
   linkType: hard
 

@@ -9,62 +9,51 @@ import {
   ScrollView,
   Modal,
 } from 'react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { FontFamily, Images } from '../utils/Images';
-import { fetchSetupSheetparams, UserImages } from '../utils/Dummy';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
+import {FontFamily, Images} from '../utils/Images';
+import {fetchSetupSheetparams, UserImages} from '../utils/Dummy';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
 import axiosBaseURL from '../utils/AxiosBaseURL';
 import EditAddressModal from '../Components/EditAddressModal';
 import DeleteCardModal from '../Components/DeleteCardModal';
 import useToast from '../Hooks/Toast';
 import ImageCropPicker from 'react-native-image-crop-picker';
-import { showMessage } from 'react-native-flash-message';
+import {showMessage} from 'react-native-flash-message';
 import {
   initPaymentSheet,
   presentPaymentSheet,
 } from '@stripe/stripe-react-native';
 const Profile = () => {
-  const [CardDetails, setCardDetails] = useState([]);
   const [Address, setAddress] = useState('');
   const [name, setname] = useState('');
   const [email, setemail] = useState('');
   const [AddressModal, setAddressModal] = useState(false);
   const [CardModal, setCardModal] = useState(false);
-  const [CardData, SetCardData] = useState('');
   const [stripeId, setStripeId] = useState(null);
   const [StripeCardDetails, setStripeCardDetails] = useState([]);
   const [StripeCardData, setStripeCardData] = useState('');
-
   const authData = useSelector(state => state.Auth.data);
-  console.log("object", authData)
-
-  const { showToast } = useToast();
-
-  // const {initPaymentSheet, presentPaymentSheet} = usePaymentSheet();
-
-  const trainerImage = useSelector(state => state.Image.PROFILE_IMAGE);
-
-  // console.log('trainerImage', trainerImage);
+  console.log('authData:', authData);
+  const {showToast} = useToast();
   const openModal = () => setModal(true);
   const closeModal = () => setModal(false);
   const [imageUri, setImageUri] = useState(null);
   const [isModal, setModal] = useState(false);
+
   const handleChoosePhoto = () => {
     ImageCropPicker.openPicker({
       mediaType: 'photo',
       cropping: true,
     })
       .then(image => {
-        setImageUri(image.path);
         uploadImage(image);
-        // console.log('Image Object', image);
         setModal(false);
       })
       .catch(error => {
@@ -73,49 +62,48 @@ const Profile = () => {
   };
 
   const handleTakePhoto = async () => {
-    ImageCropPicker.openCamera({
-      mediaType: 'photo',
-      cropping: true,
-    })
-      .then(image => {
-        setImageUri(image.path);
-        uploadImage(image);
-        setModal(false);
-      })
-      .catch(error => {
-        console.error('ImagePicker Error: ', error.message);
+    try {
+      const image = await ImageCropPicker.openCamera({
+        mediaType: 'photo',
+        cropping: true,
       });
+      uploadImage(image);
+      setModal(false);
+    } catch (error) {
+      console.error('ImagePicker Error: ', error.message);
+    }
   };
 
   const uploadImage = async image => {
     try {
       const formData = new FormData();
-
-      formData.append('profileImage', {
+      console.log('image received:', image);
+      formData.append('file', {
         uri: image.path,
         type: image.mime,
         name: `profileImage-${Date.now()}.jpg`,
       });
-      formData.append('email', email);
+      formData.append('email', authData.res_EMAIL);
+      console.log('form data:', formData);
 
-      const response = await axiosBaseURL.post(
-        '/trainer/uploadProfileImage',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-      showMessage({
-        message: 'Update Successful',
-        description: 'Your image has been updated!',
-        type: 'success',
+      const response = await axiosBaseURL.post('/Common/fileUpload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
+      setImageUri(response.data.data.url);
+      if (response.data.status) {
+        showMessage({
+          message: 'Update Successful',
+          description: 'Your image has been updated!',
+          type: 'success',
+        });
+      }
     } catch (error) {
+      console.error('Upload Error: ', error);
       showMessage({
         message: 'Upload Failed',
-        description: 'Failed to upload image.',
+        description: error.message || 'Failed to upload image.',
         type: 'danger',
       });
     }
@@ -149,6 +137,7 @@ const Profile = () => {
             `/Common/GetProfile/${authData.isToken}`
           );
           const userData = profileResponse.data.data;
+          console.log('profileResponce', profileResponse);
           setImageUri(userData.profileImage);
           setAddress(userData.Address);
           setname(userData.fullName);
@@ -169,10 +158,10 @@ const Profile = () => {
   const initializepaymentsheet = async () => {
     if (!stripeId) return;
     try {
-      const { ephemeralKey, setupIntents } = await fetchSetupSheetparams(
+      const {ephemeralKey, setupIntents} = await fetchSetupSheetparams(
         stripeId
       );
-      const { error } = await initPaymentSheet({
+      const {error} = await initPaymentSheet({
         customerId: stripeId,
         customerEphemeralKeySecret: ephemeralKey,
         setupIntentClientSecret: setupIntents,
@@ -188,14 +177,14 @@ const Profile = () => {
     } catch (error) {
       console.error(
         'Error during payment sheet initialization:',
-        error.message,
+        error.message
       );
     }
   };
 
   const AddCardStripe = async () => {
     await initializepaymentsheet();
-    const { error } = await presentPaymentSheet();
+    const {error} = await presentPaymentSheet();
     if (error) {
       showToast('Try later', error.message, 'danger');
     } else {
@@ -204,17 +193,6 @@ const Profile = () => {
     }
   };
 
-  // const AddCardStripe = async () => {
-  //   await initializepaymentsheet();
-  //   console.log('is running ', email);
-  //   const {error} = await presentPaymentSheet();
-  //   if (error) {
-  //     showToast('Try later', error.message, 'danger');
-  //   } else {
-  //     showToast('Added Successfully!', 'Your card hase been added', 'success');
-  //   }
-  // };
-
   const limitedUserImages = UserImages.slice(0, 3);
   const navigation = useNavigation();
   return (
@@ -222,11 +200,8 @@ const Profile = () => {
       <ScrollView>
         <View style={styles.top}>
           <View style={styles.topimage}>
-            {trainerImage ? (
-              <Image
-                source={{ uri: trainerImage }}
-                style={styles.profile_image}
-              />
+            {imageUri ? (
+              <Image source={{uri: imageUri}} style={styles.profile_image} />
             ) : (
               <Image
                 source={require('../assets/Images/PlaceholderImage.png')}
@@ -312,13 +287,13 @@ const Profile = () => {
           <View style={styles.addresstext}>
             <Text style={styles.heading}>Favourite</Text>
             <Pressable
-              onPress={() => { }}
-              style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View style={{ left: 25 }}>
+              onPress={() => {}}
+              style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View style={{left: 25}}>
                 <FlatList
                   horizontal
                   data={limitedUserImages}
-                  renderItem={({ item, index }) => {
+                  renderItem={({item, index}) => {
                     return (
                       <Image
                         source={item.image}
@@ -330,10 +305,10 @@ const Profile = () => {
                             index === 0
                               ? null
                               : index === 1
-                                ? 15
-                                : index === 2
-                                  ? 25
-                                  : null,
+                              ? 15
+                              : index === 2
+                              ? 25
+                              : null,
                         }}
                       />
                     );
@@ -343,7 +318,7 @@ const Profile = () => {
               <TouchableOpacity>
                 <View style={styles.favIcons}>
                   <Text
-                    style={{ color: 'black', fontSize: responsiveFontSize(2) }}>
+                    style={{color: 'black', fontSize: responsiveFontSize(2)}}>
                     +{UserImages.length - 3}
                   </Text>
                 </View>
@@ -376,8 +351,8 @@ const Profile = () => {
               scrollEnabled={false}
               showsVerticalScrollIndicator={false}
               data={StripeCardDetails}
-              contentContainerStyle={{ gap: 10 }}
-              renderItem={({ item, index }) => (
+              contentContainerStyle={{gap: 10}}
+              renderItem={({item, index}) => (
                 <View key={item._id} style={styles.container2}>
                   <View
                     style={{
@@ -391,16 +366,16 @@ const Profile = () => {
                         item.card.brand === 'mastercard'
                           ? Images.mastersilver
                           : item.card.brand === 'visa'
-                            ? Images.visasilver
-                            : item.card.brand === 'jcb'
-                              ? Images.JCBCard
-                              : item.card.brand === 'amex'
-                                ? Images.AmericanExpressCard
-                                : item.card.brand === 'diners'
-                                  ? Images.DinersClub
-                                  : item.card.brand === 'UnionPay'
-                                    ? Images.UnionPay
-                                    : Images.DicoverCard
+                          ? Images.visasilver
+                          : item.card.brand === 'jcb'
+                          ? Images.JCBCard
+                          : item.card.brand === 'amex'
+                          ? Images.AmericanExpressCard
+                          : item.card.brand === 'diners'
+                          ? Images.DinersClub
+                          : item.card.brand === 'UnionPay'
+                          ? Images.UnionPay
+                          : Images.DicoverCard
                       }
                       resizeMode="contain"
                       style={{
@@ -408,7 +383,7 @@ const Profile = () => {
                         height: responsiveWidth(10),
                       }}
                     />
-                    <View style={{ justifyContent: 'center' }}>
+                    <View style={{justifyContent: 'center'}}>
                       <Text
                         style={{
                           fontSize: responsiveFontSize(2.3),
@@ -547,7 +522,7 @@ const styles = StyleSheet.create({
     fontSize: responsiveFontSize(2),
     marginVertical: responsiveHeight(1),
   },
-  heading: { fontSize: responsiveFontSize(2.5), color: 'white' },
+  heading: {fontSize: responsiveFontSize(2.5), color: 'white'},
   email: {
     color: '#A7A7A7',
     fontSize: responsiveFontSize(1.5),

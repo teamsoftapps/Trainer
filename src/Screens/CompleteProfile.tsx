@@ -34,7 +34,7 @@ import {saveProfileImage} from '../store/Slices/profileImage';
 
 const CompleteProfile = ({route}) => {
   const {data} = route.params;
-  console.log('data from route:', data.email);
+  console.log('data from route:', data);
   //Spliting fullName in to first and lst name.
   const setFullName = data.fullName.split(' ');
   const firstName = setFullName[0];

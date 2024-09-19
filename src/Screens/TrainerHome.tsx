@@ -18,11 +18,11 @@ import {Images} from '../utils/Images';
 import {useNavigation} from '@react-navigation/native';
 import axiosBaseURL from '../utils/AxiosBaseURL';
 import {useSelector} from 'react-redux';
-// import CircularProgress from 'react-native-circular-progress-indicator';
+import {AnimatedCircularProgress} from 'react-native-circular-progress';
+
 const TrainerHome = () => {
   const [APIUserData, setAPIUserData] = useState({});
   const trainer_data = useSelector(state => state.Auth.data);
-  console.log('0000000000', trainer_data);
   const navigation = useNavigation();
   const Bookings = [
     {
@@ -56,8 +56,10 @@ const TrainerHome = () => {
           email: trainer_data.res_EMAIL,
         })
         .then(response => {
-          console.log('User found', response.data.data.Bio);
-          console.log('User found', response.data.data);
+          console.log(
+            '------------------------',
+            response.data.data.profileImage
+          );
           setAPIUserData(response.data.data);
           if (response.data.data.Bio === null) {
             Alert.alert('Please complete your profile');
@@ -191,20 +193,16 @@ const TrainerHome = () => {
             if (trainer_data.type === 'trainer') {
               navigation.navigate('CompleteProfile', {data: APIUserData});
             }
-            console.log('----------------------------------///', APIUserData);
           }}
           style={styles.Text_Sec}>
           <Image source={Images.trainer2} style={styles.trainerImage} />
-          {/* <CircularProgress
-            value={60}
-            radius={120}
-            duration={2000}
-            progressValueColor={'#ecf0f1'}
-            maxValue={200}
-            title={'KM/H'}
-            titleColor={'white'}
-            titleStyle={{fontWeight: 'bold'}}
-          /> */}
+          <AnimatedCircularProgress
+            size={80}
+            width={5}
+            fill={80}
+            tintColor="#9FED3A"
+            onAnimationComplete={() => console.log('onAnimationComplete')}
+          />
           <Text style={styles.percent}>80%</Text>
           <Text style={[{...styles.slogan}, {color: '#BBBBBB'}]}>
             Complete Profile
@@ -250,13 +248,16 @@ const styles = StyleSheet.create({
     marginVertical: responsiveHeight(2),
   },
   trainerImage: {
-    height: responsiveWidth(12),
-    width: responsiveWidth(12),
+    height: responsiveWidth(16),
+    width: responsiveWidth(16),
     borderRadius: responsiveWidth(6),
-    borderColor: '#9FED3A',
     borderWidth: responsiveWidth(0.5),
+    position: 'absolute',
+    left: responsiveWidth(5),
+    top: responsiveHeight(2.4),
   },
   Text_Sec: {
+    position: 'relative',
     backgroundColor: 'rgba(187, 187, 187, 0.1)',
     borderRadius: responsiveWidth(2),
     paddingHorizontal: responsiveWidth(3),
