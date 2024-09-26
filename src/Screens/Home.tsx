@@ -207,51 +207,6 @@ const Home: React.FC<Props> = ({navigation, route}) => {
     fetchData();
   }, [token]);
 
-  // const screenWidth = Dimensions.get('screen').width;
-
-  // const workletResponsiveScreenWidth = () => {
-  //   'worklet';
-  //   return (value: any) => (value / 375) * screenWidth;
-  // };
-
-  // const Follow = (userID: number) => {
-  //   const updateUser = usersData.map(item => {
-  //     if (userID === item.id) {
-  //       return {
-  //         ...item,
-  //         isFollow: true,
-  //       };
-  //     }
-  //     return item;
-  //   });
-  //   setusersData(updateUser);
-  // };
-
-  // const unFollow = (userID: number) => {
-  //   const updatedUser = usersData.map(item => {
-  //     if (userID === item.id) {
-  //       return {
-  //         ...item,
-  //         isFollow: false,
-  //       };
-  //     }
-  //     return item;
-  //   });
-  //   setusersData(updatedUser);
-  // };
-
-  // const animation = useSharedValue(0);
-
-  // const animatedstyle = useAnimatedStyle(() => {
-  //   const width = interpolate(
-  //     animation.value,
-  //     [0, 1],
-  //     [workletResponsiveScreenWidth()(110), workletResponsiveScreenWidth()(130)]
-  //   );
-  //   return {
-  //     width,
-  //   };
-  // });
   useEffect(() => {
     getPosts();
   });

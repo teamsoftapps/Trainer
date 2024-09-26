@@ -23,7 +23,7 @@ const Message: React.FC<Props> = ({route, navigation}) => {
   const userData = useSelector(state => state.Auth.data);
   // console.log('Userdata', userData?.data._id);
   const data = route.params;
-  // console.log('DATAAAAAA', data);
+  console.log('DATAAAAAA', data);
   const [createMessaeg] = useCreateMessaegMutation();
   const [messages, setMessages] = useState([]);
   const [page, setpage] = useState(1);
@@ -35,9 +35,9 @@ const Message: React.FC<Props> = ({route, navigation}) => {
   };
   const {data: getMessages, isError, refetch} = useGetMessagesQuery(body);
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  // useEffect(() => {
+  //   refetch();
+  // }, [refetch]);
 
   useEffect(() => {
     if (getMessages?.data) {
@@ -85,7 +85,7 @@ const Message: React.FC<Props> = ({route, navigation}) => {
           </TouchableOpacity>
           <Image source={{uri: data?.profile}} style={styles.profile_image} />
           <View>
-            <Text style={styles.user}>{data.name}</Text>
+            <Text style={styles.user}>{data?.name}</Text>
           </View>
         </View>
         <View

@@ -24,35 +24,36 @@ import {useGetChatsQuery} from '../store/Apis/chat';
 import {FlashList} from '@shopify/flash-list';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {MainProps} from '../Navigations/MainStack';
+import useToast from '../Hooks/Toast';
 
 type Props = NativeStackScreenProps<MainProps, 'Chat'>;
 const Chats: React.FC<Props> = ({navigation, route}) => {
-  const {data} = useGetChatsQuery();
+  const {data, isError, refetch} = useGetChatsQuery();
   const [allChats, setallChats] = useState([]);
-
+  const {showToast} = useToast();
   useEffect(() => {
-    getChats();
-  }, []);
-
-  const getChats = async () => {
-    try {
-      const res = await data;
-
-      console.log('Chats Success', res.data);
-      await res?.data.map(item =>
-        console.log(
-          'CONSSSS',
-          item
-          // .participants[1].userId.profileImage
-        )
-      );
-
-      setallChats(res?.data);
-    } catch (error) {
-      console.log('Chats Error', error);
+    if (data?.data) {
+      setallChats(data?.data);
     }
-  };
+    if (isError) {
+      showToast('Error', isError, 'danger');
+    }
+  }, [data, isError]);
 
+  const listemptyComp = () => {
+    return (
+      <View style={{alignItems: 'center', justifyContent: 'center'}}>
+        <Text
+          style={{
+            fontFamily: FontFamily.Regular,
+            color: 'gray',
+            fontSize: responsiveFontSize(2),
+          }}>
+          No Chat found
+        </Text>
+      </View>
+    );
+  };
   return (
     <WrapperContainer>
       <Header
@@ -134,6 +135,7 @@ const Chats: React.FC<Props> = ({navigation, route}) => {
         </Text>
         <View style={{height: '100%'}}>
           <FlashList
+            ListEmptyComponent={listemptyComp}
             estimatedItemSize={20}
             data={allChats}
             extraData={allChats}

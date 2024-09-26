@@ -18,7 +18,7 @@ export const Chats = createApi({
       return headers;
     },
   }),
-
+  tagTypes: ['Chatss'],
   endpoints: builder => ({
     createChat: builder.mutation({
       query(body) {
@@ -29,6 +29,7 @@ export const Chats = createApi({
           body,
         };
       },
+      invalidatesTags: ['Chatss'],
     }),
 
     getChats: builder.query({
@@ -36,6 +37,7 @@ export const Chats = createApi({
         url: '/getAllChats',
         method: 'GET',
       }),
+      providesTags: ['Chatss'],
     }),
   }),
 });
