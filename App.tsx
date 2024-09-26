@@ -5,14 +5,21 @@ import AuthStack from './src/Navigations/AuthStack';
 import MainStack from './src/Navigations/MainStack';
 import {useSelector} from 'react-redux';
 import {StripeProvider} from '@stripe/stripe-react-native';
+import TrainerStack from './src/Navigations/TrainerStack';
 
 const App = () => {
-  const authData = useSelector(state => state?.Auth?.data);
-  // console.log('first', authData);
+  const authData = useSelector(state => state?.Auth?.data?.data);
+  console.log('first', authData);
   return (
     // <StripeProvider publishableKey="pk_test_51MhKy0E1gqTY55tO7v4bGT0EifIECw1SHFcUx33Jgc7YF46jqRPNvDzGoSE1h9konayrzaNes7Jse3NGDLpawDql00rxdyk8Cw">
     <NavigationContainer>
-      {authData ? <MainStack /> : <AuthStack />}
+      {authData?.token && authData?.isType === 'user' ? (
+        <MainStack />
+      ) : authData?.token && authData?.isType === 'trainer' ? (
+        <TrainerStack />
+      ) : (
+        <AuthStack />
+      )}
     </NavigationContainer>
     // </StripeProvider>
   );

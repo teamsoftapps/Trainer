@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {
@@ -19,7 +20,6 @@ import {TrainerProfile, UserImages} from '../utils/Dummy';
 import {FontFamily, Images} from '../utils/Images';
 import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
-import {useNavigation} from '@react-navigation/native';
 import {useGetChatsQuery} from '../store/Apis/chat';
 import {FlashList} from '@shopify/flash-list';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
@@ -28,7 +28,7 @@ import useToast from '../Hooks/Toast';
 
 type Props = NativeStackScreenProps<MainProps, 'Chat'>;
 const Chats: React.FC<Props> = ({navigation, route}) => {
-  const {data, isError, refetch} = useGetChatsQuery();
+  const {data, isError, refetch, isLoading} = useGetChatsQuery();
   const [allChats, setallChats] = useState([]);
   const {showToast} = useToast();
   useEffect(() => {
@@ -43,14 +43,18 @@ const Chats: React.FC<Props> = ({navigation, route}) => {
   const listemptyComp = () => {
     return (
       <View style={{alignItems: 'center', justifyContent: 'center'}}>
-        <Text
-          style={{
-            fontFamily: FontFamily.Regular,
-            color: 'gray',
-            fontSize: responsiveFontSize(2),
-          }}>
-          No Chat found
-        </Text>
+        {isLoading ? (
+          <ActivityIndicator size={responsiveHeight(5)} color={'gray'} />
+        ) : (
+          <Text
+            style={{
+              fontFamily: FontFamily.Regular,
+              color: 'gray',
+              fontSize: responsiveFontSize(2),
+            }}>
+            No Chat found
+          </Text>
+        )}
       </View>
     );
   };

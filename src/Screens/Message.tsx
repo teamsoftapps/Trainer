@@ -35,9 +35,9 @@ const Message: React.FC<Props> = ({route, navigation}) => {
   };
   const {data: getMessages, isError, refetch} = useGetMessagesQuery(body);
 
-  // useEffect(() => {
-  //   refetch();
-  // }, [refetch]);
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   useEffect(() => {
     if (getMessages?.data) {

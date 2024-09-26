@@ -41,8 +41,8 @@ const TrainerProfile = ({route}) => {
   const navigation = useNavigation();
   const type = useSelector(state => state.Auth.data);
   console.log('on trainer profile:', type.type);
-  const dbId = useSelector(state => state.dbId.dbId);
-  console.log('dbId:', dbId);
+  const user_id = useSelector(state => state?.Auth.data.data._id);
+
   const {data} = route.params;
   console.log('data of trainer in profile:', data);
   const dispatch = useDispatch();
@@ -77,19 +77,20 @@ const TrainerProfile = ({route}) => {
   };
 
   const AddFavouriteTrainer = async () => {
+    console.log('DDDDDD', user_id);
     if (type.type === 'user') {
       try {
         if (isFavourite) {
           axiosBaseURL.delete('/user/Deletefavoritetrainers', {
             data: {
-              userId: dbId._id,
+              userId: user_id,
               trainerID: data.id,
             },
           });
           dispatch(unfavouriteTrainer({trainerID: data.id}));
         } else {
           axiosBaseURL.post('/user/favoritetrainers', {
-            userId: dbId._id,
+            userId: user_id,
             trainerID: data.id,
             name: data.name,
             rating: data.rating,
@@ -393,7 +394,7 @@ const TrainerProfile = ({route}) => {
               setreadmore(!readmore);
             }}
             style={{color: '#9FED3A'}}>
-            {readmore ? 'See less' : 'Read more'}
+            {readmore ? 'Read more' : 'See less'}
           </Text>
         </View>
         <View style={{marginTop: responsiveHeight(1.5)}}>

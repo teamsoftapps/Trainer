@@ -57,16 +57,21 @@ const Upcoming = () => {
   const [bookings, setBookings] = useState([]);
   const [bookingID, setBookingId] = useState('');
   const [isDelete, setDelete] = useState(false);
-  const AuthData = useSelector(state => state.Auth.data);
+  const AuthData = useSelector(state => state.Auth.data.data);
   console.log('first', AuthData);
-
+  useEffect(() => {
+    getBookings();
+  }, []);
   const getBookings = async () => {
     try {
       const response = await axiosBaseURL.get('/user/GetBookings', {
-        params: {isToken: AuthData.isToken},
+        params: {token: AuthData.token},
       });
+      console.log('RRRRRRRR', response);
       setBookings(response.data.data);
-    } catch (error) {}
+    } catch (error) {
+      console.log('Errorrrr', error);
+    }
   };
 
   const deleteBookings = async bookingId => {
@@ -83,10 +88,6 @@ const Upcoming = () => {
       setDelete(false);
     } catch (error) {}
   };
-
-  useEffect(() => {
-    getBookings();
-  }, []);
 
   return (
     <WrapperContainer style={{backgroundColor: '#181818'}}>

@@ -9,6 +9,7 @@ import {
   ScrollView,
   Pressable,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {
@@ -179,14 +180,14 @@ const StoriesData = [
 
 type Props = NativeStackScreenProps<MainProps, 'Bottom'>;
 const Home: React.FC<Props> = ({navigation, route}) => {
-  const {data} = useGetTrainersQuery();
+  const {data, isLoading} = useGetTrainersQuery();
   const [createChat] = useCreateChatMutation();
   const [modal, setmodal] = useState(Number);
   const [usersData, setusersData] = useState(TrainerProfile);
   const [trainerData, settrainerData] = useState([]);
   const [APIUserData, setAPIUserData] = useState({});
   const dispatch = useDispatch();
-  const token = useSelector(state => state?.Auth.data.isToken);
+  const token = useSelector(state => state?.Auth.data.data.token);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -246,7 +247,18 @@ const Home: React.FC<Props> = ({navigation, route}) => {
   const listemptyComp = () => {
     return (
       <View style={{alignItems: 'center', justifyContent: 'center'}}>
-        <Text style={{fontFamily: FontFamily.Regular}}>Data not found</Text>
+        {isLoading ? (
+          <ActivityIndicator size={responsiveHeight(5)} color={'#fff'} />
+        ) : (
+          <Text
+            style={{
+              fontFamily: FontFamily.Regular,
+              color: 'gray',
+              fontSize: responsiveFontSize(2),
+            }}>
+            No Chat found
+          </Text>
+        )}
       </View>
     );
   };
