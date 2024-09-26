@@ -28,9 +28,10 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import axiosBaseURL from '../utils/AxiosBaseURL';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import InstaStory from 'react-native-insta-story';
+import {SaveId, SaveLogedInUser} from '../store/Slices/db_ID';
 
 const StoriesData = [
   {
@@ -170,8 +171,29 @@ const Home = () => {
   const [modal, setmodal] = useState(Number);
   const [usersData, setusersData] = useState(TrainerProfile);
   const [APIUserData, setAPIUserData] = useState({});
+  const dispatch = useDispatch();
   const datafromsignup = useSelector(state => state.Auth.data);
   console.log('datafromsignup', datafromsignup);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const profileResponse = await axiosBaseURL.get(
+          `/Common/GetProfile/${datafromsignup.isToken}`
+        );
+        const userData = profileResponse.data.data;
+        console.log('profileResponce', userData);
+        dispatch(SaveLogedInUser(userData));
+      } catch (error) {
+        console.error(
+          'Error fetching data:',
+          error.response?.data?.message || error.message
+        );
+      }
+    };
+    fetchData();
+  }, [datafromsignup.isToken]);
+
   // const screenWidth = Dimensions.get('screen').width;
 
   // const workletResponsiveScreenWidth = () => {
@@ -268,7 +290,6 @@ const Home = () => {
 
           <View>
             <InstaStory
-              // style={{backgroundColor: 'red'}}
               data={StoriesData}
               duration={10000}
               unPressedBorderColor={'#9FED3A'}

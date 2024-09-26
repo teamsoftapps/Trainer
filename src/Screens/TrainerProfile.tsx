@@ -11,9 +11,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
-import { FontFamily, Images } from '../utils/Images';
+import {FontFamily, Images} from '../utils/Images';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   responsiveFontSize,
@@ -22,22 +22,87 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import Button from '../Components/Button';
-import { availableTimes, TimeSlots } from '../utils/Dummy';
-
-const TrainerProfile = ({ route }) => {
+import {availableTimes, TimeSlots} from '../utils/Dummy';
+import {useDispatch, useSelector} from 'react-redux';
+import axiosBaseURL from '../utils/AxiosBaseURL';
+import useToast from '../Hooks/Toast';
+import {followTrainer, unfollowTrainer} from '../store/Slices/follow';
+import {favouriteTrainer, unfavouriteTrainer} from '../store/Slices/favourite';
+const TrainerProfile = ({route}) => {
   const [readmore, setreadmore] = useState(true);
   const [follow, setfollow] = useState(false);
   const [heart, setheart] = useState(false);
   const [selected, setSelected] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const newMarkedDates = {};
-
+  const {showToast} = useToast();
   const navigation = useNavigation();
-  const { data } = route.params;
+  const type = useSelector(state => state.Auth.data);
+  console.log('on trainer profile:', type.type);
+  const dbId = useSelector(state => state.dbId.dbId);
+  console.log('dbId:', dbId);
+  const {data} = route.params;
+  console.log('data of trainer in profile:', data);
+  const dispatch = useDispatch();
+  const isFollowing = useSelector((state: RootState) => state.follow[data.id]);
+  const isFavourite = useSelector(
+    (state: RootState) => state.favourite[data.id]
+  );
 
-  const renderItem = ({ item }) => (
+  const onFollow = async () => {
+    if (type.type === 'user') {
+      try {
+        if (isFollowing) {
+          axiosBaseURL.post('/user/removeFollowedTrainers', {
+            userId: dbId._id,
+            trainerID: data.id,
+          });
+          dispatch(unfollowTrainer({trainerID: data.id}));
+        } else {
+          axiosBaseURL.post('/user/followedTrainers', {
+            userId: dbId._id,
+            trainerID: data.id,
+            name: data.name,
+            rating: data.rating,
+            isFollow: true,
+          });
+          dispatch(followTrainer({trainerID: data.id}));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
+
+  const AddFavouriteTrainer = async () => {
+    if (type.type === 'user') {
+      try {
+        if (isFavourite) {
+          axiosBaseURL.delete('/user/Deletefavoritetrainers', {
+            data: {
+              userId: dbId._id,
+              trainerID: data.id,
+            },
+          });
+          dispatch(unfavouriteTrainer({trainerID: data.id}));
+        } else {
+          axiosBaseURL.post('/user/favoritetrainers', {
+            userId: dbId._id,
+            trainerID: data.id,
+            name: data.name,
+            rating: data.rating,
+          });
+          dispatch(favouriteTrainer({trainerID: data.id}));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
+
+  const renderItem = ({item}) => (
     <TouchableOpacity
       style={{
         paddingVertical: 5,
@@ -70,18 +135,18 @@ const TrainerProfile = ({ route }) => {
     </TouchableOpacity>
   );
   return (
-    <WrapperContainer style={{ backgroundColor: 'black' }}>
+    <WrapperContainer style={{backgroundColor: 'black'}}>
       <ScrollView>
         <ImageBackground
           resizeMode="cover"
           source={Images.ProfileBG}
-          style={{ width: responsiveWidth(100) }}>
+          style={{width: responsiveWidth(100)}}>
           <StatusBar hidden />
-          <View style={{ flex: 1 }}>
+          <View style={{flex: 1}}>
             <LinearGradient
               colors={['transparent', '#000', '#000']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1.4 }}
+              start={{x: 0, y: 0}}
+              end={{x: 0, y: 1.4}}
               style={{
                 flex: 1,
               }}>
@@ -100,11 +165,14 @@ const TrainerProfile = ({ route }) => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    setheart(!follow);
+                    setheart(!heart);
+                    AddFavouriteTrainer();
                   }}>
                   <Image
-                    source={heart ? Images.heart_filled : Images.fav_heart}
-                    tintColor={heart ? '#9FED3A' : 'white'}
+                    source={
+                      isFavourite ? Images.heart_filled : Images.fav_heart
+                    }
+                    tintColor={isFavourite ? '#9FED3A' : 'white'}
                     resizeMode="contain"
                     style={{
                       width: responsiveWidth(6),
@@ -118,7 +186,6 @@ const TrainerProfile = ({ route }) => {
                   justifyContent: 'center',
                   alignItems: 'center',
                   gap: responsiveHeight(1),
-                  // backgroundColor: 'green',
                 }}>
                 <Image
                   source={data.image}
@@ -132,7 +199,7 @@ const TrainerProfile = ({ route }) => {
                   resizeMode="contain"
                 />
                 <Text
-                  style={{ fontSize: responsiveFontSize(3.5), color: 'white' }}>
+                  style={{fontSize: responsiveFontSize(3.5), color: 'white'}}>
                   {data.name}
                 </Text>
 
@@ -151,15 +218,15 @@ const TrainerProfile = ({ route }) => {
                     marginTop: responsiveHeight(1.5),
                   }}>
                   <Text
-                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
+                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
                     Strength Training
                   </Text>
                   <Text
-                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
+                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
                     •
                   </Text>
                   <Text
-                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
+                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
                     7 Year Experience
                   </Text>
                 </View>
@@ -169,7 +236,6 @@ const TrainerProfile = ({ route }) => {
                   flexDirection: 'row',
                   justifyContent: 'space-evenly',
                   marginTop: responsiveHeight(2),
-                  // backgroundColor: 'red',
                 }}>
                 <View
                   style={{
@@ -186,11 +252,11 @@ const TrainerProfile = ({ route }) => {
                     <Text style={styles.blacktext}>Available</Text>
                   </View>
                   <Text
-                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
+                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
                     {data.rating}
                   </Text>
                   <Text
-                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
+                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
                     Rating
                   </Text>
                 </View>
@@ -202,23 +268,24 @@ const TrainerProfile = ({ route }) => {
                   <TouchableOpacity
                     onPress={() => {
                       setfollow(!follow);
+                      onFollow();
                     }}
                     style={{
                       ...styles.curve,
                       borderRadius: responsiveScreenWidth(10),
-                      backgroundColor: follow ? '#9FED3A' : 'white',
+                      backgroundColor: isFollowing ? '#9FED3A' : 'white',
                       marginBottom: responsiveHeight(1),
                     }}>
                     <Text style={styles.blacktext}>
-                      {follow ? 'Following' : 'Follow +'}
+                      {isFollowing ? 'Following' : 'Follow +'}
                     </Text>
                   </TouchableOpacity>
                   <Text
-                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
+                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
                     92
                   </Text>
                   <Text
-                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
+                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
                     Followers
                   </Text>
                 </View>
@@ -237,11 +304,11 @@ const TrainerProfile = ({ route }) => {
                     <Text style={styles.blacktext}>Message</Text>
                   </View>
                   <Text
-                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
+                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
                     24
                   </Text>
                   <Text
-                    style={{ fontSize: responsiveFontSize(1.8), color: 'white' }}>
+                    style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
                     Years old
                   </Text>
                 </View>
@@ -249,7 +316,7 @@ const TrainerProfile = ({ route }) => {
               <View style={styles.BoxContainer}>
                 <View style={styles.box}>
                   <Text
-                    style={{ color: '#9FED3A', fontSize: responsiveFontSize(2) }}>
+                    style={{color: '#9FED3A', fontSize: responsiveFontSize(2)}}>
                     Hourly Rate
                   </Text>
 
@@ -271,7 +338,7 @@ const TrainerProfile = ({ route }) => {
                 </View>
                 <View style={styles.box}>
                   <Text
-                    style={{ color: '#9FED3A', fontSize: responsiveFontSize(2) }}>
+                    style={{color: '#9FED3A', fontSize: responsiveFontSize(2)}}>
                     Hired
                   </Text>
                   {/* <View style={{flexDirection: 'row', alignItems: 'center'}}> */}
@@ -325,11 +392,11 @@ const TrainerProfile = ({ route }) => {
             onPress={() => {
               setreadmore(!readmore);
             }}
-            style={{ color: '#9FED3A' }}>
+            style={{color: '#9FED3A'}}>
             {readmore ? 'See less' : 'Read more'}
           </Text>
         </View>
-        <View style={{ marginTop: responsiveHeight(1.5) }}>
+        <View style={{marginTop: responsiveHeight(1.5)}}>
           <Text
             style={{
               paddingHorizontal: responsiveWidth(7),
@@ -346,7 +413,7 @@ const TrainerProfile = ({ route }) => {
             keyExtractor={item => item}
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ alignItems: 'center' }}
+            contentContainerStyle={{alignItems: 'center'}}
           />
         </View>
         <View style={styles.addressContainer}>
@@ -359,13 +426,12 @@ const TrainerProfile = ({ route }) => {
         <View
           style={{
             marginBottom: responsiveHeight(5),
-            alignItems: "center"
+            alignItems: 'center',
           }}>
           <Button
             text="Book Now"
-            onPress={() => navigation.navigate('Schedule', { Data: data.rate })}
-            containerstyles={{
-            }}
+            onPress={() => navigation.navigate('Schedule', {Data: data.rate})}
+            containerstyles={{}}
           />
         </View>
       </ScrollView>
@@ -389,7 +455,7 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     gap: responsiveHeight(0.7),
   },
-  SpecialitiesContainer: { paddingHorizontal: responsiveWidth(7) },
+  SpecialitiesContainer: {paddingHorizontal: responsiveWidth(7)},
   BioContainer: {
     paddingHorizontal: responsiveWidth(7),
     marginTop: responsiveHeight(1),
@@ -405,7 +471,7 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.Bold,
     marginBottom: responsiveHeight(1),
   },
-  whiteText: { color: 'white', fontSize: responsiveFontSize(1.7) },
+  whiteText: {color: 'white', fontSize: responsiveFontSize(1.7)},
   blacktext: {
     color: 'black',
     fontWeight: '500',

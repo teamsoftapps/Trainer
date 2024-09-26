@@ -5,6 +5,7 @@ const initialState = {
   res_ID: null,
   res_EMAIL: null,
   CUSTOMER_ID: null,
+  dbId: null,
 };
 
 const authSlice = createSlice({

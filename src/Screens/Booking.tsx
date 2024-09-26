@@ -4,25 +4,27 @@ import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
 import {
   responsiveFontSize,
-  responsiveScreenWidth,
   responsiveWidth,
   responsiveHeight,
 } from 'react-native-responsive-dimensions';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import Upcoming from './Upcoming';
 import Previous from './Previous';
-import {FontFamily} from '../utils/Images';
+import {useNavigation} from '@react-navigation/native';
 
 const Tab = createMaterialTopTabNavigator();
 const Booking = () => {
   const [first, setfirst] = useState(false);
-
-
+  const navigation = useNavigation();
   return (
     <WrapperContainer style={{backgroundColor: '#181818'}}>
-      <Header text='Bookings' textstyle={{fontSize:responsiveFontSize(3.5), color:"white"}} />
-      
-
+      <Header
+        text="Bookings"
+        textstyle={{fontSize: responsiveFontSize(3.5), color: 'white'}}
+        onPress={() => {
+          navigation.goBack();
+        }}
+      />
       <Tab.Navigator
         tabBar={({navigation, state}) => (
           <View
@@ -31,11 +33,10 @@ const Booking = () => {
               alignItems: 'center',
               borderBottomWidth: responsiveHeight(0.05),
               borderBottomColor: 'gray',
-              marginTop:responsiveHeight(0.5)
+              marginTop: responsiveHeight(0.5),
             }}>
             <TouchableOpacity
               onPress={() => {
-                // setselect(false);
                 navigation.navigate('Upcoming');
               }}
               activeOpacity={0.8}
@@ -52,7 +53,6 @@ const Booking = () => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                // setselect(true);
                 navigation.navigate('Previous', {data: 'Ok'});
               }}
               activeOpacity={0.8}
@@ -72,8 +72,6 @@ const Booking = () => {
         <Tab.Screen name="Upcoming" component={Upcoming} />
         <Tab.Screen name="Previous" component={Previous} />
       </Tab.Navigator>
-
-      
     </WrapperContainer>
   );
 };

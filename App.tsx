@@ -1,10 +1,10 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {useState} from 'react';
+import {NavigationContainer} from '@react-navigation/native';
 import AuthStack from './src/Navigations/AuthStack';
 import MainStack from './src/Navigations/MainStack';
-import { useSelector } from 'react-redux';
-import { StripeProvider } from '@stripe/stripe-react-native';
+import {useSelector} from 'react-redux';
+import {StripeProvider} from '@stripe/stripe-react-native';
 
 const App = () => {
   const authData = useSelector(state => state.Auth.data);

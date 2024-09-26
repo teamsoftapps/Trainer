@@ -18,6 +18,7 @@ import {FontFamily, Images} from '../utils/Images';
 import {Seartrainer} from '../utils/Dummy';
 import {AirbnbRating} from 'react-native-ratings';
 import {useNavigation} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
 const SearchTrainer = () => {
   const [Search, setSearch] = useState('');
   const navigation = useNavigation();
@@ -82,7 +83,7 @@ const SearchTrainer = () => {
           <TouchableOpacity
             activeOpacity={0.9}
             onPress={() => {
-              navigation.navigate(NavigationStrings.FILTER);
+              navigation.navigate('Filter');
             }}>
             <Image
               source={Images.filterr}

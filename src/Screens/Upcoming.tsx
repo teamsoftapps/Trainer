@@ -1,12 +1,23 @@
-import {FlatList, Image, Pressable, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import {
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import {Images} from '../utils/Images';
 import {
   responsiveHeight,
   responsiveScreenWidth,
+  responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
+import axiosBaseURL from '../utils/AxiosBaseURL';
 
 const upcoming = [
   {
@@ -42,44 +53,102 @@ const upcoming = [
 ];
 
 const Upcoming = () => {
-  const navigation=useNavigation()
+  const navigation = useNavigation();
+  const [bookings, setBookings] = useState([]);
+  const [bookingID, setBookingId] = useState('');
+  const [isDelete, setDelete] = useState(false);
+  const AuthData = useSelector(state => state.Auth.data);
+  console.log('first', AuthData);
+
+  const getBookings = async () => {
+    try {
+      const response = await axiosBaseURL.get('/user/GetBookings', {
+        params: {isToken: AuthData.isToken},
+      });
+      setBookings(response.data.data);
+    } catch (error) {}
+  };
+
+  const deleteBookings = async bookingId => {
+    try {
+      const response = await axiosBaseURL.delete('/user/DeleteBooking', {
+        data: {
+          token: AuthData.isToken,
+          bookingId: bookingId,
+        },
+      });
+      await setBookings(prevBookings =>
+        prevBookings.filter(booking => booking._id !== bookingId)
+      );
+      setDelete(false);
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    getBookings();
+  }, []);
+
   return (
     <WrapperContainer style={{backgroundColor: '#181818'}}>
       <FlatList
         showsVerticalScrollIndicator={false}
-        data={upcoming}
+        data={bookings}
         renderItem={({item, index}) => {
           return (
             <View style={styles.border}>
               <View style={styles.container}>
-                <Pressable onPress={()=>{navigation.navigate("BookingDetails", {data:item})}} style={styles.left}>
-                  <Image source={item.image} />
+                <TouchableOpacity
+                  delayLongPress={500}
+                  onLongPress={() => {
+                    setDelete(true);
+                  }}
+                  onPress={() => {
+                    navigation.navigate('BookingDetails', {data: item});
+                  }}
+                  style={styles.left}>
+                  <Image
+                    source={
+                      index == 0
+                        ? upcoming[0].image
+                        : index == 1
+                        ? upcoming[1].image
+                        : index == 2
+                        ? upcoming[2].image
+                        : null
+                    }
+                  />
                   <View>
                     <Text style={styles.whitetext} numberOfLines={1}>
-                      {item.name}
+                      {index == 0
+                        ? upcoming[0].name
+                        : index == 1
+                        ? upcoming[1].name
+                        : index == 2
+                        ? upcoming[2].name
+                        : null}
                     </Text>
                     <Text style={styles.whitetext} numberOfLines={1}>
-                      {item.date}
+                      {item.Date}
                     </Text>
                     <Text style={styles.greytext} numberOfLines={1}>
-                      {item.time}
+                      {item.Time}
                     </Text>
                   </View>
-                </Pressable>
+                </TouchableOpacity>
                 <View style={styles.right}>
-                  <Text style={styles.timeago}>{item.timeage}</Text>
+                  <Text style={styles.timeago}>{item.Reminder}</Text>
                   <View
                     style={{
                       ...styles.curve,
                       borderRadius: responsiveScreenWidth(10),
-                      backgroundColor:
-                        item.status === 'Pending'
-                          ? '#B8B8B8'
-                          : item.status === 'Confirmed'
-                          ? '#9FED3A'
-                          : item.status === 'Cancelled'
-                          ? '#FF2D55'
-                          : 'none',
+                      // backgroundColor:
+                      //   item.status === 'Pending'
+                      //     ? '#B8B8B8'
+                      //     : item.status === 'Confirmed'
+                      //     ? '#9FED3A'
+                      //     : item.status === 'Cancelled'
+                      //     ? '#FF2D55'
+                      //     : 'none',
                     }}>
                     <Text
                       style={
@@ -91,6 +160,26 @@ const Upcoming = () => {
                     </Text>
                   </View>
                 </View>
+                {isDelete ? (
+                  <TouchableOpacity
+                    onPress={() => {
+                      deleteBookings(item?._id);
+                    }}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Image
+                      source={require('../assets/Images/delete.png')}
+                      style={{
+                        height: responsiveHeight(2.5),
+                        width: responsiveWidth(4),
+                        tintColor: 'red',
+                      }}
+                    />
+                  </TouchableOpacity>
+                ) : null}
               </View>
             </View>
           );

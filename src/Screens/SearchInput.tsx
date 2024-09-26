@@ -6,23 +6,24 @@ import {
   Image,
   TextInput,
 } from 'react-native';
-import React, { useRef, useEffect } from 'react';
+import React, {useRef, useEffect} from 'react';
 import WrapperContainer from '../Components/Wrapper';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import {
   responsiveHeight,
   responsiveScreenFontSize,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { Images } from '../utils/Images';
+import {Images} from '../utils/Images';
 import Top from './Top';
 import People from './People';
 import Suggestion from './Suggestion';
 import Places from './Places';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
 
 const SearchInput = () => {
-  const navigation = useNavigation()
+  const navigation = useNavigation();
   const Tab = createMaterialTopTabNavigator();
   const textInputRef = useRef(null);
   useEffect(() => {
@@ -52,7 +53,7 @@ const SearchInput = () => {
           <TouchableOpacity activeOpacity={0.6}>
             <Image
               source={Images.search}
-              style={{ width: responsiveWidth(6), height: responsiveWidth(6) }}
+              style={{width: responsiveWidth(6), height: responsiveWidth(6)}}
             />
           </TouchableOpacity>
           <TextInput
@@ -66,12 +67,16 @@ const SearchInput = () => {
             }}
           />
         </View>
-        <TouchableOpacity activeOpacity={0.6} onPress={() => { navigation.goBack() }}>
-          <Text style={{ color: 'white' }}>Cancel</Text>
+        <TouchableOpacity
+          activeOpacity={0.6}
+          onPress={() => {
+            navigation.goBack();
+          }}>
+          <Text style={{color: 'white'}}>Cancel</Text>
         </TouchableOpacity>
       </View>
       <Tab.Navigator
-        tabBar={({ navigation, state }) => (
+        tabBar={({navigation, state}) => (
           <View
             style={{
               flexDirection: 'row',
@@ -109,7 +114,7 @@ const SearchInput = () => {
                 alignItems: 'center',
                 paddingVertical: responsiveHeight(2.1),
               }}>
-              <Text style={{ color: 'white' }}>People</Text>
+              <Text style={{color: 'white'}}>People</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -122,7 +127,7 @@ const SearchInput = () => {
                 alignItems: 'center',
                 paddingVertical: responsiveHeight(2.1),
               }}>
-              <Text style={{ color: 'white' }}>Suggestion</Text>
+              <Text style={{color: 'white'}}>Suggestion</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -135,7 +140,7 @@ const SearchInput = () => {
                 alignItems: 'center',
                 paddingVertical: responsiveHeight(2),
               }}>
-              <Text style={{ color: 'white' }}>Places</Text>
+              <Text style={{color: 'white'}}>Places</Text>
             </TouchableOpacity>
           </View>
         )}>

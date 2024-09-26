@@ -33,7 +33,8 @@ import {useTrainerForgetPassMutation} from '../store/Slices/trainerAuth';
 type Props = NativeStackScreenProps<RootProps, 'ForgotPassword'>;
 const ForgotPassword: React.FC<Props> = ({navigation, route}) => {
   const data = route.params;
-  console.log('RRRR', data.checkUser);
+  const reciveddata = data.data.checkUser;
+  console.log('RRRR', reciveddata);
   const [email, setemail] = useState('');
   const dispatch = useDispatch();
   const {showToast} = useToast();
@@ -50,7 +51,7 @@ const ForgotPassword: React.FC<Props> = ({navigation, route}) => {
       }
       // FOR USER // This Api Func will Run
 
-      if (data.checkUser === 'user') {
+      if (reciveddata === 'user') {
         const res: any = await ForgotPassUser(payload);
 
         if (res.data) {
@@ -67,7 +68,7 @@ const ForgotPassword: React.FC<Props> = ({navigation, route}) => {
 
       // FOR TRAINER // This Api Func will Run
 
-      if (data.checkUser === 'trainer') {
+      if (reciveddata === 'trainer') {
         const res: any = await TrainerForgetPass(payload);
 
         if (res.data) {

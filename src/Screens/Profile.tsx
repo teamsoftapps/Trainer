@@ -137,7 +137,7 @@ const Profile = () => {
             `/Common/GetProfile/${authData.isToken}`
           );
           const userData = profileResponse.data.data;
-          console.log('profileResponce', profileResponse);
+          console.log('profileResponce', userData);
           setImageUri(userData.profileImage);
           setAddress(userData.Address);
           setname(userData.fullName);
@@ -443,7 +443,7 @@ const Profile = () => {
         </View>
         {Address && (
           <EditAddressModal
-            token={authData}
+            token={authData.isToken}
             Address={Address}
             modalstate={AddressModal}
             onRequestClose={() => setAddressModal(false)}

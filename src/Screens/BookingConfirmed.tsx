@@ -1,4 +1,4 @@
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import {
@@ -9,22 +9,23 @@ import {
   responsiveWidth,
   useResponsiveScreenWidth,
 } from 'react-native-responsive-dimensions';
-import { FontFamily, Images } from '../utils/Images';
+import {FontFamily, Images} from '../utils/Images';
 import ButtonComp from '../Components/ButtonComp';
+import {useNavigation} from '@react-navigation/native';
 
-const BookingConfirmed = ({ route }) => {
-  const { Data } = route.params;
-  console.log(Data)
+const BookingConfirmed = ({route}) => {
+  const {Data} = route.params;
+  const navigation = useNavigation();
+  console.log(Data);
   return (
     <WrapperContainer>
       <ScrollView>
-
         <View
           style={{
             paddingHorizontal: responsiveScreenWidth(6),
             alignItems: 'center',
             gap: responsiveScreenHeight(2),
-            marginTop: responsiveScreenHeight(5)
+            marginTop: responsiveScreenHeight(5),
           }}>
           <Image
             source={Images.success}
@@ -83,7 +84,7 @@ const BookingConfirmed = ({ route }) => {
                 Alex Morgan
               </Text>
               <Text
-                style={{ color: 'black', fontSize: responsiveScreenFontSize(2) }}>
+                style={{color: 'black', fontSize: responsiveScreenFontSize(2)}}>
                 Alex Morgan
               </Text>
             </View>
@@ -95,7 +96,7 @@ const BookingConfirmed = ({ route }) => {
                 alignItems: 'center',
               }}>
               <Text
-                style={{ color: 'black', fontSize: responsiveScreenFontSize(2) }}>
+                style={{color: 'black', fontSize: responsiveScreenFontSize(2)}}>
                 Date & Time
               </Text>
               <Text
@@ -107,7 +108,7 @@ const BookingConfirmed = ({ route }) => {
                 Monday, October 24
               </Text>
               <Text
-                style={{ color: 'black', fontSize: responsiveScreenFontSize(2) }}>
+                style={{color: 'black', fontSize: responsiveScreenFontSize(2)}}>
                 10:00 AM
               </Text>
             </View>
@@ -118,7 +119,7 @@ const BookingConfirmed = ({ route }) => {
                 alignItems: 'center',
               }}>
               <Text
-                style={{ color: 'black', fontSize: responsiveScreenFontSize(2) }}>
+                style={{color: 'black', fontSize: responsiveScreenFontSize(2)}}>
                 Address
               </Text>
               <Text
@@ -130,12 +131,18 @@ const BookingConfirmed = ({ route }) => {
                 San Francisco, California
               </Text>
               <Text
-                style={{ color: 'black', fontSize: responsiveScreenFontSize(2) }}>
+                style={{color: 'black', fontSize: responsiveScreenFontSize(2)}}>
                 0.31 mi away
               </Text>
             </View>
           </View>
-          <ButtonComp mainStyle={{ width: '100%', marginBottom: responsiveScreenWidth(5) }} text="Check Details" />
+          <ButtonComp
+            mainStyle={{width: '100%', marginBottom: responsiveScreenWidth(5)}}
+            text="Check Details"
+            onPress={() => {
+              navigation.navigate('Home');
+            }}
+          />
         </View>
       </ScrollView>
     </WrapperContainer>

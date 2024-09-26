@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import {
   responsiveFontSize,
@@ -15,6 +15,9 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {Images} from '../utils/Images';
+import {useSelector} from 'react-redux';
+import axiosBaseURL from '../utils/AxiosBaseURL';
+import useToast from '../Hooks/Toast';
 
 const fav = [
   {name: 'Max Well', image: Images.trainer, rating: 3.4},
@@ -28,6 +31,45 @@ const fav = [
 
 const Favourites = () => {
   const [first, setfirst] = useState(true);
+  const [isLong, setIsLong] = useState(false);
+  const [favouriteTrainers, setFavoriteTrainers] = useState([]);
+  const userId = useSelector(state => state.dbId.dbId._id);
+  const trainer_data = useSelector(state => state.Auth.data);
+  console.log('userIddddd', trainer_data.isToken);
+  const {showToast} = useToast();
+
+  const fetchFavoriteTrainers = async () => {
+    if (trainer_data.type === 'user') {
+      try {
+        const res = await axiosBaseURL.get(
+          `/user/Getfavoritetrainers/${userId}`
+        );
+
+        setFavoriteTrainers(res.data.data);
+      } catch (error) {
+        showToast('Error', error.message, 'danger');
+      }
+    }
+  };
+  const deleteFavouriteTrainers = async (trainerID, userId) => {
+    console.log('in func:', trainerID, userId);
+    try {
+      const res = await axiosBaseURL.delete('/user/Deletefavoritetrainers', {
+        data: {userId, trainerID},
+      });
+      await setFavoriteTrainers(prevTrainers =>
+        prevTrainers.filter(trainer => trainer._id !== trainerID)
+      );
+      setIsLong(false);
+      showToast('Removed!', res.data.message, 'success');
+    } catch (error) {
+      showToast('Error', error.message, 'danger');
+    }
+  };
+  useEffect(() => {
+    fetchFavoriteTrainers();
+  }, []);
+
   if (first === true) {
     fav.sort((a, b) => b.rating - a.rating);
   } else {
@@ -40,11 +82,16 @@ const Favourites = () => {
           fontSize: responsiveFontSize(3.5),
           color: 'white',
           marginLeft: responsiveWidth(6),
-          marginTop:responsiveHeight(2)
+          marginTop: responsiveHeight(2),
         }}>
         Favourites
       </Text>
-      <View style={{flexDirection: 'row', gap: responsiveWidth(1), marginTop:responsiveHeight(4)}}>
+      <View
+        style={{
+          flexDirection: 'row',
+          gap: responsiveWidth(1),
+          marginTop: responsiveHeight(4),
+        }}>
         <View
           style={{
             backgroundColor: '#232323',
@@ -105,7 +152,7 @@ const Favourites = () => {
       </View>
       <View>
         <FlatList
-          data={fav}
+          data={favouriteTrainers}
           contentContainerStyle={{
             flexDirection: 'row',
             flexWrap: 'wrap',
@@ -118,7 +165,10 @@ const Favourites = () => {
           }}
           renderItem={({item, index}) => {
             return (
-              <View
+              <TouchableOpacity
+                onLongPress={() => {
+                  setIsLong(true);
+                }}
                 style={{
                   alignItems: 'center',
                   width: responsiveWidth(30),
@@ -127,9 +177,22 @@ const Favourites = () => {
                   paddingVertical: responsiveHeight(1),
                   paddingHorizontal: responsiveWidth(4),
                 }}>
+                {isLong && (
+                  <TouchableOpacity
+                    // style={{marginLeft: responsiveWidth(20)}}
+                    onPress={() => {
+                      deleteFavouriteTrainers(item.trainerID, item.userId);
+                    }}>
+                    <Image
+                      style={{height: responsiveHeight(3)}}
+                      resizeMode="center"
+                      source={require('../assets/Images/remove.png')}
+                    />
+                  </TouchableOpacity>
+                )}
                 <View>
                   <Image
-                    source={item.image}
+                    source={require('../assets/Images/3.png')}
                     style={{
                       width: responsiveWidth(20),
                       borderRadius: 80,
@@ -175,7 +238,7 @@ const Favourites = () => {
                     {item.rating}
                   </Text>
                 </View>
-              </View>
+              </TouchableOpacity>
             );
           }}
         />

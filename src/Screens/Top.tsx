@@ -10,7 +10,8 @@ import {
 } from 'react-native-responsive-dimensions';
 
 import {AirbnbRating} from 'react-native-ratings';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
 
 const recent = [
   {name: 'Louis Hamilton'},
@@ -20,39 +21,41 @@ const recent = [
 ];
 const upcoming = [
   {
-    id: 1,
+    id: '1',
     name: 'Alex Morgan',
     distance: '0.43 miles away',
     rate: '$20',
     expertise: 'Body Building',
     image: Images.trainer2,
-    rating: 5,
+    rating: '5',
     reviews: 65,
   },
   {
-    id: 2,
+    id: '2',
     name: 'Barbra Michelle',
     distance: '1.2 miles away',
     rate: '$70',
     expertise: 'Boxing',
     image: Images.trainer,
-    rating: 4.5,
+    rating: '4.5',
     reviews: 50,
   },
   {
-    id: 3,
+    id: '3',
     name: 'Mathues Pablo',
     distance: '2.5 miles away',
     rate: '$30',
     expertise: 'Aerobics',
     image: Images.trainer3,
-    rating: 4,
+    rating: '4',
     reviews: 45,
   },
 ];
 
 const Top = () => {
-  const navigation=useNavigation()
+  const navigation = useNavigation();
+  const type = useSelector(state => state.Auth.data);
+  console.log('on top navigation:', type);
   return (
     <WrapperContainer style={{backgroundColor: '#181818'}}>
       <View>
@@ -66,7 +69,11 @@ const Top = () => {
                   borderTopColor: '#B8B8B8',
                   borderTopWidth: item.id === 1 ? 0 : 0.5,
                 }}>
-                <Pressable onPress={()=>{navigation.navigate("TrainerProfile",{data:item})}}  style={styles.container}>
+                <Pressable
+                  onPress={() => {
+                    navigation.navigate('TrainerProfile', {data: item});
+                  }}
+                  style={styles.container}>
                   <View style={styles.left}>
                     <Image
                       source={item.image}

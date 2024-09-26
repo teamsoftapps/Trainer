@@ -21,6 +21,7 @@ import Notification from '../Screens/Notification';
 import StoryViewer from '../Screens/storyViewer';
 import Chats from '../Screens/Chats';
 import BookingConfirmed from '../Screens/BookingConfirmed';
+import Filter from '../Screens/Filter';
 
 const Stack = createNativeStackNavigator();
 const MainStack = () => {
@@ -45,6 +46,7 @@ const MainStack = () => {
       <Stack.Screen name={'Notification'} component={Notification} />
       <Stack.Screen name={'StoryViewer'} component={StoryViewer} />
       <Stack.Screen name={'Chats'} component={Chats} />
+      <Stack.Screen name={'Filter'} component={Filter} />
     </Stack.Navigator>
   );
 };

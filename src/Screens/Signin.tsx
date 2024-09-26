@@ -233,7 +233,10 @@ const Signin: React.FC<Props> = ({route}) => {
                 Remember me
               </Text>
             </View>
-            <TouchableOpacity onPress={() => {}}>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('ForgotPassword', {data: data});
+              }}>
               <Text
                 style={{
                   color: '#9FED3A',
