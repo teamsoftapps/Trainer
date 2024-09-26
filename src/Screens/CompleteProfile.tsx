@@ -23,7 +23,7 @@ import {FontFamily, Images} from '../utils/Images';
 import ButtonComp from '../Components/ButtonComp';
 import {availableTimes, Specialities, TimeSlots} from '../utils/Dummy';
 import {useNavigation} from '@react-navigation/native';
-import axiosBaseURL from '../utils/AxiosBaseURL';
+import axiosBaseURL from '../services/AxiosBaseURL';
 // import {availableTimes, TimeSlots} from '../utils/Dummy';
 // import {useNavigation} from '@react-navigation/native';
 import ImageCropPicker from 'react-native-image-crop-picker';
@@ -133,7 +133,7 @@ const CompleteProfile = ({route}) => {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
-        }
+        },
       );
       showMessage({
         message: 'Update Successful',
@@ -371,7 +371,7 @@ const CompleteProfile = ({route}) => {
                     setSpeciality(prevSelectedItems => {
                       if (prevSelectedItems.includes(item.value)) {
                         return prevSelectedItems.filter(
-                          selectedItem => selectedItem !== item.value
+                          selectedItem => selectedItem !== item.value,
                         );
                       } else {
                         return [...prevSelectedItems, item.value];
@@ -434,7 +434,7 @@ const CompleteProfile = ({route}) => {
                     setSelectedTime(prevSelectedItems => {
                       if (prevSelectedItems.includes(item)) {
                         return prevSelectedItems.filter(
-                          selectedItem => selectedItem !== item
+                          selectedItem => selectedItem !== item,
                         );
                       } else {
                         return [...prevSelectedItems, item];

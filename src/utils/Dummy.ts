@@ -1,4 +1,4 @@
-import axiosBaseURL from './AxiosBaseURL';
+import axiosBaseURL from '../services/AxiosBaseURL';
 import {Images} from './Images';
 
 export const UserImages = [

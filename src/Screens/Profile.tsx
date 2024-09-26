@@ -20,7 +20,7 @@ import {FontFamily, Images} from '../utils/Images';
 import {fetchSetupSheetparams, UserImages} from '../utils/Dummy';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
-import axiosBaseURL from '../utils/AxiosBaseURL';
+import axiosBaseURL from '../services/AxiosBaseURL';
 import EditAddressModal from '../Components/EditAddressModal';
 import DeleteCardModal from '../Components/DeleteCardModal';
 import useToast from '../Hooks/Toast';
@@ -134,7 +134,7 @@ const Profile = () => {
       const fetchData = async () => {
         try {
           const profileResponse = await axiosBaseURL.get(
-            `/Common/GetProfile/${authData.isToken}`
+            `/Common/GetProfile/${authData.isToken}`,
           );
           const userData = profileResponse.data.data;
           console.log('profileResponce', userData);
@@ -146,21 +146,20 @@ const Profile = () => {
         } catch (error) {
           console.error(
             'Error fetching data:',
-            error.response?.data?.message || error.message
+            error.response?.data?.message || error.message,
           );
         }
       };
 
       fetchData();
-    }, [authData.isToken])
+    }, [authData.isToken]),
   );
 
   const initializepaymentsheet = async () => {
     if (!stripeId) return;
     try {
-      const {ephemeralKey, setupIntents} = await fetchSetupSheetparams(
-        stripeId
-      );
+      const {ephemeralKey, setupIntents} =
+        await fetchSetupSheetparams(stripeId);
       const {error} = await initPaymentSheet({
         customerId: stripeId,
         customerEphemeralKeySecret: ephemeralKey,
@@ -177,7 +176,7 @@ const Profile = () => {
     } catch (error) {
       console.error(
         'Error during payment sheet initialization:',
-        error.message
+        error.message,
       );
     }
   };
@@ -287,7 +286,9 @@ const Profile = () => {
           <View style={styles.addresstext}>
             <Text style={styles.heading}>Favourite</Text>
             <Pressable
-              onPress={() => {}}
+              onPress={() => {
+                // navigation.navigate(NavigationStrings.FAVOURITES);
+              }}
               style={{flexDirection: 'row', alignItems: 'center'}}>
               <View style={{left: 25}}>
                 <FlatList
@@ -305,10 +306,10 @@ const Profile = () => {
                             index === 0
                               ? null
                               : index === 1
-                              ? 15
-                              : index === 2
-                              ? 25
-                              : null,
+                                ? 15
+                                : index === 2
+                                  ? 25
+                                  : null,
                         }}
                       />
                     );
@@ -366,16 +367,16 @@ const Profile = () => {
                         item.card.brand === 'mastercard'
                           ? Images.mastersilver
                           : item.card.brand === 'visa'
-                          ? Images.visasilver
-                          : item.card.brand === 'jcb'
-                          ? Images.JCBCard
-                          : item.card.brand === 'amex'
-                          ? Images.AmericanExpressCard
-                          : item.card.brand === 'diners'
-                          ? Images.DinersClub
-                          : item.card.brand === 'UnionPay'
-                          ? Images.UnionPay
-                          : Images.DicoverCard
+                            ? Images.visasilver
+                            : item.card.brand === 'jcb'
+                              ? Images.JCBCard
+                              : item.card.brand === 'amex'
+                                ? Images.AmericanExpressCard
+                                : item.card.brand === 'diners'
+                                  ? Images.DinersClub
+                                  : item.card.brand === 'UnionPay'
+                                    ? Images.UnionPay
+                                    : Images.DicoverCard
                       }
                       resizeMode="contain"
                       style={{

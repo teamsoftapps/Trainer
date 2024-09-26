@@ -78,6 +78,7 @@ export const Images = {
   RemoveCard: require('../assets/Images/removeCard.png'),
   DinersClub: require('../assets/Images/Dinersclub.png'),
   UnionPay: require('../assets/Images/unionpay.png'),
+  messageGreen: require('../assets/Images/messageGreen.png'),
 };
 
 export const FontFamily = {

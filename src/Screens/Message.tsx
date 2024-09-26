@@ -1,21 +1,73 @@
-import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import {StyleSheet, Text, View, TouchableOpacity, Image} from 'react-native';
+import React, {useCallback, useEffect, useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
-import { Images } from '../utils/Images';
+import {Images} from '../utils/Images';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { useNavigation } from '@react-navigation/native';
-import { GiftedChat } from 'react-native-gifted-chat'
+import {GiftedChat} from 'react-native-gifted-chat';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {MainProps} from '../Navigations/MainStack';
+import {
+  useCreateMessaegMutation,
+  useGetMessagesQuery,
+} from '../store/Apis/messages';
+import {useSelector} from 'react-redux';
+import useToast from '../Hooks/Toast';
 
-const Message = ({ route }) => {
+type Props = NativeStackScreenProps<MainProps, 'Message'>;
+const limit = 8;
+const Message: React.FC<Props> = ({route, navigation}) => {
+  const userData = useSelector(state => state.Auth.data);
+  // console.log('Userdata', userData?.data._id);
+  const data = route.params;
+  // console.log('DATAAAAAA', data);
+  const [createMessaeg] = useCreateMessaegMutation();
   const [messages, setMessages] = useState([]);
-  const navigation = useNavigation();
-  const { data } = route.params;
+  const [page, setpage] = useState(1);
+  const {showToast} = useToast();
+  let body = {
+    chatId: data?.id,
+    limit: limit,
+    page: page,
+  };
+  const {data: getMessages, isError, refetch} = useGetMessagesQuery(body);
 
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
+  useEffect(() => {
+    if (getMessages?.data) {
+      console.log('Response Data ', getMessages.data);
+      setMessages(getMessages.data);
+    }
+    if (isError) {
+      showToast('Error', isError, 'danger');
+      console.log('Error Raised', isError);
+    }
+  }, [getMessages, isError]);
+
+  const onSend = useCallback(async (messages = []) => {
+    let payload = {
+      chatId: data?.id,
+      text: messages[0]?.text,
+    };
+    try {
+      const res: any = await createMessaeg(payload);
+
+      if (res.data) {
+        console.log('Dataa', res.data);
+      } else {
+        console.log('Data Error', res?.error);
+        showToast('Error', res?.error.data.message, 'danger');
+      }
+    } catch (error) {
+      console.log('Error', error);
+    }
+  }, []);
 
   return (
     <WrapperContainer>
@@ -31,13 +83,9 @@ const Message = ({ route }) => {
               style={styles.back}
             />
           </TouchableOpacity>
-          <Image source={data.image} style={styles.profile_image} />
+          <Image source={{uri: data?.profile}} style={styles.profile_image} />
           <View>
             <Text style={styles.user}>{data.name}</Text>
-            <View style={styles.online}>
-              <View style={styles.dot}></View>
-              <Text style={styles.online_text}>Online</Text>
-            </View>
           </View>
         </View>
         <View
@@ -50,19 +98,27 @@ const Message = ({ route }) => {
             <Image
               source={Images.video_white}
               resizeMode="contain"
-              style={{ width: responsiveWidth(7), height: responsiveWidth(7) }}
+              style={{width: responsiveWidth(7), height: responsiveWidth(7)}}
             />
           </TouchableOpacity>
           <TouchableOpacity>
             <Image
               source={Images.call_white}
               resizeMode="contain"
-              style={{ width: responsiveWidth(6), height: responsiveWidth(6) }}
+              style={{width: responsiveWidth(6), height: responsiveWidth(6)}}
             />
           </TouchableOpacity>
         </View>
       </View>
-      <View style={{ flex: 1 }}></View>
+      <View style={{flex: 1}}>
+        <GiftedChat
+          messages={messages}
+          onSend={messages => onSend(messages)}
+          user={{
+            _id: userData?.data._id,
+          }}
+        />
+      </View>
     </WrapperContainer>
   );
 };

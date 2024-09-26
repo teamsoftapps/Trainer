@@ -3,12 +3,12 @@ import {thunk} from 'redux-thunk';
 import Reducers from './Slices';
 import {MMKV} from 'react-native-mmkv';
 import {persistReducer, persistStore} from 'redux-persist';
-import {TrainerAuth} from './Slices/trainerAuth';
-import {userAuth} from './Slices/userAuth';
-import {ForgetPassword} from './Slices/forgetPassword';
-import {ResetPassword} from './Slices/resetPassword';
-import {ResetOtp} from './Slices/resetOTP';
-import {VerifyOTP} from './Slices/verifyOTP';
+import {TrainerAuth} from './Apis/trainerAuth';
+import {userAuth} from './Apis/userAuth';
+import {Posts} from './Apis/Post';
+import {Chats} from './Apis/chat';
+import {messages} from './Apis/messages';
+
 const storage = new MMKV();
 const reduxPersistStorage = {
   setItem: (key: string, value: string) => {
@@ -37,13 +37,15 @@ const persistedReducer = persistReducer(persistConfig, Reducers);
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: getdefaultMiddleware =>
-    getdefaultMiddleware({serializableCheck: false}).concat(
+    getdefaultMiddleware({
+      serializableCheck: false,
+      // immutableCheck: false,
+    }).concat(
       TrainerAuth.middleware,
       userAuth.middleware,
-      ForgetPassword.middleware,
-      ResetPassword.middleware,
-      ResetOtp.middleware,
-      VerifyOTP.middleware
+      Posts.middleware,
+      Chats.middleware,
+      messages.middleware
     ),
 });
 export const persistore = persistStore(store);

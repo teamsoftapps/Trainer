@@ -1,13 +1,11 @@
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
+import {baseUrl} from '../../services/Urls';
 
 export const TrainerAuth = createApi({
   reducerPath: 'TrainerAuth',
 
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://192.168.0.117:6000',
-    prepareHeaders: header => {
-      header.set('Accept', 'application/json');
-    },
+    baseUrl: baseUrl,
   }),
 
   endpoints: builder => ({

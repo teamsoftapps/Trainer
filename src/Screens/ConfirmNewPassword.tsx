@@ -22,13 +22,13 @@ import Button from '../Components/Button';
 import {useNavigation} from '@react-navigation/native';
 import {showMessage} from 'react-native-flash-message';
 import {useDispatch, useSelector} from 'react-redux';
-import axiosBaseURL from '../utils/AxiosBaseURL';
+import axiosBaseURL from '../services/AxiosBaseURL';
 import {SignOut} from '../store/Slices/AuthSlice';
-import {useChangePasswordMutation} from '../store/Slices/userAuth';
+import {useChangePasswordMutation} from '../store/Apis/userAuth';
 import useToast from '../Hooks/Toast';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootProps} from '../Navigations/AuthStack';
-import {useTrainerChangePassMutation} from '../store/Slices/trainerAuth';
+import {useTrainerChangePassMutation} from '../store/Apis/trainerAuth';
 
 type Props = NativeStackScreenProps<RootProps, 'ConfirmNewPassword'>;
 

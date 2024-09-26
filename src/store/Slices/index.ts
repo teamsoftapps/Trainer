@@ -1,26 +1,26 @@
 import {combineReducers} from '@reduxjs/toolkit';
-import {TrainerAuth} from './trainerAuth';
-import {userAuth} from './userAuth';
-import {ResetPassword} from './resetPassword';
-import {ResetOtp} from './resetOTP';
-import {ForgetPassword} from './forgetPassword';
-import {VerifyOTP} from './verifyOTP';
 import authSlice from '../Slices/AuthSlice';
+import {TrainerAuth} from '../Apis/trainerAuth';
+import {userAuth} from '../Apis/userAuth';
+import {Posts} from '../Apis/Post';
+import {Chats} from '../Apis/chat';
+import {messages} from '../Apis/messages';
 import profileImage from './profileImage';
 import db_ID from './db_ID';
-import favouriteSlice from './favourite';
-import followSlice from './follow';
+import follow from './follow';
+import favourite from './favourite';
+
 const Reducers = combineReducers({
   Auth: authSlice,
   Image: profileImage,
   dbId: db_ID,
-  follow: followSlice,
-  favourite: favouriteSlice,
+  follow: follow,
+  favourite: favourite,
+
   [TrainerAuth.reducerPath]: TrainerAuth.reducer,
   [userAuth.reducerPath]: userAuth.reducer,
-  [ResetPassword.reducerPath]: ResetPassword.reducer,
-  [ResetOtp.reducerPath]: ResetOtp.reducer,
-  [ForgetPassword.reducerPath]: ForgetPassword.reducer,
-  [VerifyOTP.reducerPath]: VerifyOTP.reducer,
+  [Posts.reducerPath]: Posts.reducer,
+  [Chats.reducerPath]: Chats.reducer,
+  [messages.reducerPath]: messages.reducer,
 });
 export default Reducers;

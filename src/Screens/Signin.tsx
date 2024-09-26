@@ -21,8 +21,11 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 
 import WrapperContainer from '../Components/Wrapper';
 import {useDispatch, useSelector} from 'react-redux';
-import {useSignInUserMutation} from '../store/Slices/userAuth';
-import {useSignInTrainerMutation} from '../store/Slices/trainerAuth';
+import {useSignInUserMutation} from '../store/Apis/userAuth';
+import {
+  useSignInTrainerMutation,
+  useSignUpTrainerMutation,
+} from '../store/Apis/trainerAuth';
 import {IsLogin} from '../store/Slices/AuthSlice';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootProps} from '../Navigations/AuthStack';
@@ -57,17 +60,18 @@ const Signin: React.FC<Props> = ({route}) => {
       if (data.checkUser == 'user') {
         let res: any = await SignInUser(payload);
         if (res.data) {
-          console.log('----------------++++++++++', res.data?.data.token);
+          console.log('----------------++++++++++', res.data?.data);
           showToast('Success', 'User logged In Successfully', 'success');
           const payload = {
-            isToken: res.data?.data.token,
             res_EMAIL: email,
+            data: res?.data?.data,
             type: 'user',
           };
           dispatch(IsLogin(payload));
         }
         if (res.error) {
-          showToast('Error', res.error?.data.message, 'danger');
+          console.log('Errorrrr', res.error);
+          showToast('Error', res?.error?.data.message, 'danger');
         }
       } else {
         let res: any = await SignInTrainer(payload);
@@ -79,7 +83,7 @@ const Signin: React.FC<Props> = ({route}) => {
           });
 
           const payload = {
-            isToken: res.data?.data.token,
+            data: res?.data?.data,
             res_EMAIL: email,
             type: 'trainer',
           };

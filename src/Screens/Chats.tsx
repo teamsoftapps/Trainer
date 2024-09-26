@@ -7,7 +7,7 @@ import {
   Image,
   TextInput,
 } from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   responsiveWidth,
   responsiveHeight,
@@ -15,43 +15,52 @@ import {
   responsiveScreenFontSize,
   responsiveScreenWidth,
 } from 'react-native-responsive-dimensions';
-import { TrainerProfile, UserImages } from '../utils/Dummy';
-import { FontFamily, Images } from '../utils/Images';
+import {TrainerProfile, UserImages} from '../utils/Dummy';
+import {FontFamily, Images} from '../utils/Images';
 import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import {useGetChatsQuery} from '../store/Apis/chat';
+import {FlashList} from '@shopify/flash-list';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {MainProps} from '../Navigations/MainStack';
 
-const upcoming = [
-  {
-    id: 1,
-    name: 'Alex Morgan',
-    time: '8:00 AM',
-    image: Images.trainer2,
-    text: 'I hope youre doing great, I came across your profile',
-  },
-  {
-    id: 2,
-    name: 'Barbra Michelle',
-    time: '10:00 AM',
-    image: Images.trainer,
-    text: 'I hope youre doing great, I came across your profile',
-  },
-  {
-    id: 3,
-    name: 'Mathues Pablo',
-    time: '12:00 PM',
-    image: Images.trainer3,
-    text: 'I hope youre doing great, I came across your profile',
-  },
-];
-const Chats = () => {
-  const navigation = useNavigation()
+type Props = NativeStackScreenProps<MainProps, 'Chat'>;
+const Chats: React.FC<Props> = ({navigation, route}) => {
+  const {data} = useGetChatsQuery();
+  const [allChats, setallChats] = useState([]);
+
+  useEffect(() => {
+    getChats();
+  }, []);
+
+  const getChats = async () => {
+    try {
+      const res = await data;
+
+      console.log('Chats Success', res.data);
+      await res?.data.map(item =>
+        console.log(
+          'CONSSSS',
+          item
+          // .participants[1].userId.profileImage
+        )
+      );
+
+      setallChats(res?.data);
+    } catch (error) {
+      console.log('Chats Error', error);
+    }
+  };
+
   return (
     <WrapperContainer>
       <Header
         text="Chat with Trainer"
-        textstyle={{ color: 'white', fontFamily: FontFamily.Medium }}
-        onPress={() => { navigation.goBack() }}
+        textstyle={{color: 'white', fontFamily: FontFamily.Medium}}
+        onPress={() => {
+          navigation.goBack();
+        }}
       />
       <View
         style={{
@@ -66,7 +75,7 @@ const Chats = () => {
         <TouchableOpacity>
           <Image
             source={Images.search}
-            style={{ width: responsiveWidth(6), height: responsiveWidth(6) }}
+            style={{width: responsiveWidth(6), height: responsiveWidth(6)}}
           />
         </TouchableOpacity>
         <TextInput
@@ -90,11 +99,11 @@ const Chats = () => {
           All Active Trainer
         </Text>
         <FlatList
-          style={{ paddingLeft: responsiveWidth(4) }}
+          style={{paddingLeft: responsiveWidth(4)}}
           horizontal
           showsHorizontalScrollIndicator={false}
           data={UserImages}
-          renderItem={({ item, index }) => {
+          renderItem={({item, index}) => {
             return (
               <TouchableOpacity
                 activeOpacity={0.5}
@@ -114,54 +123,70 @@ const Chats = () => {
           }}
         />
       </View>
-      <View style={{ marginHorizontal: responsiveWidth(8) }}>
+      <View style={{marginHorizontal: responsiveWidth(8)}}>
         <Text
           style={{
             color: 'white',
             marginVertical: responsiveHeight(3),
             fontSize: responsiveScreenFontSize(2.4),
           }}>
-          Chat
+          Chats
         </Text>
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          data={upcoming}
-          renderItem={({ item, index }) => {
-            return (
-              <TouchableOpacity activeOpacity={0.6} style={styles.container} onPress={() => { navigation.navigate("Messages", { data: item }) }}>
-                <View style={styles.left}>
-                  <Image
-                    source={item.image}
-                    style={{
-                      width: responsiveHeight(8),
-                      height: responsiveHeight(8),
-                    }}
-                  />
-                  <View style={{ flex: 1, gap: responsiveHeight(1) }}>
-                    <View
+        <View style={{height: '100%'}}>
+          <FlashList
+            estimatedItemSize={20}
+            data={allChats}
+            extraData={allChats}
+            renderItem={({item, index}) => {
+              console.log('Data', allChats);
+              return (
+                <TouchableOpacity
+                  activeOpacity={0.6}
+                  style={styles.container}
+                  onPress={() => {
+                    navigation.navigate('Messages', {
+                      id: item?._id,
+                      profile: item?.participants[1]?.userId?.profileImage,
+                      name: item?.participants[1]?.userId?.fullName,
+                    });
+                  }}>
+                  <View style={styles.left}>
+                    <Image
+                      source={{
+                        uri: item?.participants[1]?.userId?.profileImage,
+                      }}
                       style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                      }}>
-                      <Text style={styles.whitetext} numberOfLines={1}>
-                        {item.name}
-                      </Text>
+                        width: responsiveHeight(8),
+                        height: responsiveHeight(8),
+                        borderRadius: responsiveWidth(20),
+                      }}
+                    />
+                    <View style={{flex: 1, gap: responsiveHeight(1)}}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          justifyContent: 'space-between',
+                        }}>
+                        <Text style={styles.whitetext} numberOfLines={1}>
+                          {item?.participants[1]?.userId?.fullName}
+                        </Text>
 
-                      <Text style={styles.greytext} numberOfLines={1}>
-                        {item.time}
-                      </Text>
-                    </View>
-                    <View>
-                      <Text numberOfLines={1} style={styles.timeago}>
-                        {item.text}
-                      </Text>
+                        <Text style={styles.greytext} numberOfLines={1}>
+                          {item.time}
+                        </Text>
+                      </View>
+                      <View>
+                        <Text numberOfLines={1} style={styles.timeago}>
+                          {item?.latestmessage}
+                        </Text>
+                      </View>
                     </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            );
-          }}
-        />
+                </TouchableOpacity>
+              );
+            }}
+          />
+        </View>
       </View>
     </WrapperContainer>
   );
@@ -191,10 +216,10 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.Regular,
     fontSize: responsiveFontSize(1.7),
   },
-  border: { borderBottomColor: '#B8B8B8', borderBottomWidth: 0.5 },
+  border: {borderBottomColor: '#B8B8B8', borderBottomWidth: 0.5},
   container: {
     flexDirection: 'row',
-    width: '100%',
+    // width: '100%',
     paddingVertical: responsiveScreenWidth(3),
   },
   left: {
@@ -203,11 +228,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
-  whitetext: { color: 'white', fontWeight: '500' },
-  blacktext: { color: 'black', fontWeight: '500' },
-  greytext: { color: '#B8B8B8', fontWeight: '400' },
-  right: { justifyContent: 'space-evenly', alignItems: 'flex-end' },
-  timeago: { color: '#B8B8B8', fontWeight: '400' },
+  whitetext: {color: 'white', fontWeight: '500'},
+  blacktext: {color: 'black', fontWeight: '500'},
+  greytext: {color: '#B8B8B8', fontWeight: '400'},
+  right: {justifyContent: 'space-evenly', alignItems: 'flex-end'},
+  timeago: {color: '#B8B8B8', fontWeight: '400'},
   curve: {
     width: '100%',
     alignItems: 'center',

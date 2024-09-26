@@ -17,7 +17,7 @@ import {
 } from 'react-native-responsive-dimensions';
 import {useNavigation} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
-import axiosBaseURL from '../utils/AxiosBaseURL';
+import axiosBaseURL from '../services/AxiosBaseURL';
 
 const upcoming = [
   {
@@ -78,7 +78,7 @@ const Upcoming = () => {
         },
       });
       await setBookings(prevBookings =>
-        prevBookings.filter(booking => booking._id !== bookingId)
+        prevBookings.filter(booking => booking._id !== bookingId),
       );
       setDelete(false);
     } catch (error) {}
@@ -111,10 +111,10 @@ const Upcoming = () => {
                       index == 0
                         ? upcoming[0].image
                         : index == 1
-                        ? upcoming[1].image
-                        : index == 2
-                        ? upcoming[2].image
-                        : null
+                          ? upcoming[1].image
+                          : index == 2
+                            ? upcoming[2].image
+                            : null
                     }
                   />
                   <View>
@@ -122,10 +122,10 @@ const Upcoming = () => {
                       {index == 0
                         ? upcoming[0].name
                         : index == 1
-                        ? upcoming[1].name
-                        : index == 2
-                        ? upcoming[2].name
-                        : null}
+                          ? upcoming[1].name
+                          : index == 2
+                            ? upcoming[2].name
+                            : null}
                     </Text>
                     <Text style={styles.whitetext} numberOfLines={1}>
                       {item.Date}

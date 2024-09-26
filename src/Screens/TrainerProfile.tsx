@@ -26,7 +26,7 @@ import {useNavigation} from '@react-navigation/native';
 import Button from '../Components/Button';
 import {availableTimes, TimeSlots} from '../utils/Dummy';
 import {useDispatch, useSelector} from 'react-redux';
-import axiosBaseURL from '../utils/AxiosBaseURL';
+import axiosBaseURL from '../services/AxiosBaseURL';
 import useToast from '../Hooks/Toast';
 import {followTrainer, unfollowTrainer} from '../store/Slices/follow';
 import {favouriteTrainer, unfavouriteTrainer} from '../store/Slices/favourite';
@@ -48,7 +48,7 @@ const TrainerProfile = ({route}) => {
   const dispatch = useDispatch();
   const isFollowing = useSelector((state: RootState) => state.follow[data.id]);
   const isFavourite = useSelector(
-    (state: RootState) => state.favourite[data.id]
+    (state: RootState) => state.favourite[data.id],
   );
 
   const onFollow = async () => {

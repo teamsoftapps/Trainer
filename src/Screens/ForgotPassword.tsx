@@ -20,15 +20,15 @@ import {FontFamily, Images} from '../utils/Images';
 import {TouchableOpacity} from 'react-native';
 import Button from '../Components/Button';
 import {useNavigation} from '@react-navigation/native';
-import axiosBaseURL from '../utils/AxiosBaseURL';
+import axiosBaseURL from '../services/AxiosBaseURL';
 import {showMessage} from 'react-native-flash-message';
 import useToast from '../Hooks/Toast';
-import {useForgotPassUserMutation} from '../store/Slices/userAuth';
+import {useForgotPassUserMutation} from '../store/Apis/userAuth';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootProps} from '../Navigations/AuthStack';
 import {useDispatch} from 'react-redux';
 import {ForgetPasswordID, SaveEmail} from '../store/Slices/AuthSlice';
-import {useTrainerForgetPassMutation} from '../store/Slices/trainerAuth';
+import {useTrainerForgetPassMutation} from '../store/Apis/trainerAuth';
 
 type Props = NativeStackScreenProps<RootProps, 'ForgotPassword'>;
 const ForgotPassword: React.FC<Props> = ({navigation, route}) => {

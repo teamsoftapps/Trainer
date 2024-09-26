@@ -23,12 +23,12 @@ import Button from '../Components/Button';
 import {OtpInput} from 'react-native-otp-entry';
 import {useNavigation} from '@react-navigation/native';
 import {showMessage} from 'react-native-flash-message';
-import axiosBaseURL from '../utils/AxiosBaseURL';
+import axiosBaseURL from '../services/AxiosBaseURL';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   useForgotPassUserMutation,
   useVerifyOtpMutation,
-} from '../store/Slices/userAuth';
+} from '../store/Apis/userAuth';
 import useToast from '../Hooks/Toast';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootProps} from '../Navigations/AuthStack';
@@ -36,7 +36,7 @@ import {SaveEmail, ForgetPasswordID} from '../store/Slices/AuthSlice';
 import {
   useTrainerForgetPassMutation,
   useTrainerVerifyOtpMutation,
-} from '../store/Slices/trainerAuth';
+} from '../store/Apis/trainerAuth';
 
 type Props = NativeStackScreenProps<RootProps, 'VerifyOTP'>;
 const VerifyOTP: React.FC<Props> = ({navigation, route}) => {

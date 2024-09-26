@@ -26,8 +26,8 @@ import FlashMessage from 'react-native-flash-message';
 import {showMessage} from 'react-native-flash-message';
 import {useDispatch, useSelector} from 'react-redux';
 import {IsLogin} from '../store/Slices/AuthSlice';
-import {useSignUpUserMutation} from '../store/Slices/userAuth';
-import {useSignUpTrainerMutation} from '../store/Slices/trainerAuth';
+import {useSignUpUserMutation} from '../store/Apis/userAuth';
+import {useSignUpTrainerMutation} from '../store/Apis/trainerAuth';
 import useToast from '../Hooks/Toast';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootProps} from '../Navigations/AuthStack';
@@ -72,7 +72,7 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
     {label: 'Male', value: 'Male'},
     {label: 'Female', value: 'Female'},
   ];
-
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const handledobInput = () => {
     dobRef.current?.focus();
   };
@@ -82,6 +82,15 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
   const handleEmailInput = () => {
     emailRef.current?.focus();
   };
+
+  const condition1 = name.length > 3;
+  const condition2 = emailPattern.test(email);
+  const condition3 = password === confirmpassword && password != '';
+  const condition4 = Gender != '';
+  const condition5 = DoB != '';
+  const condition6 = weight != '';
+  const condition7 = height != '';
+  const condition8 = address != '';
 
   const handleSignup = async () => {
     let payload = {
@@ -116,7 +125,7 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
           navigation.navigate('signin', {checkUser: 'trainer'});
         }
         if (res.error) {
-          console.log('errorr');
+          console.log('errorr', res.error);
 
           showToast('Error', res.error?.data.message, 'danger');
         }

@@ -27,11 +27,21 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import axiosBaseURL from '../utils/AxiosBaseURL';
+import axiosBaseURL from '../services/AxiosBaseURL';
 import {useDispatch, useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import InstaStory from 'react-native-insta-story';
-import {SaveId, SaveLogedInUser} from '../store/Slices/db_ID';
+import {store} from '../store/store';
+import {useGetTrainersQuery} from '../store/Apis/Post';
+import {FlashList} from '@shopify/flash-list';
+import {
+  NativeStackScreenProps,
+  NativeStackNavigationProp,
+} from '@react-navigation/native-stack';
+import {MainProps} from '../Navigations/MainStack';
+import {useCreateChatMutation, useGetChatsQuery} from '../store/Apis/chat';
+import {socketService} from '../utils/socketService';
+import {SaveLogedInUser} from '../store/Slices/db_ID';
 
 const StoriesData = [
   {
@@ -166,20 +176,23 @@ const StoriesData = [
     ],
   },
 ];
-const Home = () => {
-  const navigation = useNavigation();
+
+type Props = NativeStackScreenProps<MainProps, 'Bottom'>;
+const Home: React.FC<Props> = ({navigation, route}) => {
+  const {data} = useGetTrainersQuery();
+  const [createChat] = useCreateChatMutation();
   const [modal, setmodal] = useState(Number);
   const [usersData, setusersData] = useState(TrainerProfile);
+  const [trainerData, settrainerData] = useState([]);
   const [APIUserData, setAPIUserData] = useState({});
   const dispatch = useDispatch();
-  const datafromsignup = useSelector(state => state.Auth.data);
-  console.log('datafromsignup', datafromsignup);
+  const token = useSelector(state => state?.Auth.data.isToken);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const profileResponse = await axiosBaseURL.get(
-          `/Common/GetProfile/${datafromsignup.isToken}`
+          `/Common/GetProfile/${token}`,
         );
         const userData = profileResponse.data.data;
         console.log('profileResponce', userData);
@@ -187,12 +200,12 @@ const Home = () => {
       } catch (error) {
         console.error(
           'Error fetching data:',
-          error.response?.data?.message || error.message
+          error.response?.data?.message || error.message,
         );
       }
     };
     fetchData();
-  }, [datafromsignup.isToken]);
+  }, [token]);
 
   // const screenWidth = Dimensions.get('screen').width;
 
@@ -239,6 +252,49 @@ const Home = () => {
   //     width,
   //   };
   // });
+  useEffect(() => {
+    getPosts();
+  });
+  useEffect(() => {
+    socketService.initializeSocket();
+  }, []);
+  const getPosts = async () => {
+    try {
+      const res = await data;
+      console.log('ALL', res);
+      settrainerData(res?.data);
+    } catch (error) {
+      console.log('Errorr', error);
+    }
+  };
+
+  const onPressMessage = async (item: object) => {
+    let payload = {
+      userId: item._id,
+      type: item.isType,
+    };
+    try {
+      const res = await createChat(payload);
+
+      if (res?.data.data) {
+        navigation.navigate('Messages', {
+          name: item?.fullName,
+          profile: item?.profileImage,
+          id: res?.data.data._id,
+        });
+      }
+    } catch (error) {
+      console.log('Successfull Error', error);
+    }
+  };
+
+  const listemptyComp = () => {
+    return (
+      <View style={{alignItems: 'center', justifyContent: 'center'}}>
+        <Text style={{fontFamily: FontFamily.Regular}}>Data not found</Text>
+      </View>
+    );
+  };
   return (
     <WrapperContainer>
       <View
@@ -263,7 +319,7 @@ const Home = () => {
             alignItems: 'center',
             gap: responsiveWidth(5),
           }}>
-          <TouchableOpacity activeOpacity={0.8}>
+          <TouchableOpacity onPress={getPosts} activeOpacity={0.8}>
             <Image source={Images.notification} style={styles.notifiaction} />
           </TouchableOpacity>
           <TouchableOpacity
@@ -340,50 +396,19 @@ const Home = () => {
         <View>
           <Text style={styles.popular}>Popular Personal Trainers</Text>
 
-          <View>
-            <FlatList
+          <View style={{flex: 1}}>
+            <FlashList
+              estimatedItemSize={200}
               scrollEnabled={false}
-              data={usersData}
+              ListEmptyComponent={listemptyComp}
+              data={trainerData}
               renderItem={({item, index}) => {
                 return (
                   <ImageBackground
                     imageStyle={{borderRadius: responsiveWidth(1.5)}}
-                    source={item.ProfileImage}
+                    source={{uri: item?.profileImage}}
                     style={styles.Trainer}>
-                    <Pressable
-                    // onPress={() => {
-                    //   !item.isFollow ? Follow(item.id) : unFollow(item.id);
-                    //   setmodal(item.id);
-
-                    //   if (!item.isFollow) {
-                    //     Follow(item.id);
-                    //     animation.value = withSpring(1); // Animate to expanded state
-                    //   } else {
-                    //     unFollow(item.id);
-                    //     animation.value = withSpring(0); // Animate to collapsed state
-                    //   }
-                    // }}
-                    >
-                      {/* <Animated.View style={[styles.Follow, animatedstyle]}>
-                        <Text
-                          style={{
-                            color: '#000',
-                            fontSize: responsiveFontSize(2),
-                            fontFamily: FontFamily.Semi_Bold,
-                          }}>
-                          {item.isFollow ? 'Following' : 'Follow'}
-                        </Text>
-
-                        <Image
-                          source={Images.plus}
-                          style={{
-                            width: responsiveHeight(2),
-                            height: responsiveHeight(2),
-                          }}
-                        />
-                      </Animated.View> */}
-                    </Pressable>
-
+                    <Text>Ok Now We Try</Text>
                     <LinearGradient
                       colors={['transparent', '#000', '#000']}
                       start={{x: 0, y: 0}}
@@ -396,7 +421,7 @@ const Home = () => {
                             fontFamily: FontFamily.Regular,
                             fontSize: responsiveFontSize(2),
                           }}>
-                          {item.cate}
+                          {item?.Speciality}
                         </Text>
                         <Text
                           style={{
@@ -405,7 +430,7 @@ const Home = () => {
                             fontSize: responsiveFontSize(2.5),
                             marginVertical: responsiveHeight(1),
                           }}>
-                          {item.ProfileName}
+                          {item?.fullName}
                         </Text>
 
                         <View
@@ -417,7 +442,7 @@ const Home = () => {
                           }}>
                           <View style={styles.bottomSubView}>
                             <Image source={Images.pin} style={styles.pin} />
-                            <Text style={styles.rating}>{item.location}</Text>
+                            <Text style={styles.rating}>{item?.gender}</Text>
                           </View>
 
                           <View style={styles.bottomSubView}>
@@ -426,13 +451,17 @@ const Home = () => {
                               selectedColor="#9FED3A"
                               showRating={false}
                               isDisabled
-                              defaultRating={item.rating}
+                              defaultRating={item?.Rating}
                             />
-                            <Text style={styles.rating}>{item.rating}</Text>
+                            <Text style={styles.rating}>{item?.Rating}</Text>
                           </View>
                         </View>
                       </View>
-                      <TouchableOpacity activeOpacity={0.8}>
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => {
+                          onPressMessage(item);
+                        }}>
                         <Image
                           source={Images.messageGreen}
                           style={styles.messageGreen}

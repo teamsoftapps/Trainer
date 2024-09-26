@@ -26,7 +26,7 @@ import {
   presentPaymentSheet,
 } from '@stripe/stripe-react-native';
 import useToast from '../Hooks/Toast';
-import axiosBaseURL from '../utils/AxiosBaseURL';
+import axiosBaseURL from '../services/AxiosBaseURL';
 import {useSelector} from 'react-redux';
 
 const ReviewBooking = ({route}) => {
@@ -37,7 +37,7 @@ const ReviewBooking = ({route}) => {
   const [totalAmount, setTotalAmount] = useState();
   const {Data} = route.params;
   const [trainerRatePerHour, settrainerRatePerHour] = useState(
-    Data.rate.replace('$', '')
+    Data.rate.replace('$', ''),
   );
   const authData = useSelector(state => state.Auth.data);
   console.log('in review booking', authData);
@@ -61,13 +61,13 @@ const ReviewBooking = ({route}) => {
   const fetchData = async () => {
     try {
       const profileResponse = await axiosBaseURL.get(
-        `/common/GetProfile/${authData.isToken}`
+        `/common/GetProfile/${authData.isToken}`,
       );
       setStripeId(profileResponse.data.data.stripeCustomerID);
     } catch (error) {
       console.error(
         'Error fetching data:',
-        error.response?.data?.message || error.message
+        error.response?.data?.message || error.message,
       );
     }
   };
@@ -78,7 +78,7 @@ const ReviewBooking = ({route}) => {
     try {
       const {ephemeralKey, paymentIntent} = await fetchPaymentSheetparams(
         stripeId,
-        totalAmount
+        totalAmount,
       );
 
       const {error} = await initPaymentSheet({
@@ -98,7 +98,7 @@ const ReviewBooking = ({route}) => {
     } catch (error) {
       console.error(
         'Error during payment sheet initialization:',
-        error.message
+        error.message,
       );
     }
   };

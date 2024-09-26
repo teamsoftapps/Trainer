@@ -16,7 +16,7 @@ import {
 } from 'react-native-responsive-dimensions';
 import {Images} from '../utils/Images';
 import {useSelector} from 'react-redux';
-import axiosBaseURL from '../utils/AxiosBaseURL';
+import axiosBaseURL from '../services/AxiosBaseURL';
 import useToast from '../Hooks/Toast';
 
 const fav = [
@@ -42,7 +42,7 @@ const Favourites = () => {
     if (trainer_data.type === 'user') {
       try {
         const res = await axiosBaseURL.get(
-          `/user/Getfavoritetrainers/${userId}`
+          `/user/Getfavoritetrainers/${userId}`,
         );
 
         setFavoriteTrainers(res.data.data);
@@ -58,7 +58,7 @@ const Favourites = () => {
         data: {userId, trainerID},
       });
       await setFavoriteTrainers(prevTrainers =>
-        prevTrainers.filter(trainer => trainer._id !== trainerID)
+        prevTrainers.filter(trainer => trainer._id !== trainerID),
       );
       setIsLong(false);
       showToast('Removed!', res.data.message, 'success');

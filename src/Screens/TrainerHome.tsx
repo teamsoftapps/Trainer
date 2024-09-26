@@ -16,7 +16,7 @@ import {
 } from 'react-native-responsive-dimensions';
 import {Images} from '../utils/Images';
 import {useNavigation} from '@react-navigation/native';
-import axiosBaseURL from '../utils/AxiosBaseURL';
+import axiosBaseURL from '../services/AxiosBaseURL';
 import {useSelector} from 'react-redux';
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
 
@@ -58,7 +58,7 @@ const TrainerHome = () => {
         .then(response => {
           console.log(
             '------------------------',
-            response.data.data.profileImage
+            response.data.data.profileImage,
           );
           setAPIUserData(response.data.data);
           if (response.data.data.Bio === null) {

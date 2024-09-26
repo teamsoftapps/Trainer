@@ -7,7 +7,7 @@ import {
   FlatList,
   Pressable,
 } from 'react-native';
-import React, { useCallback, useState } from 'react';
+import React, {useCallback, useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
 import {
@@ -17,43 +17,38 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { FontFamily, Images } from '../utils/Images';
+import {FontFamily, Images} from '../utils/Images';
 import Button from '../Components/Button';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import axiosBaseURL from '../utils/AxiosBaseURL';
-import { useSelector } from 'react-redux';
-import { useStripe } from '@stripe/stripe-react-native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import axiosBaseURL from '../services/AxiosBaseURL';
+import {useSelector} from 'react-redux';
+import {useStripe} from '@stripe/stripe-react-native';
 
-
-const PaymentMethod = ({ route }) => {
+const PaymentMethod = ({route}) => {
   const [cardcheckbox, setcardcheckbox] = useState(0);
-  const [CardDetails, setCardDetails] = useState([])
+  const [CardDetails, setCardDetails] = useState([]);
 
-  const { Data } = route.params;
-
+  const {Data} = route.params;
 
   const authData = useSelector(state => state.Auth.data);
   const onPress = () => {
-    const selectedCard = CardDetails.find((item) => item._id === cardcheckbox)
-    navigation.navigate('ReviewBooking', { Card: selectedCard, Data: Data })
-  }
+    const selectedCard = CardDetails.find(item => item._id === cardcheckbox);
+    navigation.navigate('ReviewBooking', {Card: selectedCard, Data: Data});
+  };
   useFocusEffect(
     useCallback(() => {
       axiosBaseURL
         .post('/Common/GetCardDetail', {
-          token: authData
+          token: authData,
         })
         .then(response => {
-          setCardDetails(response.data.data)
+          setCardDetails(response.data.data);
           if (CardDetails.length > 0) {
             setcardcheckbox(CardDetails[0]._id);
           }
         })
-        .catch(error => {
-
-        });
-
-    }, [authData])
+        .catch(error => {});
+    }, [authData]),
   );
 
   const navigation = useNavigation();
@@ -61,7 +56,7 @@ const PaymentMethod = ({ route }) => {
     <WrapperContainer>
       <Header
         onPress={() => navigation.goBack()}
-        style={{ height: responsiveHeight(7) }}
+        style={{height: responsiveHeight(7)}}
       />
       <View>
         <Text
@@ -77,7 +72,7 @@ const PaymentMethod = ({ route }) => {
       <View style={styles.shipping_container}>
         <FlatList
           data={CardDetails}
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <View style={styles.address_container}>
               <View style={styles.address_left}>
                 {item.CardType === 'visa' ? (
@@ -106,15 +101,18 @@ const PaymentMethod = ({ route }) => {
                       width: responsiveScreenWidth(10),
                       height: responsiveScreenWidth(6),
                     }}
-                  />) : item.CardType === 'jcb' ?
-                  (<Image
+                  />
+                ) : item.CardType === 'jcb' ? (
+                  <Image
                     source={Images.JCBCard}
                     resizeMode="contain"
                     style={{
                       width: responsiveScreenWidth(10),
                       height: responsiveScreenWidth(6),
                     }}
-                  />) : (<Image
+                  />
+                ) : (
+                  <Image
                     source={Images.AmericanExpressCard}
                     resizeMode="contain"
                     style={{
@@ -122,7 +120,7 @@ const PaymentMethod = ({ route }) => {
                       height: responsiveScreenWidth(6),
                     }}
                   />
-                  )}
+                )}
               </View>
               <View style={styles.address}>
                 <Text numberOfLines={1} style={styles.address_top}>
@@ -135,7 +133,6 @@ const PaymentMethod = ({ route }) => {
               <View style={styles.address_icon}>
                 <TouchableOpacity
                   onPress={() => {
-
                     setcardcheckbox(item._id);
                   }}
                   style={{
@@ -180,8 +177,7 @@ const PaymentMethod = ({ route }) => {
           </View>
         </View>
       </View>
-      <View style={{ alignItems: "center" }}>
-
+      <View style={{alignItems: 'center'}}>
         <Button
           disabled={cardcheckbox == 0 ? true : false}
           text="Next"

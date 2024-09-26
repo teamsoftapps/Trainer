@@ -23,7 +23,16 @@ import Chats from '../Screens/Chats';
 import BookingConfirmed from '../Screens/BookingConfirmed';
 import Filter from '../Screens/Filter';
 
-const Stack = createNativeStackNavigator();
+export type MainProps = {
+  Message: {
+    name: String;
+    profile: String;
+    id: String;
+  };
+  Chat: undefined;
+  Bottom: undefined;
+};
+const Stack = createNativeStackNavigator<MainProps>();
 const MainStack = () => {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>

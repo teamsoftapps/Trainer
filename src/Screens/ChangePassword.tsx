@@ -22,7 +22,7 @@ import Button from '../Components/Button';
 import {useNavigation} from '@react-navigation/native';
 import {showMessage} from 'react-native-flash-message';
 import {useDispatch, useSelector} from 'react-redux';
-import axiosBaseURL from '../utils/AxiosBaseURL';
+import axiosBaseURL from '../services/AxiosBaseURL';
 import {SignOut} from '../store/Slices/AuthSlice';
 
 const ChangePassword = ({route}) => {

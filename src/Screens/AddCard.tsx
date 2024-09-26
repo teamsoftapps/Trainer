@@ -6,24 +6,28 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import Header from '../Components/Header';
-import MaskInput, { Masks } from 'react-native-mask-input';
+import MaskInput, {Masks} from 'react-native-mask-input';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { Images } from '../utils/Images';
+import {Images} from '../utils/Images';
 import Button from '../Components/Button';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import SubscriptionModal from '../Components/SubscriptionModal';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 import PaymentModal from '../Components/PaymentModal';
-import axiosBaseURL from '../utils/AxiosBaseURL';
-import { showMessage } from 'react-native-flash-message';
-import { usePaymentSheet, presentPaymentSheet, initPaymentSheet } from '@stripe/stripe-react-native';
+import axiosBaseURL from '../services/AxiosBaseURL';
+import {showMessage} from 'react-native-flash-message';
+import {
+  usePaymentSheet,
+  presentPaymentSheet,
+  initPaymentSheet,
+} from '@stripe/stripe-react-native';
 var creditCardType = require('credit-card-type');
 
 const AddCard = () => {
@@ -60,44 +64,49 @@ const AddCard = () => {
   const condition1 = expirationDate != '';
   const condition6 =
     expiryYear > currentYear ||
-    (expiryYear === currentYear && expiryMonth > currentMonth) || (expiryYear === currentYear && expiryMonth === currentMonth)
+    (expiryYear === currentYear && expiryMonth > currentMonth) ||
+    (expiryYear === currentYear && expiryMonth === currentMonth);
   const condition2 = CardHoldername != '';
-  const condition3 = CardNumber != '' && (visaCards[0]?.type != undefined || visaCards[0]?.type != null)
+  const condition3 =
+    CardNumber != '' &&
+    (visaCards[0]?.type != undefined || visaCards[0]?.type != null);
   const condition4 = CVV != '';
 
   useEffect(() => {
-    initializepaymentsheet()
-  }, [])
+    initializepaymentsheet();
+  }, []);
 
   const fetchPaymentSheetparams = async () => {
-    const response = await axiosBaseURL.post("/Common/InitializeStripe")
-    const { customer, ephemeralKey, paymentIntent } = await response.data.data
-    console.log("step 1 done")
+    const response = await axiosBaseURL.post('/Common/InitializeStripe');
+    const {customer, ephemeralKey, paymentIntent} = await response.data.data;
+    console.log('step 1 done');
     return {
-      customer, ephemeralKey, paymentIntent
-    }
-  }
+      customer,
+      ephemeralKey,
+      paymentIntent,
+    };
+  };
 
   const initializepaymentsheet = async () => {
-    const { customer, ephemeralKey, paymentIntent } = await fetchPaymentSheetparams()
-    console.log(customer, "step 2 done")
-    const { error } = await initPaymentSheet({
+    const {customer, ephemeralKey, paymentIntent} =
+      await fetchPaymentSheetparams();
+    console.log(customer, 'step 2 done');
+    const {error} = await initPaymentSheet({
       customerId: customer,
       customerEphemeralKeySecret: ephemeralKey,
       paymentIntentClientSecret: paymentIntent,
       merchantDisplayName: "Stern's GYM",
       allowsDelayedPaymentMethods: true,
-      allowsRemovalOfLastSavedPaymentMethod: true
-    })
-  }
+      allowsRemovalOfLastSavedPaymentMethod: true,
+    });
+  };
   // Main function
   const AddCard = async () => {
-
-    const { error } = await presentPaymentSheet()
+    const {error} = await presentPaymentSheet();
     if (error) {
-      console.log("maa chud gai")
+      console.log('maa chud gai');
     } else {
-      console.log("oh yehhh")
+      console.log('oh yehhh');
     }
     // if (condition1 && condition2 && condition3 && condition4 && condition6) {
     //   setCVVformik(false);
@@ -128,7 +137,6 @@ const AddCard = () => {
     //       });
     //     });
 
-
     // } else {
     //   if (!condition4) setCVVformik(true);
     //   if (!condition3) setCardformik(true);
@@ -141,8 +149,6 @@ const AddCard = () => {
 
     // }
   };
-
-
 
   const navigation = useNavigation();
   return (
@@ -161,7 +167,7 @@ const AddCard = () => {
         }}>
         Add Card
       </Text>
-      <View style={{ marginHorizontal: responsiveWidth(8) }}>
+      <View style={{marginHorizontal: responsiveWidth(8)}}>
         <View
           style={{
             flexDirection: 'row',
@@ -175,9 +181,9 @@ const AddCard = () => {
           <Image
             source={Images.Cardwhite}
             resizeMode="contain"
-            style={{ width: responsiveWidth(10) }}
+            style={{width: responsiveWidth(10)}}
           />
-          <Text style={{ color: 'white', fontSize: responsiveFontSize(2.3) }}>
+          <Text style={{color: 'white', fontSize: responsiveFontSize(2.3)}}>
             Credit or Debit Card
           </Text>
         </View>
@@ -227,8 +233,8 @@ const AddCard = () => {
             onChangeText={setCardNumber}
             mask={Masks.CREDIT_CARD}
           />
-          <View style={{ flexDirection: 'row', gap: responsiveWidth(4) }}>
-            <View style={{ flex: 1 }}>
+          <View style={{flexDirection: 'row', gap: responsiveWidth(4)}}>
+            <View style={{flex: 1}}>
               <Text
                 style={{
                   marginVertical: responsiveHeight(2),
@@ -255,7 +261,7 @@ const AddCard = () => {
                 placeholderTextColor="#888"
               />
             </View>
-            <View style={{ flex: 1 }}>
+            <View style={{flex: 1}}>
               <Text
                 style={{
                   marginVertical: responsiveHeight(2),
@@ -297,17 +303,17 @@ const AddCard = () => {
                 source={
                   checkbox ? Images.Checkboxgreen : Images.Blank_Checkboxgreen
                 }
-                style={{ width: responsiveWidth(5), height: responsiveWidth(5) }}
+                style={{width: responsiveWidth(5), height: responsiveWidth(5)}}
               />
             </TouchableOpacity>
-            <Text style={{ fontSize: responsiveFontSize(1.8), color: 'grey' }}>
+            <Text style={{fontSize: responsiveFontSize(1.8), color: 'grey'}}>
               Remember this card
             </Text>
           </View>
         </View>
         <Button
           onPress={() => {
-            AddCard()
+            AddCard();
           }}
           containerstyles={{
             marginLeft: responsiveWidth(4),

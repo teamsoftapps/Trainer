@@ -16,7 +16,7 @@ import {
 import {FontFamily, Images} from '../utils/Images';
 import Button from './Button';
 import {TextInput} from 'react-native';
-import axiosBaseURL from '../utils/AxiosBaseURL';
+import axiosBaseURL from '../services/AxiosBaseURL';
 import {showMessage} from 'react-native-flash-message';
 
 interface Props {

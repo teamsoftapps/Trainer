@@ -18,7 +18,7 @@ import {
 import {FontFamily, Images} from '../utils/Images';
 import Button from './Button';
 import {TextInput} from 'react-native';
-import axiosBaseURL from '../utils/AxiosBaseURL';
+import axiosBaseURL from '../services/AxiosBaseURL';
 import {showMessage} from 'react-native-flash-message';
 
 interface Props {
@@ -76,7 +76,7 @@ const DeleteCardModal: React.FC<Props> = ({
       .catch(error => {
         console.error(
           'Error removing card:',
-          error.response ? error.response.data : error.message
+          error.response ? error.response.data : error.message,
         );
         showMessage({
           message: 'Failed, Please try again',
