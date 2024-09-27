@@ -16,6 +16,7 @@ import {
 } from '../store/Apis/messages';
 import {useSelector} from 'react-redux';
 import useToast from '../Hooks/Toast';
+import {socketService} from '../utils/socketService';
 
 type Props = NativeStackScreenProps<MainProps, 'Message'>;
 const limit = 8;
@@ -35,9 +36,9 @@ const Message: React.FC<Props> = ({route, navigation}) => {
   };
   const {data: getMessages, isError, refetch} = useGetMessagesQuery(body);
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  //   useEffect(() => {
+  //     refetch();
+  //   }, [refetch]);
 
   useEffect(() => {
     if (getMessages?.data) {
@@ -50,6 +51,21 @@ const Message: React.FC<Props> = ({route, navigation}) => {
     }
   }, [getMessages, isError]);
 
+  useEffect(() => {
+    socketService.emit('join_room', data?.id);
+    socketService.on('Send_Message', (data: any) => {
+      console.log('Socket Response From Backend ', data);
+      // alert(data);
+      setMessages(previousMessages =>
+        GiftedChat.append(previousMessages, data.data)
+      );
+    });
+
+    return () => {
+      socketService.removeListener('Send_Message');
+    };
+  }, []);
+
   const onSend = useCallback(async (messages = []) => {
     let payload = {
       chatId: data?.id,
@@ -58,8 +74,9 @@ const Message: React.FC<Props> = ({route, navigation}) => {
     try {
       const res: any = await createMessaeg(payload);
 
-      if (res.data) {
+      if (res?.data) {
         console.log('Dataa', res.data);
+        socketService.emit('Send_Message', res.data);
       } else {
         console.log('Data Error', res?.error);
         showToast('Error', res?.error.data.message, 'danger');
