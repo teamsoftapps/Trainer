@@ -43,6 +43,7 @@ import {MainProps} from '../Navigations/MainStack';
 import {useCreateChatMutation, useGetChatsQuery} from '../store/Apis/chat';
 import {socketService} from '../utils/socketService';
 import {SaveLogedInUser} from '../store/Slices/db_ID';
+import {followTrainer, unfollowTrainer} from '../store/Slices/follow';
 
 const StoriesData = [
   {
@@ -188,8 +189,10 @@ const Home: React.FC<Props> = ({navigation, route}) => {
   const [APIUserData, setAPIUserData] = useState({});
   const dispatch = useDispatch();
   const token = useSelector(state => state?.Auth.data.data.token);
-
+  const authData = useSelector(state => state?.Auth.data.data);
+  // const isFollowing = useSelector((state: RootState) => state.follow[data._id]);
   useEffect(() => {
+    console.log('data', data);
     const fetchData = async () => {
       try {
         const profileResponse = await axiosBaseURL.get(
@@ -211,9 +214,11 @@ const Home: React.FC<Props> = ({navigation, route}) => {
   useEffect(() => {
     getPosts();
   });
+
   useEffect(() => {
     socketService.initializeSocket();
   }, []);
+
   const getPosts = async () => {
     try {
       const res = await data;
@@ -262,6 +267,31 @@ const Home: React.FC<Props> = ({navigation, route}) => {
       </View>
     );
   };
+
+  // const onFollow = async () => {
+  //   if (authData.isType === 'user') {
+  //     try {
+  //       // if () {
+  //       // axiosBaseURL.post('/user/removeFollowedTrainers', {
+  //       //   userId: authData._id,
+  //       //   trainerID: data.data.id,
+  //       // });
+  //       // dispatch(unfollowTrainer({trainerID: data.data._id}));
+  //       // } else {
+  //       axiosBaseURL.post('/user/followedTrainers', {
+  //         userId: authData._id,
+  //         trainerID: data.data._id,
+  //         name: data.data.fullName,
+  //         rating: data.data.Rating,
+  //         isFollow: true,
+  //       });
+  //       dispatch(followTrainer({trainerID: data.data._id}));
+  //       // }
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   }
+  // };
   return (
     <WrapperContainer>
       <View
@@ -339,6 +369,10 @@ const Home: React.FC<Props> = ({navigation, route}) => {
                     source={{uri: item?.profileImage}}
                     style={styles.Trainer}>
                     <TouchableOpacity
+                      // onPress={() => {
+                      //   onFollow();
+                      //   // console.log('itemmm', item._id);
+                      // }}
                       activeOpacity={0.9}
                       style={{
                         backgroundColor: '#9fed3a',

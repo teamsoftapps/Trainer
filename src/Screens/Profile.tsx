@@ -444,7 +444,7 @@ const Profile = () => {
         </View>
         {Address && (
           <EditAddressModal
-            token={authData.isToken}
+            token={authData.token}
             Address={Address}
             modalstate={AddressModal}
             onRequestClose={() => setAddressModal(false)}

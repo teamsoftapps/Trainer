@@ -23,35 +23,43 @@ import {useNavigation} from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
 const trainers = [
   {
+    id: '4',
+    img: require('../assets/Images/trainer4.jpg'),
+    rating: '5',
+    star: require('../assets/Images/Starrr.png'),
+    lat: 37.787979,
+    lng: -122.43341,
+  },
+  {
     id: '1',
     img: require('../assets/Images/2.png'),
     rating: '3',
     star: require('../assets/Images/Starrr.png'),
+    lat: 37.788733,
+    lng: -122.435286,
   },
   {
     id: '2',
     img: require('../assets/Images/3.png'),
     rating: '5',
     star: require('../assets/Images/Starrr.png'),
+    lat: 37.789136,
+    lng: -122.431858,
   },
+
   {
     id: '3',
     img: require('../assets/Images/Mask.png'),
     rating: '4',
     star: require('../assets/Images/Starrr.png'),
-  },
-  {
-    id: '4',
-    img: require('../assets/Images/3.png'),
-    rating: '5',
-    star: require('../assets/Images/Starrr.png'),
+    lat: 37.788191,
+    lng: -122.431507,
   },
 ];
 
 const SearchTrainer = () => {
   const [location, setLocation] = useState(null);
   const flatListRef = useRef(null);
-  console.log(location);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -85,6 +93,7 @@ const SearchTrainer = () => {
   };
 
   const scrollToItem = index => {
+    console.log('indexx', index);
     flatListRef.current.scrollToIndex({index, animated: true});
   };
 
@@ -119,18 +128,23 @@ const SearchTrainer = () => {
         <MapView
           provider={PROVIDER_GOOGLE}
           style={styles.map}
-          region={{
-            latitude: 37.78825,
-            longitude: -122.4324,
-            latitudeDelta: 0.015,
-            longitudeDelta: 0.0121,
+          initialRegion={{
+            latitude: 37.788733,
+            longitude: -122.435286,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
           }}>
-          <Marker
-            coordinate={{
-              latitude: 37.78825,
-              longitude: -122.4324,
-            }}
-          />
+          {trainers.map((trainer, index) => (
+            <Marker
+              key={trainer.id}
+              coordinate={{latitude: trainer.lat, longitude: trainer.lng}}
+              onPress={() => scrollToItem(index)}>
+              <Image
+                source={trainer.img}
+                style={{width: 40, height: 40, borderRadius: 20}}
+              />
+            </Marker>
+          ))}
         </MapView>
         <View
           style={{
@@ -167,7 +181,7 @@ const SearchTrainer = () => {
             />
           </TouchableOpacity>
         </View>
-        <View
+        {/* <View
           style={{
             zIndex: 1000,
             height: responsiveHeight(10),
@@ -293,7 +307,7 @@ const SearchTrainer = () => {
               );
             }}
           />
-        </View>
+        </View> */}
         <View>
           <FlatList
             ref={flatListRef}

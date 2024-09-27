@@ -67,11 +67,8 @@ const Upcoming = () => {
       const response = await axiosBaseURL.get('/user/GetBookings', {
         params: {token: AuthData.token},
       });
-      console.log('RRRRRRRR', response);
       setBookings(response.data.data);
-    } catch (error) {
-      console.log('Errorrrr', error);
-    }
+    } catch (error) {}
   };
 
   const deleteBookings = async bookingId => {
