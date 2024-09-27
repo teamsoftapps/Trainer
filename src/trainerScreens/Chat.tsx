@@ -150,16 +150,16 @@ const Chats: React.FC<Props> = ({navigation, route}) => {
                   activeOpacity={0.6}
                   style={styles.container}
                   onPress={() => {
-                    navigation.navigate('Messages', {
+                    navigation.navigate('Message', {
                       id: item?._id,
-                      profile: item?.participants[1]?.userId?.profileImage,
-                      name: item?.participants[1]?.userId?.fullName,
+                      profile: item?.participants[0]?.userId?.profileImage,
+                      name: item?.participants[0]?.userId?.fullName,
                     });
                   }}>
                   <View style={styles.left}>
                     <Image
                       source={{
-                        uri: item?.participants[1]?.userId?.profileImage,
+                        uri: item?.participants[0]?.userId?.profileImage,
                       }}
                       style={{
                         width: responsiveHeight(8),
@@ -174,7 +174,7 @@ const Chats: React.FC<Props> = ({navigation, route}) => {
                           justifyContent: 'space-between',
                         }}>
                         <Text style={styles.whitetext} numberOfLines={1}>
-                          {item?.participants[1]?.userId?.fullName}
+                          {item?.participants[0]?.userId?.fullName}
                         </Text>
 
                         <Text style={styles.greytext} numberOfLines={1}>

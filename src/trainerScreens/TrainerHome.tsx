@@ -19,6 +19,7 @@ import {useNavigation} from '@react-navigation/native';
 import axiosBaseURL from '../services/AxiosBaseURL';
 import {useSelector} from 'react-redux';
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
+import {socketService} from '../utils/socketService';
 
 const TrainerHome = () => {
   const [APIUserData, setAPIUserData] = useState({});
@@ -48,7 +49,9 @@ const TrainerHome = () => {
       selectedTime: '8:00 AM',
     },
   ];
-
+  useEffect(() => {
+    socketService.initializeSocket();
+  }, []);
   useEffect(() => {
     console.log('=----------', trainer_data);
     if (trainer_data.type === 'trainer') {

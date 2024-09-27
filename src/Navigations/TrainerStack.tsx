@@ -3,6 +3,7 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import TrainerBttomStack from './TrainerBttomStack';
 import Chat from '../trainerScreens/Chat';
+import Message from '../trainerScreens/Message';
 
 export type TainerProps = {
   TrainerBttomStack: undefined;
@@ -14,6 +15,7 @@ const TrainerStack = () => {
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name={'TrainerBttomStack'} component={TrainerBttomStack} />
       <Stack.Screen name={'Chat'} component={Chat} />
+      <Stack.Screen name={'Message'} component={Message} />
     </Stack.Navigator>
   );
 };
