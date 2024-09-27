@@ -41,6 +41,7 @@ import {
 type Props = NativeStackScreenProps<RootProps, 'VerifyOTP'>;
 const VerifyOTP: React.FC<Props> = ({navigation, route}) => {
   const data = route.params;
+  console.log('Routes Dtaaaa', data);
   const [start, setstart] = useState(false);
   const [code, setcode] = useState('');
   const [time, setTime] = useState(60);
@@ -48,6 +49,7 @@ const VerifyOTP: React.FC<Props> = ({navigation, route}) => {
   const [remainingTime, setRemainingTime] = useState(0);
   const [timeoutId, setTimeoutId] = useState(null);
   const authData = useSelector(state => state.Auth);
+  console.log('IDDDDDDD////', authData?.res_ID);
   const [verifyOtp, {isLoading: isUserLoading}] = useVerifyOtpMutation();
   const [TrainerVerifyOtp, {isLoading: isTrainerLoading}] =
     useTrainerVerifyOtpMutation();
@@ -59,8 +61,9 @@ const VerifyOTP: React.FC<Props> = ({navigation, route}) => {
   const dispatch = useDispatch();
 
   const ResendOTPFunctions = async () => {
+    console.log('Lets Run');
     if (isDisabled) return; // Prevent action if button is disabled
-
+    console.log('Its runninng');
     let payload = {email: authData.res_EMAIL};
 
     try {
@@ -141,14 +144,16 @@ const VerifyOTP: React.FC<Props> = ({navigation, route}) => {
 
       _id: authData?.res_ID,
     };
+    console.log('Runing ');
     try {
       if (!code || code.length < 4) {
         return showToast('Error', 'Input field must not be empty', 'danger');
       }
 
       // FOR USER // This Api Func will Run
-
+      console.log('OOOOOOO');
       if (data.checkUser === 'user') {
+        console.log('Checking');
         const res: any = await verifyOtp(payload);
 
         if (res?.data) {

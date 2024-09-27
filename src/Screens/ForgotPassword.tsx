@@ -33,7 +33,7 @@ import {useTrainerForgetPassMutation} from '../store/Apis/trainerAuth';
 type Props = NativeStackScreenProps<RootProps, 'ForgotPassword'>;
 const ForgotPassword: React.FC<Props> = ({navigation, route}) => {
   const data = route.params;
-  const reciveddata = data.data.checkUser;
+  const reciveddata = data?.data.checkUser;
   console.log('RRRR', reciveddata);
   const [email, setemail] = useState('');
   const dispatch = useDispatch();
@@ -59,7 +59,7 @@ const ForgotPassword: React.FC<Props> = ({navigation, route}) => {
           showToast('Success', res?.data.message, 'success');
           dispatch(ForgetPasswordID(res?.data?.data?.id));
           dispatch(SaveEmail(res.data?.data?.email));
-          navigation.navigate('VerifyOTP', {checkUser: data.checkUser});
+          navigation.navigate('VerifyOTP', {checkUser: reciveddata});
         }
         if (res.error) {
           showToast('Error', res.error?.data?.message, 'danger');
@@ -76,7 +76,7 @@ const ForgotPassword: React.FC<Props> = ({navigation, route}) => {
           showToast('Success', res?.data.message, 'success');
           dispatch(ForgetPasswordID(res?.data?.data?.id));
           dispatch(SaveEmail(res.data?.data?.email));
-          navigation.navigate('VerifyOTP', {checkUser: data.checkUser});
+          navigation.navigate('VerifyOTP', {checkUser: reciveddata});
         }
         if (res.error) {
           showToast('Error', res.error?.data?.message, 'danger');

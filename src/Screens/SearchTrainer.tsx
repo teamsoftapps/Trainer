@@ -15,14 +15,32 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import MapView, {PROVIDER_GOOGLE} from 'react-native-maps';
+import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import {FontFamily, Images} from '../utils/Images';
 import {Seartrainer} from '../utils/Dummy';
 import {AirbnbRating} from 'react-native-ratings';
 import {useNavigation} from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
+const trainers = [
+  {
+    id: '1',
+    img: require('../assets/Images/2.png'),
+    rating: '3',
+  },
+  {
+    id: '2',
+    img: require('../assets/Images/3.png'),
+    rating: '5',
+  },
+  {
+    id: '3',
+    img: require('../assets/Images/Mask.png'),
+    rating: '4',
+  },
+];
 const SearchTrainer = () => {
   const [location, setLocation] = useState(null);
+  console.log(location);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -85,11 +103,18 @@ const SearchTrainer = () => {
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           region={{
-            latitude: 24.856649,
-            longitude: 67.058323,
+            latitude: location.latitude,
+            longitude: location.longitude,
             latitudeDelta: 0.015,
             longitudeDelta: 0.0121,
-          }}></MapView>
+          }}>
+          <Marker
+            coordinate={{
+              latitude: location.latitude,
+              longitude: location.longitude,
+            }}
+          />
+        </MapView>
         <View
           style={{
             flexDirection: 'row',

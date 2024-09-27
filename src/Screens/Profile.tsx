@@ -186,7 +186,6 @@ const Profile = () => {
     await initializepaymentsheet();
     const {error} = await presentPaymentSheet();
     if (error) {
-      showToast('Try later', error.message, 'danger');
     } else {
       showToast('Added Successfully!', 'Your card has been added', 'success');
       await fetchStripeCards();

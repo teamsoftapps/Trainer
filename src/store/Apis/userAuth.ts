@@ -34,6 +34,7 @@ export const userAuth = createApi({
 
     verifyOtp: builder.mutation({
       query: body => {
+        console.log('Data', body);
         return {
           url: `/user/otpVerify/${body._id}`,
           method: 'POST',
