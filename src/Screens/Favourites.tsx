@@ -33,27 +33,24 @@ const Favourites = () => {
   const [first, setfirst] = useState(true);
   const [isLong, setIsLong] = useState(false);
   const [favouriteTrainers, setFavoriteTrainers] = useState([]);
-  const userId = useSelector(state => state.dbId.dbId);
-  const trainer_data = useSelector(state => state.Auth.data);
-  console.log('userIddddd', trainer_data.data);
-  console.log('userIddddd', userId);
+  const authData = useSelector(state => state.Auth.data.data);
   const {showToast} = useToast();
 
+  useEffect(() => {
+    fetchFavoriteTrainers();
+  }, []);
+
   const fetchFavoriteTrainers = async () => {
-    if (trainer_data.type === 'user') {
+    if (authData.isType === 'user') {
       try {
         const res = await axiosBaseURL.get(
-          `/user/Getfavoritetrainers/${userId}`
+          `/user/Getfavoritetrainers/${authData._id}`
         );
-
         setFavoriteTrainers(res.data.data);
-      } catch (error) {
-        showToast('Error', error.message, 'danger');
-      }
+      } catch (error) {}
     }
   };
   const deleteFavouriteTrainers = async (trainerID, userId) => {
-    console.log('in func:', trainerID, userId);
     try {
       const res = await axiosBaseURL.delete('/user/Deletefavoritetrainers', {
         data: {userId, trainerID},
@@ -62,14 +59,8 @@ const Favourites = () => {
         prevTrainers.filter(trainer => trainer._id !== trainerID)
       );
       setIsLong(false);
-      showToast('Removed!', res.data.message, 'success');
-    } catch (error) {
-      showToast('Error', error.message, 'danger');
-    }
+    } catch (error) {}
   };
-  useEffect(() => {
-    fetchFavoriteTrainers();
-  }, []);
 
   if (first === true) {
     fav.sort((a, b) => b.rating - a.rating);

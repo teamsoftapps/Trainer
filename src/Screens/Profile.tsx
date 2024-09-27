@@ -31,6 +31,9 @@ import {
   presentPaymentSheet,
 } from '@stripe/stripe-react-native';
 const Profile = () => {
+  const {showToast} = useToast();
+  const openModal = () => setModal(true);
+  const closeModal = () => setModal(false);
   const [Address, setAddress] = useState('');
   const [name, setname] = useState('');
   const [email, setemail] = useState('');
@@ -39,13 +42,39 @@ const Profile = () => {
   const [stripeId, setStripeId] = useState(null);
   const [StripeCardDetails, setStripeCardDetails] = useState([]);
   const [StripeCardData, setStripeCardData] = useState('');
-  const authData = useSelector(state => state.Auth.data);
-  console.log('authData:', authData);
-  const {showToast} = useToast();
-  const openModal = () => setModal(true);
-  const closeModal = () => setModal(false);
+  const authData = useSelector(state => state.Auth.data.data);
+  console.log('suthData', authData);
   const [imageUri, setImageUri] = useState(null);
   const [isModal, setModal] = useState(false);
+
+  useEffect(() => {
+    fetchStripeCards();
+  }, [stripeId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const profileResponse = await axiosBaseURL.get(
+            `/Common/GetProfile/${authData.token}`
+          );
+          const userData = profileResponse.data.data;
+          setImageUri(userData.profileImage);
+          setAddress(userData.Address);
+          setname(userData.fullName);
+          setemail(userData.email);
+          setStripeId(userData.stripeCustomerID);
+        } catch (error) {
+          console.error(
+            'Error fetching data:',
+            error.response?.data?.message || error.message
+          );
+        }
+      };
+
+      fetchData();
+    }, [authData.token])
+  );
 
   const handleChoosePhoto = () => {
     ImageCropPicker.openPicker({
@@ -83,7 +112,7 @@ const Profile = () => {
         type: image.mime,
         name: `profileImage-${Date.now()}.jpg`,
       });
-      formData.append('email', authData.res_EMAIL);
+      formData.append('email', authData.email);
       console.log('form data:', formData);
 
       const response = await axiosBaseURL.post('/Common/fileUpload', formData, {
@@ -125,41 +154,13 @@ const Profile = () => {
       console.error('Error fetching Stripe cards:', error.message);
     }
   };
-  useEffect(() => {
-    fetchStripeCards();
-  }, [stripeId]);
-
-  useFocusEffect(
-    useCallback(() => {
-      const fetchData = async () => {
-        try {
-          const profileResponse = await axiosBaseURL.get(
-            `/Common/GetProfile/${authData.isToken}`,
-          );
-          const userData = profileResponse.data.data;
-          console.log('profileResponce', userData);
-          setImageUri(userData.profileImage);
-          setAddress(userData.Address);
-          setname(userData.fullName);
-          setemail(userData.email);
-          setStripeId(userData.stripeCustomerID);
-        } catch (error) {
-          console.error(
-            'Error fetching data:',
-            error.response?.data?.message || error.message,
-          );
-        }
-      };
-
-      fetchData();
-    }, [authData.isToken]),
-  );
 
   const initializepaymentsheet = async () => {
     if (!stripeId) return;
     try {
-      const {ephemeralKey, setupIntents} =
-        await fetchSetupSheetparams(stripeId);
+      const {ephemeralKey, setupIntents} = await fetchSetupSheetparams(
+        stripeId
+      );
       const {error} = await initPaymentSheet({
         customerId: stripeId,
         customerEphemeralKeySecret: ephemeralKey,
@@ -176,7 +177,7 @@ const Profile = () => {
     } catch (error) {
       console.error(
         'Error during payment sheet initialization:',
-        error.message,
+        error.message
       );
     }
   };
@@ -306,10 +307,10 @@ const Profile = () => {
                             index === 0
                               ? null
                               : index === 1
-                                ? 15
-                                : index === 2
-                                  ? 25
-                                  : null,
+                              ? 15
+                              : index === 2
+                              ? 25
+                              : null,
                         }}
                       />
                     );
@@ -367,16 +368,16 @@ const Profile = () => {
                         item.card.brand === 'mastercard'
                           ? Images.mastersilver
                           : item.card.brand === 'visa'
-                            ? Images.visasilver
-                            : item.card.brand === 'jcb'
-                              ? Images.JCBCard
-                              : item.card.brand === 'amex'
-                                ? Images.AmericanExpressCard
-                                : item.card.brand === 'diners'
-                                  ? Images.DinersClub
-                                  : item.card.brand === 'UnionPay'
-                                    ? Images.UnionPay
-                                    : Images.DicoverCard
+                          ? Images.visasilver
+                          : item.card.brand === 'jcb'
+                          ? Images.JCBCard
+                          : item.card.brand === 'amex'
+                          ? Images.AmericanExpressCard
+                          : item.card.brand === 'diners'
+                          ? Images.DinersClub
+                          : item.card.brand === 'UnionPay'
+                          ? Images.UnionPay
+                          : Images.DicoverCard
                       }
                       resizeMode="contain"
                       style={{

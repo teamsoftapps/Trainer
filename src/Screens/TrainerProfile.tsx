@@ -31,38 +31,31 @@ import useToast from '../Hooks/Toast';
 import {followTrainer, unfollowTrainer} from '../store/Slices/follow';
 import {favouriteTrainer, unfavouriteTrainer} from '../store/Slices/favourite';
 const TrainerProfile = ({route}) => {
+  const {data} = route.params;
   const [readmore, setreadmore] = useState(true);
   const [follow, setfollow] = useState(false);
   const [heart, setheart] = useState(false);
-  const [selected, setSelected] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
-  const newMarkedDates = {};
-  const {showToast} = useToast();
   const navigation = useNavigation();
-  const type = useSelector(state => state.Auth.data);
-  console.log('on trainer profile:', type.type);
-  const user_id = useSelector(state => state?.Auth.data.data._id);
-
-  const {data} = route.params;
+  const authData = useSelector(state => state?.Auth.data.data);
   console.log('data of trainer in profile:', data);
   const dispatch = useDispatch();
   const isFollowing = useSelector((state: RootState) => state.follow[data.id]);
   const isFavourite = useSelector(
-    (state: RootState) => state.favourite[data.id],
+    (state: RootState) => state.favourite[data.id]
   );
 
   const onFollow = async () => {
-    if (type.type === 'user') {
+    if (authData.isType === 'user') {
       try {
         if (isFollowing) {
           axiosBaseURL.post('/user/removeFollowedTrainers', {
-            userId: dbId._id,
+            userId: authData._id,
             trainerID: data.id,
           });
           dispatch(unfollowTrainer({trainerID: data.id}));
         } else {
           axiosBaseURL.post('/user/followedTrainers', {
-            userId: dbId._id,
+            userId: authData._id,
             trainerID: data.id,
             name: data.name,
             rating: data.rating,
@@ -77,20 +70,19 @@ const TrainerProfile = ({route}) => {
   };
 
   const AddFavouriteTrainer = async () => {
-    console.log('DDDDDD', user_id);
-    if (type.type === 'user') {
+    if (authData.isType === 'user') {
       try {
         if (isFavourite) {
           axiosBaseURL.delete('/user/Deletefavoritetrainers', {
             data: {
-              userId: user_id,
+              userId: authData._id,
               trainerID: data.id,
             },
           });
           dispatch(unfavouriteTrainer({trainerID: data.id}));
         } else {
           axiosBaseURL.post('/user/favoritetrainers', {
-            userId: user_id,
+            userId: authData._id,
             trainerID: data.id,
             name: data.name,
             rating: data.rating,
