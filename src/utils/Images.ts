@@ -80,6 +80,8 @@ export const Images = {
   DinersClub: require('../assets/Images/Dinersclub.png'),
   UnionPay: require('../assets/Images/unionpay.png'),
   messageGreen: require('../assets/Images/messageGreen.png'),
+  plus: require('../assets/Images/plus.png'),
+  story: require('../assets/Images/story.png'),
 };
 
 export const FontFamily = {

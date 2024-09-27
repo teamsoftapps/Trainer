@@ -14,7 +14,7 @@ export const Chats = createApi({
       if (token) {
         headers.set('authorization', `Bearer ${token}`);
       }
-      console.log('Header', headers);
+      console.log('Header', headers?.map.authorization);
       return headers;
     },
   }),

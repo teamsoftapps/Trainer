@@ -338,6 +338,35 @@ const Home: React.FC<Props> = ({navigation, route}) => {
                     imageStyle={{borderRadius: responsiveWidth(1.5)}}
                     source={{uri: item?.profileImage}}
                     style={styles.Trainer}>
+                    <TouchableOpacity
+                      activeOpacity={0.9}
+                      style={{
+                        backgroundColor: '#9fed3a',
+                        padding: responsiveWidth(1),
+                        borderRadius: responsiveHeight(5),
+                        alignItems: 'center',
+                        justifyContent: 'space-evenly',
+                        width: responsiveWidth(30),
+                        margin: responsiveHeight(2),
+                        paddingVertical: responsiveHeight(1.5),
+                        flexDirection: 'row',
+                      }}>
+                      <Text
+                        style={{
+                          color: '#000',
+                          fontFamily: FontFamily.Medium,
+                          fontSize: responsiveFontSize(2),
+                        }}>
+                        Follow
+                      </Text>
+                      <Image
+                        style={{
+                          width: responsiveHeight(2.3),
+                          height: responsiveHeight(2.3),
+                        }}
+                        source={Images.plus}
+                      />
+                    </TouchableOpacity>
                     <LinearGradient
                       colors={['transparent', '#000', '#000']}
                       start={{x: 0, y: 0}}

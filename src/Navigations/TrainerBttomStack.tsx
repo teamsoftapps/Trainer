@@ -1,17 +1,19 @@
 import {Image, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import Home from '../Screens/Home';
-import Favourites from '../Screens/Favourites';
-import Profile from '../Screens/Profile';
+
 import {Images} from '../utils/Images';
 import {responsiveScreenHeight} from 'react-native-responsive-dimensions';
-import Booking from '../Screens/Booking';
-import SearchTrainer from '../Screens/SearchTrainer';
+
 import TrainerHome from '../trainerScreens/TrainerHome';
 import {useSelector} from 'react-redux';
+import Profile from '../trainerScreens/Profile';
+import Story from '../trainerScreens/Story';
+import Booking from '../Screens/Booking';
+import Favourite from '../trainerScreens/Favourite';
+import Listing from '../trainerScreens/Listing';
 
-const BottomStack = () => {
+const TrainerBttomStack = () => {
   const type = useSelector(state => state.Auth.data.type);
   console.log('type from bottom:', type);
   const Bottom = createBottomTabNavigator();
@@ -25,24 +27,6 @@ const BottomStack = () => {
           backgroundColor: '#000000',
         },
       }}>
-      {/* {type === 'trainer' ? (
-        <Bottom.Screen
-          options={{
-            tabBarIcon: ({focused}) => (
-              <Image
-                source={focused ? Images.home_filled : Images.home}
-                resizeMode="contain"
-                style={{
-                  height: responsiveScreenHeight(3),
-                  width: responsiveScreenHeight(3),
-                }}
-              />
-            ),
-          }}
-          name={'TrainerHome'}
-          component={TrainerHome}
-        />
-      ) : ( */}
       <Bottom.Screen
         options={{
           tabBarIcon: ({focused}) => (
@@ -56,8 +40,8 @@ const BottomStack = () => {
             />
           ),
         }}
-        name={'Home'}
-        component={Home}
+        name={'TrainerHome'}
+        component={TrainerHome}
       />
       {/* )} */}
 
@@ -74,14 +58,14 @@ const BottomStack = () => {
             />
           ),
         }}
-        name={'Booking'}
-        component={Booking}
+        name={'Listing'}
+        component={Listing}
       />
       <Bottom.Screen
         options={{
           tabBarIcon: ({focused}) => (
             <Image
-              source={focused ? Images.search_filled : Images.search}
+              source={focused ? Images.story : Images.story}
               resizeMode="contain"
               style={{
                 height: responsiveScreenHeight(3),
@@ -90,8 +74,8 @@ const BottomStack = () => {
             />
           ),
         }}
-        name={'SearchTrainer'}
-        component={SearchTrainer}
+        name={'Story'}
+        component={Story}
       />
       <Bottom.Screen
         options={{
@@ -106,8 +90,8 @@ const BottomStack = () => {
             />
           ),
         }}
-        name={'Favourites'}
-        component={Favourites}
+        name={'Favourite'}
+        component={Favourite}
       />
       <Bottom.Screen
         options={{
@@ -129,6 +113,6 @@ const BottomStack = () => {
   );
 };
 
-export default BottomStack;
+export default TrainerBttomStack;
 
 const styles = StyleSheet.create({});

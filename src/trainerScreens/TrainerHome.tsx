@@ -23,6 +23,7 @@ import {AnimatedCircularProgress} from 'react-native-circular-progress';
 const TrainerHome = () => {
   const [APIUserData, setAPIUserData] = useState({});
   const trainer_data = useSelector(state => state.Auth.data);
+  console.log('Trainer Data', trainer_data);
   const navigation = useNavigation();
   const Bookings = [
     {
@@ -58,7 +59,7 @@ const TrainerHome = () => {
         .then(response => {
           console.log(
             '------------------------',
-            response.data.data.profileImage,
+            response.data.data.profileImage
           );
           setAPIUserData(response.data.data);
           if (response.data.data.Bio === null) {
@@ -155,7 +156,7 @@ const TrainerHome = () => {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => {
-              navigation.navigate('Chats');
+              navigation.navigate('Chat');
             }}>
             <Image source={Images.messages} style={styles.notifiaction} />
           </TouchableOpacity>
@@ -169,7 +170,7 @@ const TrainerHome = () => {
               {...styles.Welcome_Text},
               {color: '#fff', fontWeight: '500'},
             ]}>
-            Alex,
+            {trainer_data?.data.fullName}
           </Text>
         </Text>
         <Text style={styles.slogan}>

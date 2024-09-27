@@ -9,8 +9,9 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
-import {Images} from '../utils/Images';
+import {FontFamily, Images} from '../utils/Images';
 import {
+  responsiveFontSize,
   responsiveHeight,
   responsiveScreenWidth,
   responsiveWidth,
@@ -87,10 +88,28 @@ const Upcoming = () => {
       setDelete(false);
     } catch (error) {}
   };
-
+  const EmptyComp = () => {
+    return (
+      <View
+        style={{
+          alignItems: 'center',
+          marginTop: responsiveHeight(25),
+        }}>
+        <Text
+          style={{
+            fontFamily: FontFamily.Regular,
+            color: 'gray',
+            fontSize: responsiveFontSize(2.2),
+          }}>
+          No Bookings Available
+        </Text>
+      </View>
+    );
+  };
   return (
     <WrapperContainer style={{backgroundColor: '#181818'}}>
       <FlatList
+        ListEmptyComponent={EmptyComp}
         showsVerticalScrollIndicator={false}
         data={bookings}
         renderItem={({item, index}) => {
