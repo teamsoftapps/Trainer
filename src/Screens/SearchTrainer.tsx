@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import {
   responsiveFontSize,
@@ -26,20 +26,31 @@ const trainers = [
     id: '1',
     img: require('../assets/Images/2.png'),
     rating: '3',
+    star: require('../assets/Images/Starrr.png'),
   },
   {
     id: '2',
     img: require('../assets/Images/3.png'),
     rating: '5',
+    star: require('../assets/Images/Starrr.png'),
   },
   {
     id: '3',
     img: require('../assets/Images/Mask.png'),
     rating: '4',
+    star: require('../assets/Images/Starrr.png'),
+  },
+  {
+    id: '4',
+    img: require('../assets/Images/3.png'),
+    rating: '5',
+    star: require('../assets/Images/Starrr.png'),
   },
 ];
+
 const SearchTrainer = () => {
   const [location, setLocation] = useState(null);
+  const flatListRef = useRef(null);
   console.log(location);
   const navigation = useNavigation();
 
@@ -73,6 +84,10 @@ const SearchTrainer = () => {
     }
   };
 
+  const scrollToItem = index => {
+    flatListRef.current.scrollToIndex({index, animated: true});
+  };
+
   return (
     <WrapperContainer style={{flex: 1}}>
       <View style={styles.header}>
@@ -90,6 +105,7 @@ const SearchTrainer = () => {
           </TouchableOpacity>
         </View>
       </View>
+
       <View
         style={{
           borderTopLeftRadius: responsiveHeight(4),
@@ -98,20 +114,21 @@ const SearchTrainer = () => {
           flex: 1,
           justifyContent: 'space-between',
           paddingVertical: responsiveHeight(3),
+          zIndex: 100,
         }}>
         <MapView
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           region={{
-            latitude: location.latitude,
-            longitude: location.longitude,
+            latitude: 37.78825,
+            longitude: -122.4324,
             latitudeDelta: 0.015,
             longitudeDelta: 0.0121,
           }}>
           <Marker
             coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude,
+              latitude: 37.78825,
+              longitude: -122.4324,
             }}
           />
         </MapView>
@@ -150,9 +167,136 @@ const SearchTrainer = () => {
             />
           </TouchableOpacity>
         </View>
+        <View
+          style={{
+            zIndex: 1000,
+            height: responsiveHeight(10),
+            position: 'absolute',
+            flexDirection: 'column',
+          }}>
+          <FlatList
+            style={{position: 'absolute'}}
+            horizontal
+            data={trainers.slice(0, 2)}
+            renderItem={({index, item}) => {
+              return (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center',
 
+                    marginVertical: responsiveHeight(30),
+                    width: responsiveWidth(50),
+                  }}>
+                  <TouchableOpacity
+                    onPress={() => scrollToItem(index + 1)}
+                    style={{position: 'relative'}}>
+                    <Image
+                      source={item.img}
+                      style={{
+                        borderColor: '#fff',
+                        borderWidth: responsiveWidth(1.3),
+                        borderRadius: responsiveWidth(6),
+                      }}
+                    />
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        position: 'absolute',
+                        top: responsiveHeight(6),
+                        left: responsiveWidth(5),
+                        backgroundColor: 'white',
+                        borderRadius: responsiveWidth(2),
+                        padding: responsiveWidth(1),
+                        gap: responsiveWidth(1),
+                      }}>
+                      <Text
+                        style={{
+                          fontSize: responsiveFontSize(1.5),
+                          fontWeight: '600',
+                        }}>
+                        {item.rating}
+                      </Text>
+                      <Image
+                        source={item.star}
+                        style={{
+                          tintColor: 'orange',
+                          height: responsiveHeight(1.5),
+                          width: responsiveWidth(3),
+                        }}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              );
+            }}
+          />
+          <FlatList
+            style={{position: 'absolute'}}
+            horizontal
+            data={trainers.slice(2, 4)}
+            renderItem={({index, item}) => {
+              return (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginTop: responsiveHeight(14),
+                    width: responsiveWidth(40),
+                  }}>
+                  <TouchableOpacity
+                    onPress={() => scrollToItem(3)}
+                    style={{position: 'relative'}}>
+                    <Image
+                      source={item.img}
+                      style={{
+                        borderColor: '#fff',
+                        borderWidth: responsiveWidth(1.3),
+                        borderRadius: responsiveWidth(6),
+                      }}
+                    />
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        position: 'absolute',
+                        top: responsiveHeight(6),
+                        left: responsiveWidth(5),
+                        backgroundColor: 'white',
+                        borderRadius: responsiveWidth(2),
+                        padding: responsiveWidth(1),
+                        gap: responsiveWidth(1),
+                      }}>
+                      <Text
+                        style={{
+                          fontSize: responsiveFontSize(1.5),
+                          fontWeight: '600',
+                        }}>
+                        {item.rating}
+                      </Text>
+                      <Image
+                        source={item.star}
+                        style={{
+                          tintColor: 'orange',
+                          height: responsiveHeight(1.5),
+                          width: responsiveWidth(3),
+                        }}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              );
+            }}
+          />
+        </View>
         <View>
           <FlatList
+            ref={flatListRef}
             showsHorizontalScrollIndicator={false}
             horizontal
             data={Seartrainer}

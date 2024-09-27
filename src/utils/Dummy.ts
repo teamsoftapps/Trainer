@@ -235,4 +235,18 @@ export const Seartrainer = [
     time: Images.clock,
     timing: '10:00-18:00',
   },
+  {
+    id: 4,
+    name: 'Alex Morgan',
+    location: '0.43 mi',
+    rate: '$20',
+    expertise: 'Training',
+    image: Images.Trainerpost2,
+    rating: 1,
+    reviews: 65,
+    claender: Images.calendar,
+    days: 'MON-FRI',
+    time: Images.clock,
+    timing: '10:00-18:00',
+  },
 ];

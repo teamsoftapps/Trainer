@@ -17,6 +17,7 @@ export const Images = {
   trainer3: require('../assets/Images/Mask.png'),
   trainerpost: require('../assets/Images/Trainerpost.png'),
   Trainerpost1: require('../assets/Images/Trainerpost1.png'),
+  Trainerpost2: require('../assets/Images/Trainerpost2.png'),
   filter: require('../assets/Images/filter.png'),
   notification: require('../assets/Images/notification.png'),
   messages: require('../assets/Images/message.png'),
