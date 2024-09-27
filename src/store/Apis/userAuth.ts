@@ -6,9 +6,6 @@ export const userAuth = createApi({
 
   baseQuery: fetchBaseQuery({
     baseUrl: baseUrl,
-    // prepareHeaders: header => {
-    //   header.set('Accept', 'application/json');
-    // },
   }),
 
   endpoints: builder => ({

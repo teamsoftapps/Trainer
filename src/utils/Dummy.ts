@@ -169,7 +169,7 @@ export const formatDate = (dateString: string) => {
 };
 
 export const fetchPaymentSheetparams = async (CustomerID: string, amount) => {
-  const response = await axiosBaseURL.post('/Common/InitializePaymentIntent', {
+  const response = await axiosBaseURL.post('/common/InitializePaymentIntent', {
     customerID: CustomerID,
     amount: amount,
   });
@@ -182,7 +182,7 @@ export const fetchPaymentSheetparams = async (CustomerID: string, amount) => {
 };
 export const fetchSetupSheetparams = async (stripeId: string) => {
   console.log('helloo stripe: ', stripeId);
-  const response = await axiosBaseURL.post('/Common/InitializeSetupIntent', {
+  const response = await axiosBaseURL.post('/common/InitializeSetupIntent', {
     customerID: stripeId,
   });
   const {ephemeralKey, setupIntents} = await response.data.data;

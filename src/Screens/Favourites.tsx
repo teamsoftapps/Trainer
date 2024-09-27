@@ -33,16 +33,17 @@ const Favourites = () => {
   const [first, setfirst] = useState(true);
   const [isLong, setIsLong] = useState(false);
   const [favouriteTrainers, setFavoriteTrainers] = useState([]);
-  const userId = useSelector(state => state.dbId.dbId._id);
+  const userId = useSelector(state => state.dbId.dbId);
   const trainer_data = useSelector(state => state.Auth.data);
-  console.log('userIddddd', trainer_data.isToken);
+  console.log('userIddddd', trainer_data.data);
+  console.log('userIddddd', userId);
   const {showToast} = useToast();
 
   const fetchFavoriteTrainers = async () => {
     if (trainer_data.type === 'user') {
       try {
         const res = await axiosBaseURL.get(
-          `/user/Getfavoritetrainers/${userId}`,
+          `/user/Getfavoritetrainers/${userId}`
         );
 
         setFavoriteTrainers(res.data.data);
@@ -58,7 +59,7 @@ const Favourites = () => {
         data: {userId, trainerID},
       });
       await setFavoriteTrainers(prevTrainers =>
-        prevTrainers.filter(trainer => trainer._id !== trainerID),
+        prevTrainers.filter(trainer => trainer._id !== trainerID)
       );
       setIsLong(false);
       showToast('Removed!', res.data.message, 'success');

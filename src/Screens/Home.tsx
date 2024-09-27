@@ -193,7 +193,7 @@ const Home: React.FC<Props> = ({navigation, route}) => {
     const fetchData = async () => {
       try {
         const profileResponse = await axiosBaseURL.get(
-          `/Common/GetProfile/${token}`,
+          `/Common/GetProfile/${token}`
         );
         const userData = profileResponse.data.data;
         console.log('profileResponce', userData);
@@ -201,7 +201,7 @@ const Home: React.FC<Props> = ({navigation, route}) => {
       } catch (error) {
         console.error(
           'Error fetching data:',
-          error.response?.data?.message || error.message,
+          error.response?.data?.message || error.message
         );
       }
     };
@@ -320,43 +320,6 @@ const Home: React.FC<Props> = ({navigation, route}) => {
               pressedAvatarTextColor={'#fff'}
               swipeText={' '}
             />
-
-            {/* <FlatList
-              style={{paddingLeft: responsiveWidth(4)}}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              data={UserImages}
-              renderItem={({item, index}) => {
-                return (
-                  // <TouchableOpacity
-                  //   onPress={() =>
-                  //     navigation.navigate('StoryViewer', {
-                  //       stories: [{id: item.id, uri: item.image}],
-                  //     })
-                  //   }
-                  //   activeOpacity={0.9}
-                  //   style={{
-                  //     marginHorizontal: responsiveWidth(4),
-                  //     width: responsiveWidth(14),
-                  //     gap: responsiveHeight(0.5),
-                  //   }}>
-                  //   <View style={styles.imageView}>
-                  //     <Image source={item.image} style={styles.storyImage} />
-                  //   </View>
-                  //   <Text style={styles.trainername} numberOfLines={1}>
-                  //     {item.name}
-                  //   </Text>
-                  // </TouchableOpacity>
-                  <View style={styles.container}>
-                    <InstaStory
-                      style={{backgroundColor: 'red'}}
-                      data={StoriesData}
-                      duration={10000}
-                    />
-                  </View>
-                );
-              }}
-            /> */}
           </View>
         </View>
 
@@ -375,7 +338,6 @@ const Home: React.FC<Props> = ({navigation, route}) => {
                     imageStyle={{borderRadius: responsiveWidth(1.5)}}
                     source={{uri: item?.profileImage}}
                     style={styles.Trainer}>
-                    <Text>Ok Now We Try</Text>
                     <LinearGradient
                       colors={['transparent', '#000', '#000']}
                       start={{x: 0, y: 0}}

@@ -58,10 +58,9 @@ const Upcoming = () => {
   const [bookingID, setBookingId] = useState('');
   const [isDelete, setDelete] = useState(false);
   const AuthData = useSelector(state => state.Auth.data.data);
-  console.log('first', AuthData);
   useEffect(() => {
     getBookings();
-  }, []);
+  }, [bookings]);
   const getBookings = async () => {
     try {
       const response = await axiosBaseURL.get('/user/GetBookings', {
@@ -78,12 +77,12 @@ const Upcoming = () => {
     try {
       const response = await axiosBaseURL.delete('/user/DeleteBooking', {
         data: {
-          token: AuthData.isToken,
+          token: AuthData.token,
           bookingId: bookingId,
         },
       });
       await setBookings(prevBookings =>
-        prevBookings.filter(booking => booking._id !== bookingId),
+        prevBookings.filter(booking => booking._id !== bookingId)
       );
       setDelete(false);
     } catch (error) {}
@@ -112,10 +111,10 @@ const Upcoming = () => {
                       index == 0
                         ? upcoming[0].image
                         : index == 1
-                          ? upcoming[1].image
-                          : index == 2
-                            ? upcoming[2].image
-                            : null
+                        ? upcoming[1].image
+                        : index == 2
+                        ? upcoming[2].image
+                        : null
                     }
                   />
                   <View>
@@ -123,10 +122,10 @@ const Upcoming = () => {
                       {index == 0
                         ? upcoming[0].name
                         : index == 1
-                          ? upcoming[1].name
-                          : index == 2
-                            ? upcoming[2].name
-                            : null}
+                        ? upcoming[1].name
+                        : index == 2
+                        ? upcoming[2].name
+                        : null}
                     </Text>
                     <Text style={styles.whitetext} numberOfLines={1}>
                       {item.Date}

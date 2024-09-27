@@ -30,17 +30,17 @@ import axiosBaseURL from '../services/AxiosBaseURL';
 import {useSelector} from 'react-redux';
 
 const ReviewBooking = ({route}) => {
+  const {Data} = route.params;
   const [CardDetails, setCardDetails] = useState([]);
   const {showToast} = useToast();
   const [stripeId, setStripeId] = useState('');
   const [hours, setHours] = useState('1');
   const [totalAmount, setTotalAmount] = useState();
-  const {Data} = route.params;
   const [trainerRatePerHour, settrainerRatePerHour] = useState(
-    Data.rate.replace('$', ''),
+    Data.rate.replace('$', '')
   );
   const authData = useSelector(state => state.Auth.data);
-  console.log('in review booking', authData);
+  console.log('in review booking', authData.data.token);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -56,18 +56,18 @@ const ReviewBooking = ({route}) => {
 
   useEffect(() => {
     fetchData();
-  }, [authData.isToken, stripeId]);
+  }, [authData.data.token, stripeId]);
 
   const fetchData = async () => {
     try {
       const profileResponse = await axiosBaseURL.get(
-        `/common/GetProfile/${authData.isToken}`,
+        `/common/GetProfile/${authData.data.token}`
       );
       setStripeId(profileResponse.data.data.stripeCustomerID);
     } catch (error) {
       console.error(
         'Error fetching data:',
-        error.response?.data?.message || error.message,
+        error.response?.data?.message || error.message
       );
     }
   };
@@ -78,7 +78,7 @@ const ReviewBooking = ({route}) => {
     try {
       const {ephemeralKey, paymentIntent} = await fetchPaymentSheetparams(
         stripeId,
-        totalAmount,
+        totalAmount
       );
 
       const {error} = await initPaymentSheet({
@@ -98,7 +98,7 @@ const ReviewBooking = ({route}) => {
     } catch (error) {
       console.error(
         'Error during payment sheet initialization:',
-        error.message,
+        error.message
       );
     }
   };
@@ -110,7 +110,7 @@ const ReviewBooking = ({route}) => {
       showToast('Try later', error.message, 'danger');
     } else {
       await axiosBaseURL.post('/user/CreateBooking', {
-        token: authData.isToken,
+        token: authData.data.token,
         Amount: totalAmount,
         Time: Data?.time,
         Date: FormatedDate,
@@ -119,8 +119,6 @@ const ReviewBooking = ({route}) => {
       navigation.navigate('BookingSuccessfull', {Data: {...Data}});
     }
   };
-
-  console.log('Value of Totoal Amount', totalAmount);
   return (
     <WrapperContainer>
       <Header
@@ -277,7 +275,6 @@ const ReviewBooking = ({route}) => {
               fontSize: responsiveFontSize(2),
               fontFamily: FontFamily.Semi_Bold,
             }}>
-            {/* {totalAmount === NaN ? "ok" : "n"} */}
             {totalAmount}
             {'$'}
           </Text>
