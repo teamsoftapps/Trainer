@@ -14,7 +14,7 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {GiftedChat} from 'react-native-gifted-chat';
+import {GiftedChat, InputToolbar} from 'react-native-gifted-chat';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {MainProps} from '../Navigations/MainStack';
 import {
@@ -141,6 +141,17 @@ const Message: React.FC<Props> = ({route, navigation}) => {
           user={{
             _id: userData?.data._id,
           }}
+          renderInputToolbar={props => (
+            <InputToolbar
+              {...props}
+              textInputProps={{
+                style: {
+                  color: '#000', // Change input text color here
+                  paddingLeft: responsiveWidth(2),
+                },
+              }}
+            />
+          )}
         />
       </View>
     </WrapperContainer>
