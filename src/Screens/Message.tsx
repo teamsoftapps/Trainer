@@ -137,7 +137,7 @@ const Message: React.FC<Props> = ({route, navigation}) => {
       <View style={{flex: 1}}>
         <GiftedChat
           messages={messages}
-          onSend={messages => onSend(messages)}
+          onSend={(messages: any) => onSend(messages)}
           user={{
             _id: userData?.data._id,
           }}
@@ -147,7 +147,6 @@ const Message: React.FC<Props> = ({route, navigation}) => {
               textInputProps={{
                 style: {
                   color: '#000', // Change input text color here
-                  paddingLeft: responsiveWidth(2),
                 },
               }}
             />

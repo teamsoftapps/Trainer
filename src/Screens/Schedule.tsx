@@ -6,28 +6,28 @@ import {
   FlatList,
   Image,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { Calendar } from 'react-native-calendars';
-import { FontFamily, Images } from '../utils/Images';
+import {Calendar} from 'react-native-calendars';
+import {FontFamily, Images} from '../utils/Images';
 import Button from '../Components/Button';
-import { availableTimes, generateDatesToMark, TimeSlots } from '../utils/Dummy';
-import { useNavigation } from '@react-navigation/native';
+import {availableTimes, generateDatesToMark, TimeSlots} from '../utils/Dummy';
+import {useNavigation} from '@react-navigation/native';
 
-const Schedule = ({ route }) => {
+const Schedule = ({route}) => {
   const [selected, setSelected] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const navigation = useNavigation();
-  const datesToMark = generateDatesToMark()
+  const datesToMark = generateDatesToMark();
   const newMarkedDates = {};
-  const { Data } = route.params;
-  console.log(Data)
-  const renderItem = ({ item }) => (
+  const {Data} = route.params;
+  console.log(Data);
+  const renderItem = ({item}) => (
     <TouchableOpacity
       style={{
         paddingVertical: 8,
@@ -50,8 +50,8 @@ const Schedule = ({ route }) => {
             item === selectedTime
               ? 'black'
               : availableTimes.includes(item)
-                ? '#9FED3A'
-                : 'grey',
+              ? '#9FED3A'
+              : 'grey',
           fontSize: responsiveFontSize(2),
         }}>
         {item}
@@ -60,11 +60,11 @@ const Schedule = ({ route }) => {
   );
 
   datesToMark.forEach(date => {
-    newMarkedDates[date] = { marked: true, dotColor: '#9FED3A' };
+    newMarkedDates[date] = {marked: true, dotColor: '#9FED3A'};
   });
 
   if (selected) {
-    newMarkedDates[selected] = { ...newMarkedDates[selected], selected: true };
+    newMarkedDates[selected] = {...newMarkedDates[selected], selected: true};
   }
 
   const handleDayPress = day => {
@@ -127,14 +127,14 @@ const Schedule = ({ route }) => {
         }}>
         Available Time
       </Text>
-      <View style={{ marginTop: responsiveHeight(1.5) }}>
+      <View style={{marginTop: responsiveHeight(1.5)}}>
         <FlatList
           data={TimeSlots}
           renderItem={renderItem}
           keyExtractor={item => item}
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ alignItems: 'center' }}
+          contentContainerStyle={{alignItems: 'center'}}
         />
       </View>
       <View
@@ -165,10 +165,10 @@ const Schedule = ({ route }) => {
               flex: 1,
               justifyContent: 'space-between',
             }}>
-            <Text style={{ color: 'white', fontSize: responsiveFontSize(2) }}>
+            <Text style={{color: 'white', fontSize: responsiveFontSize(2)}}>
               Select alert
             </Text>
-            <Text style={{ color: 'grey' }}>30 minutes before</Text>
+            <Text style={{color: 'grey'}}>30 minutes before</Text>
           </View>
           <Image source={Images.rightarrow} />
         </View>
@@ -189,7 +189,11 @@ const Schedule = ({ route }) => {
             borderWidth: 1,
             borderColor: '#9FED3A',
           }}
-          onPress={() => navigation.navigate('ReviewBooking', { Data: { Date: selected, time: selectedTime, rate: Data } })}
+          onPress={() =>
+            navigation.navigate('ReviewBooking', {
+              Data: {Date: selected, time: selectedTime, rate: Data},
+            })
+          }
           textstyle={{
             fontSize: responsiveFontSize(2.3),
             fontFamily: FontFamily.Medium,
