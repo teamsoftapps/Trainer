@@ -30,41 +30,44 @@ import axiosBaseURL from '../services/AxiosBaseURL';
 import useToast from '../Hooks/Toast';
 import {followTrainer, unfollowTrainer} from '../store/Slices/follow';
 import {favouriteTrainer, unfavouriteTrainer} from '../store/Slices/favourite';
+import {useGetUsersQuery} from '../store/Apis/Post';
 const TrainerProfile = ({route}) => {
   const {data} = route.params;
+  // const {dataa, isLoading} = useGetUsersQuery();
+  const [usersData, setUsersData] = useState([]);
   const [readmore, setreadmore] = useState(true);
   const [follow, setfollow] = useState(false);
   const [heart, setheart] = useState(false);
+  const [specialities, setSpecialities] = useState([data.Speciality]);
   const navigation = useNavigation();
   const authData = useSelector(state => state?.Auth.data.data);
-  console.log('data of trainer in profile:', data);
   const dispatch = useDispatch();
-  const isFollowing = useSelector((state: RootState) => state.follow[data.id]);
+  const isFollowing = useSelector((state: RootState) => state.follow[data._id]);
   const isFavourite = useSelector(
-    (state: RootState) => state.favourite[data.id]
+    (state: RootState) => state.favourite[data._id]
   );
 
   const onFollow = async () => {
     if (authData.isType === 'user') {
       try {
         if (isFollowing) {
-          axiosBaseURL.post('/user/removeFollowedTrainers', {
+          await axiosBaseURL.post('/user/removeFollowedTrainers', {
             userId: authData._id,
-            trainerID: data.id,
+            trainerID: data._id,
           });
-          dispatch(unfollowTrainer({trainerID: data.id}));
+          dispatch(unfollowTrainer({trainerID: data._id}));
         } else {
-          axiosBaseURL.post('/user/followedTrainers', {
+          await axiosBaseURL.post('/user/followedTrainers', {
             userId: authData._id,
-            trainerID: data.id,
-            name: data.name,
-            rating: data.rating,
+            trainerID: data._id,
+            name: data.fullName,
+            rating: '3',
             isFollow: true,
           });
-          dispatch(followTrainer({trainerID: data.id}));
+          dispatch(followTrainer({trainerID: data._id}));
         }
       } catch (error) {
-        console.log(error);
+        console.error('Error in follow/unfollow action:', error);
       }
     }
   };
@@ -76,18 +79,18 @@ const TrainerProfile = ({route}) => {
           axiosBaseURL.delete('/user/Deletefavoritetrainers', {
             data: {
               userId: authData._id,
-              trainerID: data.id,
+              trainerID: data._id,
             },
           });
-          dispatch(unfavouriteTrainer({trainerID: data.id}));
+          dispatch(unfavouriteTrainer({trainerID: data._id}));
         } else {
           axiosBaseURL.post('/user/favoritetrainers', {
             userId: authData._id,
-            trainerID: data.id,
-            name: data.name,
-            rating: data.rating,
+            trainerID: data._id,
+            name: data.fullName,
+            rating: data.Rating,
           });
-          dispatch(favouriteTrainer({trainerID: data.id}));
+          dispatch(favouriteTrainer({trainerID: data._id}));
         }
       } catch (error) {
         console.log(error);
@@ -181,7 +184,7 @@ const TrainerProfile = ({route}) => {
                   gap: responsiveHeight(1),
                 }}>
                 <Image
-                  source={data.image}
+                  src={data.profileImage}
                   style={{
                     width: responsiveWidth(28),
                     borderRadius: 70,
@@ -193,7 +196,7 @@ const TrainerProfile = ({route}) => {
                 />
                 <Text
                   style={{fontSize: responsiveFontSize(3.5), color: 'white'}}>
-                  {data.name}
+                  {data.fullName}
                 </Text>
 
                 <Text
@@ -246,7 +249,7 @@ const TrainerProfile = ({route}) => {
                   </View>
                   <Text
                     style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
-                    {data.rating}
+                    {data.Rating ? data.Rating : '--'}
                   </Text>
                   <Text
                     style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
@@ -324,8 +327,7 @@ const TrainerProfile = ({route}) => {
                         color: 'grey',
                         fontSize: responsiveFontSize(1.8),
                       }}>
-                      {' '}
-                      per hour
+                      ${data.Hourlyrate}
                     </Text>
                   </Text>
                 </View>
@@ -334,7 +336,6 @@ const TrainerProfile = ({route}) => {
                     style={{color: '#9FED3A', fontSize: responsiveFontSize(2)}}>
                     Hired
                   </Text>
-                  {/* <View style={{flexDirection: 'row', alignItems: 'center'}}> */}
                   <Text
                     style={{
                       color: 'white',
@@ -359,27 +360,19 @@ const TrainerProfile = ({route}) => {
         </ImageBackground>
         <View style={styles.SpecialitiesContainer}>
           <Text style={styles.heading}>Specialities</Text>
-          <Text style={styles.whiteText}> • Strength Training</Text>
-          <Text style={styles.whiteText}> • Weight Loss</Text>
-          <Text style={styles.whiteText}>
-            {' '}
-            • High-Intensity Interval Training (HIIT)
-          </Text>
-          <Text style={styles.whiteText}> • Functional Fitness</Text>
+          {specialities.map((item, index) => {
+            return (
+              <View>
+                <Text style={styles.whiteText}>• {item}</Text>
+              </View>
+            );
+          })}
         </View>
         <View style={styles.BioContainer}>
           <Text style={styles.heading}>Description</Text>
 
           <Text numberOfLines={readmore ? 4 : 13} style={styles.whiteText}>
-            {' '}
-            Hi, I'm Alex, and I've been a gym trainer for over 10 years. My
-            passion is helping people like you achieve their fitness goals and
-            transform their lives. I specialize in weight training,
-            cardiovascular conditioning, flexibility training, and nutritional
-            coaching. My approach is holistic, focusing not just on physical
-            fitness but also on creating sustainable, healthy habits. I believe
-            that fitness is a unique journey for each person, and I'm here to
-            provide personalized guidance and support every step of the way.
+            {data.Bio}
           </Text>
           <Text
             onPress={() => {
@@ -423,7 +416,9 @@ const TrainerProfile = ({route}) => {
           }}>
           <Button
             text="Book Now"
-            onPress={() => navigation.navigate('Schedule', {Data: data.rate})}
+            onPress={() =>
+              navigation.navigate('Schedule', {Data: data.Hourlyrate})
+            }
             containerstyles={{}}
           />
         </View>

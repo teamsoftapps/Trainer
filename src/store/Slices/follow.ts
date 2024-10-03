@@ -1,6 +1,4 @@
-// store/slices/followSlice.ts
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-
 interface FollowState {
   [trainerID: string]: boolean;
 }

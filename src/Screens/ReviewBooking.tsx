@@ -116,7 +116,7 @@ const ReviewBooking = ({route}) => {
         Date: FormatedDate,
         Reminder: '30 mins',
       });
-      navigation.navigate('BookingSuccessfull', {Data: {...Data}});
+      // navigation.navigate('BookingSuccessfull', {Data: {...Data}});
     }
   };
   return (

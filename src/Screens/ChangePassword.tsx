@@ -24,56 +24,41 @@ import {showMessage} from 'react-native-flash-message';
 import {useDispatch, useSelector} from 'react-redux';
 import axiosBaseURL from '../services/AxiosBaseURL';
 import {SignOut} from '../store/Slices/AuthSlice';
-
+import ConfirmNewPassword from './ConfirmNewPassword';
+import useToast from '../Hooks/Toast';
 const ChangePassword = ({route}) => {
-  const {data} = route.params;
   const dispatch = useDispatch();
 
-  const [password, setpassword] = useState('');
-  const [confirmpassword, setconfirmpassword] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
+  const [Newpassword, setNewpassword] = useState('');
+  const [confirmNewpassword, setConfirmNewpassword] = useState('');
   const [secure, setsecure] = useState(false);
   const [secure2, setsecure2] = useState(false);
   const [passworddisabled, setpassworddisable] = useState(false);
-  const authData = useSelector(state => state.Auth.data);
+  const authData = useSelector(state => state.Auth.data.data);
+  const {showToast} = useToast();
   const navigation = useNavigation();
-  const condition1 = password === confirmpassword && password != '';
-  useEffect(() => {
-    showMessage({
-      message: 'OTP Verfied',
-      description: 'Please Change your password',
-      type: 'success',
-    });
-  }, []);
 
-  const Onclick = () => {
-    if (condition1) {
-      setpassworddisable(false);
-      axiosBaseURL
-        .post('/trainer/resetPassword', {
-          token: authData,
-          Password: password,
-          ID: data,
-        })
-        .then(response => {
-          dispatch(SignOut());
-          showMessage({
-            message: 'Password Changed',
-            description: 'Please Login Again',
-            type: 'success',
-          });
-        })
-        .catch(error => {
-          showMessage({
-            message: 'Incorrect OTP',
-            description: 'Please enter correct OTP',
-            type: 'danger',
-          });
-          console.log(error);
-        });
-    } else {
-      if (!condition1) setpassworddisable(true);
+  const ChangePassword = async () => {
+    try {
+      const responce = await axiosBaseURL.post('/user/changePassword', {
+        id: authData._id,
+        oldPassword: oldPassword,
+        newPassword: Newpassword,
+        confirmNewPassword: confirmNewpassword,
+      });
+      if (responce.data) {
+        showToast('Success', responce.data.message, 'success');
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response && error.response.data
+          ? error.response.data.message
+          : 'Something went wrong. Please try again.';
+      showToast('Error', errorMessage, 'danger');
     }
   };
+
   return (
     <WrapperContainer>
       <ScrollView>
@@ -122,12 +107,12 @@ const ChangePassword = ({route}) => {
                   alignItems: 'center',
                 }}>
                 <View>
-                  <Text style={{color: '#908C8D'}}>New Password</Text>
+                  <Text style={{color: '#908C8D'}}>Old Password</Text>
                   <TextInput
                     placeholder="Enter Password"
                     secureTextEntry={secure}
-                    value={password || undefined}
-                    onChangeText={setpassword}
+                    value={oldPassword || undefined}
+                    onChangeText={setOldPassword}
                     style={{
                       padding: 0,
                       fontFamily: FontFamily.Semi_Bold,
@@ -163,12 +148,53 @@ const ChangePassword = ({route}) => {
                   alignItems: 'center',
                 }}>
                 <View>
-                  <Text style={{color: '#908C8D'}}>Confirm Password</Text>
+                  <Text style={{color: '#908C8D'}}>New Password</Text>
+                  <TextInput
+                    placeholder="Enter Password"
+                    secureTextEntry={secure}
+                    value={Newpassword || undefined}
+                    onChangeText={setNewpassword}
+                    style={{
+                      padding: 0,
+                      fontFamily: FontFamily.Semi_Bold,
+                      color: 'white',
+                      fontSize: responsiveFontSize(2),
+                      width: responsiveWidth(67),
+                      height: responsiveHeight(3),
+                    }}
+                    numberOfLines={1}
+                    placeholderTextColor={'white'}
+                  />
+                </View>
+                <TouchableOpacity
+                  onPress={() => {
+                    setsecure(!secure);
+                  }}>
+                  <Image
+                    source={secure ? Images.eye_off : Images.eye}
+                    style={{width: responsiveWidth(6)}}
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
+              </View>
+              <View
+                style={{
+                  width: responsiveWidth(85),
+                  paddingHorizontal: responsiveWidth(5),
+                  paddingVertical: responsiveWidth(2),
+                  borderWidth: 1,
+                  borderColor: passworddisabled ? 'red' : '#908C8D',
+                  borderRadius: 17,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}>
+                <View>
+                  <Text style={{color: '#908C8D'}}>Confirm New Password</Text>
                   <TextInput
                     placeholder="Enter Password"
                     secureTextEntry={secure2}
-                    value={confirmpassword || undefined}
-                    onChangeText={setconfirmpassword}
+                    value={confirmNewpassword || undefined}
+                    onChangeText={setConfirmNewpassword}
                     style={{
                       padding: 0,
                       fontFamily: FontFamily.Semi_Bold,
@@ -193,7 +219,6 @@ const ChangePassword = ({route}) => {
                 </TouchableOpacity>
               </View>
             </View>
-
             <View
               style={{
                 alignItems: 'center',
@@ -203,7 +228,7 @@ const ChangePassword = ({route}) => {
               <Button
                 text="Send"
                 onPress={() => {
-                  Onclick();
+                  ChangePassword();
                 }}
               />
             </View>

@@ -29,8 +29,14 @@ export const Posts = createApi({
           method: 'GET',
         }),
       }),
+      getUsers: builder.query({
+        query: () => ({
+          url: '/user/getAllUsers',
+          method: 'GET',
+        }),
+      }),
     };
   },
 });
 
-export const {useGetTrainersQuery} = Posts;
+export const {useGetTrainersQuery, useGetUsersQuery} = Posts;

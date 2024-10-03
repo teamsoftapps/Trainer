@@ -26,7 +26,7 @@ const Schedule = ({route}) => {
   const datesToMark = generateDatesToMark();
   const newMarkedDates = {};
   const {Data} = route.params;
-  console.log(Data);
+  console.log('--------', Data);
   const renderItem = ({item}) => (
     <TouchableOpacity
       style={{

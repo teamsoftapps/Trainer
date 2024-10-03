@@ -21,6 +21,8 @@ import {Seartrainer} from '../utils/Dummy';
 import {AirbnbRating} from 'react-native-ratings';
 import {useNavigation} from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
+import {useGetTrainersQuery} from '../store/Apis/Post';
+
 const trainers = [
   {
     id: '4',
@@ -59,12 +61,23 @@ const trainers = [
 
 const SearchTrainer = () => {
   const [location, setLocation] = useState(null);
+  const [trainerData, settrainerData] = useState([]);
   const flatListRef = useRef(null);
   const navigation = useNavigation();
-
+  const {data, isLoading} = useGetTrainersQuery();
   useEffect(() => {
     getCurrentLocation();
+    getPosts();
   }, []);
+  const getPosts = async () => {
+    try {
+      const res = await data;
+      console.log('ALL', res);
+      settrainerData(res?.data);
+    } catch (error) {
+      console.log('Errorr', error);
+    }
+  };
 
   const requestPermission = async () => {
     if (Platform.OS === 'android') {
@@ -181,142 +194,18 @@ const SearchTrainer = () => {
             />
           </TouchableOpacity>
         </View>
-        {/* <View
-          style={{
-            zIndex: 1000,
-            height: responsiveHeight(10),
-            position: 'absolute',
-            flexDirection: 'column',
-          }}>
-          <FlatList
-            style={{position: 'absolute'}}
-            horizontal
-            data={trainers.slice(0, 2)}
-            renderItem={({index, item}) => {
-              return (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-
-                    marginVertical: responsiveHeight(30),
-                    width: responsiveWidth(50),
-                  }}>
-                  <TouchableOpacity
-                    onPress={() => scrollToItem(index + 1)}
-                    style={{position: 'relative'}}>
-                    <Image
-                      source={item.img}
-                      style={{
-                        borderColor: '#fff',
-                        borderWidth: responsiveWidth(1.3),
-                        borderRadius: responsiveWidth(6),
-                      }}
-                    />
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        position: 'absolute',
-                        top: responsiveHeight(6),
-                        left: responsiveWidth(5),
-                        backgroundColor: 'white',
-                        borderRadius: responsiveWidth(2),
-                        padding: responsiveWidth(1),
-                        gap: responsiveWidth(1),
-                      }}>
-                      <Text
-                        style={{
-                          fontSize: responsiveFontSize(1.5),
-                          fontWeight: '600',
-                        }}>
-                        {item.rating}
-                      </Text>
-                      <Image
-                        source={item.star}
-                        style={{
-                          tintColor: 'orange',
-                          height: responsiveHeight(1.5),
-                          width: responsiveWidth(3),
-                        }}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              );
-            }}
-          />
-          <FlatList
-            style={{position: 'absolute'}}
-            horizontal
-            data={trainers.slice(2, 4)}
-            renderItem={({index, item}) => {
-              return (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginTop: responsiveHeight(14),
-                    width: responsiveWidth(40),
-                  }}>
-                  <TouchableOpacity
-                    onPress={() => scrollToItem(3)}
-                    style={{position: 'relative'}}>
-                    <Image
-                      source={item.img}
-                      style={{
-                        borderColor: '#fff',
-                        borderWidth: responsiveWidth(1.3),
-                        borderRadius: responsiveWidth(6),
-                      }}
-                    />
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        position: 'absolute',
-                        top: responsiveHeight(6),
-                        left: responsiveWidth(5),
-                        backgroundColor: 'white',
-                        borderRadius: responsiveWidth(2),
-                        padding: responsiveWidth(1),
-                        gap: responsiveWidth(1),
-                      }}>
-                      <Text
-                        style={{
-                          fontSize: responsiveFontSize(1.5),
-                          fontWeight: '600',
-                        }}>
-                        {item.rating}
-                      </Text>
-                      <Image
-                        source={item.star}
-                        style={{
-                          tintColor: 'orange',
-                          height: responsiveHeight(1.5),
-                          width: responsiveWidth(3),
-                        }}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              );
-            }}
-          />
-        </View> */}
         <View>
           <FlatList
             ref={flatListRef}
             showsHorizontalScrollIndicator={false}
             horizontal
-            data={Seartrainer}
+            data={trainerData}
             renderItem={({item, index}) => {
               return (
-                <View
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate('TrainerProfile', {data: item});
+                  }}
                   style={{
                     width: responsiveWidth(60),
                     height: responsiveWidth(60),
@@ -333,8 +222,8 @@ const SearchTrainer = () => {
                       borderTopRightRadius: 10,
                     }}>
                     <Image
-                      //   resizeMode="stretch"
-                      source={item.image}
+                      resizeMode="contain"
+                      src={item.profileImage}
                       style={{
                         height: '100%',
                         width: '100%',
@@ -351,9 +240,9 @@ const SearchTrainer = () => {
                         alignItems: 'center',
                       }}>
                       <View>
-                        <Text style={styles.Name}>{item.name}</Text>
+                        <Text style={styles.Name}>{item.fullName}</Text>
                         <Text style={styles.desc}>
-                          Strength: {item.expertise}
+                          Strength: {item.Speciality ? item.Speciality : 'Nill'}
                         </Text>
                       </View>
 
@@ -364,7 +253,7 @@ const SearchTrainer = () => {
                             selectedColor="#9FED3A"
                             showRating={false}
                             isDisabled
-                            defaultRating={item.rating}
+                            defaultRating={item.Rating}
                           />
                         </View>
                         <View style={[{...styles.bottomSubView}]}>
@@ -423,7 +312,7 @@ const SearchTrainer = () => {
                       </View>
                     </View>
                   </View>
-                </View>
+                </TouchableOpacity>
               );
             }}
           />

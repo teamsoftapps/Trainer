@@ -22,6 +22,7 @@ import StoryViewer from '../Screens/storyViewer';
 import Chats from '../Screens/Chats';
 import BookingConfirmed from '../Screens/BookingConfirmed';
 import Filter from '../Screens/Filter';
+import ChangePassword from '../Screens/ChangePassword';
 
 export type MainProps = {
   Message: {
@@ -56,6 +57,7 @@ const MainStack = () => {
       <Stack.Screen name={'StoryViewer'} component={StoryViewer} />
       <Stack.Screen name={'Chats'} component={Chats} />
       <Stack.Screen name={'Filter'} component={Filter} />
+      <Stack.Screen name={'ChangePassword'} component={ChangePassword} />
     </Stack.Navigator>
   );
 };

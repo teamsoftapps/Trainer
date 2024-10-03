@@ -56,7 +56,7 @@ const Profile = () => {
       const fetchData = async () => {
         try {
           const profileResponse = await axiosBaseURL.get(
-            `/Common/GetProfile/${authData.token}`
+            `/common/GetProfile/${authData.token}`
           );
           const userData = profileResponse.data.data;
           setImageUri(userData.profileImage);

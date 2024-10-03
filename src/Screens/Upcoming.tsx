@@ -56,12 +56,13 @@ const upcoming = [
 const Upcoming = () => {
   const navigation = useNavigation();
   const [bookings, setBookings] = useState([]);
-  const [bookingID, setBookingId] = useState('');
+  const [deleteIndex, setDeleteIndex] = useState(null);
   const [isDelete, setDelete] = useState(false);
   const AuthData = useSelector(state => state.Auth.data.data);
   useEffect(() => {
     getBookings();
-  }, [bookings]);
+  }, []);
+
   const getBookings = async () => {
     try {
       const response = await axiosBaseURL.get('/user/GetBookings', {
@@ -106,6 +107,103 @@ const Upcoming = () => {
   return (
     <WrapperContainer style={{backgroundColor: '#181818'}}>
       <FlatList
+        ListEmptyComponent={EmptyComp}
+        showsVerticalScrollIndicator={false}
+        data={bookings}
+        renderItem={({item, index}) => {
+          return (
+            <View style={styles.border}>
+              <View style={styles.container}>
+                <TouchableOpacity
+                  delayLongPress={500}
+                  onLongPress={() => {
+                    setDeleteIndex(index);
+                  }}
+                  onPress={() => {
+                    navigation.navigate('BookingDetails', {data: item});
+                  }}
+                  style={styles.left}>
+                  <Image
+                    source={
+                      index == 0
+                        ? upcoming[0].image
+                        : index == 1
+                        ? upcoming[1].image
+                        : index == 2
+                        ? upcoming[2].image
+                        : null
+                    }
+                  />
+                  <View>
+                    <Text style={styles.whitetext} numberOfLines={1}>
+                      {index == 0
+                        ? upcoming[0].name
+                        : index == 1
+                        ? upcoming[1].name
+                        : index == 2
+                        ? upcoming[2].name
+                        : null}
+                    </Text>
+                    <Text style={styles.whitetext} numberOfLines={1}>
+                      {item.Date}
+                    </Text>
+                    <Text style={styles.greytext} numberOfLines={1}>
+                      {item.Time}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+                <View style={styles.right}>
+                  <Text style={styles.timeago}>{item.Reminder}</Text>
+                  <View
+                    style={{
+                      ...styles.curve,
+                      borderRadius: responsiveScreenWidth(10),
+                      // backgroundColor:
+                      //   item.status === 'Pending'
+                      //     ? '#B8B8B8'
+                      //     : item.status === 'Confirmed'
+                      //     ? '#9FED3A'
+                      //     : item.status === 'Cancelled'
+                      //     ? '#FF2D55'
+                      //     : 'none',
+                    }}>
+                    <Text
+                      style={
+                        item.status === 'Cancelled'
+                          ? styles.whitetext
+                          : styles.blacktext
+                      }>
+                      {item.status}
+                    </Text>
+                  </View>
+                </View>
+                {deleteIndex === index ? (
+                  <TouchableOpacity
+                    onPress={() => {
+                      deleteBookings(item?._id);
+                      setDeleteIndex(null); // Hide delete button after action
+                    }}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Image
+                      source={require('../assets/Images/delete.png')}
+                      style={{
+                        height: responsiveHeight(2.5),
+                        width: responsiveWidth(4),
+                        tintColor: 'red',
+                      }}
+                    />
+                  </TouchableOpacity>
+                ) : null}
+              </View>
+            </View>
+          );
+        }}
+      />
+      {/* <FlatList
         ListEmptyComponent={EmptyComp}
         showsVerticalScrollIndicator={false}
         data={bookings}
@@ -200,7 +298,7 @@ const Upcoming = () => {
             </View>
           );
         }}
-      />
+      /> */}
     </WrapperContainer>
   );
 };

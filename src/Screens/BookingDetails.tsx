@@ -19,13 +19,12 @@ import {
 import {FontFamily, Images} from '../utils/Images';
 
 import ButtonComp from '../Components/ButtonComp';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 
 const BookingDetails = ({route}) => {
+  const navigation = useNavigation();
+  const {data} = route.params;
 
-  const navigation = useNavigation()
-  const { data } = route.params;
-  console.log(data)
   return (
     <WrapperContainer>
       <Header
@@ -90,7 +89,10 @@ const BookingDetails = ({route}) => {
               gap: responsiveWidth(3),
               alignItems: 'center',
             }}>
-            <TouchableOpacity onPress={()=>{navigation.navigate('Messages', {data: data});}}>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('Messages', {data: data});
+              }}>
               <Image
                 source={Images.chat_icon}
                 style={{
@@ -126,11 +128,11 @@ const BookingDetails = ({route}) => {
           </Text>
           <Text
             style={{color: 'white', fontSize: responsiveScreenFontSize(2.6)}}>
-            {data.date}
+            {data.Date}
           </Text>
           <Text
             style={{color: 'white', fontSize: responsiveScreenFontSize(2.3)}}>
-            {data.time}
+            {data.Time}
           </Text>
         </View>
         <View>

@@ -42,13 +42,6 @@ const Settings = () => {
         },
       },
     ]);
-    console.log('REEE', res);
-    // if(res){
-    // showMessage({
-    //   message: 'Info',
-    //   description: 'User Sined Out',
-    //   type: 'info',
-    // })};
   };
   return (
     <WrapperContainer>
@@ -80,7 +73,7 @@ const Settings = () => {
           </Text>
           <TouchableOpacity
             onPress={() => {
-              // navigation.navigate('ForgotPassword');
+              navigation.navigate('ChangePassword');
             }}
             style={{
               flexDirection: 'row',
@@ -153,7 +146,7 @@ const Settings = () => {
             </View>
             <Image source={Images.rightarrow} resizeMode="contain" />
           </TouchableOpacity>
-          <Text
+          {/* <Text
             style={{
               fontSize: responsiveFontSize(2.4),
               color: 'white',
@@ -218,7 +211,7 @@ const Settings = () => {
               </Text>
               <Image source={Images.rightarrow} resizeMode="contain" />
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
         <View style={{alignItems: 'center', marginTop: responsiveHeight(5)}}>
           <Button

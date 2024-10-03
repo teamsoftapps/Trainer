@@ -32,6 +32,7 @@ const fav = [
 const Favourites = () => {
   const [first, setfirst] = useState(true);
   const [isLong, setIsLong] = useState(false);
+  const [longPressIndex, setLongPressIndex] = useState(null);
   const [favouriteTrainers, setFavoriteTrainers] = useState([]);
   const authData = useSelector(state => state.Auth.data.data);
   const {showToast} = useToast();
@@ -159,6 +160,97 @@ const Favourites = () => {
             return (
               <TouchableOpacity
                 onLongPress={() => {
+                  setLongPressIndex(index);
+                }}
+                style={{
+                  alignItems: 'center',
+                  width: responsiveWidth(30),
+                  backgroundColor: '#232323',
+                  borderRadius: 8,
+                  paddingVertical: responsiveHeight(1),
+                  paddingHorizontal: responsiveWidth(4),
+                }}>
+                {longPressIndex === index && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      deleteFavouriteTrainers(item.trainerID, item.userId);
+                      setLongPressIndex(null); // Reset after deletion
+                    }}>
+                    <Image
+                      style={{height: responsiveHeight(3)}}
+                      resizeMode="center"
+                      source={require('../assets/Images/remove.png')}
+                    />
+                  </TouchableOpacity>
+                )}
+                <View>
+                  <Image
+                    source={require('../assets/Images/3.png')}
+                    style={{
+                      width: responsiveWidth(20),
+                      borderRadius: 80,
+                      height: responsiveWidth(20),
+                    }}
+                    resizeMode="contain"
+                  />
+                  <View
+                    style={{
+                      backgroundColor: 'white',
+                      position: 'absolute',
+                      right: 0,
+                      bottom: 0,
+                      paddingHorizontal: 5.5,
+                      borderRadius: 50,
+                    }}>
+                    <Image
+                      source={Images.Heart_filled}
+                      style={{
+                        width: responsiveWidth(5),
+                      }}
+                      tintColor={'red'}
+                      resizeMode="contain"
+                    />
+                  </View>
+                </View>
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    color: 'white',
+                    fontSize: responsiveFontSize(2),
+                  }}>
+                  {item.name.split(' ')[0]}
+                </Text>
+                <View style={{flexDirection: 'row', gap: responsiveWidth(2)}}>
+                  <Image
+                    source={Images.Star}
+                    resizeMode="contain"
+                    style={{width: responsiveWidth(4)}}
+                  />
+                  <Text
+                    style={{color: 'white', fontSize: responsiveFontSize(2)}}>
+                    {item.rating}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          }}
+        />
+        {/* <FlatList
+          data={favouriteTrainers}
+          contentContainerStyle={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: responsiveWidth(3),
+            alignSelf: 'center',
+          }}
+          style={{
+            marginLeft: responsiveWidth(2),
+            marginTop: responsiveHeight(3),
+          }}
+          renderItem={({item, index}) => {
+            return (
+              <TouchableOpacity
+                onLongPress={() => {
                   setIsLong(true);
                 }}
                 style={{
@@ -233,7 +325,7 @@ const Favourites = () => {
               </TouchableOpacity>
             );
           }}
-        />
+        /> */}
       </View>
     </WrapperContainer>
   );
