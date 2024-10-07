@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import {FontFamily, Images} from '../utils/Images';
 import {
@@ -16,7 +16,7 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
 import axiosBaseURL from '../services/AxiosBaseURL';
 
@@ -59,9 +59,11 @@ const Upcoming = () => {
   const [deleteIndex, setDeleteIndex] = useState(null);
   const [isDelete, setDelete] = useState(false);
   const AuthData = useSelector(state => state.Auth.data.data);
-  useEffect(() => {
-    getBookings();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getBookings();
+    }, [AuthData.token])
+  );
 
   const getBookings = async () => {
     try {
@@ -69,23 +71,25 @@ const Upcoming = () => {
         params: {token: AuthData.token},
       });
       setBookings(response.data.data);
+      console.log('in get bookings function:', response.data.data);
     } catch (error) {}
   };
 
-  const deleteBookings = async bookingId => {
-    try {
-      const response = await axiosBaseURL.delete('/user/DeleteBooking', {
-        data: {
-          token: AuthData.token,
-          bookingId: bookingId,
-        },
-      });
-      await setBookings(prevBookings =>
-        prevBookings.filter(booking => booking._id !== bookingId)
-      );
-      setDelete(false);
-    } catch (error) {}
-  };
+  // const deleteBookings = async bookingId => {
+  //   try {
+  //     const response = await axiosBaseURL.delete('/user/DeleteBooking', {
+  //       data: {
+  //         token: AuthData.token,
+  //         bookingId: bookingId,
+  //       },
+  //     });
+  //     await setBookings(prevBookings =>
+  //       prevBookings.filter(booking => booking._id !== bookingId)
+  //     );
+  //     setDelete(false);
+  //   } catch (error) {}
+  // };
+
   const EmptyComp = () => {
     return (
       <View

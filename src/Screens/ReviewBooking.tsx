@@ -40,6 +40,7 @@ const ReviewBooking = ({route}) => {
     Data.rate.replace('$', '')
   );
   const authData = useSelector(state => state.Auth.data);
+  console.log('data mil gya', authData.data.profileImage);
   console.log('in review booking', authData.data.token);
   const navigation = useNavigation();
 
@@ -115,8 +116,10 @@ const ReviewBooking = ({route}) => {
         Time: Data?.time,
         Date: FormatedDate,
         Reminder: '30 mins',
+        profileImage: authData.data.profileImage,
       });
-      // navigation.navigate('BookingSuccessfull', {Data: {...Data}});
+      showToast('Payment Succesfull', 'Booking successfull!', 'success');
+      navigation.navigate('Booking');
     }
   };
   return (

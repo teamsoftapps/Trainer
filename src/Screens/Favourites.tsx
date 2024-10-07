@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import {
   responsiveFontSize,
@@ -18,6 +18,7 @@ import {Images} from '../utils/Images';
 import {useSelector} from 'react-redux';
 import axiosBaseURL from '../services/AxiosBaseURL';
 import useToast from '../Hooks/Toast';
+import {useFocusEffect} from '@react-navigation/native';
 
 const fav = [
   {name: 'Max Well', image: Images.trainer, rating: 3.4},
@@ -37,9 +38,15 @@ const Favourites = () => {
   const authData = useSelector(state => state.Auth.data.data);
   const {showToast} = useToast();
 
-  useEffect(() => {
-    fetchFavoriteTrainers();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchFavoriteTrainers();
+    }, [])
+  );
+
+  // useEffect(() => {
+  // fetchFavoriteTrainers();
+  // }, []);
 
   const fetchFavoriteTrainers = async () => {
     if (authData.isType === 'user') {
@@ -51,17 +58,17 @@ const Favourites = () => {
       } catch (error) {}
     }
   };
-  const deleteFavouriteTrainers = async (trainerID, userId) => {
-    try {
-      const res = await axiosBaseURL.delete('/user/Deletefavoritetrainers', {
-        data: {userId, trainerID},
-      });
-      await setFavoriteTrainers(prevTrainers =>
-        prevTrainers.filter(trainer => trainer._id !== trainerID)
-      );
-      setIsLong(false);
-    } catch (error) {}
-  };
+  // const deleteFavouriteTrainers = async (trainerID, userId) => {
+  //   try {
+  //     const res = await axiosBaseURL.delete('/user/Deletefavoritetrainers', {
+  //       data: {userId, trainerID},
+  //     });
+  //     await setFavoriteTrainers(prevTrainers =>
+  //       prevTrainers.filter(trainer => trainer._id !== trainerID)
+  //     );
+  //     setIsLong(false);
+  //   } catch (error) {}
+  // };
 
   if (first === true) {
     fav.sort((a, b) => b.rating - a.rating);
@@ -170,7 +177,7 @@ const Favourites = () => {
                   paddingVertical: responsiveHeight(1),
                   paddingHorizontal: responsiveWidth(4),
                 }}>
-                {longPressIndex === index && (
+                {/* {longPressIndex === index && (
                   <TouchableOpacity
                     onPress={() => {
                       deleteFavouriteTrainers(item.trainerID, item.userId);
@@ -182,7 +189,7 @@ const Favourites = () => {
                       source={require('../assets/Images/remove.png')}
                     />
                   </TouchableOpacity>
-                )}
+                )} */}
                 <View>
                   <Image
                     source={require('../assets/Images/3.png')}

@@ -43,13 +43,13 @@ const TrainerBttomStack = () => {
         name={'TrainerHome'}
         component={TrainerHome}
       />
-      {/* )} */}
-
       <Bottom.Screen
         options={{
           tabBarIcon: ({focused}) => (
             <Image
-              source={focused ? Images.message_filled : Images.message}
+              source={
+                focused ? Images.sessions_filled : Images.sessions_outline
+              }
               resizeMode="contain"
               style={{
                 height: responsiveScreenHeight(3),
@@ -81,11 +81,11 @@ const TrainerBttomStack = () => {
         options={{
           tabBarIcon: ({focused}) => (
             <Image
-              source={focused ? Images.heart_filled : Images.heart}
+              source={focused ? Images.wallet_filled : Images.wallet_outline}
               resizeMode="contain"
               style={{
-                height: responsiveScreenHeight(3),
-                width: responsiveScreenHeight(3),
+                height: responsiveScreenHeight(4),
+                width: responsiveScreenHeight(3.5),
               }}
             />
           ),
