@@ -6,18 +6,12 @@ import {Images} from '../utils/Images';
 import {responsiveScreenHeight} from 'react-native-responsive-dimensions';
 
 import TrainerHome from '../trainerScreens/TrainerHome';
-import {useSelector} from 'react-redux';
 import Profile from '../trainerScreens/Profile';
 import Story from '../trainerScreens/Story';
-import Booking from '../Screens/Booking';
-import Favourite from '../trainerScreens/Favourite';
-import Listing from '../trainerScreens/Listing';
 import Sessions from '../trainerScreens/sessions';
 import Earnings from '../trainerScreens/earnings';
 
 const TrainerBttomStack = () => {
-  const type = useSelector(state => state?.Auth?.data.type);
-  console.log('type from bottom:', type);
   const Bottom = createBottomTabNavigator();
   return (
     <Bottom.Navigator

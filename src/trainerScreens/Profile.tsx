@@ -1,5 +1,4 @@
 import {
-  Alert,
   StyleSheet,
   Text,
   View,
@@ -11,18 +10,10 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Keyboard,
-  ActivityIndicator,
 } from 'react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import {useDispatch, useSelector} from 'react-redux';
-import {SignOut} from '../store/Slices/AuthSlice';
-import {
-  availableTimes,
-  generateDatesToMark,
-  Specialities,
-  TimeSlots,
-} from '../utils/Dummy';
 import {
   responsiveFontSize,
   responsiveHeight,
@@ -33,11 +24,8 @@ import ImageCropPicker from 'react-native-image-crop-picker';
 import axiosBaseURL from '../services/AxiosBaseURL';
 import {showMessage} from 'react-native-flash-message';
 import EditAddressModal from '../Components/EditAddressModal';
-import {useGetTrainersQuery} from '../store/Apis/Post';
-import {SaveLogedInUser} from '../store/Slices/db_ID';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import moment from 'moment';
-import {Time} from 'react-native-gifted-chat';
 const uploads = [
   {
     img: require('../assets/Images/trainer4.jpg'),
@@ -53,7 +41,6 @@ const Profile = () => {
   //useSelector
   const trainer_data = useSelector(state => state.Auth.data.data);
 
-  const dispatch = useDispatch();
   //useRef
   const textInputRef = useRef(null);
   //useStates
@@ -67,6 +54,7 @@ const Profile = () => {
   const [Hourly, setHourly] = useState('');
   const [selectedTime, setSelectedTime] = useState([]);
   const [Speciality, setSpeciality] = useState([]);
+  const [selectedSpeciality, setSelectedSpeciality] = useState([]);
   const [isLoading, setLoading] = useState(true);
 
   //Functions
@@ -250,34 +238,62 @@ const Profile = () => {
       </View>
     );
   };
-  const RenderedSelectedTimes = ({item, selectedTime, setSelectedTime}) => {
-    const dateString = item;
-    const time = moment(dateString).utc().format('hh:mm A');
 
-    // Function to handle press
+  const RenderedSelectedTimes = ({item, index}) => {
+    const isSelected = selectedIndex === index;
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          setSelectedIndex(index);
+        }}
+        style={[
+          styles.MainFlatlist,
+          {
+            backgroundColor: isSelected ? '#9FED3A' : '#181818',
+          },
+        ]}>
+        <Text
+          style={{
+            color: isSelected ? 'black' : '#9FED3A',
+            fontSize: responsiveFontSize(2),
+          }}>
+          {item}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  const RenderedSpecialities = ({item, Speciality, setSpeciality}) => {
     const handlePress = () => {
-      if (selectedTime.includes(time)) {
-        setSelectedTime(selectedTime.filter(t => t !== time));
+      if (Speciality.includes(item.value)) {
+        setSpeciality(Speciality.filter(s => s !== item.value));
       } else {
-        setSelectedTime([...selectedTime, time]);
+        setSpeciality([...Speciality, item.value]);
       }
     };
 
-    const isSelected = selectedTime.includes(time);
+    const isSelected = Speciality.includes(item.value);
 
     return (
       <TouchableOpacity
         style={[
           styles.MainFlatlist,
-          {backgroundColor: isSelected ? '#9FED3A' : 'white'}, // Green background for selected
+          {
+            backgroundColor: isSelected ? '#9FED3A' : '#181818', // Green for selected
+          },
         ]}
         onPress={handlePress}>
-        <Text style={{color: isSelected ? '#000' : '#9FED3A', fontSize: 16}}>
-          {time}
+        <Text
+          style={{
+            color: isSelected ? 'black' : '#9FED3A',
+            fontSize: responsiveFontSize(2),
+          }}>
+          {item.value}
         </Text>
       </TouchableOpacity>
     );
   };
+
   // const Function = async () => {
   //   if (condition1 && condition2 && condition3 && condition4) {
   //     setspecialityformik(false);
@@ -507,7 +523,6 @@ const Profile = () => {
                   marginHorizontal: responsiveWidth(2),
                 }}>
                 4.8/5
-                {/* {trainer_data.Rating} */}
               </Text>
             </View>
             <Text
@@ -628,23 +643,12 @@ const Profile = () => {
             }}>
             Availability
           </Text>
-          {/* <FlatList
-            horizontal
-            data={TimeSlots}
-            renderItem={renderedTimeSlots}
-            style={{marginVertical: responsiveHeight(1)}}
-          /> */}
+
           <FlatList
             ListEmptyComponent={WhenAvalibilitiesEmpth}
             style={{marginTop: responsiveHeight(2)}}
             data={selectedTime}
-            renderItem={({item}) => (
-              <RenderedSelectedTimes
-                item={item}
-                selectedTime={selectedTime}
-                setSelectedTime={setSelectedTime}
-              />
-            )}
+            renderItem={RenderedSelectedTimes}
             keyExtractor={item => item}
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -666,94 +670,24 @@ const Profile = () => {
             }}>
             Specialities
           </Text>
-          {/* <FlatList
-            horizontal
-            data={Specialities}
-            renderItem={renderedSpecialities}
-            style={{marginVertical: responsiveHeight(1)}}
-          /> */}
+
           <FlatList
             ListEmptyComponent={WhenSpetialitiesEmpth}
             style={{marginTop: responsiveHeight(2)}}
             data={Speciality}
             renderItem={({item}) => (
-              <TouchableOpacity
-                key={item.key}
-                style={[
-                  {...styles.MainFlatlist},
-                  {
-                    backgroundColor: Speciality.includes(item.value)
-                      ? '#9FED3A'
-                      : '#181818',
-                  },
-                ]}
-                // onPress={() => {
-                //   setSpeciality(prevSelectedItems => {
-                //     if (prevSelectedItems.includes(item.value)) {
-                //       return prevSelectedItems.filter(
-                //         selectedItem => selectedItem !== item.value
-                //       );
-                //     } else {
-                //       return [...prevSelectedItems, item.value];
-                //     }
-                //   });
-                // }}
-              >
-                <Text
-                  style={{
-                    color: Speciality.includes(item.value)
-                      ? 'black'
-                      : '#9FED3A',
-                    fontSize: responsiveFontSize(2),
-                  }}>
-                  {item.value}
-                </Text>
-              </TouchableOpacity>
+              <RenderedSpecialities
+                item={item}
+                Speciality={selectedSpeciality}
+                setSpeciality={setSelectedSpeciality}
+              />
             )}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{alignItems: 'center'}}
+            keyExtractor={item => item.key}
           />
         </View>
-        {/* <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'baseline',
-                }}>
-                <Text style={styles.modalText}>Select Option</Text>
-              </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                }}>
-                <TouchableOpacity
-                  onPress={() => {
-                    handleTakePhoto();
-                  }}
-                  style={styles.closeButton}>
-                  <Text style={styles.closeButtonText}>Open Camera</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    handleChoosePhoto();
-                  }}
-                  style={styles.closeButton}>
-                  <Text style={styles.closeButtonText}>Open Gallery</Text>
-                </TouchableOpacity>
-              </View>
-              <TouchableOpacity onPress={closeModal}>
-                <Text
-                  style={{
-                    marginLeft: responsiveWidth(2),
-                    fontSize: responsiveFontSize(2),
-                    fontWeight: '500',
-                    color: 'red',
-                  }}>
-                  Close
-                </Text>
-              </TouchableOpacity> */}
         <View
           style={{
             width: responsiveWidth(80),
@@ -768,7 +702,10 @@ const Profile = () => {
             }}>
             Location
           </Text>
-          <View
+          <TouchableOpacity
+            onPress={() => {
+              setAddressModal(true);
+            }}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -786,19 +723,7 @@ const Profile = () => {
               }}
               placeholderTextColor={'#fff'}
             />
-            <TouchableOpacity
-              onPress={() => {
-                setAddressModal(true);
-              }}>
-              <Image
-                source={Images.edit}
-                style={{
-                  height: responsiveHeight(2),
-                  width: responsiveWidth(4),
-                }}
-              />
-            </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         </View>
         <EditAddressModal
           token={trainer_data.token}
