@@ -25,8 +25,8 @@ const Schedule = ({route}) => {
   const navigation = useNavigation();
   const datesToMark = generateDatesToMark();
   const newMarkedDates = {};
-  const {Data} = route.params;
-  console.log('--------', Data);
+  const {Data, fullName} = route.params;
+  console.log('--------', Data, fullName);
   const renderItem = ({item}) => (
     <TouchableOpacity
       style={{
@@ -191,7 +191,12 @@ const Schedule = ({route}) => {
           }}
           onPress={() =>
             navigation.navigate('ReviewBooking', {
-              Data: {Date: selected, time: selectedTime, rate: Data},
+              Data: {
+                Date: selected,
+                time: selectedTime,
+                rate: Data,
+                fullName: fullName,
+              },
             })
           }
           textstyle={{

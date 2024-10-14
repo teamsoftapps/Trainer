@@ -33,7 +33,6 @@ import {favouriteTrainer, unfavouriteTrainer} from '../store/Slices/favourite';
 import {useGetUsersQuery} from '../store/Apis/Post';
 const TrainerProfile = ({route}) => {
   const {data} = route.params;
-  // const {dataa, isLoading} = useGetUsersQuery();
   const [usersData, setUsersData] = useState([]);
   const [readmore, setreadmore] = useState(true);
   const [follow, setfollow] = useState(false);
@@ -417,7 +416,10 @@ const TrainerProfile = ({route}) => {
           <Button
             text="Book Now"
             onPress={() =>
-              navigation.navigate('Schedule', {Data: data.Hourlyrate})
+              navigation.navigate('Schedule', {
+                Data: data.Hourlyrate,
+                fullName: data.fullName,
+              })
             }
             containerstyles={{}}
           />

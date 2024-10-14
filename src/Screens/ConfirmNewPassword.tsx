@@ -22,8 +22,6 @@ import Button from '../Components/Button';
 import {useNavigation} from '@react-navigation/native';
 import {showMessage} from 'react-native-flash-message';
 import {useDispatch, useSelector} from 'react-redux';
-import axiosBaseURL from '../services/AxiosBaseURL';
-import {SignOut} from '../store/Slices/AuthSlice';
 import {useChangePasswordMutation} from '../store/Apis/userAuth';
 import useToast from '../Hooks/Toast';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
@@ -42,6 +40,7 @@ const ConfirmNewPassword: React.FC<Props> = ({navigation, route}) => {
   const [secure2, setsecure2] = useState(false);
   const [passworddisabled, setpassworddisable] = useState(false);
   const authData = useSelector(state => state.Auth);
+  console.log('auth data', authData);
   const [changePassword, {isLoading: UserChangePassLoading}] =
     useChangePasswordMutation();
   const [TrainerChangePass, {isLoading: TrainerChangePassLoading}] =

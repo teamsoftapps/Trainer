@@ -1,13 +1,12 @@
 import {
-  Alert,
-  FlatList,
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import WrapperContainer from '../Components/Wrapper';
 import {
   responsiveFontSize,
@@ -17,208 +16,267 @@ import {
 import {Images} from '../utils/Images';
 import {useNavigation} from '@react-navigation/native';
 import axiosBaseURL from '../services/AxiosBaseURL';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
-import {socketService} from '../utils/socketService';
+import {SaveLogedInUser} from '../store/Slices/db_ID';
 
 const TrainerHome = () => {
-  const [APIUserData, setAPIUserData] = useState({});
   const trainer_data = useSelector(state => state.Auth.data);
-  console.log('Trainer Data', trainer_data);
   const navigation = useNavigation();
-  // const Bookings = [
-  //   {
-  //     id: '1',
-  //     userImage: require('../assets/Images/Mask2.png'),
-  //     userName: 'Nicole Foster',
-  //     userDate: 'Mondat, October 24',
-  //     selectedTime: '8:00 AM',
-  //   },
-  //   {
-  //     id: '2',
-  //     userImage: require('../assets/Images/Mask2.png'),
-  //     userName: 'Nicole Foster',
-  //     userDate: 'Mondat, October 24',
-  //     selectedTime: '8:00 AM',
-  //   },
-  //   {
-  //     id: '3',
-  //     userImage: require('../assets/Images/Mask2.png'),
-  //     userName: 'Nicole Foster',
-  //     userDate: 'Mondat, October 24',
-  //     selectedTime: '8:00 AM',
-  //   },
-  // ];
-  // useEffect(() => {
-  //   socketService.initializeSocket();
-  // }, []);
-  // useEffect(() => {
-  //   console.log('=----------', trainer_data);
-  //   if (trainer_data.type === 'trainer') {
-  //     axiosBaseURL
-  //       .post('/trainer/GetTrainer', {
-  //         email: trainer_data.res_EMAIL,
-  //       })
-  //       .then(response => {
-  //         console.log(
-  //           '------------------------',
-  //           response.data.data.profileImage
-  //         );
-  //         setAPIUserData(response.data.data);
-  //         if (response.data.data.Bio === null) {
-  //           Alert.alert('Please complete your profile');
-  //         }
-  //       })
-  //       .catch(error => {
-  //         console.error('Error fetching data:', error.response.data.message);
-  //       });
-  //   }
-  // }, []);
+  const dispatch = useDispatch();
 
-  // const TrainerAppointments = ({item, index}) => {
-  //   return (
-  //     <TouchableOpacity
-  //       style={{
-  //         flexDirection: 'row',
-  //         justifyContent: 'space-between',
-  //         alignItems: 'center',
-  //         backgroundColor: 'rgba(187, 187, 187, 0.1)',
-  //         borderRadius: responsiveWidth(3),
-  //         paddingHorizontal: responsiveWidth(2.5),
-  //         paddingVertical: responsiveHeight(2),
-  //         marginRight: responsiveWidth(3),
-  //       }}>
-  //       <View>
-  //         <Image source={item.userImage} style={styles.userImage} />
-  //       </View>
-  //       <View style={styles.child_2}>
-  //         <Text
-  //           style={[
-  //             {
-  //               ...styles.slogan,
-  //               color: '#fff',
-  //               marginVertical: responsiveHeight(0.3),
-  //             },
-  //           ]}>
-  //           {item.userName}
-  //         </Text>
-  //         <Text
-  //           style={[
-  //             {
-  //               ...styles.slogan,
-  //               color: '#fff',
-  //               marginVertical: responsiveHeight(0.3),
-  //               fontWeight: '300',
-  //             },
-  //           ]}>
-  //           {item.userDate}
-  //         </Text>
-  //         <Text
-  //           style={[
-  //             {
-  //               ...styles.slogan,
-  //               color: '#bbbbbb',
-  //               marginVertical: responsiveHeight(0.3),
-  //               fontWeight: '300',
-  //             },
-  //           ]}>
-  //           {item.selectedTime}
-  //         </Text>
-  //       </View>
-  //     </TouchableOpacity>
-  //   );
-  // };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const profileResponse = await axiosBaseURL.get(
+          `/Common/GetProfile/${trainer_data.data.token}`
+        );
+        const userData = profileResponse.data.data;
+        console.log('profileResponce', userData);
+        dispatch(SaveLogedInUser(userData));
+      } catch (error) {
+        console.error(
+          'Error fetching data:',
+          error.response?.data?.message || error.message
+        );
+      }
+    };
+    fetchData();
+  }, [trainer_data?.data.token]);
 
   return (
     <WrapperContainer>
-      <View
-        style={{
-          height: responsiveHeight(8),
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingHorizontal: responsiveWidth(7),
-        }}>
-        <Image
-          source={Images.logo}
-          style={{
-            width: responsiveWidth(12),
-            height: responsiveHeight(12),
-            resizeMode: 'contain',
-          }}
-        />
+      <ScrollView>
         <View
           style={{
+            height: responsiveHeight(8),
             flexDirection: 'row',
             alignItems: 'center',
-            gap: responsiveWidth(5),
+            justifyContent: 'space-between',
+            paddingHorizontal: responsiveWidth(7),
           }}>
-          <TouchableOpacity activeOpacity={0.8}>
-            <Image source={Images.notification} style={styles.notifiaction} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => {
-              navigation.navigate('Chat');
+          <Image
+            source={Images.logo}
+            style={{
+              width: responsiveWidth(12),
+              height: responsiveHeight(12),
+              resizeMode: 'contain',
+            }}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: responsiveWidth(5),
             }}>
-            <Image source={Images.messages} style={styles.notifiaction} />
-          </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => {
+                navigation.navigate('Notification');
+              }}>
+              <Image source={Images.notification} style={styles.notifiaction} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => {
+                navigation.navigate('Chat');
+              }}>
+              <Image source={Images.messages} style={styles.notifiaction} />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-      <View style={styles.cont_1}>
-        <Text style={styles.Welcome_Text}>
-          Welcome{' '}
+        <View style={styles.cont_1}>
+          <Text style={styles.Welcome_Text}>
+            Welcome{' '}
+            <Text
+              style={[
+                {...styles.Welcome_Text},
+                {color: '#fff', fontWeight: '500'},
+              ]}>
+              {trainer_data?.data.fullName}
+            </Text>
+          </Text>
+          <Text style={styles.slogan}>
+            Ready to start your journey with Sterns's Gym?
+          </Text>
+        </View>
+        <View style={styles.cont_2}>
           <Text
             style={[
               {...styles.Welcome_Text},
-              {color: '#fff', fontWeight: '500'},
+              {
+                fontSize: responsiveFontSize(2),
+                fontWeight: '500',
+                marginVertical: responsiveHeight(1.5),
+              },
             ]}>
-            {trainer_data?.data.fullName}
+            Get Started
           </Text>
-        </Text>
-        <Text style={styles.slogan}>
-          Ready to start your journey with Sterns's Gym?
-        </Text>
-      </View>
-      <View style={styles.cont_2}>
-        <Text
-          style={[
-            {...styles.Welcome_Text},
-            {
-              fontSize: responsiveFontSize(2),
-              fontWeight: '500',
-              marginVertical: responsiveHeight(1.5),
-            },
-          ]}>
-          Get Started
-        </Text>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate('Profile');
-          }}
-          style={styles.Text_Sec}>
-          <Image source={Images.trainer2} style={styles.trainerImage} />
-          <AnimatedCircularProgress
-            size={80}
-            width={5}
-            fill={80}
-            tintColor="#9FED3A"
-            onAnimationComplete={() => console.log('onAnimationComplete')}
-          />
-          <Text style={styles.percent}>80%</Text>
-          <Text style={[{...styles.slogan}, {color: '#BBBBBB'}]}>
-            Complete Profile
-          </Text>
-        </TouchableOpacity>
-      </View>
-      {/* <View style={styles.cont_3}>
-        <FlatList
-          showsHorizontalScrollIndicator={false}
-          horizontal
-          data={Bookings}
-          renderItem={TrainerAppointments}
-        />
-      </View> */}
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('EditProfile');
+            }}
+            style={styles.Text_Sec}>
+            <View>
+              <Image source={Images.trainer2} style={styles.trainerImage} />
+              <AnimatedCircularProgress
+                size={60}
+                width={3}
+                fill={80}
+                tintColor="#9FED3A"
+                onAnimationComplete={() => console.log('onAnimationComplete')}
+              />
+            </View>
+            <View style={styles.main_child_2}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}>
+                <Text style={styles.percent}>80%</Text>
+                <Text
+                  style={[
+                    {...styles.slogan},
+                    {
+                      color: '#BBBBBB',
+                      marginLeft: responsiveWidth(1),
+                      fontSize: responsiveFontSize(2),
+                    },
+                  ]}>
+                  Profile Completion
+                </Text>
+              </View>
+              <Text style={[{...styles.slogan}, {color: '#BBBBBB'}]}>
+                Complete your Profile to attract more clients.
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate('Profile');
+                }}>
+                <Text style={{color: '#9FED3A', alignSelf: 'flex-end'}}>
+                  View Your Profile
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <View style={{paddingHorizontal: responsiveWidth(7)}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              paddingVertical: responsiveHeight(2),
+            }}>
+            <Text
+              style={{
+                color: '#fff',
+                fontSize: responsiveFontSize(2),
+                fontWeight: '500',
+              }}>
+              Total Earnings
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('Earnings');
+              }}
+              style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Text style={{color: '#9FED3A'}}>See all</Text>
+              <Image
+                source={Images.rightarrow}
+                style={{
+                  tintColor: '#9FED3A',
+                  marginLeft: responsiveWidth(1),
+                  height: responsiveHeight(1.3),
+                  width: responsiveWidth(1.8),
+                }}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View
+            style={{
+              backgroundColor: 'rgba(187, 187, 187, 0.1)',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              paddingHorizontal: responsiveWidth(3),
+              paddingVertical: responsiveHeight(2),
+              borderRadius: responsiveWidth(3),
+            }}>
+            <View style={{width: responsiveWidth(45)}}>
+              <Text
+                style={{color: '#9FED3A', fontSize: responsiveFontSize(2.5)}}>
+                Earnings
+              </Text>
+              <Text
+                style={{color: '#BBBBBB', fontSize: responsiveFontSize(1.7)}}>
+                Earnings will appears here once your first session is complete!
+              </Text>
+            </View>
+            <View>
+              <Image source={require('../assets/Images/dollars.png')} />
+            </View>
+          </View>
+        </View>
+
+        <View style={{paddingHorizontal: responsiveWidth(7)}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              paddingVertical: responsiveHeight(2),
+            }}>
+            <Text
+              style={{
+                color: '#fff',
+                fontSize: responsiveFontSize(2),
+                fontWeight: '500',
+              }}>
+              Upcoming Sessions
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('Sessions');
+              }}
+              style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Text style={{color: '#9FED3A'}}>See all</Text>
+              <Image
+                source={Images.rightarrow}
+                style={{
+                  tintColor: '#9FED3A',
+                  marginLeft: responsiveWidth(1),
+                  height: responsiveHeight(1.3),
+                  width: responsiveWidth(1.8),
+                }}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View
+            style={{
+              backgroundColor: 'rgba(187, 187, 187, 0.1)',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              paddingHorizontal: responsiveWidth(3),
+              paddingVertical: responsiveHeight(2),
+              borderRadius: responsiveWidth(3),
+            }}>
+            <View style={{width: responsiveWidth(43)}}>
+              <Text
+                style={{color: '#9FED3A', fontSize: responsiveFontSize(2.5)}}>
+                Sessions
+              </Text>
+              <Text
+                style={{color: '#BBBBBB', fontSize: responsiveFontSize(1.7)}}>
+                When a client books you, your upcoming sessions will show here.
+              </Text>
+            </View>
+            <View>
+              <Image source={require('../assets/Images/dumbell.png')} />
+            </View>
+          </View>
+        </View>
+      </ScrollView>
     </WrapperContainer>
   );
 };
@@ -250,20 +308,21 @@ const styles = StyleSheet.create({
     marginVertical: responsiveHeight(2),
   },
   trainerImage: {
-    height: responsiveWidth(16),
-    width: responsiveWidth(16),
+    height: responsiveWidth(12),
+    width: responsiveWidth(12),
     borderRadius: responsiveWidth(6),
     borderWidth: responsiveWidth(0.5),
     position: 'absolute',
-    left: responsiveWidth(5),
-    top: responsiveHeight(2.4),
+    left: responsiveWidth(1.2),
+    top: responsiveHeight(0.6),
   },
   Text_Sec: {
-    width: responsiveWidth(60),
+    width: responsiveWidth(85),
     position: 'relative',
     backgroundColor: 'rgba(187, 187, 187, 0.1)',
     borderRadius: responsiveWidth(2),
     paddingHorizontal: responsiveWidth(3),
+    paddingRight: responsiveWidth(10),
     paddingVertical: responsiveHeight(1.5),
     display: 'flex',
     flexDirection: 'row',
@@ -271,9 +330,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   percent: {
-    color: '#fff',
-    fontSize: responsiveFontSize(2),
-    marginTop: responsiveHeight(0.8),
+    color: '#9FED3A',
+    fontSize: responsiveFontSize(2.5),
   },
   userImage: {
     height: responsiveWidth(14),
@@ -285,5 +343,8 @@ const styles = StyleSheet.create({
   cont_3: {
     marginHorizontal: responsiveWidth(7),
     marginVertical: responsiveHeight(7),
+  },
+  main_child_2: {
+    marginLeft: responsiveWidth(3),
   },
 });

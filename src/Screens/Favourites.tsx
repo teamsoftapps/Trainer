@@ -84,7 +84,7 @@ const Favourites = () => {
           marginLeft: responsiveWidth(6),
           marginTop: responsiveHeight(2),
         }}>
-        Favourites
+        Favorites
       </Text>
       <View
         style={{

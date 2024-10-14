@@ -31,9 +31,14 @@ import {
   presentPaymentSheet,
 } from '@stripe/stripe-react-native';
 const Profile = () => {
+  //Toasts
   const {showToast} = useToast();
+
+  // functions
   const openModal = () => setModal(true);
   const closeModal = () => setModal(false);
+
+  // states
   const [Address, setAddress] = useState('');
   const [name, setname] = useState('');
   const [email, setemail] = useState('');
@@ -42,14 +47,17 @@ const Profile = () => {
   const [stripeId, setStripeId] = useState(null);
   const [StripeCardDetails, setStripeCardDetails] = useState([]);
   const [StripeCardData, setStripeCardData] = useState('');
-  const authData = useSelector(state => state.Auth.data.data);
-  console.log('suthData', authData);
   const [imageUri, setImageUri] = useState(null);
   const [isModal, setModal] = useState(false);
 
-  useEffect(() => {
-    fetchStripeCards();
-  }, [stripeId]);
+  // useSelectors
+  const authData = useSelector(state => state.Auth.data.data);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchStripeCards();
+    }, [StripeCardDetails])
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -64,12 +72,7 @@ const Profile = () => {
           setname(userData.fullName);
           setemail(userData.email);
           setStripeId(userData.stripeCustomerID);
-        } catch (error) {
-          console.error(
-            'Error fetching data:',
-            error.response?.data?.message || error.message
-          );
-        }
+        } catch (error) {}
       };
 
       fetchData();
@@ -85,9 +88,7 @@ const Profile = () => {
         uploadImage(image);
         setModal(false);
       })
-      .catch(error => {
-        console.error('ImagePicker Error: ', error.message);
-      });
+      .catch(error => {});
   };
 
   const handleTakePhoto = async () => {
@@ -98,9 +99,7 @@ const Profile = () => {
       });
       uploadImage(image);
       setModal(false);
-    } catch (error) {
-      console.error('ImagePicker Error: ', error.message);
-    }
+    } catch (error) {}
   };
 
   const uploadImage = async image => {
@@ -113,7 +112,6 @@ const Profile = () => {
         name: `profileImage-${Date.now()}.jpg`,
       });
       formData.append('email', authData.email);
-      console.log('form data:', formData);
 
       const response = await axiosBaseURL.post('/Common/fileUpload', formData, {
         headers: {
@@ -129,7 +127,6 @@ const Profile = () => {
         });
       }
     } catch (error) {
-      console.error('Upload Error: ', error);
       showMessage({
         message: 'Upload Failed',
         description: error.message || 'Failed to upload image.',
@@ -146,13 +143,9 @@ const Profile = () => {
       });
       if (response.data) {
         setStripeCardDetails(response.data.data);
-        console.log('Data received:', response.data.data);
       } else {
-        console.log('No Data Found');
       }
-    } catch (error) {
-      console.error('Error fetching Stripe cards:', error.message);
-    }
+    } catch (error) {}
   };
 
   const initializepaymentsheet = async () => {
@@ -170,16 +163,9 @@ const Profile = () => {
         allowsRemovalOfLastSavedPaymentMethod: true,
       });
       if (error) {
-        console.error('Error initializing payment sheet:', error.message);
       } else {
-        console.log('Payment sheet initialized successfully');
       }
-    } catch (error) {
-      console.error(
-        'Error during payment sheet initialization:',
-        error.message
-      );
-    }
+    } catch (error) {}
   };
 
   const AddCardStripe = async () => {
@@ -194,6 +180,7 @@ const Profile = () => {
 
   const limitedUserImages = UserImages.slice(0, 3);
   const navigation = useNavigation();
+
   return (
     <WrapperContainer>
       <ScrollView>
@@ -285,11 +272,7 @@ const Profile = () => {
         <View style={styles.address}>
           <View style={styles.addresstext}>
             <Text style={styles.heading}>Favourite</Text>
-            <Pressable
-              onPress={() => {
-                // navigation.navigate(NavigationStrings.FAVOURITES);
-              }}
-              style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Pressable style={{flexDirection: 'row', alignItems: 'center'}}>
               <View style={{left: 25}}>
                 <FlatList
                   horizontal

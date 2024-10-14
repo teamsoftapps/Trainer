@@ -200,14 +200,16 @@ const SearchTrainer = () => {
             showsHorizontalScrollIndicator={false}
             horizontal
             data={trainerData}
+            keyExtractor={item => item._id}
             renderItem={({item, index}) => {
               return (
                 <TouchableOpacity
+                  activeOpacity={0.9}
                   onPress={() => {
                     navigation.navigate('TrainerProfile', {data: item});
                   }}
                   style={{
-                    width: responsiveWidth(60),
+                    width: responsiveWidth(65),
                     height: responsiveWidth(60),
                     borderRadius: responsiveWidth(4),
                     backgroundColor: '#fff',
@@ -283,7 +285,7 @@ const SearchTrainer = () => {
                               tintColor: '#9FED3A',
                               resizeMode: 'contain',
                               marginRight: responsiveWidth(1),
-                              height: responsiveHeight(3),
+                              height: responsiveWidth(3),
                               width: responsiveWidth(3),
                             }}
                           />
@@ -301,7 +303,7 @@ const SearchTrainer = () => {
                               tintColor: '#9FED3A',
                               resizeMode: 'cover',
                               marginRight: responsiveWidth(1),
-                              height: responsiveHeight(2),
+                              height: responsiveWidth(3),
                               width: responsiveWidth(3),
                             }}
                           />

@@ -12,9 +12,11 @@ import Story from '../trainerScreens/Story';
 import Booking from '../Screens/Booking';
 import Favourite from '../trainerScreens/Favourite';
 import Listing from '../trainerScreens/Listing';
+import Sessions from '../trainerScreens/sessions';
+import Earnings from '../trainerScreens/earnings';
 
 const TrainerBttomStack = () => {
-  const type = useSelector(state => state.Auth.data.type);
+  const type = useSelector(state => state?.Auth?.data.type);
   console.log('type from bottom:', type);
   const Bottom = createBottomTabNavigator();
   return (
@@ -58,8 +60,8 @@ const TrainerBttomStack = () => {
             />
           ),
         }}
-        name={'Listing'}
-        component={Listing}
+        name={'Sessions'}
+        component={Sessions}
       />
       <Bottom.Screen
         options={{
@@ -90,8 +92,8 @@ const TrainerBttomStack = () => {
             />
           ),
         }}
-        name={'Favourite'}
-        component={Favourite}
+        name={'Earnings'}
+        component={Earnings}
       />
       <Bottom.Screen
         options={{

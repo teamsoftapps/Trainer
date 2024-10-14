@@ -86,6 +86,13 @@ export const Images = {
   messageGreen: require('../assets/Images/messageGreen.png'),
   plus: require('../assets/Images/plus.png'),
   story: require('../assets/Images/story.png'),
+  edit_icon: require('../assets/Images/editIcon.png'),
+  person: require('../assets/Images/person.png'),
+  current: require('../assets/Images/current.png'),
+  editImage: require('../assets/Images/editImage.png'),
+  managePlans: require('../assets/Images/manageplans.png'),
+  EmptyFile: require('../assets/Images/file.png'),
+  downloadIcon: require('../assets/Images/downloadIcon.png'),
 };
 
 export const FontFamily = {

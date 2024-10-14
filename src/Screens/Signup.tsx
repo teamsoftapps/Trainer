@@ -40,14 +40,14 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
   const dispatch = useDispatch();
   const [SignUpUser, {isLoading: SignupUserLoading}] = useSignUpUserMutation();
   const [SignUpTrainer] = useSignUpTrainerMutation();
-  const [name, setname] = useState('tester devv');
-  const [email, setemail] = useState('testerdevv@gmail.com');
+  const [name, setname] = useState('');
+  const [email, setemail] = useState('');
   const [password, setpassword] = useState('123456');
   const [confirmpassword, setconfirmpassword] = useState('123456');
   const [DoB, setDoB] = useState('');
   const [weight, setweight] = useState('10');
   const [height, setheight] = useState('20');
-  const [address, setAddress] = useState('43 Bourke street, WA, 7563');
+  const [address, setAddress] = useState('');
   const [Gender, setGender] = useState('');
 
   // Icon touch activate Input
@@ -93,8 +93,10 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
   const condition8 = address != '';
 
   const handleSignup = async () => {
+    console.log('ADESSASDSD', address);
     let payload = {
       fullName: name,
+      Address: address,
       email: email,
       password: password,
       confirmpassword: confirmpassword,
@@ -102,11 +104,11 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
       Dob: DoB,
       weight: weight,
       height: height,
-      Address: address,
     };
     try {
       if (user.checkUser === 'user') {
         let res: any = await SignUpUser(payload);
+
         console.log('userssssss data', res);
         if (res.data) {
           showToast('Success', 'User created in successfully', 'success');
@@ -121,7 +123,6 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
         console.log('------------------', res);
         if (res.data) {
           showToast('Success', 'Trainer created in successfully', 'success');
-          // dispatch(IsLogin(res.data?.data.token));
           navigation.navigate('signin', {checkUser: 'trainer'});
         }
         if (res.error) {
@@ -497,7 +498,9 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
                   ref={addressRef}
                   placeholder="i.e 43 Bourke street, NSW 987"
                   value={address}
-                  onChangeText={setAddress}
+                  onChangeText={text => {
+                    setAddress(text);
+                  }}
                   style={{
                     padding: 0,
                     fontFamily: FontFamily.Semi_Bold,

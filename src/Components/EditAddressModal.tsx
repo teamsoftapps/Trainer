@@ -18,6 +18,7 @@ import Button from './Button';
 import {TextInput} from 'react-native';
 import axiosBaseURL from '../services/AxiosBaseURL';
 import {showMessage} from 'react-native-flash-message';
+import {useSelector} from 'react-redux';
 
 interface Props {
   modalstate: boolean;
@@ -37,11 +38,12 @@ const EditAddressModal: React.FC<Props> = ({
   const SaveData = () => {
     onRequestClose();
     axiosBaseURL
-      .post('/Common/UpdateAddress', {
+      .post('/common/UpdateAddress', {
         token: token,
         updatedAddress: text,
       })
       .then(response => {
+        console.log('90909009090', response);
         showMessage({
           message: 'Address updated successfully',
           type: 'success',

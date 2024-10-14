@@ -62,6 +62,7 @@ const Upcoming = () => {
   useFocusEffect(
     useCallback(() => {
       getBookings();
+      console.log('sasasa', AuthData);
     }, [AuthData.token])
   );
 
@@ -70,25 +71,26 @@ const Upcoming = () => {
       const response = await axiosBaseURL.get('/user/GetBookings', {
         params: {token: AuthData.token},
       });
-      setBookings(response.data.data);
       console.log('in get bookings function:', response.data.data);
+      setBookings(response.data.data);
+      console.log('bookings:::::', bookings);
     } catch (error) {}
   };
 
-  // const deleteBookings = async bookingId => {
-  //   try {
-  //     const response = await axiosBaseURL.delete('/user/DeleteBooking', {
-  //       data: {
-  //         token: AuthData.token,
-  //         bookingId: bookingId,
-  //       },
-  //     });
-  //     await setBookings(prevBookings =>
-  //       prevBookings.filter(booking => booking._id !== bookingId)
-  //     );
-  //     setDelete(false);
-  //   } catch (error) {}
-  // };
+  const deleteBookings = async bookingId => {
+    try {
+      const response = await axiosBaseURL.delete('/user/DeleteBooking', {
+        data: {
+          token: AuthData.token,
+          bookingId: bookingId,
+        },
+      });
+      await setBookings(prevBookings =>
+        prevBookings.filter(booking => booking._id !== bookingId)
+      );
+      setDelete(false);
+    } catch (error) {}
+  };
 
   const EmptyComp = () => {
     return (
@@ -128,25 +130,16 @@ const Upcoming = () => {
                   }}
                   style={styles.left}>
                   <Image
-                    source={
-                      index == 0
-                        ? upcoming[0].image
-                        : index == 1
-                        ? upcoming[1].image
-                        : index == 2
-                        ? upcoming[2].image
-                        : null
-                    }
+                    style={{
+                      height: responsiveWidth(14),
+                      width: responsiveWidth(14),
+                      borderRadius: responsiveWidth(14),
+                    }}
+                    src={item.profileImage}
                   />
                   <View>
                     <Text style={styles.whitetext} numberOfLines={1}>
-                      {index == 0
-                        ? upcoming[0].name
-                        : index == 1
-                        ? upcoming[1].name
-                        : index == 2
-                        ? upcoming[2].name
-                        : null}
+                      {item.userName}
                     </Text>
                     <Text style={styles.whitetext} numberOfLines={1}>
                       {item.Date}

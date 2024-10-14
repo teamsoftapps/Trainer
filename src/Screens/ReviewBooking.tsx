@@ -31,6 +31,7 @@ import {useSelector} from 'react-redux';
 
 const ReviewBooking = ({route}) => {
   const {Data} = route.params;
+  console.log('data from routes', Data);
   const [CardDetails, setCardDetails] = useState([]);
   const {showToast} = useToast();
   const [stripeId, setStripeId] = useState('');
@@ -40,7 +41,8 @@ const ReviewBooking = ({route}) => {
     Data.rate.replace('$', '')
   );
   const authData = useSelector(state => state.Auth.data);
-  console.log('data mil gya', authData.data.profileImage);
+  console.log('data from routes in review Booking:', Data);
+  console.log('data mil gya', authData);
   console.log('in review booking', authData.data.token);
   const navigation = useNavigation();
 
@@ -117,6 +119,7 @@ const ReviewBooking = ({route}) => {
         Date: FormatedDate,
         Reminder: '30 mins',
         profileImage: authData.data.profileImage,
+        userName: Data.fullName,
       });
       showToast('Payment Succesfull', 'Booking successfull!', 'success');
       navigation.navigate('Booking');
@@ -190,7 +193,7 @@ const ReviewBooking = ({route}) => {
           </Text>
           <Text
             style={{color: 'white', fontSize: responsiveScreenFontSize(2.4)}}>
-            Alex Morgan
+            {Data.fullName}
           </Text>
           <Text style={{color: 'white', fontSize: responsiveScreenFontSize(2)}}>
             Fitness
