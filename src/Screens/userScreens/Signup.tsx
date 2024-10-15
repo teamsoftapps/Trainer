@@ -31,6 +31,7 @@ import {useSignUpTrainerMutation} from '../../store/Apis/trainerAuth';
 import useToast from '../../Hooks/Toast';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootProps} from '../../Navigations/AuthStack';
+import {MAP_API_KEY} from '../../config/urls';
 
 type Props = NativeStackScreenProps<RootProps, 'signup'>;
 
@@ -150,6 +151,11 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
       showToast('Error', error?.message, 'danger');
       console.log('Errrrrrorrrrrrrr', error);
     }
+  };
+
+  const handleAddressSelect = (data, details = null) => {
+    console.log('Selected address:', data.description);
+    // Use the selected address in your signup logic
   };
 
   return (
@@ -495,7 +501,7 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
                 </View>
               </View>
             </View>
-            <View
+            {/* <View
               style={{
                 width: responsiveWidth(85),
                 paddingHorizontal: responsiveWidth(5),
@@ -539,7 +545,25 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
                   }}
                 />
               </TouchableOpacity>
-            </View>
+            </View> */}
+
+            <GooglePlacesAutocomplete
+              placeholder="Enter your address"
+              onPress={handleAddressSelect}
+              query={{
+                key: MAP_API_KEY,
+                language: 'en',
+              }}
+              styles={{
+                textInput: {
+                  height: 40,
+                  borderColor: 'gray',
+                  borderWidth: 1,
+                  marginBottom: 20,
+                },
+              }}
+            />
+
             <ButtonComp
               text="Sign Up"
               mainStyle={{

@@ -3761,7 +3761,7 @@ __metadata:
     react-native-image-crop-picker: ^0.41.2
     react-native-insta-story: ^1.1.9
     react-native-linear-gradient: ^2.8.3
-    react-native-maps: ^1.17.1
+    react-native-maps: ^1.18.2
     react-native-mask-input: ^1.2.3
     react-native-mmkv: ^2.12.2
     react-native-modal: ^13.0.1
@@ -9363,9 +9363,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-maps@npm:^1.17.1":
-  version: 1.18.0
-  resolution: "react-native-maps@npm:1.18.0"
+"react-native-maps@npm:^1.18.2":
+  version: 1.18.2
+  resolution: "react-native-maps@npm:1.18.2"
   dependencies:
     "@types/geojson": ^7946.0.13
   peerDependencies:
@@ -9375,7 +9375,7 @@ __metadata:
   peerDependenciesMeta:
     react-native-web:
       optional: true
-  checksum: f2be313b652a9cc1cdcf3eaa3bf8d33ca0ce564d4519371acbbbccf977342ffbd7f8ce36c851ccf7afe31c02a558d06bfd149d14ba9cc0916732a3a589f93b6d
+  checksum: 69cb40f01ce8d467e7180399aa09005bd3b0b5427c0a29aef7a23208f02cb1bfd0bf28dcafb7ecc2757f7c5d61d9af6fb8d8a339a10100c9a88a572265a12eea
   languageName: node
   linkType: hard
 
