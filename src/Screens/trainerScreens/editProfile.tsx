@@ -30,15 +30,13 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import {TouchableWithoutFeedback} from 'react-native';
 import EditAddressModal from '../../Components/EditAddressModal';
 import {useNavigation} from '@react-navigation/native';
+import moment from 'moment';
 
 const EditProfile = ({route}) => {
   //UseSelectors
   const logedInTrainer = useSelector(state => state.Auth.data.data);
   console.log('loded in trainer data:', logedInTrainer);
-  console.log('gggggggggggg', logedInTrainer.Availiblity);
-  const [avalibilities, setAvalibilities] = useState([
-    logedInTrainer.Availiblity,
-  ]);
+
   //Spliting fullName in to first and lst name.
   const setFullName = logedInTrainer?.fullName?.split(' ');
   const firstName = setFullName[0] || [];
@@ -78,6 +76,7 @@ const EditProfile = ({route}) => {
   const condition3 = Bio != '';
   const condition4 = selectedSpecialities.length !== 0;
   const navigation = useNavigation();
+
   const handleSpecialitySelect = speciality => {
     setDropdownVisible(false);
     setSelectedSpecialities(prev => {
@@ -88,26 +87,7 @@ const EditProfile = ({route}) => {
       }
     });
   };
-  const getSelectedValues = () => {
-    return (
-      selectedSpecialities.map(item => item.value).join(', ') ||
-      'Select Specialities'
-    );
-  };
-  const onTimeChange = (event, selectedTime) => {
-    if (event.type === 'set') {
-      const currentTime = selectedTime || time;
-      setSelectedTimes(prevTimes => [...prevTimes, currentTime]);
-      setTime(currentTime);
-      setModalVisible(false);
-    }
-  };
-  const onDateChange = (event, selectedValue) => {
-    if (selectedValue) {
-      setDate(selectedValue);
-    }
-    setModalVisible2(false);
-  };
+
   const toggleModalTimes = () => {
     setModalVisible(true);
   };
@@ -116,23 +96,30 @@ const EditProfile = ({route}) => {
     setModalVisible2(true);
   };
 
-  const formatDate = date => {
-    if (!date) return '';
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+  const onTimeChange = (event, selectedTime) => {
+    if (event.type === 'set') {
+      const currentTime = selectedTime || time;
+
+      // Ensure currentTime is a valid Date object
+      if (currentTime instanceof Date && !isNaN(currentTime)) {
+        const formattedTime = moment(currentTime).format('HH:mm A');
+        setSelectedTimes(prevTimes => [...prevTimes, formattedTime]);
+        setTime(currentTime);
+        setModalVisible(false);
+      } else {
+      }
+    } else if (event.type === 'dismissed') {
+      setModalVisible(false);
+    }
   };
 
-  const formatTime = isoString => {
-    const date = new Date(isoString); // Convert ISO string to Date object
-    if (isNaN(date.getTime())) {
-      return 'Invalid Date'; // Handle invalid date
+  const onDateChange = selectedValue => {
+    if (selectedValue instanceof Date && !isNaN(selectedValue)) {
+      setDate(selectedValue);
     }
-    const hours = String(date.getUTCHours()).padStart(2, '0'); // Get hours
-    const minutes = String(date.getUTCMinutes()).padStart(2, '0'); // Get minutes
-    return `${hours}:${minutes}`; // Return formatted time
+    setModalVisible2(false);
   };
+
   const Function = async () => {
     if (condition1 && condition2 && condition3 && condition4) {
       setspecialityformik(false);
@@ -152,7 +139,7 @@ const EditProfile = ({route}) => {
           description: 'your data has been updated!',
           type: 'success',
         });
-        console.log('Upload successful:', response.data);
+        navigation.navigate('Profile');
       } catch (error) {
         setUploadError('Upload failed.');
         console.error('Error uploading file:', error);
@@ -245,16 +232,13 @@ const EditProfile = ({route}) => {
             </View>
             <View style={styles.EmailContainer}>
               <Text style={{color: '#908C8D'}}>Gender</Text>
-              <TextInput
-                editable={false}
-                placeholder="Enter Gender"
-                value={logedInTrainer.gender}
-                style={styles.EmailInput}
-                numberOfLines={1}
-                placeholderTextColor={'white'}
-              />
+              <Text style={{color: '#fff', fontSize: responsiveFontSize(2.2)}}>
+                {logedInTrainer.gender}
+              </Text>
             </View>
-            <View style={styles.EmailContainer}>
+            <TouchableOpacity
+              onPress={toggleModalDob}
+              style={styles.EmailContainer}>
               <Text style={{color: '#908C8D'}}>Date of Birth</Text>
               <View
                 style={{
@@ -262,19 +246,15 @@ const EditProfile = ({route}) => {
                   justifyContent: 'space-between',
                   alignItems: 'center',
                 }}>
-                <TextInput
-                  editable={false}
-                  placeholder="DD/MM/YYYY"
-                  value={formatDate(date)}
-                  style={styles.EmailInput}
-                  numberOfLines={1}
-                  placeholderTextColor={'white'}
-                />
-                <TouchableOpacity onPress={toggleModalDob}>
+                <Text
+                  style={{color: '#fff', fontSize: responsiveFontSize(2.2)}}>
+                  10/10/2003
+                </Text>
+                <View>
                   <Image source={Images.calendar} />
-                </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            </TouchableOpacity>
             {modalVisible && (
               <Modal
                 animationType="slide"
@@ -323,66 +303,40 @@ const EditProfile = ({route}) => {
               </Modal>
             )}
 
-            <View style={styles.EmailContainer}>
-              <Text style={{color: '#908C8D'}}>Set Avalibilities</Text>
+            <TouchableOpacity
+              onPress={toggleModalTimes}
+              style={[{...styles.EmailContainer}, {flexDirection: 'column'}]}>
+              <Text style={{color: '#908C8D'}}>Set Availabilities</Text>
               <View
                 style={{
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                   alignItems: 'center',
+                  paddingVertical: responsiveHeight(0.7),
                 }}>
-                {/* {avalibilities.map((item, index) => {
-                  console.log('Current item:', item); // Log the current item for debugging
-                  const date = new Date(item); // Convert ISO string to Date object
-                  console.log('Parsed date:', date); // Log the parsed date object for debugging
-
-                  // Check if date is valid
-                  if (isNaN(date.getTime())) {
-                    return (
-                      <Text key={index} style={{color: '#fff'}}>
-                        Invalid Date
-                      </Text>
-                    );
-                  }
-
-                  const formattedTime = date.toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  });
-                  return (
-                    <Text key={index} style={{color: '#fff'}}>
-                      {formattedTime}
-                    </Text>
-                  );
-                })} */}
-                {/* {logedInTrainer.Availiblity.map((time, index) => (
-                  <Text key={index}>
-                    {formatDate(time)} at {formatTime(time)}
-                  </Text>
-                ))} */}
-                {/* <Text>{formatTime(logedInTrainer?.Availability.map)}</Text> */}
-                {/* <Text>
-                  {logedInTrainer?.Availability.map(({item, index}) => {
-                    return <Text>{item}</Text>;
-                  })}
-                </Text> */}
-                <TextInput
-                  editable={false}
-                  placeholder="00:00"
-                  value={selectedTimes
-                    .map(t => t.toLocaleTimeString())
-                    .join(', ')}
-                  onChangeText={setEmail}
-                  style={styles.EmailInput}
+                <Text
                   numberOfLines={1}
-                  placeholderTextColor={'white'}
-                />
-                <TouchableOpacity onPress={toggleModalTimes}>
+                  style={{
+                    color: '#fff',
+                    fontSize: responsiveFontSize(1.5),
+                  }}>
+                  {selectedTimes.length > 0
+                    ? selectedTimes.map((item, index) => (
+                        <React.Fragment key={index}>
+                          <Text>{item}</Text>
+                          {index < selectedTimes.length - 1 ? (
+                            <Text>, </Text>
+                          ) : null}
+                        </React.Fragment>
+                      ))
+                    : 'No Availabilities'}
+                </Text>
+                <View>
                   <Image source={Images.calendar} />
-                </TouchableOpacity>
+                </View>
               </View>
-            </View>
-            <View style={styles.EmailContainer}>
+            </TouchableOpacity>
+            <View style={[styles.EmailContainer]}>
               <Text style={{color: '#908C8D'}}>Hourly Rate</Text>
               <View
                 style={{
@@ -392,9 +346,6 @@ const EditProfile = ({route}) => {
                 <Text style={{color: '#fff', fontSize: responsiveFontSize(2)}}>
                   $
                 </Text>
-                {/* <Text style={{fontSize: responsiveFontSize(2), color: '#fff'}}>
-                  {logedInTrainer.Hourlyrate}
-                </Text> */}
                 <TextInput
                   editable={true}
                   placeholder="00"
@@ -409,35 +360,25 @@ const EditProfile = ({route}) => {
               </View>
             </View>
             <View style={[styles.EmailContainer, {position: 'relative'}]}>
-              <View
+              <TouchableOpacity
+                onPress={() => setDropdownVisible(!dropdownVisible)}
                 style={[
                   styles.inputContainer,
                   {
                     flexDirection: 'row',
                     justifyContent: 'space-between',
                     alignItems: 'center',
+                    paddingVertical: responsiveHeight(1.4),
                   },
                 ]}>
-                <TextInput
-                  editable={false}
-                  placeholder="Select Specialities"
-                  value={logedInTrainer.Speciality}
-                  style={[
-                    styles.EmailInput,
-                    {
-                      height: responsiveHeight(6),
-                      backgroundColor: 'transparent',
-                      color: 'white',
-                      flex: 1,
-                    },
-                  ]}
-                  placeholderTextColor={'white'}
-                />
-                <TouchableOpacity
-                  onPress={() => setDropdownVisible(!dropdownVisible)}>
+                <Text
+                  style={{color: '#fff', fontSize: responsiveFontSize(2.2)}}>
+                  Select Specialities
+                </Text>
+                <View>
                   <Image source={Images.dropdown} />
-                </TouchableOpacity>
-              </View>
+                </View>
+              </TouchableOpacity>
 
               {dropdownVisible && (
                 <FlatList
@@ -679,12 +620,12 @@ const styles = StyleSheet.create({
   EmailContainer: {
     paddingHorizontal: responsiveWidth(5),
     paddingVertical: responsiveWidth(1),
-    borderWidth: 0.5,
+    borderWidth: 0.4,
     borderColor: '#908C8D',
-    borderRadius: 10,
+    borderRadius: responsiveWidth(2),
   },
   EmailInput: {
-    padding: 0,
+    padding: responsiveWidth(0),
     fontFamily: FontFamily.Semi_Bold,
     color: 'white',
     fontSize: responsiveFontSize(2),
@@ -701,7 +642,7 @@ const styles = StyleSheet.create({
     width: responsiveWidth(80),
     height: responsiveHeight(30),
     justifyContent: 'space-around',
-    padding: 20,
+    padding: responsiveWidth(4),
     backgroundColor: 'white',
     borderRadius: 10,
     alignItems: 'center',

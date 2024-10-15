@@ -1,21 +1,13 @@
 import {Image, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-
 import {Images} from '../utils/Images';
 import {responsiveScreenHeight} from 'react-native-responsive-dimensions';
-
 import TrainerHome from '../Screens/trainerScreens/TrainerHome';
-import {useSelector} from 'react-redux';
 import Profile from '../Screens/trainerScreens/Profile';
 import Story from '../Screens/trainerScreens/Story';
-import Booking from '../Screens/userScreens/Booking';
-import Favourite from '../Screens/trainerScreens/Favourite';
-import Listing from '../Screens/trainerScreens/Listing';
 
 const TrainerBttomStack = () => {
-  const type = useSelector(state => state?.Auth?.data.type);
-  console.log('type from bottom:', type);
   const Bottom = createBottomTabNavigator();
   return (
     <Bottom.Navigator
