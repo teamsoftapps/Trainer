@@ -3,26 +3,26 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import BottomStack from './BottomStack';
 
-import Booking from '../Screens/Booking';
-import BookingDetails from '../Screens/BookingDetails';
-import Upcoming from '../Screens/Upcoming';
-import Previous from '../Screens/Previous';
-import ReviewBooking from '../Screens/ReviewBooking';
-import Message from '../Screens/Message';
-import TrainerProfile from '../Screens/TrainerProfile';
-import AddCard from '../Screens/AddCard';
-import Settings from '../Screens/Settings';
-import SearchInput from '../Screens/SearchInput';
-import Schedule from '../Screens/Schedule';
-import PaymentMethod from '../Screens/PaymentMethod';
-import CompleteProfile from '../Screens/CompleteProfile';
-import Membership from '../Screens/Membership';
-import Notification from '../Screens/Notification';
-import StoryViewer from '../Screens/storyViewer';
-import Chats from '../Screens/Chats';
-import BookingConfirmed from '../Screens/BookingConfirmed';
-import Filter from '../Screens/Filter';
-import ChangePassword from '../Screens/ChangePassword';
+import Booking from '../Screens/userScreens/Booking';
+import BookingDetails from '../Screens/userScreens/BookingDetails';
+import Upcoming from '../Screens/userScreens/Upcoming';
+import Previous from '../Screens/userScreens/Previous';
+import ReviewBooking from '../Screens/userScreens/ReviewBooking';
+import Message from '../Screens/userScreens/Message';
+import TrainerProfile from '../Screens/userScreens/TrainerProfile';
+import AddCard from '../Screens/userScreens/AddCard';
+import Settings from '../Screens/userScreens/Settings';
+import SearchInput from '../Screens/userScreens/SearchInput';
+import Schedule from '../Screens/userScreens/Schedule';
+import PaymentMethod from '../Screens/userScreens/PaymentMethod';
+import CompleteProfile from '../Screens/trainerScreens/CompleteProfile';
+import Membership from '../Screens/userScreens/Membership';
+import Notification from '../Screens/userScreens/Notification';
+import StoryViewer from '../Screens/userScreens/storyViewer';
+import Chats from '../Screens/userScreens/Chats';
+import BookingConfirmed from '../Screens/userScreens/BookingConfirmed';
+import Filter from '../Screens/userScreens/Filter';
+import ChangePassword from '../Screens/userScreens/ChangePassword';
 
 export type MainProps = {
   Message: {

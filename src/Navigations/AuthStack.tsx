@@ -1,15 +1,15 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import Signup from '../Screens/Signup';
-import Welcome from '../Screens/Welcome';
-import Signin from '../Screens/Signin';
-import CompleteProfile from '../Screens/CompleteProfile';
-import Membership from '../Screens/Membership';
-import AddCard from '../Screens/AddCard';
-import ForgotPassword from '../Screens/ForgotPassword';
-import VerifyOTP from '../Screens/VerifyOTP';
-import ConfirmNewPassword from '../Screens/ConfirmNewPassword';
+import Signup from '../Screens/userScreens/Signup';
+import Welcome from '../Screens/userScreens/Welcome';
+import Signin from '../Screens/userScreens/Signin';
+import Membership from '../Screens/userScreens/Membership';
+import AddCard from '../Screens/userScreens/AddCard';
+import ForgotPassword from '../Screens/userScreens/ForgotPassword';
+import VerifyOTP from '../Screens/userScreens/VerifyOTP';
+import ConfirmNewPassword from '../Screens/userScreens/ConfirmNewPassword';
+import CompleteProfile from '../Screens/trainerScreens/CompleteProfile';
 
 export type RootProps = {
   Welcome: undefined;

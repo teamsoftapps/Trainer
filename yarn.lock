@@ -3743,6 +3743,7 @@ __metadata:
     moment: ^2.30.1
     react: 18.2.0
     react-native: 0.74.2
+    react-native-alert-notification: ^0.4.0
     react-native-bootsplash: 4.1.5
     react-native-calendars: ^1.1305.0
     react-native-chart-kit: ^6.12.0
@@ -3756,6 +3757,7 @@ __metadata:
     react-native-get-random-values: ^1.11.0
     react-native-gifted-charts: ^1.4.43
     react-native-gifted-chat: ^2.6.3
+    react-native-google-places-autocomplete: ^2.5.7
     react-native-image-crop-picker: ^0.41.2
     react-native-insta-story: ^1.1.9
     react-native-linear-gradient: ^2.8.3
@@ -8970,6 +8972,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"qs@npm:~6.9.1":
+  version: 6.9.7
+  resolution: "qs@npm:6.9.7"
+  checksum: 5bbd263332ccf320a1f36d04a2019a5834dc20bcb736431eaccde2a39dcba03fb26d2fd00174f5d7bc26aaad1cad86124b18440883ac042ea2a0fca6170c1bf1
+  languageName: node
+  linkType: hard
+
 "query-string@npm:^7.1.3":
   version: 7.1.3
   resolution: "query-string@npm:7.1.3"
@@ -9049,6 +9058,17 @@ __metadata:
   version: 17.0.2
   resolution: "react-is@npm:17.0.2"
   checksum: 9d6d111d8990dc98bc5402c1266a808b0459b5d54830bbea24c12d908b536df7883f268a7868cfaedde3dd9d4e0d574db456f84d2e6df9c4526f99bb4b5344d8
+  languageName: node
+  linkType: hard
+
+"react-native-alert-notification@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "react-native-alert-notification@npm:0.4.0"
+  peerDependencies:
+    react: "*"
+    react-native: ">=0.62.0"
+    react-native-safe-area-context: "*"
+  checksum: a3698e5b03543e193c56f634c9f9fe7bd769ce8df6d9ed4b51d5014e6b6626298a580ea6aeab62c83e5c39909408063ac130ddcabf049d958ebb8ae64bd06d4c
   languageName: node
   linkType: hard
 
@@ -9265,6 +9285,20 @@ __metadata:
     react-native-reanimated: "*"
     react-native-safe-area-context: "*"
   checksum: c1370f2ab7611fbdd4fb61eddc51db6dd32c6d504dbe9cc071fd2ae55696036da84fcc8305d8bc0cf7e1ab90b5caa906b3cab45d090cf31efe089b53719dc79d
+  languageName: node
+  linkType: hard
+
+"react-native-google-places-autocomplete@npm:^2.5.7":
+  version: 2.5.7
+  resolution: "react-native-google-places-autocomplete@npm:2.5.7"
+  dependencies:
+    lodash.debounce: ^4.0.8
+    prop-types: ^15.7.2
+    qs: ~6.9.1
+    uuid: ^10.0.0
+  peerDependencies:
+    react-native: ">= 0.59"
+  checksum: d3b4d0cb8551e6e7b17e834dc56602fd821411a14fd80ebd1a37c281abc51daf86dfc5ce3480308747505eccf04501afb4516fc150f93fe9f08f77b501db3fa0
   languageName: node
   linkType: hard
 

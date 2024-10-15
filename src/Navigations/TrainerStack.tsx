@@ -2,13 +2,14 @@ import {StyleSheet} from 'react-native';
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import TrainerBttomStack from './TrainerBttomStack';
-import Chat from '../trainerScreens/Chat';
-import Message from '../trainerScreens/Message';
-import Settings from '../trainerScreens/Settings';
-import EditProfile from '../trainerScreens/editProfile';
-import Notification from '../trainerScreens/Notifications';
-import ReviewBooking from '../trainerScreens/reviewBooking';
-import ManagePlans from '../trainerScreens/ManagePlans';
+import Chat from '../Screens/trainerScreens/Chat';
+import Message from '../Screens/trainerScreens/Message';
+import Settings from '../Screens/trainerScreens/Settings';
+import CompleteProfile from '../Screens/trainerScreens/CompleteProfile';
+import EditProfile from '../Screens/trainerScreens/editProfile';
+import Notification from '../Screens/trainerScreens/Notifications';
+import ReviewBooking from '../Screens/userScreens/ReviewBooking';
+import ManagePlans from '../Screens/trainerScreens/ManagePlans';
 
 export type TainerProps = {
   TrainerBttomStack: undefined;

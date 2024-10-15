@@ -1,15 +1,16 @@
 import {Image, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import Home from '../Screens/Home';
-import Favourites from '../Screens/Favourites';
-import Profile from '../Screens/Profile';
+import Home from '../Screens/userScreens/Home';
+import Favourites from '../Screens/userScreens/Favourites';
+import Profile from '../Screens/userScreens/Profile';
 import {Images} from '../utils/Images';
 import {responsiveScreenHeight} from 'react-native-responsive-dimensions';
-import Booking from '../Screens/Booking';
-import SearchTrainer from '../Screens/SearchTrainer';
-import TrainerHome from '../trainerScreens/TrainerHome';
+
+import SearchTrainer from '../Screens/userScreens/SearchTrainer';
+import TrainerHome from '../Screens/trainerScreens/TrainerHome';
 import {useSelector} from 'react-redux';
+import Booking from '../Screens/userScreens/Booking';
 
 const BottomStack = () => {
   const type = useSelector(state => state.Auth.data.type);

@@ -27,8 +27,9 @@ const App = () => {
         {authData?.token && authData?.isType === 'user' ? (
           <MainStack />
         ) : authData?.token && authData?.isType === 'trainer' ? (
-          <TrainerStack />
+          <MainStack />
         ) : (
+          // <TrainerStack />
           <AuthStack />
         )}
       </NavigationContainer>

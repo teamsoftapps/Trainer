@@ -5,15 +5,13 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Images} from '../utils/Images';
 import {responsiveScreenHeight} from 'react-native-responsive-dimensions';
 
-import TrainerHome from '../trainerScreens/TrainerHome';
+import TrainerHome from '../Screens/trainerScreens/TrainerHome';
 import {useSelector} from 'react-redux';
-import Profile from '../trainerScreens/Profile';
-import Story from '../trainerScreens/Story';
-import Booking from '../Screens/Booking';
-import Favourite from '../trainerScreens/Favourite';
-import Listing from '../trainerScreens/Listing';
-import Sessions from '../trainerScreens/sessions';
-import Earnings from '../trainerScreens/earnings';
+import Profile from '../Screens/trainerScreens/Profile';
+import Story from '../Screens/trainerScreens/Story';
+import Booking from '../Screens/userScreens/Booking';
+import Favourite from '../Screens/trainerScreens/Favourite';
+import Listing from '../Screens/trainerScreens/Listing';
 
 const TrainerBttomStack = () => {
   const type = useSelector(state => state?.Auth?.data.type);
