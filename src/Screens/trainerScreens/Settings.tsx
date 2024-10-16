@@ -8,19 +8,19 @@ import {
   Alert,
 } from 'react-native';
 import React from 'react';
-import WrapperContainer from '../Components/Wrapper';
-import Header from '../Components/Header';
+import WrapperContainer from '../../Components/Wrapper';
+import Header from '../../Components/Header';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {FontFamily, Images} from '../utils/Images';
-import Button from '../Components/Button';
+import {FontFamily, Images} from '../../utils/Images';
+import Button from '../../Components/Button';
 import {useNavigation} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
-import {SignOut} from '../store/Slices/AuthSlice';
+import {SignOut} from '../../store/Slices/AuthSlice';
 import {showMessage} from 'react-native-flash-message';
 
 const Settings = () => {

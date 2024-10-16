@@ -9,7 +9,7 @@ export const messages = createApi({
     baseUrl: baseUrl,
 
     prepareHeaders: headers => {
-      const token = store?.getState().Auth.data.data.token;
+      const token = store?.getState().Auth?.data?.token;
 
       if (token) {
         headers.set('authorization', `Bearer ${token}`);

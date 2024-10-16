@@ -63,12 +63,7 @@ const Signin: React.FC<Props> = ({route}) => {
         if (res.data) {
           console.log('----------------++++++++++', res.data?.data);
           showToast('Success', 'User logged In Successfully', 'success');
-          const payload = {
-            res_EMAIL: email,
-            data: res?.data?.data,
-            type: 'user',
-          };
-          dispatch(IsLogin(payload));
+          dispatch(IsLogin(res?.data?.data));
         }
         if (res.error) {
           console.log('Errorrrr', res.error);
@@ -82,13 +77,7 @@ const Signin: React.FC<Props> = ({route}) => {
             description: 'Trainer logged in successfully',
             type: 'success',
           });
-
-          const payload = {
-            data: res?.data?.data,
-            res_EMAIL: email,
-            type: 'trainer',
-          };
-          dispatch(IsLogin(payload));
+          dispatch(IsLogin(res?.data?.data));
         }
         if (res.error) {
           showToast('Error', res.error?.data.message, 'danger');

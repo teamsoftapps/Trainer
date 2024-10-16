@@ -21,10 +21,11 @@ const data = {
     },
   ],
 };
+
 const Bookings = [
   {
     id: '1',
-    userImage: require('../assets/Images/Mask2.png'),
+    userImage: require('../../assets/Images/Mask2.png'),
     userName: 'Nicole Foster',
     speatiality: 'Strength Training',
     userDate: '10 November, Tuesday',
@@ -32,7 +33,7 @@ const Bookings = [
   },
   {
     id: '2',
-    userImage: require('../assets/Images/Mask2.png'),
+    userImage: require('../../assets/Images/Mask2.png'),
     userName: 'Nicole Foster',
     speatiality: 'Strength Training',
     userDate: '10 November, Tuesday',
@@ -40,7 +41,7 @@ const Bookings = [
   },
   {
     id: '3',
-    userImage: require('../assets/Images/Mask2.png'),
+    userImage: require('../../assets/Images/Mask2.png'),
     userName: 'Nicole Foster',
     speatiality: 'Strength Training',
     userDate: '10 November, Tuesday',

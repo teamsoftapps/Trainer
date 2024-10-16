@@ -8,17 +8,26 @@ import Settings from '../Screens/trainerScreens/Settings';
 import CompleteProfile from '../Screens/trainerScreens/CompleteProfile';
 import EditProfile from '../Screens/trainerScreens/editProfile';
 import Notification from '../Screens/trainerScreens/Notifications';
-import ReviewBooking from '../Screens/userScreens/ReviewBooking';
+import ReviewBooking from '../Screens/trainerScreens/reviewBooking';
 import ManagePlans from '../Screens/trainerScreens/ManagePlans';
+import {useSelector} from 'react-redux';
 
 export type TainerProps = {
   TrainerBttomStack: undefined;
   Chat: undefined;
 };
 const Stack = createNativeStackNavigator<TainerProps>();
+
 const TrainerStack = () => {
+  const checkData = useSelector(state => state?.Auth?.data);
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
+    <Stack.Navigator
+      initialRouteName={
+        checkData?.Speciality?.length === 0
+          ? 'CompleteProfile'
+          : 'TrainerBttomStack'
+      }
+      screenOptions={{headerShown: false}}>
       <Stack.Screen name={'TrainerBttomStack'} component={TrainerBttomStack} />
       <Stack.Screen name={'Chat'} component={Chat} />
       <Stack.Screen name={'Message'} component={Message} />
@@ -27,6 +36,7 @@ const TrainerStack = () => {
       <Stack.Screen name={'Notification'} component={Notification} />
       <Stack.Screen name={'ReviewBooking'} component={ReviewBooking} />
       <Stack.Screen name={'ManagePlans'} component={ManagePlans} />
+      <Stack.Screen name={'CompleteProfile'} component={CompleteProfile} />
     </Stack.Navigator>
   );
 };

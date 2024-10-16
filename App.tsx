@@ -8,7 +8,7 @@ import {StripeProvider} from '@stripe/stripe-react-native';
 import TrainerStack from './src/Navigations/TrainerStack';
 import BootSplash from 'react-native-bootsplash';
 const App = () => {
-  const authData = useSelector(state => state?.Auth?.data?.data);
+  const authData = useSelector(state => state?.Auth?.data);
   console.log('first', authData);
 
   useEffect(() => {
@@ -27,9 +27,9 @@ const App = () => {
         {authData?.token && authData?.isType === 'user' ? (
           <MainStack />
         ) : authData?.token && authData?.isType === 'trainer' ? (
-          // <TrainerStack />
-          <MainStack />
+          <TrainerStack />
         ) : (
+          // <MainStack />
           <AuthStack />
         )}
       </NavigationContainer>

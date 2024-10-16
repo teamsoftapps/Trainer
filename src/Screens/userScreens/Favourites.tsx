@@ -1,24 +1,26 @@
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   StyleSheet,
   Text,
-  Touchable,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
 import {
   responsiveFontSize,
   responsiveHeight,
+  responsiveScreenFontSize,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {Images} from '../../utils/Images';
-import {useSelector} from 'react-redux';
+import {FontFamily, Images} from '../../utils/Images';
+import {useDispatch, useSelector} from 'react-redux';
 import axiosBaseURL from '../../services/AxiosBaseURL';
-import useToast from '../../Hooks/Toast';
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {unfavouriteTrainer} from '../../store/Slices/favourite';
 
 const fav = [
   {name: 'Max Well', image: Images.trainer, rating: 3.4},
@@ -31,12 +33,16 @@ const fav = [
 ];
 
 const Favourites = () => {
-  const [first, setfirst] = useState(true);
   const [isLong, setIsLong] = useState(false);
   const [longPressIndex, setLongPressIndex] = useState(null);
   const [favouriteTrainers, setFavoriteTrainers] = useState([]);
-  const authData = useSelector(state => state.Auth.data.data);
-  const {showToast} = useToast();
+  console.log('favouriteTrainers', favouriteTrainers);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchText, setSearchText] = useState('');
+  const authData = useSelector(state => state.Auth.data);
+  const textInputRef = useRef(null);
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   useFocusEffect(
     useCallback(() => {
@@ -44,9 +50,24 @@ const Favourites = () => {
     }, [])
   );
 
-  // useEffect(() => {
-  // fetchFavoriteTrainers();
-  // }, []);
+  const listemptyComp = () => {
+    return (
+      <View style={{alignItems: 'center', justifyContent: 'center'}}>
+        {isLoading ? (
+          <ActivityIndicator size={responsiveHeight(5)} color={'#fff'} />
+        ) : (
+          <Text
+            style={{
+              fontFamily: FontFamily.Regular,
+              color: 'gray',
+              fontSize: responsiveFontSize(2),
+            }}>
+            No Chat found
+          </Text>
+        )}
+      </View>
+    );
+  };
 
   const fetchFavoriteTrainers = async () => {
     if (authData.isType === 'user') {
@@ -58,23 +79,28 @@ const Favourites = () => {
       } catch (error) {}
     }
   };
-  // const deleteFavouriteTrainers = async (trainerID, userId) => {
-  //   try {
-  //     const res = await axiosBaseURL.delete('/user/Deletefavoritetrainers', {
-  //       data: {userId, trainerID},
-  //     });
-  //     await setFavoriteTrainers(prevTrainers =>
-  //       prevTrainers.filter(trainer => trainer._id !== trainerID)
-  //     );
-  //     setIsLong(false);
-  //   } catch (error) {}
-  // };
 
-  if (first === true) {
-    fav.sort((a, b) => b.rating - a.rating);
-  } else {
-    fav.sort((a, b) => a.rating - b.rating);
-  }
+  const deleteFavouriteTrainers = async (trainerID, userId) => {
+    try {
+      const res = await axiosBaseURL.delete('/user/Deletefavoritetrainers', {
+        data: {userId, trainerID},
+      });
+      await setIsLoading(false);
+      dispatch(unfavouriteTrainer({trainerID: trainerID}));
+      await setFavoriteTrainers(prevTrainers =>
+        prevTrainers.filter(trainer => trainer._id !== trainerID)
+      );
+      setIsLong(false);
+    } catch (error) {}
+  };
+
+  const filteredData = useMemo(() => {
+    const toLowerCase = searchText.toLowerCase();
+    return favouriteTrainers.filter(item => {
+      return item?.name?.toLowerCase().includes(toLowerCase);
+    });
+  }, [searchText, favouriteTrainers]);
+
   return (
     <WrapperContainer>
       <Text
@@ -89,70 +115,56 @@ const Favourites = () => {
       <View
         style={{
           flexDirection: 'row',
-          gap: responsiveWidth(1),
-          marginTop: responsiveHeight(4),
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginHorizontal: responsiveWidth(8),
+          marginTop: responsiveHeight(3),
         }}>
         <View
           style={{
-            backgroundColor: '#232323',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flex: 1,
-            paddingVertical: responsiveHeight(1.5),
             flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: '#232323',
+            paddingHorizontal: responsiveWidth(4),
+            borderRadius: 25,
+            gap: responsiveWidth(4),
           }}>
-          <TouchableOpacity
-            onPress={() => {
-              setfirst(!first);
+          <TouchableOpacity activeOpacity={0.6}>
+            <Image
+              source={Images.search}
+              style={{width: responsiveWidth(6), height: responsiveWidth(6)}}
+            />
+          </TouchableOpacity>
+          <TextInput
+            ref={textInputRef}
+            placeholder="Search"
+            placeholderTextColor={'white'}
+            style={{
+              fontSize: responsiveScreenFontSize(2.2),
+              width: responsiveWidth(52),
+              color: 'white',
             }}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: responsiveWidth(1),
-            }}>
-            <Image
-              source={Images.Sort}
-              style={{width: responsiveWidth(5)}}
-              resizeMode="contain"
-              tintColor={'grey'}
-            />
-            <Text style={{color: 'grey', fontSize: responsiveFontSize(2.4)}}>
-              Sort
-            </Text>
-          </TouchableOpacity>
+            value={searchText}
+            onChangeText={text => {
+              setSearchText(text);
+            }}
+          />
         </View>
-        <View
-          style={{
-            backgroundColor: '#232323',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flex: 1,
-            paddingVertical: responsiveHeight(1.5),
-            flexDirection: 'row',
+        <TouchableOpacity
+          activeOpacity={0.6}
+          onPress={() => {
+            searchText.length > 0 ? setSearchText('') : navigation.goBack();
           }}>
-          <TouchableOpacity
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: responsiveWidth(1),
-            }}>
-            <Image
-              source={Images.filter}
-              style={{width: responsiveWidth(5)}}
-              resizeMode="contain"
-              tintColor={'grey'}
-            />
-            <Text style={{color: 'grey', fontSize: responsiveFontSize(2.4)}}>
-              Filter
-            </Text>
-          </TouchableOpacity>
-        </View>
+          <Text style={{color: 'white'}}>
+            {searchText.length > 0 ? 'Clear' : ' Cancel'}
+          </Text>
+        </TouchableOpacity>
       </View>
       <View>
         <FlatList
-          data={favouriteTrainers}
+          ListEmptyComponent={listemptyComp}
+          data={filteredData}
+          extraData={filteredData}
           contentContainerStyle={{
             flexDirection: 'row',
             flexWrap: 'wrap',
@@ -177,19 +189,24 @@ const Favourites = () => {
                   paddingVertical: responsiveHeight(1),
                   paddingHorizontal: responsiveWidth(4),
                 }}>
-                {/* {longPressIndex === index && (
+                {longPressIndex === index && (
                   <TouchableOpacity
+                    style={{
+                      marginLeft: responsiveWidth(20),
+                    }}
                     onPress={() => {
                       deleteFavouriteTrainers(item.trainerID, item.userId);
-                      setLongPressIndex(null); // Reset after deletion
+                      setLongPressIndex(null);
                     }}>
                     <Image
-                      style={{height: responsiveHeight(3)}}
+                      style={{
+                        height: responsiveHeight(3),
+                      }}
                       resizeMode="center"
-                      source={require('../assets/Images/remove.png')}
+                      source={require('../../assets/Images/remove.png')}
                     />
                   </TouchableOpacity>
-                )} */}
+                )}
                 <View>
                   <Image
                     source={require('../../assets/Images/3.png')}

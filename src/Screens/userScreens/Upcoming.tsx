@@ -59,7 +59,7 @@ const Upcoming = () => {
   const [bookings, setBookings] = useState([]);
   const [deleteIndex, setDeleteIndex] = useState(null);
   const [isDelete, setDelete] = useState(false);
-  const AuthData = useSelector(state => state.Auth.data.data);
+  const AuthData = useSelector(state => state.Auth.data);
   const [createChat] = useCreateChatMutation();
   useFocusEffect(
     useCallback(() => {

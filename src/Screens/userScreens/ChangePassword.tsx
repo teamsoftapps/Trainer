@@ -25,15 +25,13 @@ import axiosBaseURL from '../../services/AxiosBaseURL';
 import useToast from '../../Hooks/Toast';
 
 const ChangePassword = ({route}) => {
-  const dispatch = useDispatch();
-
   const [oldPassword, setOldPassword] = useState('');
   const [Newpassword, setNewpassword] = useState('');
   const [confirmNewpassword, setConfirmNewpassword] = useState('');
   const [secure, setsecure] = useState(false);
   const [secure2, setsecure2] = useState(false);
   const [passworddisabled, setpassworddisable] = useState(false);
-  const authData = useSelector(state => state.Auth.data.data);
+  const authData = useSelector(state => state.Auth.data);
   const {showToast} = useToast();
   const navigation = useNavigation();
 

@@ -28,10 +28,10 @@ import {socketService} from '../../utils/socketService';
 type Props = NativeStackScreenProps<MainProps, 'Message'>;
 const limit = 8;
 const Message: React.FC<Props> = ({route, navigation}) => {
-  const userData = useSelector(state => state.Auth.data);
-  // console.log('Userdata', userData?.data._id);
+  const userData = useSelector(state => state?.Auth);
+  console.log('Userdata', userData?.data._id);
   const data = route.params;
-  // console.log('DATAAAAAA', data);
+  console.log('DATAAAAAA', data);
   const [createMessaeg] = useCreateMessaegMutation();
   const [messages, setMessages] = useState([]);
   const [page, setpage] = useState(1);

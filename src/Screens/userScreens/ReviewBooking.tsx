@@ -41,7 +41,7 @@ const ReviewBooking = ({route}) => {
     Data?.rate.replace('$', '')
   );
   const authData = useSelector(state => state.Auth.data);
-  // console.log('data mil gya', authData.data.profileImage);
+  console.log('data mil gya', authData.fullName);
   // console.log('in review booking', authData.data.token);
   const navigation = useNavigation();
 
@@ -58,12 +58,12 @@ const ReviewBooking = ({route}) => {
 
   useEffect(() => {
     fetchData();
-  }, [authData.data.token, stripeId]);
+  }, [authData.token, stripeId]);
 
   const fetchData = async () => {
     try {
       const profileResponse = await axiosBaseURL.get(
-        `/common/GetProfile/${authData.data.token}`
+        `/common/GetProfile/${authData.token}`
       );
       setStripeId(profileResponse.data.data.stripeCustomerID);
     } catch (error) {
@@ -112,15 +112,16 @@ const ReviewBooking = ({route}) => {
       showToast('Try later', error.message, 'danger');
     } else {
       await axiosBaseURL.post('/user/CreateBooking', {
-        token: authData.data.token,
+        token: authData.token,
         Amount: totalAmount,
-        Time: Data?.time,
+        bookingTime: Data?.time,
         Date: FormatedDate,
         Reminder: '30 mins',
         profileImage: Data.data.profileImage,
         trainerId: Data?.data._id,
         trainerName: Data?.data?.fullName,
         Address: Data?.data?.Address,
+        userName: authData?.fullName,
       });
       showToast('Payment Succesfull', 'Booking successfull!', 'success');
       navigation.navigate('Booking');

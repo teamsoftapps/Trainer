@@ -34,9 +34,8 @@ import moment from 'moment';
 
 const EditProfile = ({route}) => {
   //UseSelectors
-  const logedInTrainer = useSelector(state => state.Auth.data.data);
-  console.log('loded in trainer data:', logedInTrainer);
-
+  const logedInTrainer = useSelector(state => state.Auth.data);
+  console.log('loged in trainer data in edit profile screen :', logedInTrainer);
   //Spliting fullName in to first and lst name.
   const setFullName = logedInTrainer?.fullName?.split(' ');
   const firstName = setFullName[0] || [];
@@ -66,10 +65,14 @@ const EditProfile = ({route}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [time, setTime] = useState(new Date());
-  const [selectedTimes, setSelectedTimes] = useState([]);
+  const [selectedTimes, setSelectedTimes] = useState([
+    logedInTrainer.Availiblity,
+  ]);
   const [date, setDate] = useState(new Date());
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [selectedSpecialities, setSelectedSpecialities] = useState([]);
+  const [selectedSpecialities, setSelectedSpecialities] = useState([
+    logedInTrainer.Speciality,
+  ]);
 
   const condition1 = Hourly !== '0' && Hourly !== '';
   const condition2 = selectedTimes.length !== 0;
@@ -177,18 +180,20 @@ const EditProfile = ({route}) => {
                 placeholderTextColor={'white'}
               />
             </View>
-            <View style={styles.LastNameContainer}>
-              <Text style={{color: '#908C8D'}}>Last Name</Text>
-              <TextInput
-                editable={false}
-                placeholder="Enter Last Name"
-                value={lastName}
-                onChangeText={setsecondname}
-                style={styles.LastNameInput}
-                numberOfLines={1}
-                placeholderTextColor={'white'}
-              />
-            </View>
+            {lastName === ' ' ? (
+              <View style={styles.LastNameContainer}>
+                <Text style={{color: '#908C8D'}}>Last Name</Text>
+                <TextInput
+                  editable={false}
+                  placeholder="Enter Last Name"
+                  value={lastName}
+                  onChangeText={setsecondname}
+                  style={styles.LastNameInput}
+                  numberOfLines={1}
+                  placeholderTextColor={'white'}
+                />
+              </View>
+            ) : null}
             <View style={styles.EmailContainer}>
               <Text style={{color: '#908C8D'}}>Email</Text>
               <TextInput
@@ -220,7 +225,7 @@ const EditProfile = ({route}) => {
                 <TextInput
                   placeholder="A brief introduction about yourself and your training philosophy"
                   onChangeText={setBio}
-                  value={Bio}
+                  value={logedInTrainer.Bio}
                   style={[
                     {...styles.BioInput},
                     {height: Bio.length == 0 ? responsiveHeight(7) : 'auto'},
@@ -248,7 +253,7 @@ const EditProfile = ({route}) => {
                 }}>
                 <Text
                   style={{color: '#fff', fontSize: responsiveFontSize(2.2)}}>
-                  10/10/2003
+                  {logedInTrainer.Dob}
                 </Text>
                 <View>
                   <Image source={Images.calendar} />
@@ -325,7 +330,7 @@ const EditProfile = ({route}) => {
                         <React.Fragment key={index}>
                           <Text>{item}</Text>
                           {index < selectedTimes.length - 1 ? (
-                            <Text>, </Text>
+                            <Text> </Text>
                           ) : null}
                         </React.Fragment>
                       ))
@@ -349,7 +354,7 @@ const EditProfile = ({route}) => {
                 <TextInput
                   editable={true}
                   placeholder="00"
-                  value={Hourly}
+                  value={logedInTrainer.Hourlyrate}
                   onChangeText={text => {
                     setHourly(text);
                   }}
@@ -395,11 +400,10 @@ const EditProfile = ({route}) => {
                 />
               )}
             </View>
-            <Text></Text>
           </View>
-          <View>
+          <View style={{marginVertical: responsiveHeight(1.5)}}>
             <FlatList
-              data={selectedSpecialities}
+              data={logedInTrainer?.Speciality}
               renderItem={({item}) => (
                 <View
                   key={item.key}

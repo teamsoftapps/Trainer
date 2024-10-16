@@ -42,8 +42,8 @@ const Profile = () => {
   const [stripeId, setStripeId] = useState(null);
   const [StripeCardDetails, setStripeCardDetails] = useState([]);
   const [StripeCardData, setStripeCardData] = useState('');
-  const authData = useSelector(state => state.Auth.data.data);
-  console.log('suthData', authData);
+  const authData = useSelector(state => state.Auth.data);
+  console.log('auth data in home:', authData);
   const [imageUri, setImageUri] = useState(null);
   const [isModal, setModal] = useState(false);
 
@@ -73,7 +73,7 @@ const Profile = () => {
       };
 
       fetchData();
-    }, [authData.token])
+    }, [authData?.token])
   );
 
   const handleChoosePhoto = () => {

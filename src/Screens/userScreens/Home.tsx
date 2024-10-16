@@ -191,9 +191,7 @@ const Home: React.FC<Props> = ({navigation, route}) => {
   const [APIUserData, setAPIUserData] = useState({});
   const [refreshing, setRefreshing] = useState(false);
   const dispatch = useDispatch();
-  const token = useSelector(state => state?.Auth?.data?.data?.token);
-  const authData = useSelector(state => state?.Auth.data.data);
-  // const isFollowing = useSelector((state: RootState) => state.follow[data._id]);
+  const token = useSelector(state => state?.Auth?.data?.token);
   useEffect(() => {
     console.log('data', data);
     const fetchData = async () => {

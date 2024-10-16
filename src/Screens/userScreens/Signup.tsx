@@ -501,7 +501,7 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
                 </View>
               </View>
             </View>
-            {/* <View
+            <View
               style={{
                 width: responsiveWidth(85),
                 paddingHorizontal: responsiveWidth(5),
@@ -545,9 +545,9 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
                   }}
                 />
               </TouchableOpacity>
-            </View> */}
+            </View>
 
-            <GooglePlacesAutocomplete
+            {/* <GooglePlacesAutocomplete
               placeholder="Enter your address"
               onPress={handleAddressSelect}
               query={{
@@ -562,7 +562,7 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
                   marginBottom: 20,
                 },
               }}
-            />
+            /> */}
 
             <ButtonComp
               text="Sign Up"

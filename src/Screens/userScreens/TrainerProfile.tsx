@@ -37,14 +37,11 @@ import {useCreateChatMutation} from '../../store/Apis/chat';
 const TrainerProfile = ({route}) => {
   const {data} = route.params;
   console.log('Route Data Is Found======', data);
-  // const {dataa, isLoading} = useGetUsersQuery();
-  const [usersData, setUsersData] = useState([]);
   const [readmore, setreadmore] = useState(true);
   const [follow, setfollow] = useState(false);
   const [heart, setheart] = useState(false);
-  // const [specialities, setSpecialities] = useState([data?.Speciality]);
   const navigation = useNavigation();
-  const authData = useSelector(state => state?.Auth.data.data);
+  const authData = useSelector(state => state?.Auth.data);
   const dispatch = useDispatch();
   const isFollowing = useSelector((state: RootState) => state.follow[data._id]);
   const isFavourite = useSelector(
@@ -101,21 +98,7 @@ const TrainerProfile = ({route}) => {
       }
     }
   };
-  // const Schedule = (data: Date) => {
-
-  //   const time = data.toLocaleTimeString([], {
-  //     hour: '2-digit',
-  //     minute: '2-digit',
-  //   });
-  //   return time;
-  // };
   const renderItem = ({item, index}) => {
-    // const date = new Date(item);
-    // const time = date?.toLocaleTimeString([], {
-    //   hour: '2-digit',
-    //   minute: '2-digit',
-    // });
-
     return (
       <TouchableOpacity
         style={{

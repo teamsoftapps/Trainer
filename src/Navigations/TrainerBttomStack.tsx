@@ -6,6 +6,9 @@ import {responsiveScreenHeight} from 'react-native-responsive-dimensions';
 import TrainerHome from '../Screens/trainerScreens/TrainerHome';
 import Profile from '../Screens/trainerScreens/Profile';
 import Story from '../Screens/trainerScreens/Story';
+import Sessions from '../Screens/trainerScreens/sessions';
+import Earnings from '../Screens/trainerScreens/earnings';
+import CompletedTrainerHome from '../Screens/trainerScreens/trainerOld';
 
 const TrainerBttomStack = () => {
   const Bottom = createBottomTabNavigator();
@@ -32,8 +35,8 @@ const TrainerBttomStack = () => {
             />
           ),
         }}
-        name={'TrainerHome'}
-        component={TrainerHome}
+        name={'CompletedTrainerHome'}
+        component={CompletedTrainerHome}
       />
       <Bottom.Screen
         options={{

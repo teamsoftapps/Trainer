@@ -25,21 +25,20 @@ import axiosBaseURL from '../../services/AxiosBaseURL';
 import {showMessage} from 'react-native-flash-message';
 import EditAddressModal from '../../Components/EditAddressModal';
 import {useNavigation} from '@react-navigation/native';
-import moment from 'moment';
 const uploads = [
   {
-    img: require('../assets/Images/trainer4.jpg'),
+    img: require('../../assets/Images/trainer4.jpg'),
   },
   {
-    img: require('../assets/Images/trainer4.jpg'),
+    img: require('../../assets/Images/trainer4.jpg'),
   },
   {
-    img: require('../assets/Images/trainer4.jpg'),
+    img: require('../../assets/Images/trainer4.jpg'),
   },
 ];
 const Profile = () => {
   //useSelector
-  const trainer_data = useSelector(state => state.Auth.data.data);
+  const trainer_data = useSelector(state => state.Auth.data);
 
   //useRef
   const textInputRef = useRef(null);
@@ -702,7 +701,7 @@ const Profile = () => {
             }}>
             Location
           </Text>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => {
               setAddressModal(true);
             }}
@@ -710,20 +709,24 @@ const Profile = () => {
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'space-between',
-            }}>
-            <TextInput
-              onChangeText={text => {
-                setAddress(text);
-              }}
-              value={Address}
-              placeholder="Enter your address"
-              style={{
-                color: '#fff',
-                width: responsiveWidth(70),
-              }}
-              placeholderTextColor={'#fff'}
-            />
-          </TouchableOpacity>
+            }}> */}
+          {/* <Text>
+                {trainer_data.Address}
+              </Text> */}
+          <TextInput
+            editable={false}
+            onChangeText={text => {
+              setAddress(text);
+            }}
+            value={trainer_data.Address}
+            placeholder="Enter your address"
+            style={{
+              color: '#fff',
+              width: responsiveWidth(70),
+            }}
+            placeholderTextColor={'#fff'}
+          />
+          {/* </TouchableOpacity> */}
         </View>
         <EditAddressModal
           token={trainer_data.token}

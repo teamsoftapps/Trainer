@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
 import {Images} from '../../utils/Images';
 import {
@@ -15,7 +15,9 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
+import axiosBaseURL from '../../services/AxiosBaseURL';
 
 const upcoming = [
   {
@@ -48,109 +50,138 @@ const upcoming = [
 ];
 
 const Previous = () => {
+  const trainer_data = useSelector(state => state.Auth.data);
   const navigation = useNavigation();
+  const [sessions, setSessions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  // useEffect(() => {
+  //   getSessions();
+  // }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getSessions();
+    }, [])
+  );
+  const getSessions = async () => {
+    try {
+      const responce = await axiosBaseURL.get(
+        `/user/getBookingbyId/${trainer_data._id}`
+      );
+      await setSessions(responce.data.data);
+      setIsLoading(false);
+      console.log('Sessions we get in upcoming: ', responce.data.data);
+    } catch (error) {}
+  };
+  const upComingSessions = ({item, index}) => {
+    return (
+      <View style={styles.border}>
+        <View style={styles.container}>
+          <View style={styles.left}>
+            <Image
+              source={item.profileImage}
+              style={{
+                height: responsiveWidth(14),
+                width: responsiveWidth(14),
+                borderRadius: responsiveWidth(7),
+              }}
+            />
+            <View>
+              <Text style={styles.whitetext} numberOfLines={1}>
+                {item.fullName}
+              </Text>
+              <Text style={styles.whitetext} numberOfLines={1}>
+                {item.Date}
+              </Text>
+              <Text style={styles.greytext} numberOfLines={1}>
+                {item.bookingTime}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.right}>
+            <Text style={{color: '#9FED3A'}}>View Details</Text>
+            <View
+              style={{
+                ...styles.curve,
+                borderRadius: responsiveScreenWidth(10),
+                backgroundColor:
+                  item.status === 'Completed'
+                    ? '#9FED3A'
+                    : item.status === 'Cancelled'
+                    ? '#FF2D55'
+                    : 'none',
+              }}>
+              <Text
+                style={
+                  item.status === 'Cancelled'
+                    ? styles.whitetext
+                    : styles.blacktext
+                }>
+                {item.status}
+              </Text>
+            </View>
+          </View>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignSelf: 'flex-end',
+            paddingHorizontal: responsiveWidth(6),
+            paddingBottom: responsiveHeight(3),
+          }}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('ReviewBooking');
+            }}
+            style={{
+              height: responsiveHeight(4),
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingHorizontal: responsiveWidth(3),
+              borderColor: '#B8B8B8',
+              borderWidth: responsiveWidth(0.3),
+              borderRadius: responsiveWidth(2),
+              marginHorizontal: responsiveWidth(3),
+              width: responsiveWidth(30),
+            }}>
+            <Text
+              style={{
+                color: '#bbbbbb',
+                fontSize: responsiveFontSize(1.7),
+                fontWeight: '500',
+              }}>
+              Review
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              height: responsiveHeight(4),
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingHorizontal: responsiveWidth(3),
+              borderColor: '#B8B8B8',
+              backgroundColor: '#9FED3A',
+              borderRadius: responsiveWidth(2),
+              width: responsiveWidth(30),
+            }}>
+            <Text
+              style={{
+                color: '#000',
+                fontWeight: '500',
+                fontSize: responsiveFontSize(1.7),
+              }}>
+              Accept
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
   return (
     <WrapperContainer style={{backgroundColor: '#181818'}}>
       <FlatList
         showsVerticalScrollIndicator={false}
-        data={upcoming}
-        renderItem={({item, index}) => {
-          return (
-            <View style={styles.border}>
-              <View style={styles.container}>
-                <View style={styles.left}>
-                  <Image source={item.image} />
-                  <View>
-                    <Text style={styles.whitetext} numberOfLines={1}>
-                      {item.name}
-                    </Text>
-                    <Text style={styles.whitetext} numberOfLines={1}>
-                      {item.date}
-                    </Text>
-                    <Text style={styles.greytext} numberOfLines={1}>
-                      {item.time}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.right}>
-                  <Text style={{color: '#9FED3A'}}>View Details</Text>
-                  <View
-                    style={{
-                      ...styles.curve,
-                      borderRadius: responsiveScreenWidth(10),
-                      backgroundColor:
-                        item.status === 'Completed'
-                          ? '#9FED3A'
-                          : item.status === 'Cancelled'
-                          ? '#FF2D55'
-                          : 'none',
-                    }}>
-                    <Text
-                      style={
-                        item.status === 'Cancelled'
-                          ? styles.whitetext
-                          : styles.blacktext
-                      }>
-                      {item.status}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignSelf: 'flex-end',
-                  paddingHorizontal: responsiveWidth(6),
-                  paddingBottom: responsiveHeight(3),
-                }}>
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate('ReviewBooking');
-                  }}
-                  style={{
-                    height: responsiveHeight(4),
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    paddingHorizontal: responsiveWidth(3),
-                    borderColor: '#B8B8B8',
-                    borderWidth: responsiveWidth(0.3),
-                    borderRadius: responsiveWidth(2),
-                    marginHorizontal: responsiveWidth(3),
-                    width: responsiveWidth(30),
-                  }}>
-                  <Text
-                    style={{
-                      color: '#bbbbbb',
-                      fontSize: responsiveFontSize(1.7),
-                      fontWeight: '500',
-                    }}>
-                    Review
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={{
-                    height: responsiveHeight(4),
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    paddingHorizontal: responsiveWidth(3),
-                    borderColor: '#B8B8B8',
-                    backgroundColor: '#9FED3A',
-                    borderRadius: responsiveWidth(2),
-                    width: responsiveWidth(30),
-                  }}>
-                  <Text
-                    style={{
-                      color: '#000',
-                      fontWeight: '500',
-                      fontSize: responsiveFontSize(1.7),
-                    }}>
-                    Accept
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          );
-        }}
+        data={sessions}
+        renderItem={upComingSessions}
       />
     </WrapperContainer>
   );

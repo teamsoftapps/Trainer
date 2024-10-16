@@ -20,6 +20,7 @@ import axiosBaseURL from '../../services/AxiosBaseURL';
 import {useDispatch, useSelector} from 'react-redux';
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
 import {socketService} from '../../utils/socketService';
+import {SaveLogedInUser} from '../../store/Slices/db_ID';
 
 const TrainerHome = () => {
   const trainer_data = useSelector(state => state.Auth.data);
@@ -63,7 +64,6 @@ const TrainerHome = () => {
             '------------------------',
             response.data.data.profileImage
           );
-          setAPIUserData(response.data.data);
           if (response.data.data.Bio === null) {
             Alert.alert('Please complete your profile');
           }
@@ -78,7 +78,7 @@ const TrainerHome = () => {
     const fetchData = async () => {
       try {
         const profileResponse = await axiosBaseURL.get(
-          `/Common/GetProfile/${trainer_data.data.token}`
+          `/Common/GetProfile/${trainer_data.token}`
         );
         const userData = profileResponse.data.data;
         console.log('profileResponce', userData);
@@ -91,7 +91,7 @@ const TrainerHome = () => {
       }
     };
     fetchData();
-  }, [trainer_data?.data.token]);
+  }, [trainer_data?.token]);
 
   return (
     <WrapperContainer>
@@ -142,7 +142,7 @@ const TrainerHome = () => {
                 {...styles.Welcome_Text},
                 {color: '#fff', fontWeight: '500'},
               ]}>
-              {trainer_data?.data.fullName}
+              {trainer_data?.fullName}
             </Text>
           </Text>
           <Text style={styles.slogan}>
@@ -163,7 +163,7 @@ const TrainerHome = () => {
           </Text>
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate('EditProfile');
+              navigation.navigate('CompleteProfile');
             }}
             style={styles.Text_Sec}>
             <View>
@@ -263,7 +263,7 @@ const TrainerHome = () => {
               </Text>
             </View>
             <View>
-              <Image source={require('../assets/Images/dollars.png')} />
+              <Image source={require('../../assets/Images/dollars.png')} />
             </View>
           </View>
         </View>
@@ -321,7 +321,7 @@ const TrainerHome = () => {
               </Text>
             </View>
             <View>
-              <Image source={require('../assets/Images/dumbell.png')} />
+              <Image source={require('../../assets/Images/dumbell.png')} />
             </View>
           </View>
         </View>

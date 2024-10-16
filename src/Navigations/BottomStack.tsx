@@ -13,8 +13,6 @@ import {useSelector} from 'react-redux';
 import Booking from '../Screens/userScreens/Booking';
 
 const BottomStack = () => {
-  const type = useSelector(state => state.Auth.data.type);
-  console.log('type from bottom:', type);
   const Bottom = createBottomTabNavigator();
   return (
     <Bottom.Navigator
