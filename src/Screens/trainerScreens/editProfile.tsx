@@ -24,22 +24,18 @@ import ButtonComp from '../../Components/ButtonComp';
 import {Specialities, TimeSlots} from '../../utils/Dummy';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import {showMessage} from 'react-native-flash-message';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import Header from '../../Components/Header';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {TouchableWithoutFeedback} from 'react-native';
-import EditAddressModal from '../../Components/EditAddressModal';
 import {useNavigation} from '@react-navigation/native';
 import moment from 'moment';
+import {updateLogin} from '../../store/Slices/AuthSlice';
 
 const EditProfile = ({route}) => {
   //UseSelectors
   const logedInTrainer = useSelector(state => state.Auth.data);
   console.log('loged in trainer data in edit profile screen :', logedInTrainer);
-  //Spliting fullName in to first and lst name.
-  const setFullName = logedInTrainer?.fullName?.split(' ');
-  const firstName = setFullName[0] || [];
-  const lastName = setFullName[1] || [];
 
   // Data States
   const [firstname, setfirstname] = useState('');
@@ -51,6 +47,7 @@ const EditProfile = ({route}) => {
   const [selectedTime, setSelectedTime] = useState([]);
   const [Address, setAddress] = useState('');
   const [AddressModal, setAddressModal] = useState(false);
+  const [gender, setGender] = useState('');
 
   // Formik States
   const [specialityformik, setspecialityformik] = useState(false);
@@ -65,21 +62,25 @@ const EditProfile = ({route}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [time, setTime] = useState(new Date());
-  const [selectedTimes, setSelectedTimes] = useState([
-    logedInTrainer.Availiblity,
-  ]);
+  const [selectedTimes, setSelectedTimes] = useState([]);
   const [date, setDate] = useState(new Date());
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [selectedSpecialities, setSelectedSpecialities] = useState([
-    logedInTrainer.Speciality,
+    // logedInTrainer.Speciality,
   ]);
+  const [formData, setFormData] = useState(logedInTrainer);
 
+  const Spec = useSelector(state => state?.Auth?.data?.Availiblity);
   const condition1 = Hourly !== '0' && Hourly !== '';
   const condition2 = selectedTimes.length !== 0;
   const condition3 = Bio != '';
   const condition4 = selectedSpecialities.length !== 0;
   const navigation = useNavigation();
-
+  const dispatch = useDispatch();
+  const concat = () => {
+    const fullname = firstname + ' ' + secondname;
+    console.log('nameeee', fullname);
+  };
   const handleSpecialitySelect = speciality => {
     setDropdownVisible(false);
     setSelectedSpecialities(prev => {
@@ -91,19 +92,16 @@ const EditProfile = ({route}) => {
     });
   };
 
-  const toggleModalTimes = () => {
-    setModalVisible(true);
-  };
-
-  const toggleModalDob = () => {
-    setModalVisible2(true);
+  const handleRemoveSpeciality = speciality => {
+    setSelectedSpecialities(prev =>
+      prev.filter(item => item.key !== speciality.key)
+    );
   };
 
   const onTimeChange = (event, selectedTime) => {
     if (event.type === 'set') {
       const currentTime = selectedTime || time;
 
-      // Ensure currentTime is a valid Date object
       if (currentTime instanceof Date && !isNaN(currentTime)) {
         const formattedTime = moment(currentTime).format('HH:mm A');
         setSelectedTimes(prevTimes => [...prevTimes, formattedTime]);
@@ -116,6 +114,12 @@ const EditProfile = ({route}) => {
     }
   };
 
+  const removeTime = timeToRemove => {
+    setSelectedTimes(prevTimes =>
+      prevTimes.filter(time => time !== timeToRemove)
+    );
+  };
+
   const onDateChange = selectedValue => {
     if (selectedValue instanceof Date && !isNaN(selectedValue)) {
       setDate(selectedValue);
@@ -123,37 +127,51 @@ const EditProfile = ({route}) => {
     setModalVisible2(false);
   };
 
+  const toggleModalTimes = () => {
+    setModalVisible(true);
+  };
+
+  const toggleModalDob = () => {
+    setModalVisible2(true);
+  };
+
   const Function = async () => {
-    if (condition1 && condition2 && condition3 && condition4) {
-      setspecialityformik(false);
-      setBioformik(false);
-      settimeformik(false);
-      setHourlyformik(false);
-      try {
-        const response = await axiosBaseURL.post('/trainer/update', {
-          email: logedInTrainer.email,
+    try {
+      const response = await axiosBaseURL.post('/trainer/update', {
+        email: logedInTrainer.email,
+        fullName: firstname,
+        Bio: Bio,
+        gender: gender,
+        Dob: date,
+        Availiblity: selectedTimes,
+        Hourlyrate: Hourly,
+        Speciality: selectedSpecialities,
+        Address: Address,
+      });
+      dispatch(
+        updateLogin({
+          fullName: firstname,
           Bio: Bio,
+          gender: gender,
+          Dob: date,
+          Speciality: [...logedInTrainer?.Speciality, ...selectedSpecialities],
           Hourlyrate: Hourly,
-          Availiblity: selectedTimes,
-          Speciality: selectedSpecialities,
-        });
-        showMessage({
-          message: 'Updates Succesfully',
-          description: 'your data has been updated!',
-          type: 'success',
-        });
-        navigation.navigate('Profile');
-      } catch (error) {
-        setUploadError('Upload failed.');
-        console.error('Error uploading file:', error);
-      } finally {
-        setUploading(false);
-      }
-    } else {
-      if (!condition4) setspecialityformik(true);
-      if (!condition3) setBioformik(true);
-      if (!condition2) settimeformik(true);
-      if (!condition1) setHourlyformik(true);
+          Availiblity: [...logedInTrainer?.Availiblity, ...selectedTimes],
+          Address: Address,
+        })
+      );
+      showMessage({
+        message: 'Updates Successfully',
+        description: 'Your data has been updated!',
+        type: 'success',
+      });
+
+      navigation.navigate('Profile');
+    } catch (error) {
+      setUploadError('Upload failed.');
+      console.error('Error uploading file:', error);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -166,40 +184,33 @@ const EditProfile = ({route}) => {
           }}
         />
         <View style={styles.Main}>
-          <Text style={styles.subHeading}>Edit picture</Text>
+          <Text style={styles.subHeading}>Edit Profile</Text>
           <View style={styles.FirstNameContainer}>
             <View style={styles.FirstNameH}>
               <Text style={{color: '#908C8D'}}>First Name</Text>
               <TextInput
-                editable={false}
-                value={firstName}
-                onChangeText={setfirstname}
-                placeholder="Enter First Name"
+                editable={true}
+                value={firstname}
+                onChangeText={text => setfirstname(text)}
+                // placeholder={
+                //   logedInTrainer.fullName
+                //     ? logedInTrainer.fullName
+                //     : ' Enter your first name'
+                // }
                 style={styles.FirstNameInput}
                 numberOfLines={1}
                 placeholderTextColor={'white'}
               />
             </View>
-            {lastName === ' ' ? (
-              <View style={styles.LastNameContainer}>
-                <Text style={{color: '#908C8D'}}>Last Name</Text>
-                <TextInput
-                  editable={false}
-                  placeholder="Enter Last Name"
-                  value={lastName}
-                  onChangeText={setsecondname}
-                  style={styles.LastNameInput}
-                  numberOfLines={1}
-                  placeholderTextColor={'white'}
-                />
-              </View>
-            ) : null}
             <View style={styles.EmailContainer}>
               <Text style={{color: '#908C8D'}}>Email</Text>
               <TextInput
-                editable={false}
-                placeholder="Enter Email"
-                value={logedInTrainer.email}
+                // placeholder={
+                //   logedInTrainer.email
+                //     ? logedInTrainer.email
+                //     : 'Enter your e-mail'
+                // }
+                value={Email}
                 onChangeText={setEmail}
                 style={styles.EmailInput}
                 numberOfLines={1}
@@ -223,9 +234,14 @@ const EditProfile = ({route}) => {
                   },
                 ]}>
                 <TextInput
-                  placeholder="A brief introduction about yourself and your training philosophy"
-                  onChangeText={setBio}
-                  value={logedInTrainer.Bio}
+                  editable={true}
+                  // placeholder={
+                  //   logedInTrainer.Bio
+                  //     ? logedInTrainer.Bio
+                  //     : 'A brief introduction about yourself and your training philosophy'
+                  // }
+                  onChangeText={text => setBio(text)}
+                  value={Bio}
                   style={[
                     {...styles.BioInput},
                     {height: Bio.length == 0 ? responsiveHeight(7) : 'auto'},
@@ -237,29 +253,36 @@ const EditProfile = ({route}) => {
             </View>
             <View style={styles.EmailContainer}>
               <Text style={{color: '#908C8D'}}>Gender</Text>
-              <Text style={{color: '#fff', fontSize: responsiveFontSize(2.2)}}>
-                {logedInTrainer.gender}
-              </Text>
+              <TextInput
+                // placeholder={
+                //   logedInTrainer.gender ? logedInTrainer.gender : 'Enter gender'
+                // }
+                value={gender}
+                onChangeText={text => {
+                  setGender(text);
+                }}
+                style={styles.EmailInput}
+                numberOfLines={1}
+                placeholderTextColor={'white'}
+              />
             </View>
-            <TouchableOpacity
-              onPress={toggleModalDob}
-              style={styles.EmailContainer}>
-              <Text style={{color: '#908C8D'}}>Date of Birth</Text>
+            <View style={styles.EmailContainer}>
+              <Text style={{color: '#908C8D'}}>Date of birth</Text>
               <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}>
-                <Text
-                  style={{color: '#fff', fontSize: responsiveFontSize(2.2)}}>
-                  {logedInTrainer.Dob}
-                </Text>
-                <View>
+                style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <TextInput
+                  // placeholder={
+                  //   logedInTrainer.Dob ? logedInTrainer.Dob : 'Enter DOB'
+                  // }
+                  style={styles.EmailInput}
+                  numberOfLines={1}
+                  placeholderTextColor={'white'}
+                />
+                <TouchableOpacity onPress={toggleModalDob}>
                   <Image source={Images.calendar} />
-                </View>
+                </TouchableOpacity>
               </View>
-            </TouchableOpacity>
+            </View>
             {modalVisible && (
               <Modal
                 animationType="slide"
@@ -276,6 +299,7 @@ const EditProfile = ({route}) => {
                           mode="time"
                           display="default"
                           onChange={onTimeChange}
+                          is24Hour={false}
                         />
                       </View>
                     </TouchableWithoutFeedback>
@@ -319,28 +343,74 @@ const EditProfile = ({route}) => {
                   alignItems: 'center',
                   paddingVertical: responsiveHeight(0.7),
                 }}>
-                <Text
-                  numberOfLines={1}
-                  style={{
-                    color: '#fff',
-                    fontSize: responsiveFontSize(1.5),
-                  }}>
-                  {selectedTimes.length > 0
-                    ? selectedTimes.map((item, index) => (
-                        <React.Fragment key={index}>
-                          <Text>{item}</Text>
-                          {index < selectedTimes.length - 1 ? (
-                            <Text> </Text>
-                          ) : null}
-                        </React.Fragment>
-                      ))
-                    : 'No Availabilities'}
-                </Text>
+                <View style={{width: responsiveWidth(70)}}>
+                  {selectedTimes.length > 0 ? (
+                    <Text
+                      numberOfLines={1}
+                      style={{
+                        color: '#fff',
+                        fontSize: responsiveFontSize(1.5),
+                      }}>
+                      {selectedTimes.join(' , ')}
+                    </Text>
+                  ) : (
+                    <Text
+                      style={{
+                        color: '#fff',
+                        fontSize: responsiveFontSize(1.5),
+                      }}>
+                      Add Availabilities
+                    </Text>
+                  )}
+                </View>
+
                 <View>
                   <Image source={Images.calendar} />
                 </View>
               </View>
             </TouchableOpacity>
+            <View>
+              <FlatList
+                data={selectedTimes}
+                renderItem={({item}) => (
+                  <View
+                    key={item}
+                    style={[
+                      {...styles.MainFlatlist},
+                      {
+                        backgroundColor: selectedTime.includes(item)
+                          ? '#9FED3A'
+                          : '#181818',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                      },
+                    ]}>
+                    <Text
+                      style={{
+                        color: selectedTime.includes(item)
+                          ? 'black'
+                          : '#9FED3A',
+                        fontSize: responsiveFontSize(2),
+                      }}>
+                      {item}
+                    </Text>
+                    <TouchableOpacity onPress={() => removeTime(item)}>
+                      <Image
+                        source={Images.Cross}
+                        style={{
+                          tintColor: '#9FED3A',
+                          marginLeft: responsiveWidth(4),
+                          height: responsiveHeight(1.5),
+                        }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                )}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{alignItems: 'center'}}
+              />
+            </View>
             <View style={[styles.EmailContainer]}>
               <Text style={{color: '#908C8D'}}>Hourly Rate</Text>
               <View
@@ -353,8 +423,10 @@ const EditProfile = ({route}) => {
                 </Text>
                 <TextInput
                   editable={true}
-                  placeholder="00"
-                  value={logedInTrainer.Hourlyrate}
+                  // placeholder={
+                  //   logedInTrainer.Hourlyrate ? logedInTrainer.Hourlyrate : '00'
+                  // }
+                  value={Hourly}
                   onChangeText={text => {
                     setHourly(text);
                   }}
@@ -403,7 +475,7 @@ const EditProfile = ({route}) => {
           </View>
           <View style={{marginVertical: responsiveHeight(1.5)}}>
             <FlatList
-              data={logedInTrainer?.Speciality}
+              data={selectedSpecialities}
               renderItem={({item}) => (
                 <View
                   key={item.key}
@@ -426,7 +498,8 @@ const EditProfile = ({route}) => {
                     }}>
                     {item.value}
                   </Text>
-                  <TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleRemoveSpeciality(item)}>
                     <Image
                       source={Images.Cross}
                       style={{
@@ -456,15 +529,15 @@ const EditProfile = ({route}) => {
               onChangeText={text => {
                 setAddress(text);
               }}
-              value={logedInTrainer.Address}
-              placeholder="Enter your address"
+              value={Address}
+              // placeholder="Enter your address"
               style={{
                 color: '#fff',
                 width: responsiveWidth(70),
               }}
               placeholderTextColor={'#fff'}
             />
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => {
                 setAddressModal(true);
               }}>
@@ -475,19 +548,20 @@ const EditProfile = ({route}) => {
                   width: responsiveWidth(4),
                 }}
               />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
-          <EditAddressModal
+          {/* <EditAddressModal
             token={logedInTrainer.token}
             Address={Address}
             modalstate={AddressModal}
             onRequestClose={() => setAddressModal(false)}
-          />
+          /> */}
         </View>
       </ScrollView>
       <ButtonComp
         onPress={() => {
           Function();
+          // concat();
         }}
         text="Save"
         mainStyle={{

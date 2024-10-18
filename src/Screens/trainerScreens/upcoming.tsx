@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   StyleSheet,
@@ -8,7 +9,7 @@ import {
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
-import {Images} from '../../utils/Images';
+import {FontFamily, Images} from '../../utils/Images';
 import {
   responsiveFontSize,
   responsiveHeight,
@@ -78,7 +79,7 @@ const Previous = () => {
         <View style={styles.container}>
           <View style={styles.left}>
             <Image
-              source={item.profileImage}
+              src={item.profileImage}
               style={{
                 height: responsiveWidth(14),
                 width: responsiveWidth(14),
@@ -87,13 +88,13 @@ const Previous = () => {
             />
             <View>
               <Text style={styles.whitetext} numberOfLines={1}>
-                {item.fullName}
+                {item.userName}
               </Text>
               <Text style={styles.whitetext} numberOfLines={1}>
                 {item.Date}
               </Text>
               <Text style={styles.greytext} numberOfLines={1}>
-                {item.bookingTime}
+                {item.bookingTime} (1 Hour)
               </Text>
             </View>
           </View>
@@ -108,13 +109,16 @@ const Previous = () => {
                     ? '#9FED3A'
                     : item.status === 'Cancelled'
                     ? '#FF2D55'
+                    : item.status === 'pending'
+                    ? '#bbbbbb'
                     : 'none',
+                marginVertical: responsiveHeight(0.5),
               }}>
               <Text
                 style={
-                  item.status === 'Cancelled'
-                    ? styles.whitetext
-                    : styles.blacktext
+                  item.status === 'pending'
+                    ? styles.blacktext
+                    : styles.whitetext
                 }>
                 {item.status}
               </Text>
@@ -130,7 +134,7 @@ const Previous = () => {
           }}>
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate('ReviewBooking');
+              navigation.navigate('ReviewBooking', {data: item});
             }}
             style={{
               height: responsiveHeight(4),
@@ -176,12 +180,32 @@ const Previous = () => {
       </View>
     );
   };
+
+  const WhenListEmpty = () => {
+    return (
+      <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+        {isLoading ? (
+          <ActivityIndicator size={responsiveHeight(5)} color={'#fff'} />
+        ) : (
+          <Text
+            style={{
+              fontFamily: FontFamily.Regular,
+              color: 'gray',
+              fontSize: responsiveFontSize(2),
+            }}>
+            No Sessions found
+          </Text>
+        )}
+      </View>
+    );
+  };
   return (
     <WrapperContainer style={{backgroundColor: '#181818'}}>
       <FlatList
         showsVerticalScrollIndicator={false}
         data={sessions}
         renderItem={upComingSessions}
+        ListEmptyComponent={WhenListEmpty}
       />
     </WrapperContainer>
   );

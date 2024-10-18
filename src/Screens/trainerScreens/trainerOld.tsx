@@ -105,7 +105,7 @@ const CompletedTrainerHome = () => {
               color: 'gray',
               fontSize: responsiveFontSize(2),
             }}>
-            No Chat found
+            No Sessions found
           </Text>
         )}
       </View>

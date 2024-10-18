@@ -10,8 +10,9 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Keyboard,
+  ActivityIndicator,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
 import {useDispatch, useSelector} from 'react-redux';
 import {
@@ -24,7 +25,8 @@ import ImageCropPicker from 'react-native-image-crop-picker';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import {showMessage} from 'react-native-flash-message';
 import EditAddressModal from '../../Components/EditAddressModal';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {updateLogin} from '../../store/Slices/AuthSlice';
 const uploads = [
   {
     img: require('../../assets/Images/trainer4.jpg'),
@@ -39,32 +41,35 @@ const uploads = [
 const Profile = () => {
   //useSelector
   const trainer_data = useSelector(state => state.Auth.data);
+  const dispatch = useDispatch();
 
-  //useRef
-  const textInputRef = useRef(null);
   //useStates
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(null);
   const [Address, setAddress] = useState('');
   const [AddressModal, setAddressModal] = useState(false);
   const [imageUri, setImageUri] = useState(null);
-  const [isModal, setModal] = useState(false);
-  const [Bio, setBio] = useState(trainer_data.Bio);
   const [Hourly, setHourly] = useState('');
   const [selectedTime, setSelectedTime] = useState([]);
+  const [availability, setAvailability] = useState([]);
   const [Speciality, setSpeciality] = useState([]);
   const [selectedSpeciality, setSelectedSpeciality] = useState([]);
   const [isLoading, setLoading] = useState(true);
+  const [isModal, setModal] = useState(false);
+  const [subModal, setSubModal] = useState(false);
+  const [isImageUploading, setImageUploading] = useState(false);
 
   //Functions
   const openModal = () => setModal(true);
   const closeModal = () => setModal(false);
 
+  const openSubModal = () => setSubModal(true);
+  const closeSubModal = () => setSubModal(false);
+
   // Formik States
-  const [specialityformik, setspecialityformik] = useState(false);
-  const [Bioformik, setBioformik] = useState(false);
-  const [Hourlyformik, setHourlyformik] = useState(false);
-  const [timeformik, settimeformik] = useState(false);
+  // const [specialityformik, setspecialityformik] = useState(false);
+  // const [Bioformik, setBioformik] = useState(false);
+  // const [Hourlyformik, setHourlyformik] = useState(false);
+  // const [timeformik, settimeformik] = useState(false);
 
   // Formik Conditions
   // const condition1 = Hourly !== '0' && Hourly !== '';
@@ -77,38 +82,31 @@ const Profile = () => {
   //consoles
   console.log('auth data in trainer profile', trainer_data);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const profileResponse = await axiosBaseURL.get(
-          `/Common/GetProfile/${trainer_data.token}`
-        );
-        const userData = profileResponse.data.data;
-        console.log('profileResponce', userData);
-        await setSelectedTime(userData.Availiblity);
-        await setSpeciality(userData.Speciality);
-        await setHourly(userData.Hourlyrate);
-        setLoading(false);
-      } catch (error) {
-        console.error(
-          'Error fetching data:',
-          error.response?.data?.message || error.message
-        );
-      }
-    };
-
-    fetchData();
-  }, [trainer_data.token]);
-
-  const handleEditPress = () => {
-    setIsEditing(true);
-    setTimeout(() => {
-      textInputRef.current.focus();
-    }, 0);
+  const fetchData = async () => {
+    try {
+      const profileResponse = await axiosBaseURL.get(
+        `/Common/GetProfile/${trainer_data.token}`
+      );
+      const userData = profileResponse.data.data;
+      console.log('profileResponce', userData);
+      await setSelectedTime(userData.Availiblity);
+      await setSpeciality(userData.Speciality);
+      await setHourly(userData.Hourlyrate);
+      setLoading(false);
+    } catch (error) {
+      console.error(
+        'Error fetching data:',
+        error.response?.data?.message || error.message
+      );
+    }
   };
-  const handleBlur = () => {
-    setIsEditing(false);
-  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+      console.log('fetch called');
+    }, [trainer_data.token])
+  );
 
   const RenderedUploads = ({item, index}) => {
     return (
@@ -129,21 +127,26 @@ const Profile = () => {
   const uploadImage = async image => {
     try {
       const formData = new FormData();
-      console.log('image received:', image);
+
       formData.append('file', {
         uri: image.path,
         type: image.mime,
         name: `profileImage-${Date.now()}.jpg`,
       });
       formData.append('email', trainer_data.email);
-      console.log('form data:', formData);
+
+      setImageUploading(true);
 
       const response = await axiosBaseURL.post('/Common/fileUpload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      setImageUri(response.data.data.url);
+
+      await setImageUri(response.data.data.url);
+      dispatch(updateLogin({profileImage: response.data.data.url}));
+      closeSubModal();
+
       if (response.data.status) {
         showMessage({
           message: 'Update Successful',
@@ -152,14 +155,16 @@ const Profile = () => {
         });
       }
     } catch (error) {
-      console.error('Upload Error: ', error);
       showMessage({
         message: 'Upload Failed',
         description: error.message || 'Failed to upload image.',
         type: 'danger',
       });
+    } finally {
+      setImageUploading(false);
     }
   };
+
   const handleChoosePhoto = () => {
     ImageCropPicker.openPicker({
       mediaType: 'photo',
@@ -169,9 +174,7 @@ const Profile = () => {
         uploadImage(image);
         setModal(false);
       })
-      .catch(error => {
-        console.error('ImagePicker Error: ', error.message);
-      });
+      .catch(error => {});
   };
 
   const handleTakePhoto = async () => {
@@ -182,9 +185,7 @@ const Profile = () => {
       });
       uploadImage(image);
       setModal(false);
-    } catch (error) {
-      console.error('ImagePicker Error: ', error.message);
-    }
+    } catch (error) {}
   };
 
   const WhenSpetialitiesEmpth = () => {
@@ -238,19 +239,27 @@ const Profile = () => {
     );
   };
 
-  const RenderedSelectedTimes = ({item, index}) => {
-    const isSelected = selectedIndex === index;
+  const toggleItem = item => {
+    setAvailability(prevSelected => {
+      if (prevSelected.includes(item)) {
+        return prevSelected.filter(i => i !== item);
+      } else {
+        return [...prevSelected, item];
+      }
+    });
+  };
+
+  const RenderedSelectedTimes = ({item}) => {
+    const isSelected = availability.includes(item);
     return (
       <TouchableOpacity
-        onPress={() => {
-          setSelectedIndex(index);
-        }}
         style={[
           styles.MainFlatlist,
           {
             backgroundColor: isSelected ? '#9FED3A' : '#181818',
           },
-        ]}>
+        ]}
+        onPress={() => toggleItem(item)}>
         <Text
           style={{
             color: isSelected ? 'black' : '#9FED3A',
@@ -278,7 +287,7 @@ const Profile = () => {
         style={[
           styles.MainFlatlist,
           {
-            backgroundColor: isSelected ? '#9FED3A' : '#181818', // Green for selected
+            backgroundColor: isSelected ? '#9FED3A' : '#181818',
           },
         ]}
         onPress={handlePress}>
@@ -293,39 +302,27 @@ const Profile = () => {
     );
   };
 
-  // const Function = async () => {
-  //   if (condition1 && condition2 && condition3 && condition4) {
-  //     setspecialityformik(false);
-  //     setBioformik(false);
-  //     settimeformik(false);
-  //     setHourlyformik(false);
-  //     try {
-  //       const response = await axiosBaseURL.post('/trainer/update', {
-  //         email: trainer_data.email,
-  //         Bio: Bio,
-  //         Speciality: Speciality,
-  //         Hourlyrate: Hourly,
-  //         Availiblity: selectedTime,
-  //       });
-  //       showMessage({
-  //         message: 'Updates Succesfully',
-  //         description: 'your data has been updated!',
-  //         type: 'success',
-  //       });
-  //       console.log('Upload successful:', response.data);
-  //     } catch (error) {
-  //       setUploadError('Upload failed.');
-  //       console.error('Error uploading file:', error);
-  //     } finally {
-  //       setUploading(false);
-  //     }
-  //   } else {
-  //     if (!condition4) setspecialityformik(true);
-  //     if (!condition3) setBioformik(true);
-  //     if (!condition2) settimeformik(true);
-  //     if (!condition1) setHourlyformik(true);
+  // const calculateAge = (birthdateString: String) => {
+  //   const [month, day, year] = birthdateString.split('/');
+  //   const formattedDate = `${year}-${month}-${day}`;
+  //   const birthDate = new Date(formattedDate);
+
+  //   const today = new Date();
+
+  //   let age = today.getFullYear() - birthDate.getFullYear();
+  //   const monthDifference = today.getMonth() - birthDate.getMonth();
+
+  //   if (
+  //     monthDifference < 0 ||
+  //     (monthDifference === 0 && today.getDate() < birthDate.getDate())
+  //   ) {
+  //     age--;
   //   }
+
+  //   return age;
   // };
+  // const age = calculateAge(trainer_data.Dob);
+
   return (
     <WrapperContainer>
       <ScrollView>
@@ -368,7 +365,56 @@ const Profile = () => {
             <Image source={Images.setting} />
           </TouchableOpacity>
         </View>
-
+        <Modal
+          transparent={true}
+          animationType="slide"
+          visible={subModal}
+          onRequestClose={closeSubModal}>
+          <TouchableWithoutFeedback onPress={closeSubModal}>
+            <View style={[styles.subModalContainer, {position: 'relative'}]}>
+              <View style={{position: 'absolute', top: responsiveHeight(45)}}>
+                {isImageUploading && (
+                  <ActivityIndicator
+                    size={responsiveHeight(5)}
+                    color={'#fff'}
+                  />
+                )}
+              </View>
+              <View style={{position: 'absolute', bottom: responsiveHeight(0)}}>
+                <View style={styles.subModalContent}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      alignItems: 'baseline',
+                    }}>
+                    <Text style={styles.modalText}>Select Option</Text>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-around',
+                    }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        handleTakePhoto();
+                      }}
+                      style={styles.closeButton}>
+                      <Text style={styles.closeButtonText}>Open Camera</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        handleChoosePhoto();
+                      }}
+                      style={styles.closeButton}>
+                      <Text style={styles.closeButtonText}>Open Gallery</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
         <Modal
           transparent={true}
           animationType="slide"
@@ -409,6 +455,10 @@ const Profile = () => {
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
+                    onPress={() => {
+                      closeModal();
+                      openSubModal();
+                    }}
                     style={{
                       flexDirection: 'row',
                       alignItems: 'center',
@@ -545,7 +595,6 @@ const Profile = () => {
                 marginHorizontal: responsiveWidth(2),
                 textAlign: 'center',
               }}>
-              {/* {trainer_data.Followers} */}
               92
             </Text>
             <Text style={{color: '#9FED3A', fontSize: responsiveFontSize(1.5)}}>
@@ -564,7 +613,7 @@ const Profile = () => {
                 marginHorizontal: responsiveWidth(2),
                 textAlign: 'center',
               }}>
-              28
+              {/* {age} */}hhh
             </Text>
             <Text
               style={{
@@ -606,9 +655,9 @@ const Profile = () => {
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
-            paddingBottom: responsiveHeight(3),
+            paddingBottom: responsiveHeight(1.5),
             borderBottomColor: '#bbbbbb',
-            borderWidth: responsiveWidth(0.2),
+            borderBottomWidth: responsiveWidth(0.2),
           }}>
           <Text
             style={{
@@ -642,17 +691,17 @@ const Profile = () => {
             }}>
             Availability
           </Text>
-
-          <FlatList
-            ListEmptyComponent={WhenAvalibilitiesEmpth}
-            style={{marginTop: responsiveHeight(2)}}
-            data={selectedTime}
-            renderItem={RenderedSelectedTimes}
-            keyExtractor={item => item}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{alignItems: 'center'}}
-          />
+          <View style={{marginTop: responsiveHeight(2)}}>
+            <FlatList
+              horizontal
+              data={selectedTime}
+              renderItem={RenderedSelectedTimes}
+              keyExtractor={item => item}
+              ListEmptyComponent={WhenAvalibilitiesEmpth}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{alignItems: 'center'}}
+            />
+          </View>
         </View>
 
         <View
@@ -701,18 +750,6 @@ const Profile = () => {
             }}>
             Location
           </Text>
-          {/* <TouchableOpacity
-            onPress={() => {
-              setAddressModal(true);
-            }}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}> */}
-          {/* <Text>
-                {trainer_data.Address}
-              </Text> */}
           <TextInput
             editable={false}
             onChangeText={text => {
@@ -722,11 +759,10 @@ const Profile = () => {
             placeholder="Enter your address"
             style={{
               color: '#fff',
-              width: responsiveWidth(70),
+              width: responsiveWidth(80),
             }}
             placeholderTextColor={'#fff'}
           />
-          {/* </TouchableOpacity> */}
         </View>
         <EditAddressModal
           token={trainer_data.token}
@@ -748,6 +784,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
+  subModalContainer: {
+    flex: 1,
+    // justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
   modalContent: {
     width: responsiveWidth(100),
     height: responsiveHeight(25),
@@ -755,21 +797,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#333333',
     borderRadius: responsiveWidth(3),
   },
+
+  subModalContent: {
+    width: responsiveWidth(100),
+    height: responsiveHeight(16),
+    padding: responsiveWidth(3),
+    backgroundColor: '#333333',
+    borderRadius: responsiveWidth(3),
+  },
   modalText: {
-    fontSize: 18,
-    marginBottom: 20,
-    color: '#000',
+    fontSize: responsiveFontSize(2.2),
+    marginBottom: responsiveHeight(3),
+    color: '#fff',
     fontWeight: '600',
   },
   closeButton: {
-    padding: 10,
+    paddingHorizontal: responsiveWidth(4),
+    paddingVertical: responsiveHeight(1.5),
     backgroundColor: '#000',
-    borderRadius: 5,
+    borderRadius: responsiveWidth(6),
     marginHorizontal: responsiveWidth(1),
   },
   closeButtonText: {
     color: '#9FED3A',
-    fontSize: responsiveFontSize(1.7),
+    fontSize: responsiveFontSize(2),
     fontWeight: '600',
   },
   MainFlatlist: {

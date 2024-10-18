@@ -18,22 +18,34 @@ const authSlice = createSlice({
     },
 
     updateLogin: (state, action) => {
-      console.log('Dtaa Updated', state.data);
-      state.data = {...state?.data, ...action.payload};
-      console.log('After', state.data);
+      state.data = {
+        ...state.data,
+        fullName: action.payload.fullName || state.data.fullName,
+        email: action.payload.email || state.data.email,
+
+        Bio: action.payload.Bio || state.data.Bio,
+        gender: action.payload.gender || state.data.gender,
+        Dob: action.payload.Dob || state.data.Dob,
+
+        Availiblity: Array.isArray(action.payload.Availiblity)
+          ? action.payload.Availiblity
+          : state.data.Availiblity,
+        Hourlyrate: action.payload.Hourlyrate || state.data.Hourlyrate,
+        Speciality: Array.isArray(action.payload.Speciality)
+          ? action.payload.Speciality
+          : state.data.Speciality,
+        Address: action.payload.Address || state.data.Address,
+      };
     },
-    //   export const updateLoginData = (newData) => (dispatch, getState) => {
-    //     const currentData = getState().login.data; // Access current state
-    //     const updatedData = { ...currentData, ...newData }; // Merge data
-    //     dispatch(IsLogin(updatedData)); // Dispatch action with merged data
-    // };
 
     SignOut: (state, action) => {
       state.data = null;
     },
+
     ForgetPasswordID: (state, action) => {
       state.res_ID = action.payload;
     },
+
     SaveEmail: (state, action) => {
       state.res_EMAIL = action.payload;
     },

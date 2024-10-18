@@ -23,7 +23,10 @@ import {FontFamily, Images} from '../../utils/Images';
 import ButtonComp from '../../Components/ButtonComp';
 import {useNavigation} from '@react-navigation/native';
 
-const BookingDetails = () => {
+const BookingDetails = ({route}) => {
+  const data = route.params;
+  const routeData = data.data;
+  console.log('data from upcomimg: ', routeData);
   const navigation = useNavigation();
   const toggleSwitch = () => setIsEnabled(prevState => !prevState);
   const [isEnabled, setIsEnabled] = useState(false);
@@ -62,7 +65,7 @@ const BookingDetails = () => {
             }}>
             <View style={{flexDirection: 'row', gap: responsiveWidth(4)}}>
               <Image
-                source={Images.trainer4}
+                src={routeData.profileImage}
                 style={{
                   width: responsiveScreenWidth(18),
                   height: responsiveScreenWidth(18),
@@ -78,7 +81,7 @@ const BookingDetails = () => {
                     color: 'white',
                     maxWidth: responsiveWidth(34),
                   }}>
-                  John Doe
+                  {routeData.userName}
                 </Text>
                 <View
                   style={{
@@ -87,7 +90,7 @@ const BookingDetails = () => {
                     backgroundColor:
                       status === 'Confirmed' ? '#9BE639' : '#bbbbbb',
                   }}>
-                  <Text style={styles.blacktext}>{status}</Text>
+                  <Text style={styles.blacktext}>{routeData.status}</Text>
                 </View>
               </View>
             </View>
@@ -133,15 +136,15 @@ const BookingDetails = () => {
             </Text>
             <Text
               style={{color: 'white', fontSize: responsiveScreenFontSize(2.6)}}>
-              Monday, October 24
+              {routeData.Date}
             </Text>
             <Text
               style={{color: 'white', fontSize: responsiveScreenFontSize(2.3)}}>
-              8:00 AM
+              {routeData.bookingTime}
             </Text>
           </View>
         </View>
-        <View
+        {/* <View
           style={{
             paddingHorizontal: responsiveScreenWidth(8),
             marginTop: responsiveWidth(6),
@@ -160,7 +163,7 @@ const BookingDetails = () => {
               Weight Loss and Muscle Building
             </Text>
           </View>
-        </View>
+        </View> */}
         <View
           style={{
             paddingHorizontal: responsiveScreenWidth(8),
@@ -176,7 +179,7 @@ const BookingDetails = () => {
             </Text>
             <Text
               style={{color: 'white', fontSize: responsiveScreenFontSize(2.6)}}>
-              $80 (1 Hour)
+              ${routeData.Amount} (1 Hour)
             </Text>
           </View>
         </View>

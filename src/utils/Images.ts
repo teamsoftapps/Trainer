@@ -93,6 +93,8 @@ export const Images = {
   managePlans: require('../assets/Images/manageplans.png'),
   EmptyFile: require('../assets/Images/file.png'),
   downloadIcon: require('../assets/Images/downloadIcon.png'),
+  galleryIcon: require('../assets/Images/galleryIcon.png'),
+  cameraIcon: require('../assets/Images/camIcon.png'),
 };
 
 export const FontFamily = {
