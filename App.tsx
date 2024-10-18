@@ -7,6 +7,9 @@ import {useSelector} from 'react-redux';
 import {StripeProvider} from '@stripe/stripe-react-native';
 import TrainerStack from './src/Navigations/TrainerStack';
 import BootSplash from 'react-native-bootsplash';
+import {PermissionsAndroid, Platform} from 'react-native';
+import notifee, {EventType} from '@notifee/react-native';
+import {requestNotificationPermission} from './src/Hooks/Permission';
 const App = () => {
   const authData = useSelector(state => state?.Auth?.data);
   console.log('first', authData);
@@ -18,9 +21,16 @@ const App = () => {
 
     init().finally(async () => {
       await BootSplash.hide({fade: true});
-      console.log('BootSplash has been hidden successfully');
+      requestNotificationPermission()
+        .then(result => {
+          console.log('Result', result);
+        })
+        .catch(error => {
+          console.log('Error', error);
+        });
     });
   }, []);
+
   return (
     <StripeProvider publishableKey="pk_test_51MhKy0E1gqTY55tO7v4bGT0EifIECw1SHFcUx33Jgc7YF46jqRPNvDzGoSE1h9konayrzaNes7Jse3NGDLpawDql00rxdyk8Cw">
       <NavigationContainer>

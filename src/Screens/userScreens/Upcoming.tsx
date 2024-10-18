@@ -140,34 +140,39 @@ const Upcoming = () => {
                       width: responsiveWidth(14),
                       borderRadius: responsiveWidth(14),
                     }}
-                    src={item.profileImage}
+                    src={item?.profileImage}
                   />
                   <View>
                     <Text style={styles.whitetext} numberOfLines={1}>
-                      {item.trainerName}
+                      {item?.trainerName}
                     </Text>
                     <Text style={styles.whitetext} numberOfLines={1}>
-                      {item.Date}
+                      {item?.Date}
                     </Text>
                     <Text style={styles.greytext} numberOfLines={1}>
-                      {item.Time}
+                      {item?.Time}
                     </Text>
                   </View>
                 </TouchableOpacity>
                 <View style={styles.right}>
-                  <Text style={styles.timeago}>{item.Reminder}</Text>
+                  <Text style={styles.timeago}>{item?.Reminder}</Text>
                   <View
                     style={{
-                      ...styles.curve,
-                      borderRadius: responsiveScreenWidth(10),
-                      // backgroundColor:
-                      //   item.status === 'Pending'
-                      //     ? '#B8B8B8'
-                      //     : item.status === 'Confirmed'
-                      //     ? '#9FED3A'
-                      //     : item.status === 'Cancelled'
-                      //     ? '#FF2D55'
-                      //     : 'none',
+                      // ...styles.curve,
+                      borderRadius: responsiveWidth(10),
+                      width: responsiveWidth(20),
+                      paddingHorizontal: responsiveWidth(2),
+                      height: responsiveHeight(3),
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor:
+                        item.paymentStatus == 'pending'
+                          ? '#B8B8B8'
+                          : item.paymentStatus == 'confirmed'
+                          ? '#9FED3A'
+                          : item.paymentStatus == 'cancelled'
+                          ? '#FF2D55'
+                          : 'none',
                     }}>
                     <Text
                       style={
@@ -175,7 +180,7 @@ const Upcoming = () => {
                           ? styles.whitetext
                           : styles.blacktext
                       }>
-                      {item.status}
+                      {item?.paymentStatus}
                     </Text>
                   </View>
                 </View>

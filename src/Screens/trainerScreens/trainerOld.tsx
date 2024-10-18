@@ -21,6 +21,7 @@ import {useSelector} from 'react-redux';
 import {LineChart} from 'react-native-chart-kit';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import {useEffect, useState} from 'react';
+import notifee, {EventType} from '@notifee/react-native';
 const CompletedTrainerHome = () => {
   const data = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
@@ -54,13 +55,16 @@ const CompletedTrainerHome = () => {
       const responce = await axiosBaseURL.get(
         `/user/getBookingbyId/${trainer_data._id}`
       );
-      await setSessions(responce.data.data);
+      setSessions(responce.data.data);
       setIsLoading(false);
       console.log('Sessions we get: ', responce.data.data);
     } catch (error) {}
   };
 
   const RenderedBookings = ({item, index}) => {
+    if (item?.paymentStatus === 'pending' || item?.paymentStatus === 'failed') {
+      return;
+    }
     return (
       <View>
         <TouchableOpacity
@@ -137,7 +141,9 @@ const CompletedTrainerHome = () => {
               alignItems: 'center',
               gap: responsiveWidth(5),
             }}>
-            <TouchableOpacity activeOpacity={0.8}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Notification')}
+              activeOpacity={0.8}>
               <Image source={Images.notification} style={styles.notifiaction} />
             </TouchableOpacity>
             <TouchableOpacity

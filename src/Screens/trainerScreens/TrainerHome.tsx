@@ -21,34 +21,12 @@ import {useDispatch, useSelector} from 'react-redux';
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
 import {socketService} from '../../utils/socketService';
 import {SaveLogedInUser} from '../../store/Slices/db_ID';
-
+import notifee from '@notifee/react-native';
 const TrainerHome = () => {
   const trainer_data = useSelector(state => state.Auth.data);
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const Bookings = [
-    {
-      id: '1',
-      userImage: require('../../assets/Images/Mask2.png'),
-      userName: 'Nicole Foster',
-      userDate: 'Mondat, October 24',
-      selectedTime: '8:00 AM',
-    },
-    {
-      id: '2',
-      userImage: require('../../assets/Images/Mask2.png'),
-      userName: 'Nicole Foster',
-      userDate: 'Mondat, October 24',
-      selectedTime: '8:00 AM',
-    },
-    {
-      id: '3',
-      userImage: require('../../assets/Images/Mask2.png'),
-      userName: 'Nicole Foster',
-      userDate: 'Mondat, October 24',
-      selectedTime: '8:00 AM',
-    },
-  ];
+
   useEffect(() => {
     socketService.initializeSocket();
   }, []);

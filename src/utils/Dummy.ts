@@ -168,30 +168,30 @@ export const formatDate = (dateString: string) => {
   return `${weekday} ${day} ${month}, ${year}`;
 };
 
-export const fetchPaymentSheetparams = async (CustomerID: string, amount) => {
-  const response = await axiosBaseURL.post('/common/InitializePaymentIntent', {
-    customerID: CustomerID,
-    amount: amount,
-  });
-  const {ephemeralKey, paymentIntent, customer} = await response.data.data;
-  return {
-    ephemeralKey,
-    paymentIntent,
-    customer,
-  };
-};
-export const fetchSetupSheetparams = async (stripeId: string) => {
-  console.log('helloo stripe: ', stripeId);
-  const response = await axiosBaseURL.post('/common/InitializeSetupIntent', {
-    customerID: stripeId,
-  });
-  const {ephemeralKey, setupIntents} = await response.data.data;
-  console.log('is data going:', response.data);
-  return {
-    ephemeralKey,
-    setupIntents,
-  };
-};
+// export const fetchPaymentSheetparams = async (CustomerID: string, amount: number) => {
+//   const response = await axiosBaseURL.post('/common/InitializePaymentIntent', {
+//     customerID: CustomerID,
+//     amount: amount,
+//   });
+//   const {ephemeralKey, paymentIntent, customer} = await response.data.data;
+//   return {
+//     ephemeralKey,
+//     paymentIntent,
+//     customer,
+//   };
+// };
+// export const fetchSetupSheetparams = async (stripeId: string) => {
+//   console.log('helloo stripe: ', stripeId);
+//   const response = await axiosBaseURL.post('/common/InitializeSetupIntent', {
+//     customerID: stripeId,
+//   });
+//   const {ephemeralKey, setupIntents} = await response.data.data;
+//   console.log('is data going:', response.data);
+//   return {
+//     ephemeralKey,
+//     setupIntents,
+//   };
+// };
 export const Seartrainer = [
   {
     id: 1,
@@ -250,3 +250,56 @@ export const Seartrainer = [
     timing: '10:00-18:00',
   },
 ];
+export const fetchPaymentSheetparams = async (
+  customerID: string,
+  amount: number
+) => {
+  try {
+    const response = await axiosBaseURL.post(
+      '/common/InitializePaymentIntent',
+      {
+        customerID: customerID,
+        amount: amount,
+      }
+    );
+
+    // Ensure the response structure matches what your API returns
+    const {ephemeralKey, paymentIntent, customer} = response.data.data;
+
+    return {
+      ephemeralKey,
+      paymentIntent,
+      customer,
+    };
+  } catch (error) {
+    console.error(
+      'Error fetching payment sheet parameters:',
+      error.response ? error.response.data : error.message
+    );
+    throw error; // Rethrow to handle it in the calling function
+  }
+};
+
+export const fetchSetupSheetparams = async (stripeId: string) => {
+  try {
+    console.log('Requesting setup for Stripe ID:', stripeId);
+
+    const response = await axiosBaseURL.post('/common/InitializeSetupIntent', {
+      customerID: stripeId,
+    });
+
+    const {ephemeralKey, setupIntents} = response.data.data;
+    console.log('Setup data received:', response.data);
+
+    return {
+      ephemeralKey,
+      setupIntents,
+    };
+  } catch (error) {
+    console.error(
+      'Error fetching setup sheet parameters:',
+      error.response ? error.response.data : error.message
+    );
+    throw error; // Rethrow to handle it in the calling function
+  }
+};

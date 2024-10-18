@@ -49,7 +49,7 @@ const ReviewBooking = ({route}) => {
   const [loading, setloading] = useState(false);
   const authData = useSelector(state => state.Auth.data);
   const navigation = useNavigation();
-
+  console.log('object', trainerRatePerHour);
   useEffect(() => {
     const isValidHours = !(
       hours.includes(',') ||
@@ -79,7 +79,65 @@ const ReviewBooking = ({route}) => {
     }
   };
 
-  const initializePaymentsheet = async () => {
+  // const initializePaymentsheet = async () => {
+  //   if (!stripeId) return;
+
+  //   try {
+  //     const {ephemeralKey, paymentIntent} = await fetchPaymentSheetparams(
+  //       stripeId,
+  //       totalAmount
+  //     );
+
+  //     const {error} = await initPaymentSheet({
+  //       customerId: stripeId,
+  //       customerEphemeralKeySecret: ephemeralKey,
+  //       paymentIntentClientSecret: paymentIntent,
+  //       merchantDisplayName: "Stern's GYM",
+  //       allowsDelayedPaymentMethods: true,
+  //       allowsRemovalOfLastSavedPaymentMethod: true,
+  //     });
+
+  //     if (error) {
+  //       console.error('Error initializing payment sheet:', error.message);
+  //     } else {
+  //       console.log('Payment sheet initialized successfully');
+  //     }
+  //   } catch (error) {
+  //     console.error(
+  //       'Error during payment sheet initialization:',
+  //       error.message
+  //     );
+  //   }
+  // };
+  // const FormatedDate = formatDate(Data?.Date);
+  // const ConfirmBooking = async () => {
+  //   setloading(true);
+  //   await initializePaymentsheet();
+  //   setloading(false);
+  //   const {error} = await presentPaymentSheet();
+  //   if (error) {
+  //     showToast('Try later', error.message, 'danger');
+  //   } else {
+  //     await axiosBaseURL.post('/user/CreateBooking', {
+  //       token: authData.token,
+  //       Amount: totalAmount,
+  //       bookingTime: Data?.time,
+  //       Date: FormatedDate,
+  //       Reminder: '30 mins',
+  //       profileImage: Data.data.profileImage,
+  //       trainerId: Data?.data._id,
+  //       trainerName: Data?.data?.fullName,
+  //       Address: Data?.data?.Address,
+  //       userName: authData?.fullName,
+  //     });
+
+  //     // navigation.navigate('Booking');
+  //     setModal(true);
+  //     showToast('Payment Succesfull', 'Booking successfull!', 'success');
+  //   }
+  // };
+
+  const initializePaymentSheet = async () => {
     if (!stripeId) return;
 
     try {
@@ -99,43 +157,63 @@ const ReviewBooking = ({route}) => {
 
       if (error) {
         console.error('Error initializing payment sheet:', error.message);
-      } else {
-        console.log('Payment sheet initialized successfully');
+        throw new Error(error.message);
       }
+
+      console.log('Payment sheet initialized successfully');
     } catch (error) {
       console.error(
         'Error during payment sheet initialization:',
         error.message
       );
+      throw new Error(error.message);
     }
   };
-  const FormatedDate = formatDate(Data?.Date);
-  const ConfirmBooking = async () => {
-    setloading(true);
-    await initializePaymentsheet();
-    setloading(false);
-    const {error} = await presentPaymentSheet();
-    if (error) {
-      showToast('Try later', error.message, 'danger');
-    } else {
-      await axiosBaseURL.post('/user/CreateBooking', {
-        token: authData.token,
-        Amount: totalAmount,
-        bookingTime: Data?.time,
-        Date: FormatedDate,
-        Reminder: '30 mins',
-        profileImage: Data.data.profileImage,
-        trainerId: Data?.data._id,
-        trainerName: Data?.data?.fullName,
-        Address: Data?.data?.Address,
-        userName: authData?.fullName,
-      });
 
-      // navigation.navigate('Booking');
-      setModal(true);
-      showToast('Payment Succesfull', 'Booking successfull!', 'success');
+  const formattedDate = formatDate(Data?.Date);
+
+  const confirmBooking = async () => {
+    setloading(true); // Set loading state to true
+
+    try {
+      await initializePaymentSheet();
+      const {error} = await presentPaymentSheet();
+
+      if (error) {
+        showToast('Try later', error.message, 'danger');
+      } else {
+        // API call to create the booking after successful payment
+        const response = await axiosBaseURL.post('/user/CreateBooking', {
+          token: authData.token,
+          Amount: totalAmount,
+          bookingTime: Data?.time,
+          Date: formattedDate,
+          Reminder: '30 mins',
+          profileImage: Data.data.profileImage,
+          trainerId: Data?.data._id,
+          trainerName: Data?.data?.fullName,
+          Address: Data?.data?.Address,
+          userName: authData?.fullName,
+        });
+
+        // Check response status
+        if (response.status === 200) {
+          setModal(true);
+          showToast('Payment Successful', 'Booking successful!', 'success');
+          // Uncomment to navigate
+          // navigation.navigate('Booking');
+        } else {
+          showToast('Error', 'Failed to create booking', 'danger');
+        }
+      }
+    } catch (error) {
+      console.log('Error confirming booking:', error);
+      showToast('Error', error.message, 'danger');
+    } finally {
+      setloading(false); // Ensure loading state is reset
     }
   };
+
   return (
     <WrapperContainer>
       <Header
@@ -174,7 +252,7 @@ const ReviewBooking = ({route}) => {
           </Text>
           <Text
             style={{color: 'white', fontSize: responsiveScreenFontSize(2.4)}}>
-            {FormatedDate}
+            {formattedDate}
           </Text>
           <Text style={{color: 'white', fontSize: responsiveScreenFontSize(2)}}>
             {Data?.time}
@@ -349,7 +427,7 @@ const ReviewBooking = ({route}) => {
                   }}>
                   <View
                     style={{
-                      width: '70%',
+                      // width: '100%',
                       gap: responsiveScreenHeight(1),
                       alignItems: 'center',
                     }}>
@@ -358,7 +436,8 @@ const ReviewBooking = ({route}) => {
                       style={{
                         width: responsiveScreenWidth(20),
                         height: responsiveHeight(20),
-                        borderRadius: 50,
+                        resizeMode: 'contain',
+                        borderRadius: responsiveWidth(20),
                       }}
                     />
                     <Text
@@ -462,7 +541,7 @@ const ReviewBooking = ({route}) => {
           isloading={loading}
           text="Confirm"
           onPress={() => {
-            ConfirmBooking();
+            confirmBooking();
           }}
           containerstyles={{
             marginTop: responsiveHeight(32),
