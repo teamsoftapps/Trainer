@@ -2,8 +2,6 @@ import {
   FlatList,
   Image,
   ImageBackground,
-  Platform,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -11,32 +9,32 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
 import {FontFamily, Images} from '../../utils/Images';
 import LinearGradient from 'react-native-linear-gradient';
 import {
-  responsiveFontSize,
   responsiveHeight,
-  responsiveScreenFontSize,
-  responsiveScreenWidth,
+  responsiveFontSize,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import Button from '../../Components/Button';
-import {availableTimes, TimeSlots} from '../../utils/Dummy';
 import {useDispatch, useSelector} from 'react-redux';
 import axiosBaseURL from '../../services/AxiosBaseURL';
-import useToast from '../../Hooks/Toast';
 import {followTrainer, unfollowTrainer} from '../../store/Slices/follow';
 import {
   favouriteTrainer,
   unfavouriteTrainer,
 } from '../../store/Slices/favourite';
 import {useCreateChatMutation} from '../../store/Apis/chat';
+import {RootState} from '@reduxjs/toolkit/query/react';
 const TrainerProfile = ({route}) => {
-  const {data} = route.params;
+  const {data, booking} = route.params;
   console.log('Route Data Is Found======', data);
+  // console.log('Route Bookings Is Found======', booking);
+  // const {dataa, isLoading} = useGetUsersQuery();
+  const [bookingTime, setbookingTime] = useState<string[]>([]);
   const [readmore, setreadmore] = useState(true);
   const [follow, setfollow] = useState(false);
   const [heart, setheart] = useState(false);
@@ -44,9 +42,13 @@ const TrainerProfile = ({route}) => {
   const authData = useSelector(state => state?.Auth.data);
   const dispatch = useDispatch();
   const isFollowing = useSelector((state: RootState) => state.follow[data._id]);
+  const [favouriteTrainers, setFavoriteTrainers] = useState([]);
+  const [filtered, setfiltered] = useState();
   const isFavourite = useSelector(
     (state: RootState) => state.favourite[data._id]
   );
+  const {Bookings} = useSelector(state => state?.bookings);
+  console.log('Redux Trainer Booking', Bookings);
   const [createChat] = useCreateChatMutation();
   const onFollow = async () => {
     if (authData.isType === 'user') {
@@ -58,13 +60,14 @@ const TrainerProfile = ({route}) => {
           });
           dispatch(unfollowTrainer({trainerID: data._id}));
         } else {
-          await axiosBaseURL.post('/user/followedTrainers', {
+          const res = await axiosBaseURL.post('/user/followedTrainers', {
             userId: authData._id,
             trainerID: data._id,
             name: data.fullName,
             rating: '3',
             isFollow: true,
           });
+          console.log('Follow Responsse', res);
           dispatch(followTrainer({trainerID: data._id}));
         }
       } catch (error) {
@@ -72,49 +75,85 @@ const TrainerProfile = ({route}) => {
       }
     }
   };
+  const fetchFavoriteTrainers = async () => {
+    if (authData.isType === 'user') {
+      try {
+        const res = await axiosBaseURL.get(
+          `/user/Getfavoritetrainers/${authData?._id}`
+        );
+        console.log('Favourites', res?.data?.data);
+
+        // Correct filtering logic
+        const filtered = res?.data?.data?.filter(
+          (item: {trainerID: any}) => item.trainerID === data?._id // Ensure you're comparing correctly
+        );
+
+        console.log('Filtered Trainers', filtered);
+        setfiltered(filtered); // Use the correct variable name
+        // setFavoriteTrainers(res?.data?.data); // Uncomment if needed
+      } catch (error) {
+        console.error('Error fetching favorite trainers:', error);
+      }
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchFavoriteTrainers();
+    }, [heart])
+  );
 
   const AddFavouriteTrainer = async () => {
     if (authData.isType === 'user') {
       try {
-        if (isFavourite) {
-          axiosBaseURL.delete('/user/Deletefavoritetrainers', {
+        // Ensure 'filtered' is an array before using it
+        var isFavorite =
+          filtered &&
+          filtered.some(
+            (item: {trainerID: any}) => item.trainerID === data?._id
+          );
+
+        if (isFavorite) {
+          await axiosBaseURL.delete('/user/Deletefavoritetrainers', {
             data: {
-              userId: authData._id,
-              trainerID: data._id,
+              userId: authData?._id,
+              trainerID: data?._id,
             },
           });
-          dispatch(unfavouriteTrainer({trainerID: data._id}));
+          await fetchFavoriteTrainers();
+          console.log('Deleted favorite trainer');
+          dispatch(unfavouriteTrainer({trainerID: data?._id}));
         } else {
-          axiosBaseURL.post('/user/favoritetrainers', {
-            userId: authData._id,
-            trainerID: data._id,
-            name: data.fullName,
-            rating: data.Rating,
+          await axiosBaseURL.post('/user/favoritetrainers', {
+            userId: authData?._id,
+            trainerID: data?._id,
+            name: data?.fullName,
+            rating: data?.Rating,
+            trainerProfile: data?.profileImage,
           });
-          dispatch(favouriteTrainer({trainerID: data._id}));
+          await fetchFavoriteTrainers();
+          console.log('Added favorite trainer');
+          dispatch(favouriteTrainer({trainerID: data?._id}));
         }
       } catch (error) {
-        console.log(error);
+        console.log('Error adding/removing favorite trainer:', error);
       }
     }
   };
-  const renderItem = ({item, index}) => {
+
+  const renderItem = ({item, index}: {item: string; index: number}) => {
     return (
-      <TouchableOpacity
+      <View
         style={{
           paddingVertical: 5,
           paddingHorizontal: 25,
           borderRadius: responsiveWidth(2),
           marginHorizontal: responsiveWidth(1.2),
           borderWidth: 1,
-          backgroundColor: availableTimes.includes(item)
-            ? '#9FED3A'
-            : '#BBBBBB',
-          borderColor: availableTimes.includes(item) ? '#9FED3A' : '#ccc',
+          backgroundColor: bookingTime?.includes(item) ? '#d7d7d7' : '#9FED3A',
           alignItems: 'center',
           justifyContent: 'center',
-        }}
-        disabled={true}>
+        }}>
         <Text
           style={{
             color: 'black',
@@ -129,12 +168,18 @@ const TrainerProfile = ({route}) => {
             fontSize: responsiveFontSize(1.6),
             fontFamily: FontFamily.Semi_Bold,
           }}>
-          {availableTimes.includes(item) ? 'Available' : 'Booked'}
+          {bookingTime?.includes(item) ? 'Booked' : 'Available'}
         </Text>
-      </TouchableOpacity>
+      </View>
     );
   };
 
+  useEffect(() => {
+    if (Bookings) {
+      const timeArray = Bookings?.map((item: any) => item?.bookingTime);
+      setbookingTime(timeArray);
+    }
+  }, [Bookings]);
   const onPressMessage = async () => {
     let payload = {
       userId: data._id,
@@ -154,6 +199,10 @@ const TrainerProfile = ({route}) => {
       console.log('Successfull Error', error);
     }
   };
+  // const exists = filtered?.includes(data?._id);
+  // const exists = filtered?.some(trainer => trainer._id === data?._id);
+  const isFavorite =
+    filtered && filtered.some(item => item.trainerID === data?._id);
   return (
     <WrapperContainer style={{backgroundColor: 'black'}}>
       <ScrollView>
@@ -185,14 +234,11 @@ const TrainerProfile = ({route}) => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    setheart(!heart);
                     AddFavouriteTrainer();
+                    // setheart(!heart);
                   }}>
                   <Image
-                    source={
-                      isFavourite ? Images.heart_filled : Images.fav_heart
-                    }
-                    tintColor={isFavourite ? '#9FED3A' : 'white'}
+                    source={isFavorite ? Images.heart_filled : Images.fav_heart}
                     resizeMode="contain"
                     style={{
                       width: responsiveWidth(6),
@@ -208,7 +254,7 @@ const TrainerProfile = ({route}) => {
                   gap: responsiveHeight(1),
                 }}>
                 <Image
-                  src={data.profileImage}
+                  src={data?.profileImage}
                   style={{
                     width: responsiveWidth(28),
                     borderRadius: 70,
@@ -220,7 +266,7 @@ const TrainerProfile = ({route}) => {
                 />
                 <Text
                   style={{fontSize: responsiveFontSize(3.5), color: 'white'}}>
-                  {data.fullName}
+                  {data?.fullName}
                 </Text>
 
                 <Text
@@ -265,7 +311,7 @@ const TrainerProfile = ({route}) => {
                   <View
                     style={{
                       ...styles.curve,
-                      borderRadius: responsiveScreenWidth(10),
+                      borderRadius: responsiveWidth(10),
                       backgroundColor: '#9FED3A',
                       marginBottom: responsiveHeight(1),
                     }}>
@@ -273,7 +319,7 @@ const TrainerProfile = ({route}) => {
                   </View>
                   <Text
                     style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
-                    {data.Rating ? data.Rating : '--'}
+                    {data?.Rating ? data?.Rating : '--'}
                   </Text>
                   <Text
                     style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
@@ -292,7 +338,7 @@ const TrainerProfile = ({route}) => {
                     }}
                     style={{
                       ...styles.curve,
-                      borderRadius: responsiveScreenWidth(10),
+                      borderRadius: responsiveWidth(10),
                       backgroundColor: isFollowing ? '#9FED3A' : 'white',
                       marginBottom: responsiveHeight(1),
                     }}>
@@ -319,7 +365,7 @@ const TrainerProfile = ({route}) => {
                     activeOpacity={0.8}
                     style={{
                       ...styles.curve,
-                      borderRadius: responsiveScreenWidth(10),
+                      borderRadius: responsiveWidth(10),
                       backgroundColor: '#9FED3A',
                       marginBottom: responsiveHeight(1),
                     }}>
@@ -357,7 +403,7 @@ const TrainerProfile = ({route}) => {
                         color: 'grey',
                         fontSize: responsiveFontSize(1.8),
                       }}>
-                      ${data.Hourlyrate}
+                      ${data?.Hourlyrate}
                     </Text>
                   </Text>
                 </View>
@@ -405,7 +451,7 @@ const TrainerProfile = ({route}) => {
           <Text style={styles.heading}>Description</Text>
 
           <Text numberOfLines={readmore ? 4 : 13} style={styles.whiteText}>
-            {data.Bio}
+            {data?.Bio}
           </Text>
           <Text
             onPress={() => {
@@ -500,7 +546,7 @@ const styles = StyleSheet.create({
   blacktext: {
     color: 'black',
     fontWeight: '500',
-    fontSize: responsiveScreenFontSize(1.8),
+    fontSize: responsiveFontSize(1.8),
   },
   curve: {
     width: responsiveWidth(24),

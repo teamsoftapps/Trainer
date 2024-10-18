@@ -6,7 +6,7 @@ import {
   FlatList,
   Image,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
 import {
   responsiveFontSize,
@@ -22,34 +22,47 @@ import {
   TimeSlots,
 } from '../../utils/Dummy';
 import {useNavigation} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
 
 const Schedule = ({route}) => {
-  const {Data} = route.params;
+  const {Data} = route.params || {};
   console.log('--------', Data);
   const [selected, setSelected] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
+  const [bookingTime, setbookingTime] = useState<string[]>([]);
+  const {Bookings} = useSelector(state => state?.bookings);
+  console.log('Redux Trainer Booking', Bookings);
   const navigation = useNavigation();
   const datesToMark = generateDatesToMark();
   const newMarkedDates = {};
-  const renderItem = ({item, index}) => {
-    // const date = new Date(item);
-    // const time = date?.toLocaleTimeString([], {
-    //   hour: '2-digit',
-    //   minute: '2-digit',
-    // });
 
+  useEffect(() => {
+    if (Bookings) {
+      const timeArray = Bookings?.map((item: any) => item?.bookingTime);
+      setbookingTime(timeArray);
+    }
+  }, [Bookings]);
+  const renderItem = ({item, index}: {item: string; index: number}) => {
     return (
       <TouchableOpacity
+        activeOpacity={0.8}
         style={{
-          paddingVertical: 5,
-          paddingHorizontal: 25,
-          borderRadius: responsiveWidth(2),
+          padding: responsiveHeight(1),
+          paddingHorizontal: responsiveWidth(3),
+          borderRadius: responsiveWidth(5),
           marginHorizontal: responsiveWidth(2),
           borderWidth: 1,
-          backgroundColor: availableTimes.includes(item)
+          backgroundColor: bookingTime?.includes(item)
+            ? '#000'
+            : !bookingTime?.includes(item) && selectedTime === item
             ? '#9FED3A'
-            : '#BBBBBB',
-          borderColor: availableTimes.includes(item) ? '#9FED3A' : '#ccc',
+            : '#000',
+          borderColor: bookingTime?.includes(item)
+            ? '#d7d7d7'
+            : !bookingTime?.includes(item) && selectedTime === item
+            ? '#9FED3A'
+            : '#9FED3A',
+
           alignItems: 'center',
           justifyContent: 'center',
         }}
@@ -57,29 +70,32 @@ const Schedule = ({route}) => {
           setSelectedTime(item);
           console.log('SELECTED TIME', item);
         }}
-        // disabled={true}
-      >
+        disabled={bookingTime?.includes(item) && true}>
         <Text
           style={{
-            color: 'black',
+            color: bookingTime?.includes(item)
+              ? '#d7d7d7'
+              : !bookingTime?.includes(item) && selectedTime === item
+              ? '#000'
+              : '#9FED3A',
             fontSize: responsiveFontSize(1.6),
             fontFamily: FontFamily.Extra_Bold,
           }}>
           {item}
         </Text>
-        <Text
+        {/* <Text
           style={{
             color: 'black',
             fontSize: responsiveFontSize(1.6),
             fontFamily: FontFamily.Semi_Bold,
           }}>
-          {availableTimes.includes(item) ? 'Available' : 'Booked'}
-        </Text>
+          {bookingTime?.includes(item) ? 'Booked' : 'Available'}
+        </Text> */}
       </TouchableOpacity>
     );
   };
 
-  datesToMark.forEach(date => {
+  datesToMark?.forEach(date => {
     newMarkedDates[date] = {marked: true, dotColor: '#9FED3A'};
   });
 

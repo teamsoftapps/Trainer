@@ -46,6 +46,7 @@ import {useCreateChatMutation, useGetChatsQuery} from '../../store/Apis/chat';
 import {socketService} from '../../utils/socketService';
 import {SaveLogedInUser} from '../../store/Slices/db_ID';
 import {followTrainer, unfollowTrainer} from '../../store/Slices/follow';
+import {saveBookings} from '../../store/Slices/trainerBookings';
 
 const StoriesData = [
   {
@@ -185,10 +186,7 @@ type Props = NativeStackScreenProps<MainProps, 'Bottom'>;
 const Home: React.FC<Props> = ({navigation, route}) => {
   const {data, isLoading, refetch} = useGetTrainersQuery();
   const [createChat] = useCreateChatMutation();
-  const [modal, setmodal] = useState(Number);
-  const [usersData, setusersData] = useState(TrainerProfile);
   const [trainerData, settrainerData] = useState([]);
-  const [APIUserData, setAPIUserData] = useState({});
   const [refreshing, setRefreshing] = useState(false);
   const dispatch = useDispatch();
   const token = useSelector(state => state?.Auth?.data?.token);
@@ -200,7 +198,7 @@ const Home: React.FC<Props> = ({navigation, route}) => {
           `/Common/GetProfile/${token}`
         );
         const userData = profileResponse.data.data;
-        console.log('profileResponce', userData);
+        // console.log('profileResponce', userData);
         dispatch(SaveLogedInUser(userData));
       } catch (error) {
         console.error(
@@ -223,7 +221,7 @@ const Home: React.FC<Props> = ({navigation, route}) => {
   const getPosts = async () => {
     try {
       const res = await data;
-      console.log('ALL', res.data);
+      // console.log('ALL', res.data);
       settrainerData(res?.data);
     } catch (error) {
       console.log('Errorr', error);
@@ -271,31 +269,23 @@ const Home: React.FC<Props> = ({navigation, route}) => {
   const onRefresh = () => {
     refetch(); // This will fetch the latest data
   };
+  const getBookingbyID = async (item: any) => {
+    // console.log('IDLE', item?._id);
+    try {
+      const response = await axiosBaseURL.get(
+        `/user/getBookingbyId/${item?._id}`
+      );
+      console.log('By ID ===========', response);
 
-  // const onFollow = async () => {
-  //   if (authData.isType === 'user') {
-  //     try {
-  //       // if () {
-  //       // axiosBaseURL.post('/user/removeFollowedTrainers', {
-  //       //   userId: authData._id,
-  //       //   trainerID: data.data.id,
-  //       // });
-  //       // dispatch(unfollowTrainer({trainerID: data.data._id}));
-  //       // } else {
-  //       axiosBaseURL.post('/user/followedTrainers', {
-  //         userId: authData._id,
-  //         trainerID: data.data._id,
-  //         name: data.data.fullName,
-  //         rating: data.data.Rating,
-  //         isFollow: true,
-  //       });
-  //       dispatch(followTrainer({trainerID: data.data._id}));
-  //       // }
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  // };
+      dispatch(saveBookings(response.data?.data));
+      navigation.navigate('TrainerProfile', {
+        data: item,
+      });
+    } catch (error) {
+      console.log('By ID ERRORRORROORO ===========', error);
+    }
+  };
+
   return (
     <WrapperContainer>
       <View
@@ -383,7 +373,7 @@ const Home: React.FC<Props> = ({navigation, route}) => {
                     <TouchableOpacity
                       activeOpacity={0.8}
                       onPress={() => {
-                        navigation.navigate('TrainerProfile', {data: item});
+                        getBookingbyID(item);
                       }}
                       style={{flex: 1, justifyContent: 'space-between'}}>
                       <TouchableOpacity

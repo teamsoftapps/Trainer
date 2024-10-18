@@ -6,6 +6,8 @@ import {
   Image,
   Pressable,
   TextInput,
+  Modal,
+  ScrollView,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
@@ -14,6 +16,7 @@ import {
   responsiveFontSize,
   responsiveHeight,
   responsiveScreenFontSize,
+  responsiveScreenHeight,
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
@@ -28,11 +31,14 @@ import {
 import useToast from '../../Hooks/Toast';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import {useSelector} from 'react-redux';
+import BookingConfirmed from './BookingConfirmed';
+import {set} from 'date-fns';
+import ButtonComp from '../../Components/ButtonComp';
 
 const ReviewBooking = ({route}) => {
   const {Data} = route.params;
   console.log('Dataaa//////////////////////////88888888888', Data);
-  const [CardDetails, setCardDetails] = useState([]);
+  const [openModal, setModal] = useState(false);
   const {showToast} = useToast();
   const [stripeId, setStripeId] = useState('');
   const [hours, setHours] = useState('1');
@@ -40,9 +46,8 @@ const ReviewBooking = ({route}) => {
   const [trainerRatePerHour, settrainerRatePerHour] = useState(
     Data?.rate.replace('$', '')
   );
+  const [loading, setloading] = useState(false);
   const authData = useSelector(state => state.Auth.data);
-  console.log('data mil gya', authData.fullName);
-  // console.log('in review booking', authData.data.token);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -106,7 +111,9 @@ const ReviewBooking = ({route}) => {
   };
   const FormatedDate = formatDate(Data?.Date);
   const ConfirmBooking = async () => {
+    setloading(true);
     await initializePaymentsheet();
+    setloading(false);
     const {error} = await presentPaymentSheet();
     if (error) {
       showToast('Try later', error.message, 'danger');
@@ -123,8 +130,10 @@ const ReviewBooking = ({route}) => {
         Address: Data?.data?.Address,
         userName: authData?.fullName,
       });
+
+      // navigation.navigate('Booking');
+      setModal(true);
       showToast('Payment Succesfull', 'Booking successfull!', 'success');
-      navigation.navigate('Booking');
     }
   };
   return (
@@ -287,9 +296,170 @@ const ReviewBooking = ({route}) => {
             {'$'}
           </Text>
         </View>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={openModal}
+          // onRequestClose={() => {
+          //   setModal(false);
+          // }}
+        >
+          <WrapperContainer>
+            <ScrollView>
+              <View
+                style={{
+                  paddingHorizontal: responsiveScreenWidth(6),
+                  alignItems: 'center',
+                  gap: responsiveScreenHeight(2),
+                  marginTop: responsiveScreenHeight(5),
+                }}>
+                <Image
+                  source={Images.success}
+                  style={{
+                    width: responsiveScreenWidth(16),
+                    height: responsiveWidth(16),
+                  }}
+                />
+                <Text
+                  style={{
+                    color: 'white',
+                    fontSize: responsiveFontSize(5),
+                    fontFamily: FontFamily.Semi_Bold,
+                  }}>
+                  Success!
+                </Text>
+                <Text
+                  style={{
+                    color: 'white',
+                    fontSize: responsiveFontSize(2),
+                    fontFamily: FontFamily.Medium,
+                    textAlign: 'center',
+                  }}>
+                  Thank you for choosing our service and trusting our trainer to
+                  help you achieve your health goals.
+                </Text>
+                <View
+                  style={{
+                    width: '100%',
+                    backgroundColor: '#9FED3A',
+                    paddingVertical: responsiveScreenHeight(3),
+                    gap: responsiveScreenHeight(3),
+                    alignItems: 'center',
+                    borderRadius: 20,
+                  }}>
+                  <View
+                    style={{
+                      width: '70%',
+                      gap: responsiveScreenHeight(1),
+                      alignItems: 'center',
+                    }}>
+                    <Image
+                      source={{uri: Data?.data?.profileImage}}
+                      style={{
+                        width: responsiveScreenWidth(20),
+                        height: responsiveHeight(20),
+                        borderRadius: 50,
+                      }}
+                    />
+                    <Text
+                      style={{
+                        fontFamily: FontFamily.Extra_Bold,
+                        fontSize: responsiveScreenFontSize(2.7),
+                        color: 'black',
+                      }}>
+                      {Data?.data?.fullName}
+                    </Text>
+                    <Text
+                      style={{
+                        color: 'black',
+                        fontSize: responsiveScreenFontSize(2),
+                      }}>
+                      {Data?.data?.Speciality?.[0]?.value || 'Not available'}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      width: '70%',
+                      gap: responsiveScreenHeight(1),
+                      alignItems: 'center',
+                    }}>
+                    <Text
+                      style={{
+                        color: 'black',
+                        fontSize: responsiveScreenFontSize(2),
+                      }}>
+                      Date & Time
+                    </Text>
+                    <Text
+                      style={{
+                        fontFamily: FontFamily.Extra_Bold,
+                        fontSize: responsiveScreenFontSize(2.4),
+                        color: 'black',
+                      }}>
+                      {Data?.Date}
+                    </Text>
+                    <Text
+                      style={{
+                        color: 'black',
+                        fontSize: responsiveScreenFontSize(2),
+                      }}>
+                      {Data?.time}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      width: '70%',
+                      gap: responsiveScreenHeight(1),
+                      alignItems: 'center',
+                    }}>
+                    <Text
+                      style={{
+                        color: 'black',
+                        fontSize: responsiveScreenFontSize(2),
+                      }}>
+                      Address
+                    </Text>
+                    <Text
+                      style={{
+                        fontFamily: FontFamily.Extra_Bold,
+                        fontSize: responsiveScreenFontSize(2.4),
+                        color: 'black',
+                      }}>
+                      {Data?.data?.Address.length > 15
+                        ? Data?.data?.Address.slice(0, 10) +
+                          '...' +
+                          Data?.data?.Address.split(',')[1].trim()
+                        : Data?.data?.Address}
+                    </Text>
+                    <Text
+                      style={{
+                        color: 'black',
+                        fontSize: responsiveScreenFontSize(2),
+                      }}>
+                      0.31 mi away
+                    </Text>
+                  </View>
+                </View>
+                <ButtonComp
+                  mainStyle={{
+                    width: '100%',
+                    marginBottom: responsiveScreenWidth(5),
+                  }}
+                  text="Check Details"
+                  onPress={() => {
+                    setModal(false);
+                    navigation.navigate('BookingDetails', {data: Data});
+                  }}
+                />
+              </View>
+            </ScrollView>
+          </WrapperContainer>
+        </Modal>
       </View>
       <View style={{alignItems: 'center'}}>
         <Button
+          isloading={loading}
           text="Confirm"
           onPress={() => {
             ConfirmBooking();

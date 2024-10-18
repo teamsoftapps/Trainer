@@ -27,22 +27,24 @@ import {useCreateChatMutation} from '../../store/Apis/chat';
 const BookingDetails = ({route}) => {
   const navigation = useNavigation();
   const [createChat] = useCreateChatMutation();
-  const {data} = route.params;
+  const {data} = route.params || {};
+
+  console.log('ROUTEEEEEEEE', data?.Dob);
   console.log('ROUTEEEEEEEE', data);
 
   const onPressMessage = async (item: object) => {
     let payload = {
-      userId: data?.UserID,
-      type: data?.isType,
+      userId: data?.data?._id,
+      type: data?.data?.isType,
     };
     try {
       const res = await createChat(payload);
 
       if (res?.data.data) {
         navigation.navigate('Messages', {
-          name: data?.trainerName,
-          profile: data?.profileImage,
-          id: res?.data.data._id,
+          name: data?.data?.fullName,
+          profile: data?.data?.profileImage,
+          id: res?.data?.data?._id,
         });
       }
     } catch (error) {
@@ -54,9 +56,10 @@ const BookingDetails = ({route}) => {
     <WrapperContainer>
       <Header
         onPress={() => {
-          navigation.goBack();
+          navigation.replace('Bottom');
         }}
       />
+
       <View
         style={{
           borderBlockColor: 'grey',
@@ -73,7 +76,7 @@ const BookingDetails = ({route}) => {
           }}>
           <View style={{flexDirection: 'row', gap: responsiveWidth(4)}}>
             <Image
-              source={{uri: data.profileImage}}
+              source={{uri: data?.data?.profileImage}}
               style={{
                 width: responsiveScreenWidth(20),
                 height: responsiveScreenWidth(20),
@@ -89,11 +92,11 @@ const BookingDetails = ({route}) => {
                   color: 'white',
                   maxWidth: responsiveWidth(34),
                 }}>
-                {data.trainerName.length > 8
-                  ? data.trainerName.slice(0, 8) + '...'
-                  : data.trainerName}
+                {data?.data?.fullName.length > 8
+                  ? data?.data?.fullName.slice(0, 8) + '...'
+                  : data?.data?.fullName}
               </Text>
-              <View
+              {/* <View
                 style={{
                   ...styles.curve,
                   borderRadius: responsiveScreenWidth(10),
@@ -106,8 +109,8 @@ const BookingDetails = ({route}) => {
                       ? '#FF2D55'
                       : 'none',
                 }}>
-                <Text style={styles.blacktext}>{data.status}</Text>
-              </View>
+                <Text style={styles.blacktext}>{data?.status}</Text>
+              </View> */}
             </View>
           </View>
           <View
@@ -152,21 +155,13 @@ const BookingDetails = ({route}) => {
           </Text>
           <Text
             style={{color: 'white', fontSize: responsiveScreenFontSize(2.6)}}>
-            {data.Date}
+            {data?.Date}
           </Text>
           <Text
             style={{color: 'white', fontSize: responsiveScreenFontSize(2.3)}}>
-            {data.Time}
+            {data?.time}
           </Text>
         </View>
-        {/* <View>
-          <TouchableOpacity>
-            <Image
-              source={Images.edit}
-              style={{width: responsiveWidth(5), height: responsiveWidth(5)}}
-            />
-          </TouchableOpacity>
-        </View> */}
       </View>
       <View
         style={{
@@ -184,14 +179,14 @@ const BookingDetails = ({route}) => {
           <Text
             numberOfLines={3}
             style={{color: 'white', fontSize: responsiveScreenFontSize(2.6)}}>
-            {data?.Address || 'Not Available'}
+            {data?.data?.Address || 'Not Available'}
           </Text>
           <Text
             style={{color: 'white', fontSize: responsiveScreenFontSize(2.3)}}>
             0.31 mi away
           </Text>
         </View>
-        <View>{/* //Add map here */}</View>
+        {/* <View>Add map here</View> */}
       </View>
       <View
         style={{
@@ -208,7 +203,7 @@ const BookingDetails = ({route}) => {
           </Text>
           <Text
             style={{color: 'white', fontSize: responsiveScreenFontSize(2.6)}}>
-            Total price ${data?.Amount}
+            Total price ${data?.data?.Amount}
           </Text>
           <Text
             style={{color: 'white', fontSize: responsiveScreenFontSize(2.3)}}>
@@ -235,7 +230,7 @@ const BookingDetails = ({route}) => {
               color: 'white',
               fontSize: responsiveScreenFontSize(2.6),
             }}>
-            {data.Reminder} before
+            {data?.data?.Reminder} before
           </Text>
           <Text
             style={{color: 'white', fontSize: responsiveScreenFontSize(2.3)}}>

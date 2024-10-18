@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   Pressable,
@@ -20,39 +21,7 @@ import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import {useCreateChatMutation} from '../../store/Apis/chat';
-
-const upcoming = [
-  {
-    id: 1,
-    name: 'Alex Morgan',
-    date: 'Monday, Oct, 23',
-    time: '8:00 AM',
-    timeage: '30 mins before',
-    status: 'Pending',
-    image: Images.trainer2,
-    address: '4th Street, Blinken Ave, San Francisco, California',
-  },
-  {
-    id: 2,
-    name: 'Barbra Michelle',
-    date: 'Monday, Oct, 2',
-    time: '10:00 AM',
-    timeage: '15 mins before',
-    status: 'Confirmed',
-    image: Images.trainer,
-    address: '4th Street, Blinken Ave, San Francisco, California',
-  },
-  {
-    id: 3,
-    name: 'Mathues Pablo',
-    date: 'Sunday, Oct, 21',
-    time: '12:00 PM',
-    timeage: 'None',
-    status: 'Cancelled',
-    image: Images.trainer3,
-    address: '4th Street, Blinken Ave, San Francisco, California',
-  },
-];
+import {set} from 'date-fns';
 
 const Upcoming = () => {
   const navigation = useNavigation();
@@ -60,6 +29,7 @@ const Upcoming = () => {
   const [deleteIndex, setDeleteIndex] = useState(null);
   const [isDelete, setDelete] = useState(false);
   const AuthData = useSelector(state => state.Auth.data);
+  const [loading, setloading] = useState(false);
   const [createChat] = useCreateChatMutation();
   useFocusEffect(
     useCallback(() => {
@@ -69,14 +39,19 @@ const Upcoming = () => {
   );
 
   const getBookings = async () => {
+    setloading(true);
     try {
       const response = await axiosBaseURL.get('/user/GetBookings', {
         params: {token: AuthData.token},
       });
       console.log('in get bookings function:', response.data.data);
+      setloading(false);
       setBookings(response.data.data);
       console.log('bookings:::::', bookings);
-    } catch (error) {}
+    } catch (error: any) {
+      console.log('bookingsERROR:', error?.message);
+      setloading(false);
+    }
   };
 
   const deleteBookings = async bookingId => {
@@ -126,6 +101,19 @@ const Upcoming = () => {
       </View>
     );
   };
+  if (bookings.length === 0 && loading) {
+    return (
+      <WrapperContainer
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#181818',
+        }}>
+        <ActivityIndicator size="large" color="#fff" />
+      </WrapperContainer>
+    );
+  }
   return (
     <WrapperContainer style={{backgroundColor: '#181818'}}>
       <FlatList
@@ -137,12 +125,13 @@ const Upcoming = () => {
             <View style={styles.border}>
               <View style={styles.container}>
                 <TouchableOpacity
+                  activeOpacity={0.8}
                   delayLongPress={500}
                   onLongPress={() => {
                     setDeleteIndex(index);
                   }}
                   onPress={() => {
-                    navigation.navigate('BookingDetails', {data: item});
+                    setDeleteIndex(null);
                   }}
                   style={styles.left}>
                   <Image

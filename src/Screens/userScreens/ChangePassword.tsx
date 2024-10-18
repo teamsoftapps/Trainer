@@ -23,6 +23,7 @@ import {useNavigation} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import useToast from '../../Hooks/Toast';
+import {set} from 'date-fns';
 
 const ChangePassword = ({route}) => {
   const [oldPassword, setOldPassword] = useState('');
@@ -30,12 +31,14 @@ const ChangePassword = ({route}) => {
   const [confirmNewpassword, setConfirmNewpassword] = useState('');
   const [secure, setsecure] = useState(false);
   const [secure2, setsecure2] = useState(false);
+  const [loading, setloading] = useState(false);
   const [passworddisabled, setpassworddisable] = useState(false);
   const authData = useSelector(state => state.Auth.data);
   const {showToast} = useToast();
   const navigation = useNavigation();
 
   const ChangePassword = async () => {
+    setloading(true);
     try {
       const responce = await axiosBaseURL.post('/user/changePassword', {
         id: authData._id,
@@ -44,6 +47,7 @@ const ChangePassword = ({route}) => {
         confirmNewPassword: confirmNewpassword,
       });
       if (responce.data) {
+        setloading(false);
         showToast('Success', responce.data.message, 'success');
       }
     } catch (error) {
@@ -52,6 +56,7 @@ const ChangePassword = ({route}) => {
           ? error.response.data.message
           : 'Something went wrong. Please try again.';
       showToast('Error', errorMessage, 'danger');
+      setloading(false);
     }
   };
 
@@ -222,6 +227,7 @@ const ChangePassword = ({route}) => {
                 marginBottom: responsiveWidth(5),
               }}>
               <Button
+                isloading={loading}
                 text="Send"
                 onPress={() => {
                   ChangePassword();

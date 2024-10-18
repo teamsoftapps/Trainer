@@ -24,24 +24,6 @@ const BottomStack = () => {
           backgroundColor: '#000000',
         },
       }}>
-      {/* {type === 'trainer' ? (
-        <Bottom.Screen
-          options={{
-            tabBarIcon: ({focused}) => (
-              <Image
-                source={focused ? Images.home_filled : Images.home}
-                resizeMode="contain"
-                style={{
-                  height: responsiveScreenHeight(3),
-                  width: responsiveScreenHeight(3),
-                }}
-              />
-            ),
-          }}
-          name={'TrainerHome'}
-          component={TrainerHome}
-        />
-      ) : ( */}
       <Bottom.Screen
         options={{
           tabBarIcon: ({focused}) => (

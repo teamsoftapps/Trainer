@@ -13,10 +13,10 @@ import {FontFamily, Images} from '../../utils/Images';
 import ButtonComp from '../../Components/ButtonComp';
 import {useNavigation} from '@react-navigation/native';
 
-const BookingConfirmed = ({route}) => {
-  const {Data} = route.params;
+const BookingConfirmed = ({route, closeModal = () => {}}) => {
+  console.log('Boookinnnggg', route);
   const navigation = useNavigation();
-  console.log(Data);
+
   return (
     <WrapperContainer>
       <ScrollView>
@@ -68,7 +68,7 @@ const BookingConfirmed = ({route}) => {
                 alignItems: 'center',
               }}>
               <Image
-                source={Images.trainer4}
+                source={{uri: route?.data?.profileImage}}
                 style={{
                   width: responsiveScreenWidth(20),
                   height: useResponsiveScreenWidth(20),
@@ -81,11 +81,11 @@ const BookingConfirmed = ({route}) => {
                   fontSize: responsiveScreenFontSize(2.7),
                   color: 'black',
                 }}>
-                Alex Morgan
+                {route?.data?.fullName}
               </Text>
               <Text
                 style={{color: 'black', fontSize: responsiveScreenFontSize(2)}}>
-                Alex Morgan
+                {route?.data?.Speciality?.[0]?.value || 'Not available'}
               </Text>
             </View>
 
@@ -105,11 +105,11 @@ const BookingConfirmed = ({route}) => {
                   fontSize: responsiveScreenFontSize(2.4),
                   color: 'black',
                 }}>
-                Monday, October 24
+                {route?.Date}
               </Text>
               <Text
                 style={{color: 'black', fontSize: responsiveScreenFontSize(2)}}>
-                10:00 AM
+                {route?.time}
               </Text>
             </View>
             <View
@@ -128,7 +128,11 @@ const BookingConfirmed = ({route}) => {
                   fontSize: responsiveScreenFontSize(2.4),
                   color: 'black',
                 }}>
-                San Francisco, California
+                {route?.data?.Address.length > 15
+                  ? route?.data?.Address.slice(0, 10) +
+                    '...' +
+                    route?.data?.Address.split(',')[1].trim()
+                  : route?.data?.Address}
               </Text>
               <Text
                 style={{color: 'black', fontSize: responsiveScreenFontSize(2)}}>
@@ -140,7 +144,8 @@ const BookingConfirmed = ({route}) => {
             mainStyle={{width: '100%', marginBottom: responsiveScreenWidth(5)}}
             text="Check Details"
             onPress={() => {
-              navigation.navigate('Home');
+              closeModal();
+              // navigation.navigate('BookingDetails', {data: route});
             }}
           />
         </View>

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Linking,
 } from 'react-native';
 import React from 'react';
 import WrapperContainer from '../../Components/Wrapper';
@@ -124,6 +125,12 @@ const Settings = () => {
             <Image source={Images.rightarrow} resizeMode="contain" />
           </TouchableOpacity>
           <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              Linking.openURL(
+                'https://www.termsfeed.com/live/f2f3da63-7737-4d15-b065-d877869ba22d'
+              );
+            }}
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
@@ -141,7 +148,7 @@ const Settings = () => {
                 }}
               />
               <Text style={{color: 'white', fontSize: responsiveFontSize(2.4)}}>
-                Privacy Settings
+                Privacy Policy
               </Text>
             </View>
             <Image source={Images.rightarrow} resizeMode="contain" />

@@ -23,6 +23,7 @@ import {useNavigation} from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
 import {useGetTrainersQuery} from '../../store/Apis/Post';
 import axios from 'axios';
+import {MAP_API_KEY} from '../../config/urls';
 
 const trainers = [
   {
@@ -80,7 +81,7 @@ const SearchTrainer = () => {
         const response = await axios.get(
           `https://maps.googleapis.com/maps/api/geocode/json?address=${trainer.Address}&key=${MAP_API_KEY}`
         );
-
+        console.log('Location Data', response);
         if (response.data.results.length > 0) {
           const location = response.data.results[0].geometry.location;
 
@@ -88,10 +89,10 @@ const SearchTrainer = () => {
           setCoordinates(prevState => [
             ...prevState,
             {
-              id: trainer?.id,
+              id: trainer?._id,
               lat: location.lat,
               lng: location.lng,
-              img: trainer?.img, // Including image or other data
+              profileImage: trainer?.profileImage, // Including image or other data
             },
           ]);
         } else {
@@ -106,7 +107,11 @@ const SearchTrainer = () => {
   // useEffect to run the fetchCoordinates for each trainer in the data
   useEffect(() => {
     if (trainerData?.length) {
-      trainerData.forEach(trainer => fetchCoordinates(trainer));
+      trainerData.forEach(
+        trainer => (
+          fetchCoordinates(trainer), console.log('Trainer For Each', trainer)
+        )
+      );
     }
   }, [trainerData]);
   useEffect(() => {
@@ -191,14 +196,21 @@ const SearchTrainer = () => {
             latitudeDelta: 0.01,
             longitudeDelta: 0.01,
           }}>
-          {coordinates.map((trainer, index) => (
+          {coordinates.map((trainer: any, index) => (
             <Marker
-              key={trainer.id}
-              coordinate={{latitude: trainer.lat, longitude: trainer.lng}}
-              onPress={() => console.log('Marker pressed', trainer.id)}>
+              key={trainer?._id}
+              coordinate={{latitude: trainer?.lat, longitude: trainer?.lng}}
+              onPress={() => console.log('Marker pressed', trainer?._id)}>
               <Image
-                source={trainer.img}
-                style={{width: 40, height: 40, borderRadius: 20}}
+                source={{uri: trainer?.profileImage}}
+                style={{
+                  width: responsiveWidth(18),
+                  height: responsiveWidth(18),
+                  borderWidth: responsiveHeight(0.8),
+                  borderColor: '#fff',
+                  borderRadius: responsiveWidth(2),
+                  overflow: 'hidden',
+                }}
               />
             </Marker>
           ))}
@@ -219,6 +231,7 @@ const SearchTrainer = () => {
               style={{
                 fontSize: responsiveFontSize(2),
                 paddingHorizontal: responsiveWidth(2),
+                color: 'gray',
               }}>
               Search for trainers
             </Text>
@@ -296,11 +309,11 @@ const SearchTrainer = () => {
                             ? `${item.fullName.slice(0, 8)}...`
                             : item.fullName}
                         </Text>
-                        <Text style={styles.desc}>
+                        {/* <Text style={styles.desc}>
                           {item?.Speciality?.[0]?.value.length > 8
                             ? `${item?.Speciality?.[0]?.value.slice(0, 10)}...`
                             : item?.Speciality?.[0]?.value || 'Not available'}
-                        </Text>
+                        </Text> */}
                       </View>
 
                       <View>

@@ -85,9 +85,9 @@ const Favourites = () => {
       const res = await axiosBaseURL.delete('/user/Deletefavoritetrainers', {
         data: {userId, trainerID},
       });
-      await setIsLoading(false);
+      setIsLoading(false);
       dispatch(unfavouriteTrainer({trainerID: trainerID}));
-      await setFavoriteTrainers(prevTrainers =>
+      setFavoriteTrainers(prevTrainers =>
         prevTrainers.filter(trainer => trainer._id !== trainerID)
       );
       setIsLong(false);
@@ -209,7 +209,7 @@ const Favourites = () => {
                 )}
                 <View>
                   <Image
-                    source={require('../../assets/Images/3.png')}
+                    source={{uri: item?.trainerProfile}}
                     style={{
                       width: responsiveWidth(20),
                       borderRadius: 80,

@@ -42,6 +42,7 @@ const Profile = () => {
   const [stripeId, setStripeId] = useState(null);
   const [StripeCardDetails, setStripeCardDetails] = useState([]);
   const [StripeCardData, setStripeCardData] = useState('');
+  const [favouriteTrainers, setFavoriteTrainers] = useState([]);
   const authData = useSelector(state => state.Auth.data);
   console.log('auth data in home:', authData);
   const [imageUri, setImageUri] = useState(null);
@@ -192,7 +193,23 @@ const Profile = () => {
     }
   };
 
-  const limitedUserImages = UserImages.slice(0, 3);
+  useFocusEffect(
+    useCallback(() => {
+      fetchFavoriteTrainers();
+    }, [])
+  );
+  const fetchFavoriteTrainers = async () => {
+    if (authData.isType === 'user') {
+      try {
+        const res = await axiosBaseURL.get(
+          `/user/Getfavoritetrainers/${authData._id}`
+        );
+        setFavoriteTrainers(res.data.data);
+      } catch (error) {}
+    }
+  };
+
+  const limitedUserImages = favouriteTrainers?.slice(0, 3);
   const navigation = useNavigation();
   return (
     <WrapperContainer>
@@ -287,17 +304,17 @@ const Profile = () => {
             <Text style={styles.heading}>Favourite</Text>
             <Pressable
               onPress={() => {
-                // navigation.navigate(NavigationStrings.FAVOURITES);
+                navigation.navigate('Favourites');
               }}
               style={{flexDirection: 'row', alignItems: 'center'}}>
-              <View style={{left: 25}}>
+              <View style={{left: responsiveWidth(12)}}>
                 <FlatList
                   horizontal
                   data={limitedUserImages}
                   renderItem={({item, index}) => {
                     return (
                       <Image
-                        source={item.image}
+                        source={{uri: item?.trainerProfile}}
                         style={{
                           width: responsiveWidth(11),
                           height: responsiveWidth(11),
@@ -316,15 +333,25 @@ const Profile = () => {
                   }}
                 />
               </View>
-              <TouchableOpacity>
+              {favouriteTrainers.length > 3 && (
+                // <TouchableOpacity>
                 <View style={styles.favIcons}>
                   <Text
                     style={{color: 'black', fontSize: responsiveFontSize(2)}}>
-                    +{UserImages.length - 3}
+                    +{favouriteTrainers.length - 3}
                   </Text>
                 </View>
-              </TouchableOpacity>
-              <View>
+                // </TouchableOpacity>
+              )}
+              {/* <TouchableOpacity>
+                <View style={styles.favIcons}>
+                  <Text
+                    style={{color: 'black', fontSize: responsiveFontSize(2)}}>
+                    +{favouriteTrainers.length - 3}
+                  </Text>
+                </View>
+              </TouchableOpacity> */}
+              <View style={{marginLeft: responsiveWidth(3)}}>
                 <TouchableOpacity>
                   <Image source={Images.rightarrow} />
                 </TouchableOpacity>
@@ -489,13 +516,13 @@ const styles = StyleSheet.create({
     marginVertical: responsiveHeight(1),
   },
   favIcons: {
-    width: responsiveWidth(10),
-    height: responsiveWidth(10),
+    width: responsiveWidth(11),
+    height: responsiveWidth(11),
     borderRadius: responsiveWidth(10),
     backgroundColor: '#9FED3A',
     alignItems: 'center',
     justifyContent: 'center',
-    right: 15,
+    // right: 15,
   },
   image: {
     width: responsiveWidth(10),
