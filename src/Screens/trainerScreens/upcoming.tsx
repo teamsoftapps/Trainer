@@ -68,12 +68,30 @@ const Previous = () => {
       const responce = await axiosBaseURL.get(
         `/user/getBookingbyId/${trainer_data._id}`
       );
-      await setSessions(responce.data.data);
+      setSessions(responce.data.data);
       setIsLoading(false);
       console.log('Sessions we get in upcoming: ', responce.data.data);
     } catch (error) {}
   };
+
+  const acceptSession = async (item: any) => {
+    console.log('ID', item);
+    try {
+      const responce = await axiosBaseURL.post('/common/acceptBooking', {
+        bookingId: item?._id, //booking id
+      });
+
+      console.log('Res Data', responce?.data?.data);
+      getSessions();
+    } catch (error) {
+      console.log('Errrrr', error);
+    }
+  };
+
   const upComingSessions = ({item, index}) => {
+    if (item?.paymentStatus === 'accepted') {
+      return;
+    }
     return (
       <View style={styles.border}>
         <View style={styles.container}>
@@ -157,6 +175,9 @@ const Previous = () => {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
+            onPress={() => {
+              acceptSession(item);
+            }}
             style={{
               height: responsiveHeight(4),
               justifyContent: 'center',

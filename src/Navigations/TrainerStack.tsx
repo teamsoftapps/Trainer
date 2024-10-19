@@ -102,52 +102,41 @@ const TrainerStack = () => {
       const newBookings = response.data.data;
       console.log('New Bookings:', newBookings);
 
-      // Find bookings that are new (not in the previousBookings array)
-      const addedBookings = newBookings.filter(
-        newBooking =>
-          !previousBookings.current.some(
-            prevBooking => prevBooking._id === newBooking._id
-          )
-      );
-
-      // If there are added bookings, trigger a notification
-      if (addedBookings.length > 0) {
-        for (const booking of addedBookings) {
-          if (booking.notificationSent === true) {
-            await notifee.createTriggerNotification(
-              {
-                id: booking._id,
-                title: 'New Session Request',
-                body: 'You have a new session request',
-                android: {
-                  channelId: 'default',
-                  pressAction: {
-                    id: 'default',
-                  },
+      response.data.data.forEach(async (booking: any) => {
+        if (booking?.notificationSent) {
+          await notifee.createTriggerNotification(
+            {
+              id: booking._id,
+              title: 'New Session Request',
+              body: 'You have a new session request',
+              android: {
+                channelId: 'default',
+                pressAction: {
+                  id: 'default',
                 },
               },
-              {
-                type: TriggerType.TIMESTAMP,
-                timestamp: Date.now() + 1000, // Trigger notification immediately (1-second delay)
-              }
-            );
-            try {
-              const response = await axiosBaseURL.post('/user/updateBooking', {
-                bookingId: booking._id,
-              });
-
-              if (response.data) {
-                console.log('Notification marked as read:', response.data);
-                // Update UI or state as needed, e.g., remove notification from list
-              }
-            } catch (error) {
-              console.log('Error marking notification as read:', error);
+            },
+            {
+              type: TriggerType.TIMESTAMP,
+              timestamp: Date.now() + 1000, // Trigger notification immediately (1-second delay)
             }
-          } else {
-            return;
+          );
+          try {
+            const response = await axiosBaseURL.post('/user/updateBooking', {
+              bookingId: booking._id,
+            });
+
+            if (response.data) {
+              console.log('Notification marked as read:', response.data);
+              // Update UI or state as needed, e.g., remove notification from list
+            }
+          } catch (error) {
+            console.log('Error marking notification as read:', error);
           }
+        } else {
+          return;
         }
-      }
+      });
 
       // Update previousBookings with the latest data
       previousBookings.current = newBookings;
@@ -162,7 +151,10 @@ const TrainerStack = () => {
       const unsubscribe = notifee.onForegroundEvent(({type, detail}) => {
         if (type === EventType.PRESS) {
           console.log('Notification Pressed:', detail);
-          navigation.navigate('Notification', {id: detail.notification.id});
+          navigation.navigate(
+            'Sessions'
+            // {id: detail.notification.id}
+          );
         }
       });
 
