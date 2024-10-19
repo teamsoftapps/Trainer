@@ -103,15 +103,31 @@ const Favourites = () => {
 
   return (
     <WrapperContainer>
-      <Text
+      <View
         style={{
-          fontSize: responsiveFontSize(3.5),
-          color: 'white',
-          marginLeft: responsiveWidth(6),
-          marginTop: responsiveHeight(2),
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}>
-        Favorites
-      </Text>
+        <Text
+          style={{
+            fontSize: responsiveFontSize(3.5),
+            color: 'white',
+            marginLeft: responsiveWidth(6),
+            marginTop: responsiveHeight(2),
+          }}>
+          Favorites
+        </Text>
+        <Image
+          source={Images.logo}
+          style={{
+            height: responsiveHeight(5),
+            width: responsiveWidth(10),
+            marginRight: responsiveWidth(3),
+            marginTop: responsiveHeight(2),
+          }}
+        />
+      </View>
       <View
         style={{
           flexDirection: 'row',

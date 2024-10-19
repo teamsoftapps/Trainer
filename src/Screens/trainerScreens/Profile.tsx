@@ -302,26 +302,26 @@ const Profile = () => {
     );
   };
 
-  // const calculateAge = (birthdateString: String) => {
-  //   const [month, day, year] = birthdateString.split('/');
-  //   const formattedDate = `${year}-${month}-${day}`;
-  //   const birthDate = new Date(formattedDate);
+  const calculateAge = (birthdateString: String) => {
+    const [month, day, year] = birthdateString.split('/');
+    const formattedDate = `${year}-${month}-${day}`;
+    const birthDate = new Date(formattedDate);
 
-  //   const today = new Date();
+    const today = new Date();
 
-  //   let age = today.getFullYear() - birthDate.getFullYear();
-  //   const monthDifference = today.getMonth() - birthDate.getMonth();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
 
-  //   if (
-  //     monthDifference < 0 ||
-  //     (monthDifference === 0 && today.getDate() < birthDate.getDate())
-  //   ) {
-  //     age--;
-  //   }
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
 
-  //   return age;
-  // };
-  // const age = calculateAge(trainer_data.Dob);
+    return age;
+  };
+  const age = calculateAge(trainer_data.Dob);
 
   return (
     <WrapperContainer>
@@ -595,7 +595,9 @@ const Profile = () => {
                 marginHorizontal: responsiveWidth(2),
                 textAlign: 'center',
               }}>
-              92
+              {trainer_data?.followers?.length
+                ? trainer_data?.followers?.length
+                : 0}
             </Text>
             <Text style={{color: '#9FED3A', fontSize: responsiveFontSize(1.5)}}>
               Followers
@@ -613,7 +615,7 @@ const Profile = () => {
                 marginHorizontal: responsiveWidth(2),
                 textAlign: 'center',
               }}>
-              {/* {age} */}hhh
+              {age}
             </Text>
             <Text
               style={{

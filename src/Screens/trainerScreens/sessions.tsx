@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {StyleSheet, Text, View, TouchableOpacity, Image} from 'react-native';
 import React, {useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
 import Header from '../../Components/Header';
@@ -12,6 +12,7 @@ import {useNavigation} from '@react-navigation/native';
 import Upcoming from './upcoming';
 import Previous from './previous';
 import TrainerHeader from '../../Components/TrainerHeader';
+import {Images} from '../../utils/Images';
 
 const Tab = createMaterialTopTabNavigator();
 const Sessions = () => {
@@ -29,6 +30,12 @@ const Sessions = () => {
         onPress={() => {
           navigation.goBack();
         }}
+        rightView={
+          <Image
+            source={Images.logo}
+            style={{height: responsiveHeight(5), width: responsiveWidth(10)}}
+          />
+        }
       />
       <Tab.Navigator
         tabBar={({navigation, state}) => (

@@ -31,6 +31,7 @@ import {TouchableWithoutFeedback} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import moment from 'moment';
 import {updateLogin} from '../../store/Slices/AuthSlice';
+import {format} from 'date-fns';
 
 const EditProfile = ({route}) => {
   //UseSelectors
@@ -48,6 +49,7 @@ const EditProfile = ({route}) => {
   const [Address, setAddress] = useState('');
   const [AddressModal, setAddressModal] = useState(false);
   const [gender, setGender] = useState('');
+  const [dob, setDob] = useState('');
 
   // Formik States
   const [specialityformik, setspecialityformik] = useState(false);
@@ -65,16 +67,21 @@ const EditProfile = ({route}) => {
   const [selectedTimes, setSelectedTimes] = useState([]);
   const [date, setDate] = useState(new Date());
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [selectedSpecialities, setSelectedSpecialities] = useState([
-    // logedInTrainer.Speciality,
-  ]);
+  const [selectedSpecialities, setSelectedSpecialities] = useState([]);
   const [formData, setFormData] = useState(logedInTrainer);
 
   const Spec = useSelector(state => state?.Auth?.data?.Availiblity);
+
   const condition1 = Hourly !== '0' && Hourly !== '';
   const condition2 = selectedTimes.length !== 0;
   const condition3 = Bio != '';
   const condition4 = selectedSpecialities.length !== 0;
+  const condition5 = firstname !== '';
+  const condition6 = Email !== '';
+  const condition7 = gender !== '';
+  const condition8 = dob !== '';
+  const condition9 = Address !== '';
+
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const concat = () => {
@@ -120,13 +127,15 @@ const EditProfile = ({route}) => {
     );
   };
 
-  const onDateChange = selectedValue => {
-    if (selectedValue instanceof Date && !isNaN(selectedValue)) {
-      setDate(selectedValue);
+  const onDateChange = (event, selectedValue) => {
+    if (event.type === 'set') {
+      const currentDate = selectedValue || date;
+      const formattedDate = format(currentDate, 'dd/MM/yyyy');
+      setDob(formattedDate);
+      console.log(formattedDate);
     }
     setModalVisible2(false);
   };
-
   const toggleModalTimes = () => {
     setModalVisible(true);
   };
@@ -142,7 +151,7 @@ const EditProfile = ({route}) => {
         fullName: firstname,
         Bio: Bio,
         gender: gender,
-        Dob: date,
+        Dob: dob,
         Availiblity: selectedTimes,
         Hourlyrate: Hourly,
         Speciality: selectedSpecialities,
@@ -153,7 +162,7 @@ const EditProfile = ({route}) => {
           fullName: firstname,
           Bio: Bio,
           gender: gender,
-          Dob: date,
+          Dob: dob,
           Speciality: [...logedInTrainer?.Speciality, ...selectedSpecialities],
           Hourlyrate: Hourly,
           Availiblity: [...logedInTrainer?.Availiblity, ...selectedTimes],
@@ -182,21 +191,23 @@ const EditProfile = ({route}) => {
           onPress={() => {
             navigation.goBack();
           }}
+          rightView={
+            <Image
+              source={Images.logo}
+              style={{height: responsiveHeight(5), width: responsiveWidth(10)}}
+            />
+          }
         />
         <View style={styles.Main}>
           <Text style={styles.subHeading}>Edit Profile</Text>
           <View style={styles.FirstNameContainer}>
             <View style={styles.FirstNameH}>
-              <Text style={{color: '#908C8D'}}>First Name</Text>
+              <Text style={{color: '#908C8D'}}>Full Name</Text>
               <TextInput
                 editable={true}
                 value={firstname}
-                onChangeText={text => setfirstname(text)}
-                // placeholder={
-                //   logedInTrainer.fullName
-                //     ? logedInTrainer.fullName
-                //     : ' Enter your first name'
-                // }
+                onChangeText={setfirstname}
+                placeholder={' Enter your full name'}
                 style={styles.FirstNameInput}
                 numberOfLines={1}
                 placeholderTextColor={'white'}
@@ -205,11 +216,7 @@ const EditProfile = ({route}) => {
             <View style={styles.EmailContainer}>
               <Text style={{color: '#908C8D'}}>Email</Text>
               <TextInput
-                // placeholder={
-                //   logedInTrainer.email
-                //     ? logedInTrainer.email
-                //     : 'Enter your e-mail'
-                // }
+                placeholder={'Enter your e-mail'}
                 value={Email}
                 onChangeText={setEmail}
                 style={styles.EmailInput}
@@ -235,11 +242,9 @@ const EditProfile = ({route}) => {
                 ]}>
                 <TextInput
                   editable={true}
-                  // placeholder={
-                  //   logedInTrainer.Bio
-                  //     ? logedInTrainer.Bio
-                  //     : 'A brief introduction about yourself and your training philosophy'
-                  // }
+                  placeholder={
+                    'A brief introduction about yourself and your training philosophy'
+                  }
                   onChangeText={text => setBio(text)}
                   value={Bio}
                   style={[
@@ -254,9 +259,7 @@ const EditProfile = ({route}) => {
             <View style={styles.EmailContainer}>
               <Text style={{color: '#908C8D'}}>Gender</Text>
               <TextInput
-                // placeholder={
-                //   logedInTrainer.gender ? logedInTrainer.gender : 'Enter gender'
-                // }
+                placeholder={'Enter gender'}
                 value={gender}
                 onChangeText={text => {
                   setGender(text);
@@ -270,14 +273,15 @@ const EditProfile = ({route}) => {
               <Text style={{color: '#908C8D'}}>Date of birth</Text>
               <View
                 style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <TextInput
-                  // placeholder={
-                  //   logedInTrainer.Dob ? logedInTrainer.Dob : 'Enter DOB'
-                  // }
+                {/* <TextInput
+                  value={date}
+                  placeholder={'Enter DOB'}
                   style={styles.EmailInput}
                   numberOfLines={1}
                   placeholderTextColor={'white'}
-                />
+                /> */}
+                <Text style={{color: '#fff'}}>{dob ? dob : 'Enter dob'}</Text>
+
                 <TouchableOpacity onPress={toggleModalDob}>
                   <Image source={Images.calendar} />
                 </TouchableOpacity>
@@ -423,9 +427,7 @@ const EditProfile = ({route}) => {
                 </Text>
                 <TextInput
                   editable={true}
-                  // placeholder={
-                  //   logedInTrainer.Hourlyrate ? logedInTrainer.Hourlyrate : '00'
-                  // }
+                  placeholder={'00'}
                   value={Hourly}
                   onChangeText={text => {
                     setHourly(text);
@@ -530,7 +532,7 @@ const EditProfile = ({route}) => {
                 setAddress(text);
               }}
               value={Address}
-              // placeholder="Enter your address"
+              placeholder="Enter your address"
               style={{
                 color: '#fff',
                 width: responsiveWidth(70),

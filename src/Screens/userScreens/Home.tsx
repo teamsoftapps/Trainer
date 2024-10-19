@@ -13,7 +13,7 @@ import {
   Alert,
   RefreshControl,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   responsiveHeight,
   responsiveWidth,
@@ -32,7 +32,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import {useDispatch, useSelector} from 'react-redux';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import InstaStory from 'react-native-insta-story';
 import {store} from '../../store/store';
 import {useGetTrainersQuery} from '../../store/Apis/Post';
@@ -189,7 +189,12 @@ const Home: React.FC<Props> = ({navigation, route}) => {
   const [trainerData, settrainerData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const dispatch = useDispatch();
+  const authData = useSelector(state => state?.Auth?.data);
+  const checkFollowed = useSelector(state => state?.dbId?.dbId);
+  console.log('check Followedddddd', checkFollowed);
+  console.log('authData in home:', authData);
   const token = useSelector(state => state?.Auth?.data?.token);
+
   useEffect(() => {
     console.log('data', data);
     const fetchData = async () => {
@@ -209,6 +214,12 @@ const Home: React.FC<Props> = ({navigation, route}) => {
     };
     fetchData();
   }, [token]);
+
+  useFocusEffect(
+    useCallback(() => {
+      onRefresh();
+    }, [data])
+  );
 
   useEffect(() => {
     getPosts();
@@ -286,6 +297,34 @@ const Home: React.FC<Props> = ({navigation, route}) => {
     }
   };
 
+  const onFollow = async item => {
+    const isFollowing = checkFollowed?.followedTrainers?.includes(item?._id);
+    console.log('isFollowing', isFollowing);
+
+    try {
+      if (!isFollowing) {
+        await axiosBaseURL.post('/common/Follow', {
+          userID: authData._id,
+          trainerID: item?._id,
+        });
+        dispatch(followTrainer([...checkFollowed.followedTrainers, item._id]));
+      } else {
+        await axiosBaseURL.post('/common/unFollow', {
+          userID: authData._id,
+          trainerID: item?._id,
+        });
+        dispatch(
+          unfollowTrainer(
+            checkFollowed.followedTrainers.filter(id => id !== item._id)
+          )
+        );
+      }
+    } catch (error) {
+      console.log('Error:', error);
+      Alert.alert(`${error?.response?.data?.message || 'An error occurred'}`);
+    }
+  };
+
   return (
     <WrapperContainer>
       <View
@@ -356,15 +395,13 @@ const Home: React.FC<Props> = ({navigation, route}) => {
 
           <View style={{flex: 1}}>
             <FlashList
-              // onRefresh={getPosts}
-
-              // id=""
               estimatedItemSize={200}
               scrollEnabled={false}
               ListEmptyComponent={listemptyComp}
               data={trainerData}
               renderItem={({item, index}) => {
                 console.log('TRAINER DATA', trainerData[index]);
+                // console.log('00000000000000000', item);
                 return (
                   <ImageBackground
                     imageStyle={{borderRadius: responsiveWidth(1.5)}}
@@ -377,13 +414,15 @@ const Home: React.FC<Props> = ({navigation, route}) => {
                       }}
                       style={{flex: 1, justifyContent: 'space-between'}}>
                       <TouchableOpacity
-                        // onPress={() => {
-                        //   onFollow();
-                        //   // console.log('itemmm', item._id);
-                        // }}
-                        activeOpacity={0.9}
+                        onPress={() => {
+                          onFollow(item);
+                        }}
+                        // activeOpacity={0.9}
                         style={{
-                          backgroundColor: '#9fed3a',
+                          backgroundColor:
+                            checkFollowed.followedTrainers.includes(item._id)
+                              ? 'white'
+                              : '#9FED3A',
                           padding: responsiveWidth(1),
                           borderRadius: responsiveHeight(5),
                           alignItems: 'center',
@@ -399,15 +438,21 @@ const Home: React.FC<Props> = ({navigation, route}) => {
                             fontFamily: FontFamily.Medium,
                             fontSize: responsiveFontSize(2),
                           }}>
-                          Follow
+                          {checkFollowed.followedTrainers.includes(item._id)
+                            ? 'Following'
+                            : 'Follow'}
                         </Text>
-                        <Image
-                          style={{
-                            width: responsiveHeight(2.3),
-                            height: responsiveHeight(2.3),
-                          }}
-                          source={Images.plus}
-                        />
+                        {checkFollowed.followedTrainers.includes(
+                          item._id
+                        ) ? null : (
+                          <Image
+                            style={{
+                              width: responsiveHeight(2.3),
+                              height: responsiveHeight(2.3),
+                            }}
+                            source={Images.plus}
+                          />
+                        )}
                       </TouchableOpacity>
                       <LinearGradient
                         colors={['transparent', '#000', '#000']}

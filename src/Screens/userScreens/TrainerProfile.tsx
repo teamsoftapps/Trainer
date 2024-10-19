@@ -1,4 +1,5 @@
 import {
+  Alert,
   FlatList,
   Image,
   ImageBackground,
@@ -20,6 +21,7 @@ import {
 } from 'react-native-responsive-dimensions';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import Button from '../../Components/Button';
+import {availableTimes} from '../../utils/Dummy';
 import {useDispatch, useSelector} from 'react-redux';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import {followTrainer, unfollowTrainer} from '../../store/Slices/follow';
@@ -28,7 +30,7 @@ import {
   unfavouriteTrainer,
 } from '../../store/Slices/favourite';
 import {useCreateChatMutation} from '../../store/Apis/chat';
-import {RootState} from '@reduxjs/toolkit/query/react';
+import {SaveLogedInUser} from '../../store/Slices/db_ID';
 const TrainerProfile = ({route}) => {
   const {data, booking} = route.params;
   console.log('Route Data Is Found======', data);
@@ -40,6 +42,10 @@ const TrainerProfile = ({route}) => {
   const [heart, setheart] = useState(false);
   const navigation = useNavigation();
   const authData = useSelector(state => state?.Auth.data);
+  const checkFollowed = useSelector(state => state?.dbId?.dbId);
+  const token = useSelector(state => state?.Auth?.data?.token);
+
+  console.log('auth data in trainer profile:', authData);
   const dispatch = useDispatch();
   const isFollowing = useSelector((state: RootState) => state.follow[data._id]);
   const [favouriteTrainers, setFavoriteTrainers] = useState([]);
@@ -50,29 +56,74 @@ const TrainerProfile = ({route}) => {
   const {Bookings} = useSelector(state => state?.bookings);
   console.log('Redux Trainer Booking', Bookings);
   const [createChat] = useCreateChatMutation();
-  const onFollow = async () => {
-    if (authData.isType === 'user') {
-      try {
-        if (isFollowing) {
-          await axiosBaseURL.post('/user/removeFollowedTrainers', {
-            userId: authData._id,
-            trainerID: data._id,
-          });
-          dispatch(unfollowTrainer({trainerID: data._id}));
-        } else {
-          const res = await axiosBaseURL.post('/user/followedTrainers', {
-            userId: authData._id,
-            trainerID: data._id,
-            name: data.fullName,
-            rating: '3',
-            isFollow: true,
-          });
-          console.log('Follow Responsse', res);
-          dispatch(followTrainer({trainerID: data._id}));
+
+  const calculateAge = (birthdateString: String) => {
+    const [month, day, year] = birthdateString.split('/');
+    const formattedDate = `${year}-${month}-${day}`;
+    const birthDate = new Date(formattedDate);
+
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+  const age = calculateAge(data.Dob);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const profileResponse = await axiosBaseURL.get(
+            `/Common/GetProfile/${token}`
+          );
+          const userData = profileResponse.data.data;
+          console.log('profileResponce', userData);
+          dispatch(SaveLogedInUser(userData));
+        } catch (error) {
+          console.error(
+            'Error fetching data:',
+            error.response?.data?.message || error.message
+          );
         }
-      } catch (error) {
-        console.error('Error in follow/unfollow action:', error);
+      };
+      fetchData();
+    }, [token, checkFollowed])
+  );
+
+  const onFollow = async () => {
+    try {
+      const isFollowing = checkFollowed.followedTrainers.includes(data._id);
+
+      if (!isFollowing) {
+        await axiosBaseURL.post('/common/Follow', {
+          userID: authData._id,
+          trainerID: data._id,
+        });
+        dispatch(followTrainer([...checkFollowed?.followedTrainers, data._id]));
+      } else {
+        const response = await axiosBaseURL.post('/common/unFollow', {
+          userID: authData._id,
+          trainerID: data._id,
+        });
+        dispatch(
+          unfollowTrainer(
+            checkFollowed?.followedTrainers.filter(id => id !== data._id)
+          )
+        );
+        console.log('Response', response.data);
       }
+    } catch (error) {
+      console.log('error====>>>', error);
+      Alert.alert(`${error?.response?.data?.message}`);
     }
   };
   const fetchFavoriteTrainers = async () => {
@@ -199,8 +250,6 @@ const TrainerProfile = ({route}) => {
       console.log('Successfull Error', error);
     }
   };
-  // const exists = filtered?.includes(data?._id);
-  // const exists = filtered?.some(trainer => trainer._id === data?._id);
   const isFavorite =
     filtered && filtered.some(item => item.trainerID === data?._id);
   return (
@@ -339,16 +388,22 @@ const TrainerProfile = ({route}) => {
                     style={{
                       ...styles.curve,
                       borderRadius: responsiveWidth(10),
-                      backgroundColor: isFollowing ? '#9FED3A' : 'white',
+                      backgroundColor: checkFollowed.followedTrainers.includes(
+                        data._id
+                      )
+                        ? '#9FED3A'
+                        : 'white',
                       marginBottom: responsiveHeight(1),
                     }}>
                     <Text style={styles.blacktext}>
-                      {isFollowing ? 'Following' : 'Follow +'}
+                      {checkFollowed.followedTrainers.includes(data._id)
+                        ? 'Following'
+                        : 'Follow +'}
                     </Text>
                   </TouchableOpacity>
                   <Text
                     style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
-                    {data?.Followers > 0 ? data?.Followers : 0}
+                    {data?.followers?.length > 0 ? data?.followers?.length : 0}
                   </Text>
                   <Text
                     style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
@@ -373,7 +428,7 @@ const TrainerProfile = ({route}) => {
                   </TouchableOpacity>
                   <Text
                     style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
-                    {data?.Yearsold ? data?.Yearsold : '--'}
+                    {data?.Dob ? age : '--'}
                   </Text>
 
                   <Text

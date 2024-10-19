@@ -13,6 +13,7 @@ import {
   responsiveFontSize,
   responsiveHeight,
   responsiveScreenWidth,
+  responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {Images} from '../../utils/Images';
 import {useNavigation} from '@react-navigation/native';
@@ -63,6 +64,12 @@ const Notification = () => {
         onPress={() => {
           navigation.goBack();
         }}
+        rightView={
+          <Image
+            source={Images.logo}
+            style={{height: responsiveHeight(5), width: responsiveWidth(10)}}
+          />
+        }
       />
       <View
         style={{

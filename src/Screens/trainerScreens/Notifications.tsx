@@ -66,6 +66,12 @@ const Notification = () => {
         onPress={() => {
           navigation.goBack();
         }}
+        rightView={
+          <Image
+            source={Images.logo}
+            style={{height: responsiveHeight(5), width: responsiveWidth(10)}}
+          />
+        }
       />
       <View
         style={{

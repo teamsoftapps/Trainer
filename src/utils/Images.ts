@@ -95,6 +95,17 @@ export const Images = {
   downloadIcon: require('../assets/Images/downloadIcon.png'),
   galleryIcon: require('../assets/Images/galleryIcon.png'),
   cameraIcon: require('../assets/Images/camIcon.png'),
+  imageoutline: require('../assets/Images/imageoutline.png'),
+  videoIcon: require('../assets/Images/videoIcon.png'),
+  st_01: require('../assets/Images/st_01.png'),
+  st_02: require('../assets/Images/st_02.png'),
+  st_03: require('../assets/Images/st_03.png'),
+  st_04: require('../assets/Images/st_04.png'),
+  st_05: require('../assets/Images/st_05.png'),
+  st_06: require('../assets/Images/st_06.png'),
+  st_07: require('../assets/Images/st_07.png'),
+  st_08: require('../assets/Images/st_08.png'),
+  st_09: require('../assets/Images/st_09.png'),
 };
 
 export const FontFamily = {

@@ -11,6 +11,7 @@ import {
 import {LineChart} from 'react-native-chart-kit';
 import {Image} from 'react-native';
 import {ScrollView} from 'react-native';
+import {Images} from '../../utils/Images';
 const data = {
   labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
   datasets: [
@@ -143,6 +144,12 @@ const Earnings = () => {
           onPress={() => {
             navigation.goBack();
           }}
+          rightView={
+            <Image
+              source={Images.logo}
+              style={{height: responsiveHeight(5), width: responsiveWidth(10)}}
+            />
+          }
         />
         <Text
           style={{

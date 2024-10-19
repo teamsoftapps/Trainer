@@ -98,6 +98,15 @@ const ConfirmNewPassword: React.FC<Props> = ({navigation, route}) => {
         <TouchableWithoutFeedback style={{flex: 1}}>
           <KeyboardAvoidingView>
             <Header
+              rightView={
+                <Image
+                  source={Images.logo}
+                  style={{
+                    height: responsiveHeight(5),
+                    width: responsiveWidth(10),
+                  }}
+                />
+              }
               text="Create New Password"
               textstyle={{color: 'white'}}
               onPress={() => {

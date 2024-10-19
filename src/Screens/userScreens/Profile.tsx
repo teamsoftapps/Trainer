@@ -8,6 +8,7 @@ import {
   Pressable,
   ScrollView,
   Modal,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
@@ -237,49 +238,43 @@ const Profile = () => {
             animationType="slide"
             visible={isModal}
             onRequestClose={closeModal}>
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
+            <TouchableWithoutFeedback onPress={closeModal}>
+              <View style={[styles.subModalContainer, {position: 'relative'}]}>
                 <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    alignItems: 'baseline',
-                  }}>
-                  <Text style={styles.modalText}>Select Option</Text>
+                  style={{position: 'absolute', bottom: responsiveHeight(0)}}>
+                  <View style={styles.subModalContent}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        alignItems: 'baseline',
+                      }}>
+                      <Text style={styles.modalText}>Select Option</Text>
+                    </View>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-around',
+                      }}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          handleTakePhoto();
+                        }}
+                        style={styles.closeButton}>
+                        <Text style={styles.closeButtonText}>Open Camera</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          handleChoosePhoto();
+                        }}
+                        style={styles.closeButton}>
+                        <Text style={styles.closeButtonText}>Open Gallery</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
                 </View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                  }}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      handleTakePhoto();
-                    }}
-                    style={styles.closeButton}>
-                    <Text style={styles.closeButtonText}>Open Camera</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      handleChoosePhoto();
-                    }}
-                    style={styles.closeButton}>
-                    <Text style={styles.closeButtonText}>Open Gallery</Text>
-                  </TouchableOpacity>
-                </View>
-                <TouchableOpacity onPress={closeModal}>
-                  <Text
-                    style={{
-                      marginLeft: responsiveWidth(2),
-                      fontSize: responsiveFontSize(2),
-                      fontWeight: '500',
-                      color: 'red',
-                    }}>
-                    Close
-                  </Text>
-                </TouchableOpacity>
               </View>
-            </View>
+            </TouchableWithoutFeedback>
           </Modal>
           <View style={styles.right}>
             <View>
@@ -637,5 +632,18 @@ const styles = StyleSheet.create({
     color: '#9FED3A',
     fontSize: responsiveFontSize(1.7),
     fontWeight: '600',
+  },
+  subModalContainer: {
+    flex: 1,
+    // justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  subModalContent: {
+    width: responsiveWidth(100),
+    height: responsiveHeight(16),
+    padding: responsiveWidth(3),
+    backgroundColor: '#333333',
+    borderRadius: responsiveWidth(3),
   },
 });

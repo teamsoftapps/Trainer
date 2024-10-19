@@ -168,6 +168,10 @@ const SearchTrainer = () => {
             alignItems: 'center',
             gap: responsiveWidth(5),
           }}>
+          <Image
+            source={Images.logo}
+            style={{height: responsiveHeight(5), width: responsiveWidth(10)}}
+          />
           <TouchableOpacity activeOpacity={0.8}>
             <Image source={Images.notification} style={styles.notifiaction} />
           </TouchableOpacity>

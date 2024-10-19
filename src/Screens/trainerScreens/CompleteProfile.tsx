@@ -10,6 +10,7 @@ import {
   Modal,
   Alert,
   TouchableWithoutFeedback,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
@@ -70,11 +71,6 @@ const CompleteProfile = ({route}) => {
   const condition2 = selectedTimes.length !== 0;
   const condition3 = Bio != '';
   const condition4 = selectedSpecialities.length !== 0;
-
-  //Spliting fullName in to first and lst name.
-  const setFullName = logedInTrainerEmail?.fullName?.split(' ');
-  const firstName = setFullName[0];
-  const lastName = setFullName[1];
 
   console.log(
     'trainer data in complete profile: ',
@@ -190,9 +186,7 @@ const CompleteProfile = ({route}) => {
         console.log('Image Object', image);
         setModal(false);
       })
-      .catch(error => {
-        console.error('ImagePicker Error: ', error.message);
-      });
+      .catch(error => {});
   };
 
   const handleTakePhoto = async () => {
@@ -208,9 +202,7 @@ const CompleteProfile = ({route}) => {
         console.log('Image Object', image);
         setModal(false);
       })
-      .catch(error => {
-        console.error('ImagePicker Error: ', error.message);
-      });
+      .catch(error => {});
   };
 
   const uploadImage = async image => {
@@ -222,7 +214,7 @@ const CompleteProfile = ({route}) => {
         type: image.mime,
         name: `profileImage-${Date.now()}.jpg`,
       });
-      formData.append('email', logedInTrainerEmail.res_EMAIL);
+      formData.append('email', logedInTrainerEmail.email);
 
       const response = await axiosBaseURL.post(
         '/trainer/uploadProfileImage',
@@ -245,7 +237,6 @@ const CompleteProfile = ({route}) => {
         description: 'Failed to upload image.',
         type: 'danger',
       });
-      console.error('Error uploading file:', error);
     }
   };
   const Specialsity = [
@@ -297,57 +288,55 @@ const CompleteProfile = ({route}) => {
               animationType="slide"
               visible={isModal}
               onRequestClose={closeModal}>
-              <View style={styles.modalContainer}>
-                <View style={styles.modalContent}>
+              <TouchableWithoutFeedback onPress={closeModal}>
+                <View
+                  style={[styles.subModalContainer, {position: 'relative'}]}>
                   <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      alignItems: 'baseline',
-                    }}>
-                    <Text style={styles.modalText}>Select Option</Text>
+                    style={{position: 'absolute', bottom: responsiveHeight(0)}}>
+                    <View style={styles.subModalContent}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          justifyContent: 'center',
+                          alignItems: 'baseline',
+                        }}>
+                        <Text style={styles.modalText}>Select Option</Text>
+                      </View>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          justifyContent: 'space-around',
+                        }}>
+                        <TouchableOpacity
+                          onPress={() => {
+                            handleTakePhoto();
+                          }}
+                          style={styles.closeButton}>
+                          <Text style={styles.closeButtonText}>
+                            Open Camera
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => {
+                            handleChoosePhoto();
+                          }}
+                          style={styles.closeButton}>
+                          <Text style={styles.closeButtonText}>
+                            Open Gallery
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
                   </View>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                    }}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        handleTakePhoto();
-                      }}
-                      style={styles.closeButton}>
-                      <Text style={styles.closeButtonText}>Open Camera</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => {
-                        handleChoosePhoto();
-                      }}
-                      style={styles.closeButton}>
-                      <Text style={styles.closeButtonText}>Open Gallery</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <TouchableOpacity onPress={closeModal}>
-                    <Text
-                      style={{
-                        marginLeft: responsiveWidth(2),
-                        fontSize: responsiveFontSize(2),
-                        fontWeight: '500',
-                        color: 'red',
-                      }}>
-                      Close
-                    </Text>
-                  </TouchableOpacity>
                 </View>
-              </View>
+              </TouchableWithoutFeedback>
             </Modal>
           </View>
           <View style={styles.FirstNameContainer}>
             <View style={styles.FirstNameH}>
               <Text style={{color: '#908C8D'}}>First Name</Text>
               <TextInput
-                editable={false}
-                value={firstName}
+                value={firstname}
                 onChangeText={setfirstname}
                 placeholder="Enter First Name"
                 style={styles.FirstNameInput}
@@ -355,20 +344,6 @@ const CompleteProfile = ({route}) => {
                 placeholderTextColor={'white'}
               />
             </View>
-            {lastName ? (
-              <View style={styles.LastNameContainer}>
-                <Text style={{color: '#908C8D'}}>Last Name</Text>
-                <TextInput
-                  editable={false}
-                  placeholder="Enter Last Name"
-                  value={lastName}
-                  onChangeText={setsecondname}
-                  style={styles.LastNameInput}
-                  numberOfLines={1}
-                  placeholderTextColor={'white'}
-                />
-              </View>
-            ) : null}
             <View style={styles.EmailContainer}>
               <Text style={{color: '#908C8D'}}>Email</Text>
               <TextInput
@@ -777,5 +752,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  subModalContent: {
+    width: responsiveWidth(100),
+    height: responsiveHeight(16),
+    padding: responsiveWidth(3),
+    backgroundColor: '#333333',
+    borderRadius: responsiveWidth(3),
+  },
+  subModalContainer: {
+    flex: 1,
+    // justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
 });

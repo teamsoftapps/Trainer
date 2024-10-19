@@ -16,11 +16,13 @@ const TrainerHeader = ({
 }) => {
   return (
     <View style={{...styles.container, ...style}}>
-      <TouchableOpacity onPress={onPress} style={styles.button}>
-        <Image source={Images.back} style={styles.backIcon} />
-      </TouchableOpacity>
-      <View style={styles.textContainer}>
-        <Text style={{...styles.textStyle, ...textStyle}}>{text}</Text>
+      <View style={{flexDirection: 'column'}}>
+        <TouchableOpacity onPress={onPress} style={styles.button}>
+          <Image source={Images.back} style={styles.backIcon} />
+        </TouchableOpacity>
+        <View style={styles.textContainer}>
+          <Text style={{...styles.textStyle, ...textStyle}}>{text}</Text>
+        </View>
       </View>
       {rightView && <TouchableOpacity>{rightView}</TouchableOpacity>}
     </View>
@@ -33,8 +35,9 @@ const styles = StyleSheet.create({
   container: {
     height: responsiveHeight(10),
     paddingHorizontal: responsiveWidth(8),
-    flexDirection: 'column',
+    flexDirection: 'row',
     marginVertical: responsiveHeight(1.3),
+    justifyContent: 'space-between',
   },
   backIcon: {
     width: responsiveWidth(6),
