@@ -88,7 +88,7 @@ const SearchInput = () => {
     return trainerData.filter((item: any) => {
       const fullName = item?.fullName?.toLowerCase();
       const specialities = item?.Speciality?.map((spec: string) =>
-        spec.toLowerCase()
+        spec.value.toLowerCase()
       );
 
       return (
@@ -172,7 +172,7 @@ const SearchInput = () => {
             return (
               <TouchableOpacity
                 onPress={() => {
-                  setSearchText(item.value);
+                  setSearchText(item?.value);
                 }}
                 style={{
                   // width: responsiveWidth(30),
@@ -190,7 +190,7 @@ const SearchInput = () => {
                     fontSize: responsiveFontSize(1.8),
                     textAlign: 'center',
                   }}>
-                  {item.value}
+                  {item?.value}
                 </Text>
               </TouchableOpacity>
             );
@@ -216,7 +216,7 @@ const SearchInput = () => {
                   style={styles.container}>
                   <View style={styles.left}>
                     <Image
-                      src={item.profileImage}
+                      src={item?.profileImage}
                       style={{
                         width: responsiveWidth(17),
                         height: responsiveWidth(17),
@@ -225,7 +225,7 @@ const SearchInput = () => {
                     />
                     <View>
                       <Text style={styles.whitetext} numberOfLines={1}>
-                        {item.fullName}
+                        {item?.fullName}
                       </Text>
                       <View
                         style={{
@@ -242,9 +242,9 @@ const SearchInput = () => {
                           0.43 miles away
                         </Text>
                         <Text style={styles.greytext}>·</Text>
-                        <Text style={styles.greytext}>
-                          {item.Speciality ? item.Speciality : 'None'}
-                        </Text>
+                        {/* <Text style={styles.greytext}>
+                          {item?.Speciality ? item?.Speciality : 'None'}
+                        </Text> */}
                       </View>
                       <View
                         style={{
@@ -253,18 +253,18 @@ const SearchInput = () => {
                           gap: responsiveWidth(1),
                         }}>
                         <AirbnbRating
-                          defaultRating={item.rating}
+                          defaultRating={item?.rating}
                           selectedColor="#9FED3A"
                           isDisabled
                           showRating={false}
                           size={responsiveHeight(1.6)}
                         />
                         <Text style={styles.greytext} numberOfLines={1}>
-                          {item.reviews}+
+                          {item?.reviews}+
                         </Text>
-                        {item.rate && <Text style={styles.greytext}>·</Text>}
+                        {item?.rate && <Text style={styles.greytext}>·</Text>}
                         <Text style={styles.greytext}>
-                          {item.Hourlyrate ? item.Hourlyrate : '-'}/hr
+                          {item?.Hourlyrate ? item?.Hourlyrate : '-'}/hr
                         </Text>
                       </View>
                     </View>
