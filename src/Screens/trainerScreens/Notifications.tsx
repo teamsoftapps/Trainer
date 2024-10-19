@@ -150,9 +150,9 @@ const Notification = () => {
                             alignItems: 'center',
                           }}>
                           <TouchableOpacity
-                            onPress={() => {
-                              navigation.navigate('ReviewBooking');
-                            }}
+                            // onPress={() => {
+                            //   navigation.navigate('ReviewBooking');
+                            // }}
                             style={{
                               borderColor: '#bbbbbb',
                               borderWidth: responsiveWidth(0.3),

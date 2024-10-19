@@ -96,7 +96,9 @@ const BookingDetails = ({route}) => {
                     backgroundColor:
                       status === 'Confirmed' ? '#9BE639' : '#bbbbbb',
                   }}>
-                  <Text style={styles.blacktext}>{routeData.status}</Text>
+                  <Text style={styles.blacktext}>
+                    {routeData.paymentStatus}
+                  </Text>
                 </View>
               </View>
             </View>
