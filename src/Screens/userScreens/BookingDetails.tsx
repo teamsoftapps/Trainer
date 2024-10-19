@@ -239,6 +239,9 @@ const BookingDetails = ({route}) => {
         </View>
       </View>
       <ButtonComp
+        onPress={() => {
+          navigation.replace('Bottom');
+        }}
         text="Cancel"
         mainStyle={{
           backgroundColor: '#BDBDBD',
