@@ -151,7 +151,10 @@ const TrainerStack = () => {
       const unsubscribe = notifee.onForegroundEvent(({type, detail}) => {
         if (type === EventType.PRESS) {
           console.log('Notification Pressed:', detail);
-          navigation.navigate('Notification', {id: detail.notification.id});
+          navigation.navigate(
+            'Sessions'
+            // {id: detail.notification.id}
+          );
         }
       });
 
