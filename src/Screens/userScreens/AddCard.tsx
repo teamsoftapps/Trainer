@@ -104,7 +104,7 @@ const AddCard = () => {
   const AddCard = async () => {
     const {error} = await presentPaymentSheet();
     if (error) {
-      console.log('maa chud gai');
+      console.log('maa chud ga');
     } else {
       console.log('oh yehhh');
     }
