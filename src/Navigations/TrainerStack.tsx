@@ -15,6 +15,7 @@ import notifee, {EventType, TriggerType} from '@notifee/react-native';
 import {useNavigation} from '@react-navigation/native'; // Import useNavigation
 import axiosBaseURL from '../services/AxiosBaseURL';
 import axios from 'axios';
+import StoryView from '../Screens/trainerScreens/storyView';
 
 export type TainerProps = {
   TrainerBttomStack: undefined;
@@ -197,6 +198,7 @@ const TrainerStack = () => {
       <Stack.Screen name="ReviewBooking" component={ReviewBooking} />
       <Stack.Screen name="ManagePlans" component={ManagePlans} />
       <Stack.Screen name="CompleteProfile" component={CompleteProfile} />
+      <Stack.Screen name="StoryView" component={StoryView} />
     </Stack.Navigator>
   );
 };

@@ -104,17 +104,27 @@ const EditProfile = ({route}) => {
       prev.filter(item => item.key !== speciality.key)
     );
   };
-
   const onTimeChange = (event, selectedTime) => {
     if (event.type === 'set') {
       const currentTime = selectedTime || time;
 
       if (currentTime instanceof Date && !isNaN(currentTime)) {
         const formattedTime = moment(currentTime).format('hh:mm A');
-        setSelectedTimes(prevTimes => [...prevTimes, formattedTime]);
+
+        setSelectedTimes(prevTimes => {
+          if (!prevTimes.includes(formattedTime)) {
+            return [...prevTimes, formattedTime];
+          } else {
+            showMessage({
+              message: 'Duplication',
+              description: 'Already added!.',
+              type: 'danger',
+            });
+          }
+          return prevTimes;
+        });
         setTime(currentTime);
         setModalVisible(false);
-      } else {
       }
     } else if (event.type === 'dismissed') {
       setModalVisible(false);
@@ -130,12 +140,45 @@ const EditProfile = ({route}) => {
   const onDateChange = (event, selectedValue) => {
     if (event.type === 'set') {
       const currentDate = selectedValue || date;
-      const formattedDate = format(currentDate, 'dd/MM/yyyy');
-      setDob(formattedDate);
-      console.log(formattedDate);
+
+      // Get today's date
+      const today = new Date();
+
+      // Calculate age
+      const age = today.getFullYear() - currentDate.getFullYear();
+      const monthDifference = today.getMonth() - currentDate.getMonth();
+
+      // Adjust age if the birth date hasn't occurred yet this year
+      if (
+        monthDifference < 0 ||
+        (monthDifference === 0 && today.getDate() < currentDate.getDate())
+      ) {
+        age--;
+      }
+
+      // Check if the age is less than 24
+      if (age < 24) {
+        showMessage({
+          message: 'Error',
+          description: 'Age must be 24 years old.',
+          type: 'danger',
+        });
+      } else {
+        const formattedDate = `${String(currentDate.getDate()).padStart(
+          2,
+          '0'
+        )}/${String(currentDate.getMonth() + 1).padStart(
+          2,
+          '0'
+        )}/${currentDate.getFullYear()}`;
+        setDob(formattedDate);
+        console.log(formattedDate);
+      }
     }
+
     setModalVisible2(false);
   };
+
   const toggleModalTimes = () => {
     setModalVisible(true);
   };
@@ -145,7 +188,6 @@ const EditProfile = ({route}) => {
   };
 
   const Function = async () => {
-    // Check if essential fields are empty
     if (!firstname || firstname.length <= 3) {
       return showMessage({
         message: 'Validation Error',

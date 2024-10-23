@@ -10,6 +10,8 @@ import {
   Image,
   ScrollView,
   Alert,
+  Modal,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {
@@ -32,6 +34,7 @@ import useToast from '../../Hooks/Toast';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootProps} from '../../Navigations/AuthStack';
 import {MAP_API_KEY} from '../../config/urls';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 type Props = NativeStackScreenProps<RootProps, 'signup'>;
 
@@ -52,7 +55,9 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
   const [height, setheight] = useState('');
   const [address, setAddress] = useState('');
   const [Gender, setGender] = useState('');
-
+  const [modalVisible2, setModalVisible2] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [dob, setDob] = useState('');
   // Icon touch activate Input
   const dobRef = useRef(null);
   const nameRef = useRef(null);
@@ -78,8 +83,75 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
 
   const emailPattern = /^[^\s@]+@gmail\.com$/;
 
-  const handledobInput = () => {
-    dobRef.current?.focus();
+  const toggleModalDob = () => {
+    setModalVisible2(true);
+  };
+  const onDateChange = async (event, selectedValue) => {
+    if (event.type === 'set') {
+      const currentDate = selectedValue || date;
+
+      const today = new Date();
+
+      const age = today.getFullYear() - currentDate.getFullYear();
+      const monthDifference = today.getMonth() - currentDate.getMonth();
+
+      if (
+        monthDifference < 0 ||
+        (monthDifference === 0 && today.getDate() < currentDate.getDate())
+      ) {
+        age--;
+      }
+
+      // Check if the age is less than 24
+      if (age < 24) {
+        showMessage({
+          message: 'Error',
+          description: 'Age must be 24 years old.',
+          type: 'danger',
+        });
+      } else {
+        const formattedDate = `${String(currentDate.getDate()).padStart(
+          2,
+          '0'
+        )}/${String(currentDate.getMonth() + 1).padStart(
+          2,
+          '0'
+        )}/${currentDate.getFullYear()}`;
+        await setDob(formattedDate);
+        handleDoBChange(formattedDate);
+        console.log('formated date', formattedDate);
+      }
+    }
+
+    setModalVisible2(false);
+  };
+  const handleDoBChange = value => {
+    setDoB(value);
+
+    // Parse the input to get day, month, year
+    const [day, month, year] = value.split('/').map(Number);
+    const selectedDate = new Date(year, month - 1, day); // month is 0-based
+
+    // Get today's date
+    const today = new Date();
+
+    // Calculate age
+    const age = today.getFullYear() - selectedDate.getFullYear();
+    const monthDifference = today.getMonth() - selectedDate.getMonth();
+
+    // Adjust age if the birthday hasn't occurred yet this year
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < selectedDate.getDate())
+    ) {
+      age--;
+    }
+
+    // Check if the age is less than 24
+    if (age < 24) {
+      showToast('Error', 'Age must be 24 years', 'warning');
+      setDoB(''); // Optionally clear the input if the age is invalid
+    }
   };
   const handleNameInput = () => {
     nameRef.current?.focus();
@@ -408,7 +480,7 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
                 }}>
                 <View style={{width: responsiveWidth(27)}}>
                   <Text style={{color: '#908C8D'}}>Date of Birth</Text>
-                  <MaskInput
+                  {/* <MaskInput
                     ref={dobRef}
                     value={DoB}
                     keyboardType="numeric"
@@ -424,9 +496,26 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
                       width: responsiveWidth(67),
                       height: responsiveHeight(3),
                     }}
-                  />
+                  /> */}
+                  {dob ? (
+                    <Text
+                      style={{
+                        color: '#fff',
+                        fontSize: responsiveFontSize(1.8),
+                      }}>
+                      {dob}
+                    </Text>
+                  ) : (
+                    <Text
+                      style={{
+                        color: '#bbbbbb',
+                        fontSize: responsiveFontSize(1.8),
+                      }}>
+                      dd/mm/yyyy
+                    </Text>
+                  )}
                 </View>
-                <TouchableOpacity onPress={handledobInput}>
+                <TouchableOpacity onPress={toggleModalDob}>
                   <Image
                     source={Images.calendar}
                     style={{width: responsiveWidth(4.5)}}
@@ -435,6 +524,29 @@ const Signup: React.FC<Props> = ({route, navigation}) => {
                 </TouchableOpacity>
               </View>
             </View>
+            {modalVisible2 && (
+              <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible2}
+                onRequestClose={() => setModalVisible2(false)}>
+                <TouchableWithoutFeedback
+                  onPress={() => setModalVisible2(false)}>
+                  <View>
+                    <TouchableWithoutFeedback>
+                      <View>
+                        <DateTimePicker
+                          value={date}
+                          mode="date"
+                          display="default"
+                          onChange={onDateChange}
+                        />
+                      </View>
+                    </TouchableWithoutFeedback>
+                  </View>
+                </TouchableWithoutFeedback>
+              </Modal>
+            )}
             <View
               style={{
                 flexDirection: 'row',

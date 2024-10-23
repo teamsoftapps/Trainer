@@ -173,6 +173,7 @@ const Profile = () => {
     })
       .then(image => {
         uploadImage(image);
+        console.log(':jjjjjjjjjjjjj', image);
         setModal(false);
       })
       .catch(error => {});
