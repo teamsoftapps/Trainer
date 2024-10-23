@@ -203,7 +203,6 @@ const Home: React.FC<Props> = ({navigation, route}) => {
           `/Common/GetProfile/${token}`
         );
         const userData = profileResponse.data.data;
-        // console.log('profileResponce', userData);
         dispatch(SaveLogedInUser(userData));
       } catch (error) {
         console.error(
@@ -232,7 +231,6 @@ const Home: React.FC<Props> = ({navigation, route}) => {
   const getPosts = async () => {
     try {
       const res = await data;
-      // console.log('ALL', res.data);
       settrainerData(res?.data);
     } catch (error) {
       console.log('Errorr', error);
@@ -281,7 +279,6 @@ const Home: React.FC<Props> = ({navigation, route}) => {
     refetch(); // This will fetch the latest data
   };
   const getBookingbyID = async (item: any) => {
-    // console.log('IDLE', item?._id);
     try {
       const response = await axiosBaseURL.get(
         `/user/getBookingbyId/${item?._id}`

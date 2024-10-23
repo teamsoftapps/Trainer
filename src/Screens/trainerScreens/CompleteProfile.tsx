@@ -39,7 +39,7 @@ const CompleteProfile = ({route}) => {
   const [secondname, setsecondname] = useState('');
   const [Email, setEmail] = useState('');
   const [Bio, setBio] = useState('');
-  const [Hourly, setHourly] = useState('00');
+  const [Hourly, setHourly] = useState('');
   const [Speciality, setSpeciality] = useState([]);
   const [selectedTime, setSelectedTime] = useState([]);
   const navigation = useNavigation();
@@ -49,8 +49,6 @@ const CompleteProfile = ({route}) => {
   const [Bioformik, setBioformik] = useState(false);
   const [Hourlyformik, setHourlyformik] = useState(false);
   const [timeformik, settimeformik] = useState(false);
-
-  // Formik Conditions
 
   const [isModal, setModal] = useState(false);
   const openModal = () => setModal(true);
@@ -63,19 +61,15 @@ const CompleteProfile = ({route}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTimes, setSelectedTimes] = useState([]);
   const [time, setTime] = useState(new Date());
-  const logedInTrainerEmail = useSelector(state => state.Auth.data);
-  console.log('Logged In Data', logedInTrainerEmail);
+  const logedInTrainer = useSelector(state => state.Auth.data);
+  console.log('trainer data in complete profile: ', logedInTrainer);
   const dispatch = useDispatch();
 
+  // Formik Conditions
   const condition1 = Hourly !== '0' && Hourly !== '';
   const condition2 = selectedTimes.length !== 0;
   const condition3 = Bio != '';
   const condition4 = selectedSpecialities.length !== 0;
-
-  console.log(
-    'trainer data in complete profile: ',
-    logedInTrainerEmail?.res_EMAIL
-  );
 
   const handleSpecialitySelect = selectedSpecialities => {
     setDropdownVisible(false);
@@ -92,12 +86,18 @@ const CompleteProfile = ({route}) => {
     setModalVisible(true);
   };
 
+  const handleRemoveSpeciality = speciality => {
+    setSelectedSpecialities(prev =>
+      prev.filter(item => item.key !== speciality.key)
+    );
+  };
+
   const onTimeChange = (event, selectedTime) => {
     if (event.type === 'set') {
       const currentTime = selectedTime || time;
 
       if (currentTime instanceof Date && !isNaN(currentTime.getTime())) {
-        const formattedTime = moment(currentTime).format('HH:mm A');
+        const formattedTime = moment(currentTime).format('hh:mm A');
         setSelectedTimes(prevTimes => [...prevTimes, formattedTime]);
         setTime(currentTime);
         setModalVisible(false);
@@ -108,70 +108,83 @@ const CompleteProfile = ({route}) => {
     }
   };
 
-  const Chane = () => {
-    let payload = {
-      Bio: Bio,
-      Speciality: selectedSpecialities,
-      Hourlyrate: Hourly,
-      Availiblity: selectedTimes,
-    };
-    dispatch(updateLogin(payload));
-  };
-
   const Function = async () => {
-    if (condition1 && condition2 && condition3 && condition4) {
-      setspecialityformik(false);
-      setBioformik(false);
-      settimeformik(false);
-      setHourlyformik(false);
-      try {
-        const response = await axiosBaseURL.post('/trainer/update', {
-          email: logedInTrainerEmail?.email,
-          Bio: Bio,
-          Speciality: selectedSpecialities,
-          Hourlyrate: Hourly,
-          Availiblity: selectedTimes,
-        });
-
-        let payload = {
-          Bio: Bio,
-          Speciality: selectedSpecialities,
-          Hourlyrate: Hourly,
-          Availiblity: selectedTimes,
-        };
-        dispatch(updateLogin(payload));
-
-        console.log('responce in complete profile:', response.data);
-        showMessage({
-          message: 'Updates Succesfully',
-          description: 'your data has been updated!',
-          type: 'success',
-        });
-        navigation.replace('TrainerBttomStack');
-
-        console.log('Upload successful:', response.data);
-      } catch (error) {
-        setUploadError('Upload failed.');
-        console.error('Error uploading file:', error);
-      } finally {
-        setUploading(false);
-      }
-    } else {
-      if (!condition4) setspecialityformik(true);
-      if (!condition3) setBioformik(true);
-      if (!condition2) settimeformik(true);
-      if (!condition1) setHourlyformik(true);
+    if (
+      !Bio.trim() ||
+      !Array.isArray(selectedSpecialities) ||
+      selectedSpecialities.length === 0 ||
+      Hourly <= 0 ||
+      !Array.isArray(selectedTimes) ||
+      selectedTimes.length === 0
+    ) {
+      return showMessage({
+        message: 'Validation Error',
+        description: 'Please fill in all required fields.',
+        type: 'danger',
+      });
     }
-  };
+    const validationChecks = [
+      {
+        condition: Bio.trim() !== '',
+        message: 'Please edit your bio.',
+      },
+      {
+        condition:
+          Array.isArray(selectedSpecialities) &&
+          selectedSpecialities.length > 0,
+        message: 'Please select at least one speciality.',
+      },
+      {
+        condition: Hourly > 0,
+        message: 'Please enter a valid hourly rate.',
+      },
+      {
+        condition: Array.isArray(selectedTimes) && selectedTimes.length > 0,
+        message: 'Please select your availability times.',
+      },
+    ];
 
-  const handlePress = item => {
-    setSelectedTime(prevSelectedItems => {
-      if (prevSelectedItems.includes(item)) {
-        return prevSelectedItems.filter(selectedItem => selectedItem !== item);
-      } else {
-        return [...prevSelectedItems, item];
+    for (const {condition, message} of validationChecks) {
+      if (!condition) {
+        return showMessage({
+          message: 'Validation Error',
+          description: message,
+          type: 'danger',
+        });
       }
-    });
+    }
+    try {
+      const response = await axiosBaseURL.post('/trainer/update', {
+        email: logedInTrainer?.email,
+        Bio: Bio,
+        Speciality: selectedSpecialities,
+        Hourlyrate: Hourly,
+        Availiblity: selectedTimes,
+      });
+
+      let payload = {
+        Bio: Bio,
+        Speciality: selectedSpecialities,
+        Hourlyrate: Hourly,
+        Availiblity: selectedTimes,
+      };
+      dispatch(updateLogin(payload));
+
+      console.log('responce in complete profile:', response.data);
+      showMessage({
+        message: 'Updates Succesfully',
+        description: 'your data has been updated!',
+        type: 'success',
+      });
+      navigation.replace('TrainerBttomStack');
+
+      console.log('Upload successful:', response.data);
+    } catch (error) {
+      setUploadError('Upload failed.');
+      console.error('Error uploading file:', error);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleChoosePhoto = () => {
@@ -214,7 +227,7 @@ const CompleteProfile = ({route}) => {
         type: image.mime,
         name: `profileImage-${Date.now()}.jpg`,
       });
-      formData.append('email', logedInTrainerEmail.email);
+      formData.append('email', logedInTrainer?.email);
 
       const response = await axiosBaseURL.post(
         '/trainer/uploadProfileImage',
@@ -254,7 +267,6 @@ const CompleteProfile = ({route}) => {
         <View style={styles.Main}>
           <View style={styles.Header}>
             <Text style={styles.H1}>Complete Your Profile</Text>
-            <Text style={styles.greyH}>Skip</Text>
           </View>
           <Text style={styles.subHeading}>Profile picture</Text>
           <View
@@ -336,7 +348,7 @@ const CompleteProfile = ({route}) => {
             <View style={styles.FirstNameH}>
               <Text style={{color: '#908C8D'}}>First Name</Text>
               <TextInput
-                value={firstname}
+                value={logedInTrainer?.fullName}
                 onChangeText={setfirstname}
                 placeholder="Enter First Name"
                 style={styles.FirstNameInput}
@@ -349,7 +361,7 @@ const CompleteProfile = ({route}) => {
               <TextInput
                 editable={false}
                 placeholder="Enter Email"
-                value={logedInTrainerEmail.email}
+                value={logedInTrainer.email}
                 onChangeText={setEmail}
                 style={styles.EmailInput}
                 numberOfLines={1}
@@ -449,7 +461,8 @@ const CompleteProfile = ({route}) => {
                     }}>
                     {item.value}
                   </Text>
-                  <TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleRemoveSpeciality(item)}>
                     <Image
                       source={Images.Cross}
                       style={{

@@ -108,6 +108,8 @@ const Profile = () => {
     }, [trainer_data.token])
   );
 
+  const deleteProfileImage = async () => {};
+
   const RenderedUploads = ({item, index}) => {
     return (
       <View>
@@ -142,8 +144,7 @@ const Profile = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-
-      await setImageUri(response.data.data.url);
+      console.log('image url:', response.data.data.url);
       dispatch(updateLogin({profileImage: response.data.data.url}));
       closeSubModal();
 
@@ -345,6 +346,7 @@ const Profile = () => {
               borderWidth: responsiveWidth(1),
             }}
           />
+
           <TouchableOpacity
             onPress={() => {
               openModal();

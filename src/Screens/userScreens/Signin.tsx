@@ -52,7 +52,7 @@ const Signin: React.FC<Props> = ({route}) => {
       email: email,
       password: password,
     };
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailPattern = /^[^\s@]+@gmail\.com$/;
     try {
       if (!emailPattern.test(email)) {
         return showToast('Error', 'Please Enter Valid Email', 'danger');
@@ -61,12 +61,10 @@ const Signin: React.FC<Props> = ({route}) => {
       if (data.checkUser == 'user') {
         let res: any = await SignInUser(payload);
         if (res.data) {
-          console.log('----------------++++++++++', res.data?.data);
           showToast('Success', 'User logged In Successfully', 'success');
           dispatch(IsLogin(res?.data?.data));
         }
         if (res.error) {
-          console.log('Errorrrr', res.error);
           showToast('Error', res?.error?.data.message, 'danger');
         }
       } else {
@@ -84,7 +82,6 @@ const Signin: React.FC<Props> = ({route}) => {
         }
       }
     } catch (error: any) {
-      console.log('Errorrrr', error?.message);
       showToast('Error', error?.message, 'danger');
     }
   };

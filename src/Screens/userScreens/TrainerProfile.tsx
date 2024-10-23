@@ -143,7 +143,7 @@ const TrainerProfile = ({route}) => {
         setfiltered(filtered); // Use the correct variable name
         // setFavoriteTrainers(res?.data?.data); // Uncomment if needed
       } catch (error) {
-        console.error('Error fetching favorite trainers:', error);
+        // console.error('Error fetching favorite trainers:', error);
       }
     }
   };
