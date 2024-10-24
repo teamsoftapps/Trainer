@@ -7,7 +7,7 @@ import {
   Modal,
   Keyboard,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import Header from '../../Components/Header';
 import {useNavigation} from '@react-navigation/native';
 import Button from '../../Components/Button';
@@ -22,21 +22,25 @@ import {Images} from '../../utils/Images';
 import {useSelector} from 'react-redux';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import {showMessage} from 'react-native-flash-message';
-
+import Video, {VideoRef} from 'react-native-video';
 const StoryView = ({route}) => {
   const {data} = route.params;
+  console.log('Data from story screen', data);
   const navigation = useNavigation();
   const trainer_data = useSelector(state => state.Auth.data);
   console.log('hhhh', trainer_data);
-  console.log('Data from story screen', data);
-
+  const videoRef = useRef<VideoRef>(null);
   const uploadData = async () => {
     try {
       const formData = new FormData();
 
+      if (!data?.path || !data?.mime) {
+        throw new Error('Invalid file data');
+      }
+
       formData.append('files', {
-        uri: data?.node?.imade?.uri,
-        type: data?.node?.type,
+        uri: data.path,
+        type: data.mime,
         name: `profileImage-${Date.now()}.jpg`,
       });
       formData.append('email', trainer_data.email);
@@ -50,16 +54,20 @@ const StoryView = ({route}) => {
           },
         }
       );
-      console.log('image url:', response.data.data.url);
+
+      console.log('Image URL:', response.data.data.url);
 
       if (response.data.status) {
         showMessage({
           message: 'Upload Successful',
-          description: 'Your Data has been updated!',
+          description: 'Your data has been updated!',
           type: 'success',
         });
+      } else {
+        throw new Error('Upload unsuccessful');
       }
     } catch (error) {
+      console.error('Upload error:', error);
       showMessage({
         message: 'Upload Failed',
         description: error.message || 'Failed to upload image.',
@@ -71,14 +79,24 @@ const StoryView = ({route}) => {
   return (
     <View style={styles.container}>
       <Header style={styles.header} onPress={() => navigation.goBack()} />
+      {data && data.mime === 'video/mp4' ? (
+        <Video
+          source={{uri: data.path}}
+          ref={videoRef}
+          // onBuffer={onBuffer}
+          // onError={onError}
+          style={styles.image}
+        />
+      ) : (
+        <Image
+          source={{uri: data.path}}
+          style={styles.image}
+          resizeMode="contain"
+        />
+      )}
 
-      <Image
-        source={{uri: data.node.image.uri}}
-        style={styles.image}
-        resizeMode="contain"
-      />
       <Button
-        text="Add to story"
+        text={`Add to ${data.selectedIndex}`}
         containerstyles={styles.button}
         onPress={() => {
           uploadData();

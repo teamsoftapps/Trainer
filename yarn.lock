@@ -3797,6 +3797,7 @@ __metadata:
     react-native-screens: ^3.31.1
     react-native-svg: ^15.6.0
     react-native-tab-view: ^3.5.2
+    react-native-video: ^6.7.0
     react-redux: ^9.1.2
     react-test-renderer: 18.2.0
     redux-persist: ^6.0.0
@@ -9638,6 +9639,16 @@ __metadata:
     react-native: "*"
     react-native-pager-view: "*"
   checksum: bd287e5543881aa662ee55418a3bd5dacb25033425a9fcb0fff21c3a3b96f956af1a77cd9bab4e7a8e94590080a5d8e3cb99cfa8613b19bf6da24bfc9b4942d4
+  languageName: node
+  linkType: hard
+
+"react-native-video@npm:^6.7.0":
+  version: 6.7.0
+  resolution: "react-native-video@npm:6.7.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: ad8b321ef5ac078fededcafa63d7a21fada7c13ecaf34cd795058868ef386791347ba3e5b6f320aa7ab6bf95bcb0b3958cfca540a0675c8c57fdeaf2e828b1cf
   languageName: node
   linkType: hard
 

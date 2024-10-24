@@ -23,6 +23,7 @@ import {
 import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import ImageCropPicker from 'react-native-image-crop-picker';
+import {showMessage} from 'react-native-flash-message';
 const formats = [
   {
     value: 'Story',
@@ -35,17 +36,11 @@ const categories = [{value: 'Photos'}, {value: 'Videos'}];
 
 const Story = () => {
   const [selectedIndex, setSelectedIndex] = useState(null);
+  console.log('gggg', selectedIndex);
   const [media, setMedia] = useState([]);
   const navigation = useNavigation();
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState({value: 'All'});
-
-  const handleSelectCategory = category => {
-    setSelectedCategory(category);
-    setDropdownVisible(false);
-    console.log('Selected Category:', category.value);
-    getMedia(category.value === 'All' ? 'All' : category.value);
-  };
 
   const getMedia = (assetType = 'All') => {
     CameraRoll.getPhotos({
@@ -67,10 +62,12 @@ const Story = () => {
   );
 
   const renderFormats = ({item, index}) => {
-    const isSelected = selectedIndex === index;
+    const isSelected = selectedIndex === item.value;
     return (
       <TouchableOpacity
-        onPress={() => setSelectedIndex(index)}
+        onPress={() => {
+          setSelectedIndex(item.value);
+        }}
         style={{
           height: responsiveHeight(4),
           width: responsiveWidth(20),
@@ -91,38 +88,58 @@ const Story = () => {
       </TouchableOpacity>
     );
   };
-
   const RenderedMedia = ({item, index}) => {
     return (
-      <TouchableOpacity
-        style={styles.imageContainer}
-        onPress={() => {
-          navigation.navigate('StoryView', {data: item});
-        }}>
+      <TouchableOpacity style={styles.imageContainer}>
         <Image source={{uri: item.node.image.uri}} style={styles.image} />
       </TouchableOpacity>
     );
   };
 
+  const handleSelectCategory = category => {
+    setSelectedCategory(category);
+    setDropdownVisible(false);
+    console.log('Selected Category:', category.value);
+    getMedia(category.value === 'All' ? 'All' : category.value);
+  };
+
   const handleChoosePhoto = () => {
-    ImageCropPicker.openPicker({
-      mediaType: 'photo',
-      cropping: true,
-    })
-      .then(image => {
-        console.log('selected Image:', image);
+    if (selectedIndex === null) {
+      showMessage({
+        message: 'Post or Story',
+        description: 'Your image has been updated!',
+        type: 'info',
+      });
+    } else {
+      ImageCropPicker.openPicker({
+        mediaType: 'photo',
+        cropping: true,
       })
-      .catch(error => {});
+        .then(image => {
+          navigation.navigate('StoryView', {data: {...image, selectedIndex}});
+          console.log('selected Image:', image);
+        })
+        .catch(error => {});
+    }
   };
 
   const handleChooseVideo = () => {
-    ImageCropPicker.openPicker({
-      mediaType: 'video',
-    })
-      .then(image => {
-        console.log('selected Video:', image);
+    if (selectedIndex === null) {
+      showMessage({
+        message: 'Post or Story',
+        description: 'Your image has been updated!',
+        type: 'info',
+      });
+    } else {
+      ImageCropPicker.openPicker({
+        mediaType: 'video',
       })
-      .catch(error => {});
+        .then(video => {
+          navigation.navigate('StoryView', {data: {...video, selectedIndex}});
+          console.log('selected Video:', video, selectedIndex);
+        })
+        .catch(error => {});
+    }
   };
 
   return (
