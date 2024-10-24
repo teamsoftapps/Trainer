@@ -47,6 +47,7 @@ import {socketService} from '../../utils/socketService';
 import {SaveLogedInUser} from '../../store/Slices/db_ID';
 import {followTrainer, unfollowTrainer} from '../../store/Slices/follow';
 import {saveBookings} from '../../store/Slices/trainerBookings';
+import followingHook from '../../Hooks/Follow';
 
 const StoriesData = [
   {
@@ -188,11 +189,14 @@ const Home: React.FC<Props> = ({navigation, route}) => {
   const [createChat] = useCreateChatMutation();
   const [trainerData, settrainerData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setloading] = useState(false);
   const dispatch = useDispatch();
+  const {isFollow, unFollow, loading: loadingFollow} = followingHook();
+  const [isFollowing, setIsFollowing] = useState(false);
   const authData = useSelector(state => state?.Auth?.data);
-  const checkFollowed = useSelector(state => state?.dbId?.dbId);
-  console.log('check Followedddddd', checkFollowed);
-  console.log('authData in home:', authData);
+  console.log('Auth', authData);
+  const checkFollowed = useSelector(state => state?.follow);
+  console.log('FOLLOWED', checkFollowed);
   const token = useSelector(state => state?.Auth?.data?.token);
 
   useEffect(() => {
@@ -220,9 +224,11 @@ const Home: React.FC<Props> = ({navigation, route}) => {
     }, [data])
   );
 
-  useEffect(() => {
-    getPosts();
-  }, [data]);
+  useFocusEffect(
+    useCallback(() => {
+      getPosts();
+    }, [data])
+  );
 
   useEffect(() => {
     socketService.initializeSocket();
@@ -294,31 +300,29 @@ const Home: React.FC<Props> = ({navigation, route}) => {
     }
   };
 
-  const onFollow = async item => {
-    const isFollowing = checkFollowed?.followedTrainers?.includes(item?._id);
-    console.log('isFollowing', isFollowing);
+  const handleFollow = async item => {
+    console.log('Follow Hitted');
+    const userID = authData?._id;
+    const trainerID = item?._id;
 
-    try {
-      if (!isFollowing) {
-        await axiosBaseURL.post('/common/Follow', {
-          userID: authData._id,
-          trainerID: item?._id,
-        });
-        dispatch(followTrainer([...checkFollowed.followedTrainers, item._id]));
-      } else {
-        await axiosBaseURL.post('/common/unFollow', {
-          userID: authData._id,
-          trainerID: item?._id,
-        });
-        dispatch(
-          unfollowTrainer(
-            checkFollowed.followedTrainers.filter(id => id !== item._id)
-          )
-        );
-      }
-    } catch (error) {
-      console.log('Error:', error);
-      Alert.alert(`${error?.response?.data?.message || 'An error occurred'}`);
+    // return console.log('ID', trainerID);
+    const res = await isFollow(userID, trainerID);
+
+    if (res) {
+      await refetch();
+      dispatch(followTrainer(trainerID));
+      console.log('Success', res);
+    }
+  };
+  const handleUnFollow = async item => {
+    const userID = authData?._id;
+    const trainerID = item?._id;
+
+    const res = await unFollow(userID, trainerID);
+    if (res) {
+      await refetch();
+      dispatch(unfollowTrainer(trainerID));
+      console.log('unfollow', res);
     }
   };
 
@@ -398,9 +402,15 @@ const Home: React.FC<Props> = ({navigation, route}) => {
               data={trainerData}
               renderItem={({item, index}) => {
                 console.log('TRAINER DATA', trainerData[index]);
-                // console.log('00000000000000000', item);
+
                 return (
                   <ImageBackground
+                    onLoadStart={() => {
+                      setloading(true);
+                    }}
+                    onLoadEnd={() => {
+                      setloading(false);
+                    }}
                     imageStyle={{borderRadius: responsiveWidth(1.5)}}
                     source={{uri: item?.profileImage}}
                     style={styles.Trainer}>
@@ -411,15 +421,19 @@ const Home: React.FC<Props> = ({navigation, route}) => {
                       }}
                       style={{flex: 1, justifyContent: 'space-between'}}>
                       <TouchableOpacity
+                        activeOpacity={0.9}
+                        accessibilityRole="button"
                         onPress={() => {
-                          onFollow(item);
+                          !checkFollowed.follow.includes(item?._id)
+                            ? handleFollow(item)
+                            : handleUnFollow(item);
                         }}
-                        // activeOpacity={0.9}
                         style={{
-                          backgroundColor:
-                            checkFollowed.followedTrainers.includes(item._id)
-                              ? 'white'
-                              : '#9FED3A',
+                          backgroundColor: checkFollowed?.follow.includes(
+                            item?._id
+                          )
+                            ? '#d7d7d7'
+                            : '#9FED3A',
                           padding: responsiveWidth(1),
                           borderRadius: responsiveHeight(5),
                           alignItems: 'center',
@@ -435,17 +449,17 @@ const Home: React.FC<Props> = ({navigation, route}) => {
                             fontFamily: FontFamily.Medium,
                             fontSize: responsiveFontSize(2),
                           }}>
-                          {checkFollowed.followedTrainers.includes(item._id)
+                          {loadingFollow
+                            ? 'waiting...'
+                            : checkFollowed?.follow.includes(item?._id)
                             ? 'Following'
                             : 'Follow'}
                         </Text>
-                        {checkFollowed.followedTrainers.includes(
-                          item._id
-                        ) ? null : (
+                        {checkFollowed?.follow?.includes(item._id) ? null : (
                           <Image
                             style={{
-                              width: responsiveHeight(2.3),
-                              height: responsiveHeight(2.3),
+                              width: responsiveHeight(2),
+                              height: responsiveHeight(2),
                             }}
                             source={Images.plus}
                           />

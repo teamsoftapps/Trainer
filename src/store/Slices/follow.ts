@@ -1,24 +1,34 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-interface FollowState {
-  [trainerID: string]: boolean;
-}
 
-const initialState: FollowState = {};
+const initialState = {
+  follow: [],
+};
 
 const followSlice = createSlice({
   name: 'follow',
   initialState,
   reducers: {
-    followTrainer: (state, action: PayloadAction<{trainerID: string}>) => {
-      const {trainerID} = action.payload;
-      state[trainerID] = true;
+    saveFollowers: (state, action) => {
+      state.follow = action.payload;
+    },
+    removeFollowers: (state: any, action) => {
+      state.follow = null;
+    },
+    followTrainer: (state, action) => {
+      // Check if the trainer is already followed
+      if (!state.follow.includes(action.payload)) {
+        state.follow.push(action.payload); // Add trainerID to the array
+      }
     },
     unfollowTrainer: (state, action: PayloadAction<{trainerID: string}>) => {
-      const {trainerID} = action.payload;
-      delete state[trainerID];
+      // Remove the trainerID from the follow array
+      state.follow = state.follow.filter(
+        trainerID => trainerID !== action.payload
+      );
     },
   },
 });
 
-export const {followTrainer, unfollowTrainer} = followSlice.actions;
+export const {followTrainer, unfollowTrainer, saveFollowers, removeFollowers} =
+  followSlice.actions;
 export default followSlice.reducer;

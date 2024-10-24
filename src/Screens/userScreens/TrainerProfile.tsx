@@ -21,7 +21,6 @@ import {
 } from 'react-native-responsive-dimensions';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import Button from '../../Components/Button';
-import {availableTimes} from '../../utils/Dummy';
 import {useDispatch, useSelector} from 'react-redux';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import {followTrainer, unfollowTrainer} from '../../store/Slices/follow';
@@ -31,28 +30,22 @@ import {
 } from '../../store/Slices/favourite';
 import {useCreateChatMutation} from '../../store/Apis/chat';
 import {SaveLogedInUser} from '../../store/Slices/db_ID';
+import followingHook from '../../Hooks/Follow';
 const TrainerProfile = ({route}) => {
   const {data, booking} = route.params;
   console.log('Route Data Is Found======', data);
-  // console.log('Route Bookings Is Found======', booking);
-  // const {dataa, isLoading} = useGetUsersQuery();
+
   const [bookingTime, setbookingTime] = useState<string[]>([]);
   const [readmore, setreadmore] = useState(true);
-  const [follow, setfollow] = useState(false);
   const [heart, setheart] = useState(false);
   const navigation = useNavigation();
+  const {isFollow, unFollow, loading: loadingFollow} = followingHook();
   const authData = useSelector(state => state?.Auth.data);
-  const checkFollowed = useSelector(state => state?.dbId?.dbId);
   const token = useSelector(state => state?.Auth?.data?.token);
-
+  const checkFollowed = useSelector(state => state?.follow);
   console.log('auth data in trainer profile:', authData);
   const dispatch = useDispatch();
-  const isFollowing = useSelector((state: RootState) => state.follow[data._id]);
-  const [favouriteTrainers, setFavoriteTrainers] = useState([]);
   const [filtered, setfiltered] = useState();
-  const isFavourite = useSelector(
-    (state: RootState) => state.favourite[data._id]
-  );
   const {Bookings} = useSelector(state => state?.bookings);
   console.log('Redux Trainer Booking', Bookings);
   const [createChat] = useCreateChatMutation();
@@ -99,33 +92,6 @@ const TrainerProfile = ({route}) => {
     }, [token, checkFollowed])
   );
 
-  const onFollow = async () => {
-    try {
-      const isFollowing = checkFollowed.followedTrainers.includes(data._id);
-
-      if (!isFollowing) {
-        await axiosBaseURL.post('/common/Follow', {
-          userID: authData._id,
-          trainerID: data._id,
-        });
-        dispatch(followTrainer([...checkFollowed?.followedTrainers, data._id]));
-      } else {
-        const response = await axiosBaseURL.post('/common/unFollow', {
-          userID: authData._id,
-          trainerID: data._id,
-        });
-        dispatch(
-          unfollowTrainer(
-            checkFollowed?.followedTrainers.filter(id => id !== data._id)
-          )
-        );
-        console.log('Response', response.data);
-      }
-    } catch (error) {
-      console.log('error====>>>', error);
-      Alert.alert(`${error?.response?.data?.message}`);
-    }
-  };
   const fetchFavoriteTrainers = async () => {
     if (authData.isType === 'user') {
       try {
@@ -192,6 +158,31 @@ const TrainerProfile = ({route}) => {
     }
   };
 
+  const handleFollow = async () => {
+    console.log('Follow Hitted');
+    const userID = authData?._id;
+    const trainerID = data._id;
+
+    // return console.log('ID', trainerID);
+    const res = await isFollow(userID, trainerID);
+
+    if (res) {
+      // await refetch();
+      dispatch(followTrainer(trainerID));
+      console.log('Success', res);
+    }
+  };
+  const handleUnFollow = async () => {
+    const userID = authData?._id;
+    const trainerID = data._id;
+
+    const res = await unFollow(userID, trainerID);
+    if (res) {
+      // await refetch();
+      dispatch(unfollowTrainer(trainerID));
+      console.log('unfollow', res);
+    }
+  };
   const renderItem = ({item, index}: {item: string; index: number}) => {
     return (
       <View
@@ -381,29 +372,34 @@ const TrainerProfile = ({route}) => {
                     alignItems: 'center',
                   }}>
                   <TouchableOpacity
+                    accessibilityRole="button"
+                    activeOpacity={0.8}
                     onPress={() => {
-                      setfollow(!follow);
-                      onFollow();
+                      !checkFollowed.follow.includes(data._id)
+                        ? handleFollow()
+                        : handleUnFollow();
                     }}
                     style={{
                       ...styles.curve,
                       borderRadius: responsiveWidth(10),
-                      backgroundColor: checkFollowed.followedTrainers.includes(
-                        data._id
-                      )
-                        ? '#9FED3A'
-                        : 'white',
+                      backgroundColor: checkFollowed?.follow.includes(data?._id)
+                        ? '#d7d7d7'
+                        : '#9FED3A',
                       marginBottom: responsiveHeight(1),
                     }}>
                     <Text style={styles.blacktext}>
-                      {checkFollowed.followedTrainers.includes(data._id)
+                      {loadingFollow
+                        ? 'Waiting...'
+                        : checkFollowed?.follow.includes(data?._id)
                         ? 'Following'
                         : 'Follow +'}
                     </Text>
                   </TouchableOpacity>
                   <Text
                     style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
-                    {data?.followers?.length > 0 ? data?.followers?.length : 0}
+                    {data?.followers?.length > 0
+                      ? checkFollowed?.follow.length
+                      : 0}
                   </Text>
                   <Text
                     style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>

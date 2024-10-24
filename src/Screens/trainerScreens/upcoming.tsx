@@ -75,13 +75,13 @@ const Previous = () => {
   };
 
   const acceptSession = async (item: any) => {
-    console.log('ID', item);
+    console.log('ID', item?._id);
     try {
       const responce = await axiosBaseURL.post('/common/acceptBooking', {
         bookingId: item?._id, //booking id
       });
 
-      console.log('Res Data', responce?.data?.data);
+      console.log('Res Data', responce?.data);
       getSessions();
     } catch (error) {
       console.log('Errrrr', error);
