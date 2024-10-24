@@ -55,9 +55,7 @@ const Previous = () => {
   const navigation = useNavigation();
   const [sessions, setSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  // useEffect(() => {
-  //   getSessions();
-  // }, []);
+
   useFocusEffect(
     useCallback(() => {
       getSessions();
@@ -71,7 +69,9 @@ const Previous = () => {
       setSessions(responce.data.data);
       setIsLoading(false);
       console.log('Sessions we get in upcoming: ', responce.data.data);
-    } catch (error) {}
+    } catch (error) {
+      console.log('error in getSessions:', error);
+    }
   };
 
   const acceptSession = async (item: any) => {

@@ -9,3 +9,22 @@ export const requestNotificationPermission = async () => {
   }
   return true;
 };
+export const requestMediaPermission = async () => {
+  const permission =
+    Platform.Version >= 33
+      ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+      : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
+
+  try {
+    const hasPermission = await PermissionsAndroid.check(permission);
+    if (hasPermission) {
+      return true;
+    }
+
+    const status = await PermissionsAndroid.request(permission);
+    return status === PermissionsAndroid.RESULTS.GRANTED;
+  } catch (error) {
+    console.error('Permission request error:', error);
+    return false;
+  }
+};

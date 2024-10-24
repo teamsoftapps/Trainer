@@ -47,13 +47,13 @@ const Favourites = () => {
   useFocusEffect(
     useCallback(() => {
       fetchFavoriteTrainers();
-    }, [])
+    }, [favouriteTrainers])
   );
 
   const listemptyComp = () => {
     return (
       <View style={{alignItems: 'center', justifyContent: 'center'}}>
-        {isLoading ? (
+        {isLoading && favouriteTrainers.length < 0 ? (
           <ActivityIndicator size={responsiveHeight(5)} color={'#fff'} />
         ) : (
           <Text
@@ -75,6 +75,7 @@ const Favourites = () => {
         const res = await axiosBaseURL.get(
           `/user/Getfavoritetrainers/${authData._id}`
         );
+        console.log('favoutite trainers:', res);
         setFavoriteTrainers(res.data.data);
       } catch (error) {}
     }

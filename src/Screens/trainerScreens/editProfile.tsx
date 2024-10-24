@@ -44,7 +44,7 @@ const EditProfile = ({route}) => {
   const [Speciality, setSpeciality] = useState([]);
   const [Email, setEmail] = useState('');
   const [Bio, setBio] = useState('');
-  const [Hourly, setHourly] = useState('');
+  const [Hourly, setHourly] = useState();
   const [selectedTime, setSelectedTime] = useState([]);
   const [Address, setAddress] = useState('');
   const [AddressModal, setAddressModal] = useState(false);
@@ -104,17 +104,27 @@ const EditProfile = ({route}) => {
       prev.filter(item => item.key !== speciality.key)
     );
   };
-
   const onTimeChange = (event, selectedTime) => {
     if (event.type === 'set') {
       const currentTime = selectedTime || time;
 
       if (currentTime instanceof Date && !isNaN(currentTime)) {
-        const formattedTime = moment(currentTime).format('HH:mm A');
-        setSelectedTimes(prevTimes => [...prevTimes, formattedTime]);
+        const formattedTime = moment(currentTime).format('hh:mm A');
+
+        setSelectedTimes(prevTimes => {
+          if (!prevTimes.includes(formattedTime)) {
+            return [...prevTimes, formattedTime];
+          } else {
+            showMessage({
+              message: 'Duplication',
+              description: 'Already added!.',
+              type: 'danger',
+            });
+          }
+          return prevTimes;
+        });
         setTime(currentTime);
         setModalVisible(false);
-      } else {
       }
     } else if (event.type === 'dismissed') {
       setModalVisible(false);
@@ -130,12 +140,45 @@ const EditProfile = ({route}) => {
   const onDateChange = (event, selectedValue) => {
     if (event.type === 'set') {
       const currentDate = selectedValue || date;
-      const formattedDate = format(currentDate, 'dd/MM/yyyy');
-      setDob(formattedDate);
-      console.log(formattedDate);
+
+      // Get today's date
+      const today = new Date();
+
+      // Calculate age
+      const age = today.getFullYear() - currentDate.getFullYear();
+      const monthDifference = today.getMonth() - currentDate.getMonth();
+
+      // Adjust age if the birth date hasn't occurred yet this year
+      if (
+        monthDifference < 0 ||
+        (monthDifference === 0 && today.getDate() < currentDate.getDate())
+      ) {
+        age--;
+      }
+
+      // Check if the age is less than 24
+      if (age < 24) {
+        showMessage({
+          message: 'Error',
+          description: 'Age must be 24 years old.',
+          type: 'danger',
+        });
+      } else {
+        const formattedDate = `${String(currentDate.getDate()).padStart(
+          2,
+          '0'
+        )}/${String(currentDate.getMonth() + 1).padStart(
+          2,
+          '0'
+        )}/${currentDate.getFullYear()}`;
+        setDob(formattedDate);
+        console.log(formattedDate);
+      }
     }
+
     setModalVisible2(false);
   };
+
   const toggleModalTimes = () => {
     setModalVisible(true);
   };
@@ -145,32 +188,106 @@ const EditProfile = ({route}) => {
   };
 
   const Function = async () => {
-    try {
-      const response = await axiosBaseURL.post('/trainer/update', {
-        email: logedInTrainer.email,
-        fullName: firstname,
-        Bio: Bio,
-        gender: gender,
-        Dob: dob,
-        Availiblity: selectedTimes,
-        Hourlyrate: Hourly,
-        Speciality: selectedSpecialities,
-        Address: Address,
+    if (!firstname || firstname.length <= 3) {
+      return showMessage({
+        message: 'Validation Error',
+        description: 'Name must be greater than 3 letters.',
+        type: 'danger',
       });
-      dispatch(
-        updateLogin({
-          fullName: firstname,
-          Bio: Bio,
-          gender: gender,
-          Dob: dob,
-          Speciality: [...logedInTrainer?.Speciality, ...selectedSpecialities],
-          Hourlyrate: Hourly,
-          Availiblity: [...logedInTrainer?.Availiblity, ...selectedTimes],
-          Address: Address,
-        })
-      );
+    }
+
+    if (!Bio.trim()) {
+      return showMessage({
+        message: 'Validation Error',
+        description: 'Please edit your bio.',
+        type: 'danger',
+      });
+    }
+
+    if (!gender.trim() || (gender !== 'Male' && gender !== 'Female')) {
+      return showMessage({
+        message: 'Validation Error',
+        description: 'Please select a valid gender (Male or Female).',
+        type: 'danger',
+      });
+    }
+
+    if (!dob) {
+      return showMessage({
+        message: 'Validation Error',
+        description: 'Please enter your date of birth.',
+        type: 'danger',
+      });
+    }
+
+    if (!Array.isArray(selectedTimes) || selectedTimes.length === 0) {
+      return showMessage({
+        message: 'Validation Error',
+        description: 'Please select your availability times.',
+        type: 'danger',
+      });
+    }
+
+    if (Hourly <= 0) {
+      return showMessage({
+        message: 'Validation Error',
+        description: 'Please enter a valid hourly rate.',
+        type: 'danger',
+      });
+    }
+
+    if (
+      !Array.isArray(selectedSpecialities) ||
+      selectedSpecialities.length === 0
+    ) {
+      return showMessage({
+        message: 'Validation Error',
+        description: 'Please select at least one speciality.',
+        type: 'danger',
+      });
+    }
+
+    if (!Address.trim()) {
+      return showMessage({
+        message: 'Validation Error',
+        description: 'Please edit your address.',
+        type: 'danger',
+      });
+    }
+
+    // Create the updateData object based on valid fields
+    const updateData = {};
+    if (logedInTrainer?.email) updateData.email = logedInTrainer.email;
+    if (firstname) updateData.fullName = firstname;
+    if (Bio.trim()) updateData.Bio = Bio;
+    if (gender.trim()) updateData.gender = gender;
+    if (dob) updateData.Dob = dob;
+    if (Array.isArray(selectedTimes) && selectedTimes.length > 0) {
+      updateData.Availiblity = selectedTimes;
+    }
+    if (Hourly > 0) updateData.Hourlyrate = Hourly;
+    if (
+      Array.isArray(selectedSpecialities) &&
+      selectedSpecialities.length > 0
+    ) {
+      updateData.Speciality = selectedSpecialities;
+    }
+    if (Address.trim()) updateData.Address = Address;
+
+    if (Object.keys(updateData).length === 0) {
+      return showMessage({
+        message: 'No Updates',
+        description: 'No fields to update.',
+        type: 'warning',
+      });
+    }
+
+    try {
+      const response = await axiosBaseURL.post('/trainer/update', updateData);
+      dispatch(updateLogin({...logedInTrainer, ...updateData}));
+
       showMessage({
-        message: 'Updates Successfully',
+        message: 'Update Successful',
         description: 'Your data has been updated!',
         type: 'success',
       });
@@ -178,7 +295,7 @@ const EditProfile = ({route}) => {
       navigation.navigate('Profile');
     } catch (error) {
       setUploadError('Upload failed.');
-      console.error('Error uploading file:', error);
+      console.error('Error uploading data:', error);
     } finally {
       setUploading(false);
     }
@@ -209,17 +326,6 @@ const EditProfile = ({route}) => {
                 onChangeText={setfirstname}
                 placeholder={' Enter your full name'}
                 style={styles.FirstNameInput}
-                numberOfLines={1}
-                placeholderTextColor={'white'}
-              />
-            </View>
-            <View style={styles.EmailContainer}>
-              <Text style={{color: '#908C8D'}}>Email</Text>
-              <TextInput
-                placeholder={'Enter your e-mail'}
-                value={Email}
-                onChangeText={setEmail}
-                style={styles.EmailInput}
                 numberOfLines={1}
                 placeholderTextColor={'white'}
               />

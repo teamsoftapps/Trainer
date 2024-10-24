@@ -9,7 +9,10 @@ import TrainerStack from './src/Navigations/TrainerStack';
 import BootSplash from 'react-native-bootsplash';
 import {PermissionsAndroid, Platform} from 'react-native';
 import notifee, {EventType} from '@notifee/react-native';
-import {requestNotificationPermission} from './src/Hooks/Permission';
+import {
+  requestMediaPermission,
+  requestNotificationPermission,
+} from './src/Hooks/Permission';
 const App = () => {
   const authData = useSelector(state => state?.Auth?.data);
   console.log('first', authData);
@@ -21,7 +24,8 @@ const App = () => {
 
     init().finally(async () => {
       await BootSplash.hide({fade: true});
-      requestNotificationPermission()
+      await requestNotificationPermission();
+      await requestMediaPermission()
         .then(result => {
           console.log('Result', result);
         })

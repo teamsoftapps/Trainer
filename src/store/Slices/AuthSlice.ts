@@ -35,6 +35,7 @@ const authSlice = createSlice({
           ? action.payload.Speciality
           : state.data.Speciality,
         Address: action.payload.Address || state.data.Address,
+        profileImage: action.payload.profileImage || state.data.profileImage,
       };
     },
 
