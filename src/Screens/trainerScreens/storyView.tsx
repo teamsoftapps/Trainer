@@ -1,13 +1,5 @@
-import {
-  StyleSheet,
-  Image,
-  View,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  Modal,
-  Keyboard,
-} from 'react-native';
-import React, {useRef, useState} from 'react';
+import {StyleSheet, Image, View} from 'react-native';
+import React, {useRef} from 'react';
 import Header from '../../Components/Header';
 import {useNavigation} from '@react-navigation/native';
 import Button from '../../Components/Button';
@@ -16,20 +8,19 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import ImageCropPicker from 'react-native-image-crop-picker';
-import {Text} from 'react-native-svg';
-import {Images} from '../../utils/Images';
 import {useSelector} from 'react-redux';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import {showMessage} from 'react-native-flash-message';
 import Video, {VideoRef} from 'react-native-video';
 const StoryView = ({route}) => {
   const {data} = route.params;
-  console.log('Data from story screen', data);
   const navigation = useNavigation();
   const trainer_data = useSelector(state => state.Auth.data);
-  console.log('hhhh', trainer_data);
   const videoRef = useRef<VideoRef>(null);
+
+  console.log('Data from story screen', data);
+  console.log('hhhh', trainer_data);
+
   const uploadData = async () => {
     try {
       const formData = new FormData();
@@ -80,13 +71,7 @@ const StoryView = ({route}) => {
     <View style={styles.container}>
       <Header style={styles.header} onPress={() => navigation.goBack()} />
       {data && data.mime === 'video/mp4' ? (
-        <Video
-          source={{uri: data.path}}
-          ref={videoRef}
-          // onBuffer={onBuffer}
-          // onError={onError}
-          style={styles.image}
-        />
+        <Video source={{uri: data.path}} ref={videoRef} style={styles.image} />
       ) : (
         <Image
           source={{uri: data.path}}
