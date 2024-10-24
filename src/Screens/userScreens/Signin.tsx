@@ -31,6 +31,7 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootProps} from '../../Navigations/AuthStack';
 import useToast from '../../Hooks/Toast';
 import {showMessage} from 'react-native-flash-message';
+import {followTrainer, saveFollowers} from '../../store/Slices/follow';
 
 type Props = NativeStackScreenProps<RootProps, 'signin'>;
 
@@ -64,6 +65,7 @@ const Signin: React.FC<Props> = ({route}) => {
           console.log('----------------++++++++++', res.data?.data);
           showToast('Success', 'User logged In Successfully', 'success');
           dispatch(IsLogin(res?.data?.data));
+          dispatch(saveFollowers(res.data?.data.followedTrainers));
         }
         if (res.error) {
           console.log('Errorrrr', res.error);

@@ -145,14 +145,14 @@ const ReviewBooking = ({route}) => {
         stripeId,
         totalAmount
       );
-
+      console.log('PAyment Intent', paymentIntent);
       const {error} = await initPaymentSheet({
         customerId: stripeId,
         customerEphemeralKeySecret: ephemeralKey,
         paymentIntentClientSecret: paymentIntent,
         merchantDisplayName: "Stern's GYM",
         allowsDelayedPaymentMethods: true,
-        allowsRemovalOfLastSavedPaymentMethod: true,
+        // allowsRemovalOfLastSavedPaymentMethod: true,
       });
 
       if (error) {

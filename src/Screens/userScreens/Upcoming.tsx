@@ -28,7 +28,7 @@ const Upcoming = () => {
   const [bookings, setBookings] = useState([]);
   const [deleteIndex, setDeleteIndex] = useState(null);
   const [isDelete, setDelete] = useState(false);
-  const AuthData = useSelector(state => state.Auth.data);
+  const AuthData = useSelector((state: any) => state.Auth.data);
   const [loading, setloading] = useState(false);
   const [createChat] = useCreateChatMutation();
   useFocusEffect(
@@ -62,26 +62,12 @@ const Upcoming = () => {
           bookingId: bookingId,
         },
       });
-      await setBookings(prevBookings =>
+      setBookings(prevBookings =>
         prevBookings.filter(booking => booking?._id !== bookingId)
       );
       setDelete(false);
     } catch (error) {}
   };
-  // const deleteBookings = async bookingId => {
-  //   try {
-  //     const response = await axiosBaseURL.delete('/user/DeleteBooking', {
-  //       data: {
-  //         token: AuthData.token,
-  //         bookingId: bookingId,
-  //       },
-  //     });
-  //     await setBookings(prevBookings =>
-  //       prevBookings.filter(booking => booking._id !== bookingId)
-  //     );
-  //     setDelete(false);
-  //   } catch (error) {}
-  // };
 
   const EmptyComp = () => {
     return (
@@ -101,7 +87,7 @@ const Upcoming = () => {
       </View>
     );
   };
-  if (bookings.length === 0 && loading) {
+  if (bookings?.length === 0 && loading) {
     return (
       <WrapperContainer
         style={{
