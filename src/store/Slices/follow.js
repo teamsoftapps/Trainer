@@ -11,7 +11,7 @@ const followSlice = createSlice({
     saveFollowers: (state, action) => {
       state.follow = action.payload;
     },
-    removeFollowers: (state: any, action) => {
+    removeFollowers: (state, action) => {
       state.follow = null;
     },
     followTrainer: (state, action) => {
@@ -20,10 +20,10 @@ const followSlice = createSlice({
         state.follow.push(action.payload); // Add trainerID to the array
       }
     },
-    unfollowTrainer: (state, action: PayloadAction<{trainerID: string}>) => {
+    unfollowTrainer: (state, action) => {
       // Remove the trainerID from the follow array
       state.follow = state.follow.filter(
-        trainerID => trainerID !== action.payload
+        trainerID => trainerID !== action.payload,
       );
     },
   },

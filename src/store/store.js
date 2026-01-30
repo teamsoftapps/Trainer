@@ -11,22 +11,22 @@ import {messages} from './Apis/messages';
 
 const storage = new MMKV();
 const reduxPersistStorage = {
-  setItem: (key: string, value: string) => {
+  setItem: (key, value) => {
     storage.set(key, value);
     return Promise.resolve(true);
   },
 
-  getItem: (key: string) => {
+  getItem: key => {
     const Value = storage.getString(key);
     return Promise.resolve(Value);
   },
 
-  deleteItem: (key: string) => {
+  deleteItem: key => {
     storage.delete(key);
     return Promise.resolve();
   },
 };
-const persistConfig: any = {
+const persistConfig = {
   key: 'root',
   storage: reduxPersistStorage,
   blacklist: [],
@@ -45,7 +45,7 @@ export const store = configureStore({
       userAuth.middleware,
       Posts.middleware,
       Chats.middleware,
-      messages.middleware
+      messages.middleware,
     ),
 });
 export const persistore = persistStore(store);

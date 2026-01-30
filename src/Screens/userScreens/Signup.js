@@ -8,7 +8,6 @@ import {
   View,
   Image,
   ScrollView,
-  Alert,
   Modal,
   TouchableWithoutFeedback,
 } from 'react-native';
@@ -23,18 +22,47 @@ import {FontFamily, Images} from '../../utils/Images.js';
 import WrapperContainer from '../../Components/Wrapper.js';
 import FlashMessage from 'react-native-flash-message';
 import {showMessage} from 'react-native-flash-message';
-import {useDispatch, useSelector} from 'react-redux';
-import {IsLogin} from '../../store/Slices/AuthSlice.js';
 import {useSignUpUserMutation} from '../../store/Apis/userAuth.js';
 import {useSignUpTrainerMutation} from '../../store/Apis/trainerAuth.js';
 import useToast from '../../Hooks/Toast.js';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import CountryPicker from 'react-native-country-picker-modal';
+const fitnessOptions = [
+  'Adventure Sports Coaching',
+  'Boxing',
+  'Core Strength Training',
+  'Cross-Fit',
+  'Cycling',
+  'Flexibility and Mobility Training',
+  'Functional Training',
+  'Group Fitness Classes',
+  'High-Intensity Interval Training (HIIT)',
+  'Kickboxing',
+  'Martial Arts',
+  'Nutrition Coaching',
+  'Pilates',
+  'Post-Rehabilitation Training',
+];
 
+const goalOptions = [
+  'Body Composition',
+  'Enhanced Athletic Performance',
+  'Event Preparation',
+  'General Fitness',
+  'Healthy Aging',
+  'Improved Endurance',
+  'Mind-Body Connection',
+  'Muscle Gain',
+  'Posture Correction',
+  'Rehabilitation',
+  'Sport-Specific Training',
+  'Stress Relief',
+  'Weight Loss',
+];
 const Signup = ({route, navigation}) => {
   const user = route.params;
   console.log('Routes', user);
   const {showToast} = useToast();
-  const dispatch = useDispatch();
   const [SignUpUser, {isLoading: SignupUserLoading}] = useSignUpUserMutation();
   const [SignUpTrainer, {isLoading: SignupTrainerLoading}] =
     useSignUpTrainerMutation();
@@ -50,12 +78,30 @@ const Signup = ({route, navigation}) => {
   const [modalVisible2, setModalVisible2] = useState(false);
   const [date, setDate] = useState(new Date());
   const [dob, setDob] = useState('');
+
+  const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState('1');
+  const [country, setCountry] = useState('US');
+  const [withCallingCode, setWithCallingCode] = useState(true);
+  const [showPicker, setShowPicker] = useState(false);
+
+  const [fitnessPreference, setFitnessPreference] = useState('');
+  const [goal, setGoal] = useState('');
+
+  const [fitnessModal, setFitnessModal] = useState(false);
+  const [goalModal, setGoalModal] = useState(false);
+
+  const [agree, setAgree] = useState(false);
+  const [focused, setFocused] = useState(null);
   // Icon touch activate Input
   const dobRef = useRef(null);
   const nameRef = useRef(null);
   const emailRef = useRef(null);
-  const addressRef = useRef(null);
-
+  const phoneRef = useRef(null);
+  const passwordRef = useRef(null);
+  const confirmRef = useRef(null);
+  const weightRef = useRef(null);
+  const heightRef = useRef(null);
   // Formik states to ensure correct details are entered
   const [secure, setsecure] = useState(false);
   const [secure2, setsecure2] = useState(false);
@@ -72,8 +118,6 @@ const Signup = ({route, navigation}) => {
     {label: 'Male', value: 'Male'},
     {label: 'Female', value: 'Female'},
   ];
-
-  const emailPattern = /^[^\s@]+@gmail\.com$/;
 
   const toggleModalDob = () => {
     setModalVisible2(true);
@@ -198,6 +242,9 @@ const Signup = ({route, navigation}) => {
 
     try {
       let res;
+      if (!agree) {
+        return showToast('Error', 'Please accept Terms & Conditions', 'danger');
+      }
 
       if (user.checkUser === 'user') {
         res = await SignUpUser(payload);
@@ -220,6 +267,32 @@ const Signup = ({route, navigation}) => {
       showToast('Error', error?.message, 'danger');
       console.error('Error:', error);
     }
+  };
+
+  const SelectionModal = ({visible, onClose, data, onSelect}) => {
+    return (
+      <Modal transparent animationType="slide" visible={visible}>
+        <TouchableWithoutFeedback onPress={onClose}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalBox}>
+              <ScrollView>
+                {data.map((item, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.modalItem}
+                    onPress={() => {
+                      onSelect(item);
+                      onClose();
+                    }}>
+                    <Text style={{color: '#fff'}}>{item}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    );
   };
 
   return (
@@ -260,7 +333,7 @@ const Signup = ({route, navigation}) => {
                   paddingHorizontal: responsiveWidth(5),
                   paddingVertical: responsiveWidth(2),
                   borderWidth: 1,
-                  borderColor: namedisabled ? 'red' : '#908C8D',
+                  borderColor: focused === 'name' ? '#9FED3A' : '#908C8D',
                   borderRadius: 17,
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -270,6 +343,8 @@ const Signup = ({route, navigation}) => {
                   <Text style={{color: '#908C8D'}}>Full name</Text>
                   <TextInput
                     ref={nameRef}
+                    onFocus={() => setFocused('name')}
+                    onBlur={() => setFocused(null)}
                     placeholder="Enter name"
                     value={name || undefined}
                     onChangeText={setname}
@@ -300,7 +375,7 @@ const Signup = ({route, navigation}) => {
                   paddingHorizontal: responsiveWidth(5),
                   paddingVertical: responsiveWidth(2),
                   borderWidth: 1,
-                  borderColor: emaildisabled ? 'red' : '#908C8D',
+                  borderColor: focused === 'email' ? '#9FED3A' : '#908C8D',
                   borderRadius: 17,
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -310,6 +385,8 @@ const Signup = ({route, navigation}) => {
                   <Text style={{color: '#908C8D'}}>Email</Text>
                   <TextInput
                     ref={emailRef}
+                    onFocus={() => setFocused('email')}
+                    onBlur={() => setFocused(null)}
                     placeholder="Enter email"
                     value={email || undefined}
                     onChangeText={setemail}
@@ -331,13 +408,75 @@ const Signup = ({route, navigation}) => {
                   />
                 </TouchableOpacity>
               </View>
+
               <View
                 style={{
                   width: responsiveWidth(85),
                   paddingHorizontal: responsiveWidth(5),
                   paddingVertical: responsiveWidth(2),
                   borderWidth: 1,
-                  borderColor: passworddisabled ? 'red' : '#908C8D',
+                  borderColor: focused === 'phone' ? '#9FED3A' : '#908C8D',
+                  borderRadius: 17,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}>
+                {/* LEFT SIDE → Country Picker */}
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingRight: 10,
+                    borderRightWidth: 1,
+                    borderRightColor: '#555',
+                  }}
+                  onPress={() => setShowPicker(true)}>
+                  <CountryPicker
+                    countryCode={country}
+                    withFlag
+                    withCallingCode
+                    withFilter
+                    withEmoji
+                    withModal
+                    visible={showPicker}
+                    onClose={() => setShowPicker(false)}
+                    onSelect={c => {
+                      setCountry(c.cca2);
+                      setCountryCode(c.callingCode[0]);
+                      setShowPicker(false);
+                    }}
+                  />
+
+                  <Text style={{color: '#fff', marginLeft: 6}}>
+                    +{countryCode}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* RIGHT SIDE → Number */}
+                <TextInput
+                  ref={phoneRef}
+                  onFocus={() => setFocused('phone')}
+                  onBlur={() => setFocused(null)}
+                  keyboardType="phone-pad"
+                  placeholder="Phone Number"
+                  placeholderTextColor="#908C8D"
+                  value={phone}
+                  onChangeText={setPhone}
+                  style={{
+                    color: '#fff',
+                    flex: 1,
+                    paddingLeft: 12,
+                  }}
+                />
+              </View>
+
+              <View
+                style={{
+                  width: responsiveWidth(85),
+                  paddingHorizontal: responsiveWidth(5),
+                  paddingVertical: responsiveWidth(2),
+                  borderWidth: 1,
+                  borderColor: focused === 'password' ? '#9FED3A' : '#908C8D',
                   borderRadius: 17,
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -346,6 +485,9 @@ const Signup = ({route, navigation}) => {
                 <View>
                   <Text style={{color: '#908C8D'}}>Password</Text>
                   <TextInput
+                    ref={passwordRef}
+                    onFocus={() => setFocused('password')}
+                    onBlur={() => setFocused(null)}
                     placeholder="Enter Password"
                     secureTextEntry={secure}
                     value={password || undefined}
@@ -378,7 +520,7 @@ const Signup = ({route, navigation}) => {
                   paddingHorizontal: responsiveWidth(5),
                   paddingVertical: responsiveWidth(2),
                   borderWidth: 1,
-                  borderColor: passworddisabled ? 'red' : '#908C8D',
+                  borderColor: focused === 'confirm' ? '#9FED3A' : '#908C8D',
                   borderRadius: 17,
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -387,6 +529,9 @@ const Signup = ({route, navigation}) => {
                 <View>
                   <Text style={{color: '#908C8D'}}>Confirm Password</Text>
                   <TextInput
+                    ref={confirmRef}
+                    onFocus={() => setFocused('confirm')}
+                    onBlur={() => setFocused(null)}
                     placeholder="Enter Password"
                     secureTextEntry={secure2}
                     value={confirmpassword || undefined}
@@ -428,7 +573,7 @@ const Signup = ({route, navigation}) => {
                   borderRadius: 10,
                   paddingHorizontal: responsiveWidth(4),
                   paddingTop: responsiveWidth(2),
-                  borderColor: genderdisabled ? 'red' : '#908C8D',
+                  borderColor: focused === 'name' ? '#9FED3A' : '#908C8D',
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
@@ -466,29 +611,13 @@ const Signup = ({route, navigation}) => {
                   borderRadius: 10,
                   paddingHorizontal: responsiveWidth(4),
                   paddingVertical: responsiveWidth(2),
-                  borderColor: DOBdisabled ? 'red' : '#908C8D',
+                  borderColor: focused === 'name' ? '#9FED3A' : '#908C8D',
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
                 <View style={{width: responsiveWidth(27)}}>
                   <Text style={{color: '#908C8D'}}>Date of Birth</Text>
-                  {/* <MaskInput
-                    ref={dobRef}
-                    value={DoB}
-                    keyboardType="numeric"
-                    placeholderTextColor="#908C8D"
-                    focusable={true}
-                    onChangeText={setDoB}
-                    mask={Masks.DATE_DDMMYYYY}
-                    style={{
-                      padding: 0,
-                      fontFamily: FontFamily.Semi_Bold,
-                      color: 'white',
-                      fontSize: responsiveFontSize(2),
-                      width: responsiveWidth(67),
-                      height: responsiveHeight(3),
-                    }}
-                  /> */}
+
                   {dob ? (
                     <Text
                       style={{
@@ -553,13 +682,16 @@ const Signup = ({route, navigation}) => {
                   borderRadius: 10,
                   paddingHorizontal: responsiveWidth(4),
                   paddingVertical: responsiveWidth(2),
-                  borderColor: Weightdisabled ? 'red' : '#908C8D',
+                  borderColor: focused === 'weight' ? '#9FED3A' : '#908C8D',
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
                 <View style={{width: responsiveWidth(27)}}>
                   <Text style={{color: '#908C8D'}}>Weight in lbs</Text>
                   <TextInput
+                    ref={weightRef}
+                    onFocus={() => setFocused('weight')}
+                    onBlur={() => setFocused(null)}
                     keyboardType="numeric"
                     placeholder="Your Weight"
                     placeholderTextColor={'#908C8D'}
@@ -582,13 +714,16 @@ const Signup = ({route, navigation}) => {
                   borderRadius: 10,
                   paddingHorizontal: responsiveWidth(4),
                   paddingVertical: responsiveWidth(2),
-                  borderColor: Heightdisabled ? 'red' : '#908C8D',
+                  borderColor: focused === 'height' ? '#9FED3A' : '#908C8D',
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
                 <View style={{width: responsiveWidth(27)}}>
                   <Text style={{color: '#908C8D'}}>Height in ft</Text>
                   <TextInput
+                    ref={heightRef}
+                    onFocus={() => setFocused('height')}
+                    onBlur={() => setFocused(null)}
                     keyboardType="numeric"
                     placeholder="Your Height"
                     placeholderTextColor={'#908C8D'}
@@ -605,7 +740,24 @@ const Signup = ({route, navigation}) => {
                 </View>
               </View>
             </View>
-            <View
+            <TouchableOpacity
+              style={styles.inputBox}
+              onPress={() => setFitnessModal(true)}>
+              <Text style={{color: '#908C8D'}}>Fitness Preference</Text>
+
+              <Text style={{color: '#fff'}}>
+                {fitnessPreference || 'Select Preference'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.inputBox}
+              onPress={() => setGoalModal(true)}>
+              <Text style={{color: '#908C8D'}}>Goal</Text>
+
+              <Text style={{color: '#fff'}}>{goal || 'Select Goal'}</Text>
+            </TouchableOpacity>
+            {/* <View
               style={{
                 width: responsiveWidth(85),
                 paddingHorizontal: responsiveWidth(5),
@@ -638,7 +790,7 @@ const Signup = ({route, navigation}) => {
                   placeholderTextColor={'#908C8D'}
                 />
               </View>
-              <TouchableOpacity onPress={handleEmailInput}>
+              <TouchableOpacity>
                 <Image
                   source={Images.LocationPin}
                   resizeMode="contain"
@@ -649,24 +801,23 @@ const Signup = ({route, navigation}) => {
                   }}
                 />
               </TouchableOpacity>
-            </View>
+            </View> */}
 
-            {/* <GooglePlacesAutocomplete
-              placeholder="Enter your address"
-              onPress={handleAddressSelect}
-              query={{
-                key: MAP_API_KEY,
-                language: 'en',
-              }}
-              styles={{
-                textInput: {
-                  height: 40,
-                  borderColor: 'gray',
-                  borderWidth: 1,
-                  marginBottom: 20,
-                },
-              }}
-            /> */}
+            <View style={styles.termsRow}>
+              <TouchableOpacity
+                style={[
+                  styles.checkbox,
+                  {backgroundColor: agree ? '#9FED3A' : 'transparent'},
+                ]}
+                onPress={() => setAgree(!agree)}
+              />
+
+              <Text style={styles.termsText}>
+                I agree to the{' '}
+                <Text style={{color: '#9FED3A'}}>Terms & Conditions</Text> &{' '}
+                <Text style={{color: '#9FED3A'}}>Privacy Policy</Text>
+              </Text>
+            </View>
 
             <ButtonComp
               text="Sign Up"
@@ -679,6 +830,13 @@ const Signup = ({route, navigation}) => {
               }}
               isLoading={SignupUserLoading || SignupTrainerLoading}
             />
+            <Text style={{color: '#aaa', marginTop: 20}}>Or continue with</Text>
+
+            <View style={styles.socialRow}>
+              <Image source={Images.google} style={styles.socialIcon} />
+              <Image source={Images.facebook} style={styles.socialIcon} />
+              <Image source={Images.apple} style={styles.socialIcon} />
+            </View>
             <View
               style={{
                 width: '85%',
@@ -712,6 +870,19 @@ const Signup = ({route, navigation}) => {
             </View>
           </View>
         </ImageBackground>
+        <SelectionModal
+          visible={fitnessModal}
+          onClose={() => setFitnessModal(false)}
+          data={fitnessOptions}
+          onSelect={setFitnessPreference}
+        />
+
+        <SelectionModal
+          visible={goalModal}
+          onClose={() => setGoalModal(false)}
+          data={goalOptions}
+          onSelect={setGoal}
+        />
       </WrapperContainer>
       <FlashMessage position="top" />
     </ScrollView>
@@ -757,5 +928,47 @@ const styles = StyleSheet.create({
   inputSearchStyle: {
     height: 40,
     fontSize: 16,
+  },
+  inputBox: {
+    width: responsiveWidth(85),
+    padding: 15,
+    borderWidth: 1,
+    borderColor: '#908C8D',
+    // borderColor: focused === 'name' ? '#9FED3A' : '#908C8D',
+    borderRadius: 17,
+    marginTop: 15,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+
+  modalBox: {
+    backgroundColor: '#111',
+    maxHeight: '60%',
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    padding: 20,
+  },
+
+  modalItem: {
+    paddingVertical: 18,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#333',
+  },
+
+  socialRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginTop: 15,
+    gap: responsiveWidth(10),
+  },
+
+  socialIcon: {
+    width: responsiveWidth(15),
+    height: responsiveWidth(15),
+    resizeMode: 'contain',
   },
 });

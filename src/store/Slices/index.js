@@ -1,5 +1,5 @@
 import {combineReducers} from '@reduxjs/toolkit';
-import authSlice from '../Slices/AuthSlice';
+import authSlice from './AuthSlice';
 import {TrainerAuth} from '../Apis/trainerAuth';
 import {userAuth} from '../Apis/userAuth';
 import {Posts} from '../Apis/Post';

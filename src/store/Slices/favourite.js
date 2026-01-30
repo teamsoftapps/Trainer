@@ -1,20 +1,16 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
-interface FollowState {
-  [trainerID: string]: boolean;
-}
-
-const initialState: FollowState = {};
+const initialState = {};
 
 const favouriteSlice = createSlice({
   name: 'favourite',
   initialState,
   reducers: {
-    favouriteTrainer: (state, action: PayloadAction<{trainerID: string}>) => {
+    favouriteTrainer: (state, action) => {
       const {trainerID} = action.payload;
       state[trainerID] = true;
     },
-    unfavouriteTrainer: (state, action: PayloadAction<{trainerID: string}>) => {
+    unfavouriteTrainer: (state, action) => {
       const {trainerID} = action.payload;
       delete state[trainerID];
     },
