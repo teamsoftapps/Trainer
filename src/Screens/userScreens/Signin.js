@@ -1,8 +1,6 @@
 import {
-  Alert,
   Image,
   ImageBackground,
-  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -17,21 +15,17 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import ButtonComp from '../../Components/ButtonComp';
-import {useNavigation, useRoute} from '@react-navigation/native';
-
+import {useNavigation} from '@react-navigation/native';
 import WrapperContainer from '../../Components/Wrapper';
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import {useSignInUserMutation} from '../../store/Apis/userAuth';
-import {
-  useSignInTrainerMutation,
-  useSignUpTrainerMutation,
-} from '../../store/Apis/trainerAuth';
+import {useSignInTrainerMutation} from '../../store/Apis/trainerAuth';
 import {IsLogin} from '../../store/Slices/AuthSlice';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {RootProps} from '../../Navigations/AuthStack';
 import useToast from '../../Hooks/Toast';
 import {showMessage} from 'react-native-flash-message';
-import {followTrainer, saveFollowers} from '../../store/Slices/follow';
+import {saveFollowers} from '../../store/Slices/follow';
+import auth from '@react-native-firebase/auth';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 const Signin = ({route}) => {
   const [email, setemail] = useState('');

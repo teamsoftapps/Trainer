@@ -7,13 +7,16 @@ import {useSelector} from 'react-redux';
 import {StripeProvider} from '@stripe/stripe-react-native';
 import TrainerStack from './src/Navigations/TrainerStack';
 import BootSplash from 'react-native-bootsplash';
-import {PermissionsAndroid, Platform} from 'react-native';
-import notifee, {EventType} from '@notifee/react-native';
 import {
   requestMediaPermission,
   requestNotificationPermission,
 } from './src/Hooks/Permission';
+import {configureGoogle} from './src/config/googleAuth';
 const App = () => {
+  useEffect(() => {
+    configureGoogle();
+  }, []);
+
   const authData = useSelector(state => state?.Auth?.data);
   console.log('first', authData);
 

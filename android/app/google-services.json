@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "791670162595",
+    "project_id": "stern-s-gym-trainers-connect",
+    "storage_bucket": "stern-s-gym-trainers-connect.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:791670162595:android:3ae3ab2471e4f263262b16",
+        "android_client_info": {
+          "package_name": "com.trainer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "791670162595-7k9soro0pnf7abdkjg0bs26kgckn5n0o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trainer",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "791670162595-133lqo6v65dgvjjajjssh6hcqn5ds3mh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC01YvczckLOq89IZbk8H1fY6-bchEr4Oo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "791670162595-133lqo6v65dgvjjajjssh6hcqn5ds3mh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "791670162595-qn85i13jadlq3egiqfenciggkkr3u8ll.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.trainer"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

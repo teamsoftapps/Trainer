@@ -11,7 +11,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   responsiveFontSize,
   responsiveHeight,
@@ -27,6 +27,11 @@ import {useSignUpTrainerMutation} from '../../store/Apis/trainerAuth.js';
 import useToast from '../../Hooks/Toast.js';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CountryPicker from 'react-native-country-picker-modal';
+import auth from '@react-native-firebase/auth';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {baseUrl} from '../../services/Urls.js';
+import {useDispatch} from 'react-redux';
+import {IsLogin} from '../../store/Slices/AuthSlice.js';
 const fitnessOptions = [
   'Adventure Sports Coaching',
   'Boxing',
@@ -62,6 +67,7 @@ const goalOptions = [
 const Signup = ({route, navigation}) => {
   const user = route.params;
   console.log('Routes', user);
+  const dispatch = useDispatch();
   const {showToast} = useToast();
   const [SignUpUser, {isLoading: SignupUserLoading}] = useSignUpUserMutation();
   const [SignUpTrainer, {isLoading: SignupTrainerLoading}] =
@@ -82,7 +88,6 @@ const Signup = ({route, navigation}) => {
   const [phone, setPhone] = useState('');
   const [countryCode, setCountryCode] = useState('1');
   const [country, setCountry] = useState('US');
-  const [withCallingCode, setWithCallingCode] = useState(true);
   const [showPicker, setShowPicker] = useState(false);
 
   const [fitnessPreference, setFitnessPreference] = useState('');
@@ -91,8 +96,8 @@ const Signup = ({route, navigation}) => {
   const [fitnessModal, setFitnessModal] = useState(false);
   const [goalModal, setGoalModal] = useState(false);
 
-  const [agree, setAgree] = useState(false);
   const [focused, setFocused] = useState(null);
+
   // Icon touch activate Input
   const dobRef = useRef(null);
   const nameRef = useRef(null);
@@ -102,17 +107,10 @@ const Signup = ({route, navigation}) => {
   const confirmRef = useRef(null);
   const weightRef = useRef(null);
   const heightRef = useRef(null);
+
   // Formik states to ensure correct details are entered
   const [secure, setsecure] = useState(false);
   const [secure2, setsecure2] = useState(false);
-  const [namedisabled, setnamedisable] = useState(false);
-  const [emaildisabled, setemaildisable] = useState(false);
-  const [passworddisabled, setpassworddisable] = useState(false);
-  const [genderdisabled, setgenderdisable] = useState(false);
-  const [DOBdisabled, setDOBdisable] = useState(false);
-  const [Weightdisabled, setWeightdisable] = useState(false);
-  const [Heightdisabled, setHeightdisable] = useState(false);
-  const [Addressdisabled, setaddressdisabled] = useState(false);
 
   const data = [
     {label: 'Male', value: 'Male'},
@@ -242,9 +240,6 @@ const Signup = ({route, navigation}) => {
 
     try {
       let res;
-      if (!agree) {
-        return showToast('Error', 'Please accept Terms & Conditions', 'danger');
-      }
 
       if (user.checkUser === 'user') {
         res = await SignUpUser(payload);
@@ -266,6 +261,95 @@ const Signup = ({route, navigation}) => {
     } catch (error) {
       showToast('Error', error?.message, 'danger');
       console.error('Error:', error);
+    }
+  };
+
+  // const handleGoogleSignup = async () => {
+  //   try {
+  //     await GoogleSignin.hasPlayServices();
+
+  //     const {idToken} = await GoogleSignin.signIn();
+
+  //     const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+  //     const userCredential =
+  //       await auth().signInWithCredential(googleCredential);
+
+  //     const user = userCredential.user;
+
+  //     // 🔥 SEND TO BACKEND
+  //     const res = await fetch(`${baseUrl}common/auth/google`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         role: user.checkUser,
+  //         email: user.email,
+  //         fullName: user.displayName,
+  //         profileImage: user.photoURL,
+  //         firebaseUID: user.uid,
+  //       }),
+  //     });
+
+  //     const data = await res.json();
+
+  //     // redux save
+  //     dispatch(IsLogin(data.data));
+  //   } catch (error) {
+  //     console.log(error);
+  //     showToast('Error', 'Google login failed', 'danger');
+  //   }
+  // };
+
+  const handleGoogleSignup = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+
+      // ✅ clear old session (VERY IMPORTANT)
+      await GoogleSignin.signOut();
+
+      // ✅ get fresh token
+      const userInfo = await GoogleSignin.signIn();
+
+      console.log('User info from google:', userInfo);
+
+      const idToken = userInfo.data.idToken;
+
+      if (!idToken) {
+        throw new Error('No idToken received from Google');
+      }
+
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+      const userCredential =
+        await auth().signInWithCredential(googleCredential);
+
+      const firebaseUser = userCredential.user;
+
+      console.log('Firebase User:', firebaseUser);
+
+      // ✅ SEND TO BACKEND
+      const res = await fetch(`${baseUrl}common/auth/google`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          role: route.params.checkUser, // 🔥 FIXED
+          email: firebaseUser.email,
+          fullName: firebaseUser.displayName,
+          profileImage: firebaseUser.photoURL,
+          firebaseUID: firebaseUser.uid,
+        }),
+      });
+
+      const data = await res.json();
+
+      dispatch(IsLogin(data.data));
+    } catch (error) {
+      console.log('Google Error:', error);
+      showToast('Error', 'Google login failed', 'danger');
     }
   };
 
@@ -757,67 +841,6 @@ const Signup = ({route, navigation}) => {
 
               <Text style={{color: '#fff'}}>{goal || 'Select Goal'}</Text>
             </TouchableOpacity>
-            {/* <View
-              style={{
-                width: responsiveWidth(85),
-                paddingHorizontal: responsiveWidth(5),
-                paddingVertical: responsiveWidth(2),
-                marginTop: responsiveHeight(3),
-                borderWidth: 1,
-                borderColor: Addressdisabled ? 'red' : '#908C8D',
-                borderRadius: 17,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}>
-              <View>
-                <Text style={{color: '#908C8D'}}>Address</Text>
-                <TextInput
-                  ref={addressRef}
-                  placeholder="i.e 43 Bourke street, NSW 987"
-                  value={address}
-                  onChangeText={text => {
-                    setAddress(text);
-                  }}
-                  style={{
-                    padding: 0,
-                    fontFamily: FontFamily.Semi_Bold,
-                    color: 'white',
-                    fontSize: responsiveFontSize(2),
-                    width: responsiveWidth(68),
-                  }}
-                  numberOfLines={1}
-                  placeholderTextColor={'#908C8D'}
-                />
-              </View>
-              <TouchableOpacity>
-                <Image
-                  source={Images.LocationPin}
-                  resizeMode="contain"
-                  style={{
-                    width: responsiveWidth(5),
-                    height: responsiveWidth(5),
-                    tintColor: '#908C8D',
-                  }}
-                />
-              </TouchableOpacity>
-            </View> */}
-
-            <View style={styles.termsRow}>
-              <TouchableOpacity
-                style={[
-                  styles.checkbox,
-                  {backgroundColor: agree ? '#9FED3A' : 'transparent'},
-                ]}
-                onPress={() => setAgree(!agree)}
-              />
-
-              <Text style={styles.termsText}>
-                I agree to the{' '}
-                <Text style={{color: '#9FED3A'}}>Terms & Conditions</Text> &{' '}
-                <Text style={{color: '#9FED3A'}}>Privacy Policy</Text>
-              </Text>
-            </View>
 
             <ButtonComp
               text="Sign Up"
@@ -833,8 +856,10 @@ const Signup = ({route, navigation}) => {
             <Text style={{color: '#aaa', marginTop: 20}}>Or continue with</Text>
 
             <View style={styles.socialRow}>
-              <Image source={Images.google} style={styles.socialIcon} />
-              <Image source={Images.facebook} style={styles.socialIcon} />
+              <TouchableOpacity onPress={handleGoogleSignup}>
+                <Image source={Images.google} style={styles.socialIcon} />
+              </TouchableOpacity>
+              {/* <Image source={Images.facebook} style={styles.socialIcon} /> */}
               <Image source={Images.apple} style={styles.socialIcon} />
             </View>
             <View
