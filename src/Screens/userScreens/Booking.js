@@ -15,7 +15,6 @@ import {Images} from '../../utils/Images';
 
 const Tab = createMaterialTopTabNavigator();
 const Booking = () => {
-  const [first, setfirst] = useState(false);
   const navigation = useNavigation();
   return (
     <WrapperContainer style={{backgroundColor: '#181818'}}>

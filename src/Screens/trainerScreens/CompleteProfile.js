@@ -21,6 +21,7 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
+import {PermissionsAndroid, NativeModules, Platform} from 'react-native';
 import {FontFamily, Images} from '../../utils/Images';
 import ButtonComp from '../../Components/ButtonComp';
 import {availableTimes, Specialities, TimeSlots} from '../../utils/Dummy';
@@ -33,15 +34,14 @@ import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import {IsLogin, updateLogin} from '../../store/Slices/AuthSlice';
+import Geolocation from '@react-native-community/geolocation';
 const CompleteProfile = ({route}) => {
   // Data States
   const [firstname, setfirstname] = useState('');
-  const [secondname, setsecondname] = useState('');
   const [Email, setEmail] = useState('');
   const [Bio, setBio] = useState('');
   const [Hourly, setHourly] = useState('');
   const [Speciality, setSpeciality] = useState([]);
-  const [selectedTime, setSelectedTime] = useState([]);
   const navigation = useNavigation();
 
   // Formik States
@@ -64,6 +64,8 @@ const CompleteProfile = ({route}) => {
   const logedInTrainer = useSelector(state => state.Auth.data);
   console.log('trainer data in complete profile: ', logedInTrainer);
   const dispatch = useDispatch();
+
+  const {LocationModule} = NativeModules;
 
   // Formik Conditions
   const condition1 = Hourly !== '0' && Hourly !== '';
@@ -171,12 +173,17 @@ const CompleteProfile = ({route}) => {
       dispatch(updateLogin(payload));
 
       console.log('responce in complete profile:', response.data);
+      // showMessage({
+      //   message: 'Updates Succesfully',
+      //   description: 'your data has been updated!',
+      //   type: 'success',
+      // });
       showMessage({
-        message: 'Updates Succesfully',
-        description: 'your data has been updated!',
+        message: 'Profile completed!',
+        description: 'Choose your subscription plan',
         type: 'success',
       });
-      navigation.replace('TrainerBttomStack');
+      navigation.replace('Subscription');
 
       console.log('Upload successful:', response.data);
     } catch (error) {
@@ -185,37 +192,6 @@ const CompleteProfile = ({route}) => {
     } finally {
       setUploading(false);
     }
-  };
-
-  const handleChoosePhoto = () => {
-    ImageCropPicker.openPicker({
-      mediaType: 'photo',
-      cropping: true,
-    })
-      .then(image => {
-        setImageUri(image.path);
-        uploadImage(image);
-        dispatch(saveProfileImage(image.path));
-        console.log('Image Object', image);
-        setModal(false);
-      })
-      .catch(error => {});
-  };
-
-  const handleTakePhoto = async () => {
-    ImageCropPicker.openCamera({
-      mediaType: 'photo',
-      cropping: true,
-    })
-      .then(image => {
-        setImageUri(image.path);
-
-        uploadImage(image);
-        dispatch(saveProfileImage(image.path));
-        console.log('Image Object', image);
-        setModal(false);
-      })
-      .catch(error => {});
   };
 
   const uploadImage = async image => {
@@ -252,14 +228,80 @@ const CompleteProfile = ({route}) => {
       });
     }
   };
-  const Specialsity = [
-    {key: 1, value: 'Strength Training'},
-    {key: 2, value: 'Yoga'},
-    {key: 3, value: 'Cardio Fitness'},
-    {key: 4, value: 'Weight Loss Coaching'},
-    {key: 5, value: 'Bodybuilding'},
-    {key: 6, value: 'Crossfit'},
-  ];
+
+  const handleChoosePhoto = () => {
+    ImageCropPicker.openPicker({
+      mediaType: 'photo',
+      cropping: true,
+    })
+      .then(image => {
+        setImageUri(image.path);
+        uploadImage(image);
+        dispatch(saveProfileImage(image.path));
+        console.log('Image Object', image);
+        setModal(false);
+      })
+      .catch(error => {});
+  };
+
+  const handleTakePhoto = async () => {
+    ImageCropPicker.openCamera({
+      mediaType: 'photo',
+      cropping: true,
+    })
+      .then(image => {
+        setImageUri(image.path);
+
+        uploadImage(image);
+        dispatch(saveProfileImage(image.path));
+        console.log('Image Object', image);
+        setModal(false);
+      })
+      .catch(error => {});
+  };
+
+  const requestLocationPermission = async () => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      );
+
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return true;
+  };
+
+  const getTrainerLocation = async () => {
+    try {
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) return;
+
+      const res = await LocationModule.getCurrentLocation();
+
+      console.log('Native Location:', res);
+
+      await axiosBaseURL.post('/trainer/updateLocation', {
+        email: logedInTrainer.email,
+        lat: res.lat,
+        lng: res.lng,
+      });
+
+      console.log('Location saved successfully');
+    } catch (e) {
+      console.log('Location error:', e);
+    }
+  };
+
+  useEffect(() => {
+    if (!logedInTrainer) return;
+
+    if (
+      !logedInTrainer.location ||
+      logedInTrainer.location.coordinates[0] === 0
+    ) {
+      getTrainerLocation();
+    }
+  }, [logedInTrainer]);
 
   return (
     <WrapperContainer>

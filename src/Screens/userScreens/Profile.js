@@ -60,6 +60,8 @@ const Profile = () => {
           const profileResponse = await axiosBaseURL.get(
             `/Common/GetProfile/${authData.token}`
           );
+
+          console.log("responce in profile:",profileResponse)
           const userData = profileResponse.data.data;
           setImageUri(userData.profileImage);
           setAddress(userData.Address);
@@ -336,16 +338,7 @@ const Profile = () => {
                     +{favouriteTrainers.length - 3}
                   </Text>
                 </View>
-                // </TouchableOpacity>
               )}
-              {/* <TouchableOpacity>
-                <View style={styles.favIcons}>
-                  <Text
-                    style={{color: 'black', fontSize: responsiveFontSize(2)}}>
-                    +{favouriteTrainers.length - 3}
-                  </Text>
-                </View>
-              </TouchableOpacity> */}
               <View style={{marginLeft: responsiveWidth(3)}}>
                 <TouchableOpacity>
                   <Image source={Images.rightarrow} />
@@ -464,14 +457,22 @@ const Profile = () => {
             </TouchableOpacity>
           </View>
         </View>
-        {Address && (
+        {/* {Address && (
           <EditAddressModal
             token={authData.token}
             Address={Address}
             modalstate={AddressModal}
             onRequestClose={() => setAddressModal(false)}
           />
-        )}
+        )} */}
+
+        <EditAddressModal
+  token={authData.token}
+  Address={Address}
+   setAddress={setAddress}  
+  modalstate={AddressModal}
+  onRequestClose={() => setAddressModal(false)}
+/>
         <DeleteCardModal
           modalstate={CardModal}
           paymentId={StripeCardData}
@@ -619,17 +620,17 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 18,
     marginBottom: 20,
-    color: '#000',
+    color: '#9FED3A',
     fontWeight: '600',
   },
   closeButton: {
     padding: 10,
-    backgroundColor: '#000',
+    backgroundColor: '#9FED3A',
     borderRadius: 5,
     marginHorizontal: responsiveWidth(1),
   },
   closeButtonText: {
-    color: '#9FED3A',
+    color: '#000',
     fontSize: responsiveFontSize(1.7),
     fontWeight: '600',
   },

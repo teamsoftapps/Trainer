@@ -16,6 +16,7 @@ import ReviewBooking from '../Screens/trainerScreens/reviewBooking.js';
 import ManagePlans from '../Screens/trainerScreens/ManagePlans';
 import StoryView from '../Screens/trainerScreens/storyView';
 import axiosBaseURL from '../services/AxiosBaseURL';
+import Subscription from '../Screens/trainerScreens/Subscription.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -93,6 +94,7 @@ const TrainerStack = () => {
       }
       screenOptions={{headerShown: false}}>
       <Stack.Screen name="TrainerBttomStack" component={TrainerBttomStack} />
+      <Stack.Screen name="Subscription" component={Subscription} />
       <Stack.Screen name="Chat" component={Chat} />
       <Stack.Screen name="Message" component={Message} />
       <Stack.Screen name="Settings" component={Settings} />

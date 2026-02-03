@@ -23,13 +23,23 @@ import axiosBaseURL from '../../services/AxiosBaseURL';
 import {useEffect, useState} from 'react';
 import notifee, {EventType} from '@notifee/react-native';
 const CompletedTrainerHome = () => {
+  // const data = {
+  //   labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+  //   datasets: [
+  //     {
+  //       data: [0, 1, 2, 3, 4],
+  //       color: (opacity = 1) => `rgba(159, 237, 58, ${opacity})`,
+  //       strokeWidth: 4, //
+  //     },
+  //   ],
+  // };
   const data = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+    labels: ['Jan', 'Mar', 'May', 'Jul', 'Sep', 'Nov'],
     datasets: [
       {
-        data: [0, 1, 2, 3, 4],
-        color: (opacity = 1) => `rgba(159, 237, 58, ${opacity})`,
-        strokeWidth: 4, //
+        data: [0, 200, 400, 800, 600, 1000],
+        strokeWidth: 3,
+        color: () => '#9FED3A',
       },
     ],
   };
@@ -53,7 +63,7 @@ const CompletedTrainerHome = () => {
   const getSessions = async () => {
     try {
       const responce = await axiosBaseURL.get(
-        `/user/getBookingbyId/${trainer_data._id}`
+        `/user/getBookingbyId/${trainer_data._id}`,
       );
       setSessions(responce.data.data);
       setIsLoading(false);
@@ -171,7 +181,7 @@ const CompletedTrainerHome = () => {
           <Text style={{color: '#bbbbbb'}}>{formattedDate}</Text>
         </View>
 
-        <View
+        {/* <View
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
@@ -199,9 +209,9 @@ const CompletedTrainerHome = () => {
               }}
             />
           </TouchableOpacity>
-        </View>
+        </View> */}
 
-        <View style={{paddingHorizontal: responsiveWidth(7)}}>
+        {/* <View style={{paddingHorizontal: responsiveWidth(7)}}>
           <FlatList
             ListEmptyComponent={WhenListEmpty}
             showsHorizontalScrollIndicator={false}
@@ -209,7 +219,7 @@ const CompletedTrainerHome = () => {
             data={sessions}
             renderItem={RenderedBookings}
           />
-        </View>
+        </View> */}
 
         <View
           style={{
@@ -227,6 +237,9 @@ const CompletedTrainerHome = () => {
             Total Earnings
           </Text>
           <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('Earnings');
+            }}
             style={{flexDirection: 'row', alignItems: 'center'}}>
             <Text style={{color: '#9FED3A'}}>See details</Text>
             <Image
@@ -244,12 +257,29 @@ const CompletedTrainerHome = () => {
           style={{
             height: responsiveHeight(45),
             width: responsiveWidth(85),
-            backgroundColor: 'rgba(187, 187, 187, 0.1)',
+            // backgroundColor: 'rgba(187, 187, 187, 0.1)',
+            backgroundColor: '#151515',
             alignSelf: 'center',
 
             borderRadius: responsiveWidth(3),
           }}>
-          <Text
+          <View style={{padding: 20}}>
+            <Text style={{color: '#9FED3A', fontSize: 14}}>Total Earning</Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: 5,
+              }}>
+              <Text style={{color: '#fff', fontSize: 28, fontWeight: '700'}}>
+                $5,392
+              </Text>
+
+              <Text style={{color: '#9FED3A', marginLeft: 10}}>▲ 0.0%</Text>
+            </View>
+          </View>
+          {/* <Text
             style={{
               color: '#9FED3A',
               paddingHorizontal: responsiveWidth(6),
@@ -267,8 +297,8 @@ const CompletedTrainerHome = () => {
               paddingBottom: responsiveHeight(2),
             }}>
             $5,392
-          </Text>
-          <LineChart
+          </Text> */}
+          {/* <LineChart
             data={data}
             width={responsiveWidth(85)}
             height={responsiveHeight(30)}
@@ -288,6 +318,46 @@ const CompletedTrainerHome = () => {
               },
             }}
             bezier
+          /> */}
+
+          <LineChart
+            data={data}
+            width={responsiveWidth(85)}
+            height={responsiveHeight(30)}
+            withDots={false}
+            withShadow={false}
+            withInnerLines={true}
+            withOuterLines={false}
+            withVerticalLines={false}
+            withHorizontalLines={true}
+            fromZero
+            bezier
+            style={{
+              marginTop: 10,
+              borderRadius: 16,
+            }}
+            chartConfig={{
+              backgroundGradientFrom: 'transparent',
+              backgroundGradientTo: 'transparent',
+
+              decimalPlaces: 0,
+
+              color: () => '#9FED3A',
+              labelColor: () => '#777',
+
+              propsForBackgroundLines: {
+                stroke: 'rgba(255,255,255,0.1)',
+                strokeWidth: 1,
+              },
+
+              propsForLabels: {
+                fontSize: 11,
+              },
+
+              propsForDots: {
+                r: '0',
+              },
+            }}
           />
         </View>
       </ScrollView>
@@ -333,7 +403,8 @@ const styles = StyleSheet.create({
   Text_Sec: {
     width: responsiveWidth(85),
     position: 'relative',
-    backgroundColor: 'rgba(187, 187, 187, 0.1)',
+    // backgroundColor: 'rgba(187, 187, 187, 0.1)',
+    backgroundColor: '#151515',
     borderRadius: responsiveWidth(2),
     paddingHorizontal: responsiveWidth(3),
     paddingRight: responsiveWidth(10),

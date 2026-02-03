@@ -12,15 +12,11 @@ import {LineChart} from 'react-native-chart-kit';
 import {Image} from 'react-native';
 import {ScrollView} from 'react-native';
 import {Images} from '../../utils/Images';
-const data = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-  datasets: [
-    {
-      data: [0, 1, 2, 3, 4],
-      color: (opacity = 1) => `rgba(159, 237, 58, ${opacity})`,
-      strokeWidth: 4,
-    },
-  ],
+
+const chartDataMap = {
+  0: [20, 40, 60, 80, 40, 90, 120], // week
+  1: [200, 300, 500, 800, 600, 900, 1200], // month
+  2: [1000, 2000, 1500, 4000, 3000, 5000, 6500], // year
 };
 
 const Bookings = [
@@ -50,7 +46,7 @@ const Bookings = [
   },
 ];
 const Earnings = () => {
-  const [timing, setTiming] = useState(null);
+  const [timing, setTiming] = useState(1);
   const navigation = useNavigation();
   const categories = [
     {
@@ -66,28 +62,25 @@ const Earnings = () => {
 
   const timings = ({item, index}) => {
     const isSelected = timing === index;
+
     return (
-      <View>
-        <TouchableOpacity
-          onPress={() => {
-            setTiming(index);
-          }}
+      <TouchableOpacity
+        onPress={() => setTiming(index)}
+        style={{
+          paddingHorizontal: 20,
+          paddingVertical: 8,
+          borderRadius: 30,
+          marginRight: 10,
+          backgroundColor: isSelected ? '#9FED3A' : '#1b1b1b',
+        }}>
+        <Text
           style={{
-            borderColor: '#bbbbbb',
-            borderWidth: responsiveWidth(0.3),
-            width: responsiveWidth(20),
-            paddingVertical: responsiveHeight(0.5),
-            borderRadius: responsiveWidth(4),
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginRight: responsiveWidth(2),
-            backgroundColor: isSelected ? '#9FED3A' : 'transparent',
+            color: isSelected ? '#000' : '#bbb',
+            fontWeight: '600',
           }}>
-          <Text style={{color: isSelected ? '#000' : '#bbbbbb'}}>
-            {item.feild}
-          </Text>
-        </TouchableOpacity>
-      </View>
+          {item.feild}
+        </Text>
+      </TouchableOpacity>
     );
   };
 
@@ -167,7 +160,7 @@ const Earnings = () => {
           }}>
           <FlatList horizontal data={categories} renderItem={timings} />
         </View>
-        <View
+        {/* <View
           style={{
             height: responsiveHeight(45),
             width: responsiveWidth(85),
@@ -216,7 +209,72 @@ const Earnings = () => {
             }}
             bezier
           />
+        </View> */}
+        <View
+          style={{
+            width: responsiveWidth(88),
+            backgroundColor: '#151515',
+            alignSelf: 'center',
+            borderRadius: 20,
+            paddingVertical: 20,
+            marginTop: 10,
+          }}>
+          {/* HEADER */}
+          <View style={{paddingHorizontal: 20}}>
+            <Text style={{color: '#9FED3A', fontSize: 14}}>Total Earning</Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: 5,
+              }}>
+              <Text style={{color: '#fff', fontSize: 28, fontWeight: '700'}}>
+                $5,392
+              </Text>
+
+              <Text style={{color: '#9FED3A', marginLeft: 10}}>▲ 2.4%</Text>
+            </View>
+          </View>
+
+          {/* GRAPH */}
+          <LineChart
+            data={{
+              labels: ['Jan', 'Mar', 'May', 'Jul', 'Sep', 'Nov'],
+              datasets: [
+                {
+                  data: chartDataMap[timing],
+                  strokeWidth: 3,
+                  color: () => '#9FED3A',
+                },
+              ],
+            }}
+            width={responsiveWidth(88)}
+            height={responsiveHeight(30)}
+            withDots={false}
+            withShadow={false}
+            withVerticalLines={false}
+            withOuterLines={false}
+            withInnerLines
+            fromZero
+            bezier
+            chartConfig={{
+              backgroundGradientFrom: 'transparent',
+              backgroundGradientTo: 'transparent',
+              decimalPlaces: 0,
+              color: () => '#9FED3A',
+              labelColor: () => '#777',
+              propsForBackgroundLines: {
+                stroke: 'rgba(255,255,255,0.1)',
+              },
+            }}
+            style={{
+              marginTop: 10,
+              borderRadius: 16,
+            }}
+          />
         </View>
+
         <Text
           style={{
             color: '#fff',

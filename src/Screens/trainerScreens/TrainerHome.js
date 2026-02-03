@@ -40,7 +40,7 @@ const TrainerHome = () => {
         .then(response => {
           console.log(
             '------------------------',
-            response.data.data.profileImage
+            response.data.data.profileImage,
           );
           if (response.data.data.Bio === null) {
             Alert.alert('Please complete your profile');
@@ -56,7 +56,7 @@ const TrainerHome = () => {
     const fetchData = async () => {
       try {
         const profileResponse = await axiosBaseURL.get(
-          `/Common/GetProfile/${trainer_data.token}`
+          `/Common/GetProfile/${trainer_data.token}`,
         );
         const userData = profileResponse.data.data;
         console.log('profileResponce', userData);
@@ -64,7 +64,7 @@ const TrainerHome = () => {
       } catch (error) {
         console.error(
           'Error fetching data:',
-          error.response?.data?.message || error.message
+          error.response?.data?.message || error.message,
         );
       }
     };

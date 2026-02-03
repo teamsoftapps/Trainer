@@ -27,6 +27,8 @@ import {showMessage} from 'react-native-flash-message';
 import EditAddressModal from '../../Components/EditAddressModal';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {updateLogin} from '../../store/Slices/AuthSlice';
+import ProfileImageModal from '../../Components/ProfileImageModal';
+import ImageSourceModal from '../../Components/ImageSourceModal';
 const uploads = [
   {
     img: require('../../assets/Images/trainer4.jpg'),
@@ -41,6 +43,8 @@ const uploads = [
 const Profile = () => {
   //useSelector
   const trainer_data = useSelector(state => state.Auth.data);
+
+  console.log('trainer_data', trainer_data.email);
   const dispatch = useDispatch();
 
   //useStates
@@ -54,20 +58,22 @@ const Profile = () => {
   const [Speciality, setSpeciality] = useState([]);
   const [selectedSpeciality, setSelectedSpeciality] = useState([]);
   const [isLoading, setLoading] = useState(true);
-  const [isModal, setModal] = useState(false);
-  const [subModal, setSubModal] = useState(false);
   const [isImageUploading, setImageUploading] = useState(false);
+  const [imageModal, setImageModal] = useState(false);
+  const [sourceModal, setSourceModal] = useState(false);
 
-  //Functions
-  const openModal = () => setModal(true);
-  const closeModal = () => setModal(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const openSubModal = () => setSubModal(true);
-  const closeSubModal = () => setSubModal(false);
+  const openModal = () => setModalVisible(true);
+  const closeModal = () => setModalVisible(false);
+
   const navigation = useNavigation();
-
+  const safe = v => (v === null || v === undefined || v === '' ? '-' : v);
+  safe(trainer_data?.Bio);
+  safe(trainer_data?.Address);
+  safe(trainer_data?.Hourlyrate);
   //consoles
-  console.log('auth data in trainer profile', trainer_data);
+  console.log('auth data in trainer profile', trainer_data.token);
 
   const fetchData = async () => {
     try {
@@ -95,8 +101,6 @@ const Profile = () => {
     }, [trainer_data.token]),
   );
 
-  const deleteProfileImage = async () => {};
-
   const RenderedUploads = ({item, index}) => {
     return (
       <View>
@@ -113,43 +117,112 @@ const Profile = () => {
     );
   };
 
+  // const uploadImage = async image => {
+  //   try {
+  //     const formData = new FormData();
+
+  //     formData.append('file', {
+  //       uri: image.path,
+  //       type: image.mime,
+  //       name: `profileImage-${Date.now()}.jpg`,
+  //     });
+  //     formData.append('email', trainer_data.email);
+
+  //     setImageUploading(true);
+
+  //     const response = await axiosBaseURL.post('/Common/fileUpload', formData, {
+  //       headers: {
+  //         'Content-Type': 'multipart/form-data',
+  //       },
+  //     });
+  //     console.log('image url:', response.data.data.url);
+  //     dispatch(updateLogin({profileImage: response.data.data.url}));
+  //     closeSubModal();
+
+  //     if (response.data.status) {
+  //       showMessage({
+  //         message: 'Update Successful',
+  //         description: 'Your image has been updated!',
+  //         type: 'success',
+  //       });
+  //     }
+  //   } catch (error) {
+  //     showMessage({
+  //       message: 'Upload Failed',
+  //       description: error.message || 'Failed to upload image.',
+  //       type: 'danger',
+  //     });
+  //   } finally {
+  //     setImageUploading(false);
+  //   }
+  // };
+
   const uploadImage = async image => {
     try {
       const formData = new FormData();
 
-      formData.append('file', {
+      formData.append('profileImage', {
         uri: image.path,
         type: image.mime,
-        name: `profileImage-${Date.now()}.jpg`,
+        name: 'profile.jpg',
       });
+
       formData.append('email', trainer_data.email);
 
       setImageUploading(true);
 
-      const response = await axiosBaseURL.post('/Common/fileUpload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      const res = await axiosBaseURL.post(
+        '/trainer/uploadProfileImage',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         },
-      });
-      console.log('image url:', response.data.data.url);
-      dispatch(updateLogin({profileImage: response.data.data.url}));
-      closeSubModal();
+      );
 
-      if (response.data.status) {
-        showMessage({
-          message: 'Update Successful',
-          description: 'Your image has been updated!',
-          type: 'success',
-        });
-      }
-    } catch (error) {
+      const url = res.data.url;
+
+      // ✅ instantly update redux
+      dispatch(updateLogin({profileImage: url}));
+
       showMessage({
-        message: 'Upload Failed',
-        description: error.message || 'Failed to upload image.',
+        message: 'Profile updated',
+        type: 'success',
+      });
+    } catch (err) {
+      showMessage({
+        message: 'Upload failed',
         type: 'danger',
       });
     } finally {
       setImageUploading(false);
+    }
+  };
+
+  const deleteProfileImage = async () => {
+    try {
+      await axiosBaseURL.delete('/trainer/deleteProfileImage', {
+        headers: {
+          Authorization: `Bearer ${trainer_data.token}`,
+        },
+        data: {
+          email: trainer_data.email,
+        },
+      });
+
+      // clear instantly
+      dispatch(updateLogin({profileImage: null}));
+
+      showMessage({
+        message: 'Profile image removed',
+        type: 'success',
+      });
+    } catch (err) {
+      showMessage({
+        message: 'Delete failed',
+        type: 'danger',
+      });
     }
   };
 
@@ -291,478 +364,169 @@ const Profile = () => {
     );
   };
 
-  const calculateAge = birthdateString => {
-    const [month, day, year] = birthdateString.split('/');
-    const formattedDate = `${year}-${month}-${day}`;
-    const birthDate = new Date(formattedDate);
+  // const calculateAge = birthdateString => {
+  //   const [month, day, year] = birthdateString.split('/');
+  //   const formattedDate = `${year}-${month}-${day}`;
+  //   const birthDate = new Date(formattedDate);
 
-    const today = new Date();
+  //   const today = new Date();
 
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDifference = today.getMonth() - birthDate.getMonth();
+  //   let age = today.getFullYear() - birthDate.getFullYear();
+  //   const monthDifference = today.getMonth() - birthDate.getMonth();
 
-    if (
-      monthDifference < 0 ||
-      (monthDifference === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
+  //   if (
+  //     monthDifference < 0 ||
+  //     (monthDifference === 0 && today.getDate() < birthDate.getDate())
+  //   ) {
+  //     age--;
+  //   }
 
-    return age;
-  };
-  const age = calculateAge(trainer_data.Dob);
+  //   return age;
+  // };
+  // const age = calculateAge(trainer_data.Dob);
+
+  const SectionTitle = ({title}) => (
+    <Text style={styles.sectionTitle}>{title}</Text>
+  );
+
+  const RowItem = ({title, value}) => (
+    <View style={styles.rowItem}>
+      <Text style={styles.rowTitle}>{title}</Text>
+      <Text style={styles.rowValue}>{value}</Text>
+    </View>
+  );
+
+  const StatItem = ({label, value}) => (
+    <View style={{alignItems: 'center'}}>
+      <Text style={styles.statValue}>{safe(value)}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+
+  const uniqueArray = arr => [...new Set(arr || [])];
+
+  const uniqueSpecialities = arr => [
+    ...new Map((arr || []).map(i => [i.value, i])).values(),
+  ];
 
   return (
     <WrapperContainer>
-      <ScrollView>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-            alignItems: 'center',
-            marginLeft: responsiveWidth(27),
-            position: 'relative',
-            marginVertical: responsiveHeight(3),
-          }}>
-          <Image
-            src={trainer_data.profileImage}
-            style={{
-              height: responsiveWidth(25),
-              width: responsiveWidth(25),
-              borderRadius: responsiveWidth(12.5),
-              borderColor: '#9FED3A',
-              borderWidth: responsiveWidth(1),
-            }}
-          />
+      <ScrollView
+        contentContainerStyle={{paddingHorizontal: responsiveWidth(6)}}
+        showsVerticalScrollIndicator={false}>
+        {/* ================= HEADER + PROFILE IMAGE ================= */}
+        <View style={styles.profileHeader}>
+          <View style={styles.avatarWrapper}>
+            <Image
+              source={
+                trainer_data?.profileImage
+                  ? {uri: trainer_data.profileImage}
+                  : Images.profile // default placeholder
+              }
+              style={styles.avatar}
+            />
+
+            <TouchableOpacity
+              onPress={() => setImageModal(true)}
+              style={styles.editBtn}>
+              <Image source={Images.edit_icon} />
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
-            onPress={() => {
-              openModal();
-            }}
-            style={{
-              position: 'absolute',
-              top: responsiveHeight(10),
-              left: responsiveWidth(18),
-              height: responsiveHeight(4),
-              width: responsiveWidth(8),
-            }}>
-            <Image source={Images.edit_icon} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('Settings');
-            }}>
+            style={styles.settingsBtn}
+            onPress={() => navigation.navigate('Settings')}>
             <Image source={Images.setting} />
           </TouchableOpacity>
         </View>
-        <Modal
-          transparent={true}
-          animationType="slide"
-          visible={subModal}
-          onRequestClose={closeSubModal}>
-          <TouchableWithoutFeedback onPress={closeSubModal}>
-            <View style={[styles.subModalContainer, {position: 'relative'}]}>
-              <View style={{position: 'absolute', top: responsiveHeight(45)}}>
-                {isImageUploading && (
-                  <ActivityIndicator
-                    size={responsiveHeight(5)}
-                    color={'#fff'}
-                  />
-                )}
-              </View>
-              <View style={{position: 'absolute', bottom: responsiveHeight(0)}}>
-                <View style={styles.subModalContent}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      alignItems: 'baseline',
-                    }}>
-                    <Text style={styles.modalText}>Select Option</Text>
-                  </View>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-around',
-                    }}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        handleTakePhoto();
-                      }}
-                      style={styles.closeButton}>
-                      <Text style={styles.closeButtonText}>Open Camera</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => {
-                        handleChoosePhoto();
-                      }}
-                      style={styles.closeButton}>
-                      <Text style={styles.closeButtonText}>Open Gallery</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-        <Modal
-          transparent={true}
-          animationType="slide"
-          visible={isModal}
-          onRequestClose={closeModal}>
-          <TouchableWithoutFeedback onPress={closeModal}>
-            <View style={styles.modalContainer}>
-              <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <View style={styles.modalContent}>
-                  <View
-                    style={{
-                      height: responsiveHeight(0.2),
-                      width: responsiveWidth(8),
-                      backgroundColor: '#bbbbbb',
-                      alignSelf: 'center',
-                    }}></View>
-                  <TouchableOpacity
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginTop: responsiveHeight(3),
-                    }}>
-                    <Image
-                      source={Images.current}
-                      tintColor={'#bbbbbb'}
-                      style={{
-                        height: responsiveHeight(3),
-                        width: responsiveWidth(4),
-                      }}
-                    />
-                    <Text
-                      style={{
-                        color: '#fff',
-                        fontSize: responsiveFontSize(1.8),
-                        marginLeft: responsiveWidth(5),
-                      }}>
-                      View Story
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      closeModal();
-                      openSubModal();
-                    }}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginTop: responsiveHeight(3),
-                    }}>
-                    <Image
-                      source={Images.editImage}
-                      tintColor={'#fff'}
-                      style={{
-                        height: responsiveHeight(3),
-                        width: responsiveWidth(5),
-                      }}
-                    />
-                    <Text
-                      style={{
-                        color: '#fff',
-                        fontSize: responsiveFontSize(1.8),
-                        marginLeft: responsiveWidth(5),
-                      }}>
-                      Change Profile Picture
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginTop: responsiveHeight(3),
-                    }}>
-                    <Image
-                      source={Images.DeleteBin}
-                      tintColor={'red'}
-                      style={{
-                        height: responsiveHeight(2.8),
-                        width: responsiveWidth(5),
-                      }}
-                    />
-                    <Text
-                      style={{
-                        color: 'red',
-                        fontSize: responsiveFontSize(1.8),
-                        marginLeft: responsiveWidth(5),
-                      }}>
-                      Remove Current Picture
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-        <View>
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: responsiveFontSize(2.5),
-              fontWeight: '500',
-              textAlign: 'center',
-            }}>
-            {trainer_data.fullName}
-          </Text>
-          <Text
-            style={{
-              color: '#bbbbbb',
-              fontSize: responsiveFontSize(1.7),
-              textAlign: 'center',
-            }}>
-            Certified Personel Trainer
-          </Text>
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: responsiveFontSize(1.7),
-              textAlign: 'center',
-              width: responsiveWidth(80),
-              alignSelf: 'center',
-              marginVertical: responsiveHeight(1),
-            }}>
-            {trainer_data.Bio}
-          </Text>
-        </View>
 
-        <View
-          style={{
-            width: responsiveWidth(80),
-            height: responsiveHeight(7),
-            borderBottomColor: '#bbbbbb',
-            borderBottomWidth: responsiveWidth(0.15),
-            alignSelf: 'center',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-          <View
-            style={{
-              flexDirection: 'column',
-            }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
-              <Image
-                source={Images.Star}
-                style={{height: responsiveHeight(2), width: responsiveWidth(5)}}
-              />
-              <Text
-                style={{
-                  color: '#fff',
-                  fontSize: responsiveFontSize(2.5),
-                  fontWeight: '700',
-                  marginHorizontal: responsiveWidth(2),
-                }}>
-                4.8/5
-              </Text>
-            </View>
-            <Text
-              style={{
-                color: '#9FED3A',
-                fontSize: responsiveFontSize(1.5),
-                textAlign: 'center',
-              }}>
-              120 reviews
-            </Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'column',
-            }}>
-            <Text
-              style={{
-                color: '#fff',
-                fontSize: responsiveFontSize(2.5),
-                fontWeight: '700',
-                marginHorizontal: responsiveWidth(2),
-                textAlign: 'center',
-              }}>
-              {trainer_data?.followers?.length
-                ? trainer_data?.followers?.length
-                : 0}
-            </Text>
-            <Text style={{color: '#9FED3A', fontSize: responsiveFontSize(1.5)}}>
-              Followers
-            </Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'column',
-            }}>
-            <Text
-              style={{
-                color: '#fff',
-                fontSize: responsiveFontSize(2.5),
-                fontWeight: '700',
-                marginHorizontal: responsiveWidth(2),
-                textAlign: 'center',
-              }}>
-              {age}
-            </Text>
-            <Text
-              style={{
-                color: '#9FED3A',
-                fontSize: responsiveFontSize(1.5),
-                textAlign: 'center',
-              }}>
-              Years old
-            </Text>
-          </View>
-        </View>
+        {/* ================= NAME + ROLE ================= */}
+        <Text style={styles.name}>{safe(trainer_data?.fullName)}</Text>
 
-        <View
-          style={{
-            width: responsiveWidth(80),
-            alignSelf: 'center',
-            marginVertical: responsiveHeight(3),
-          }}>
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: responsiveFontSize(2.5),
-              fontWeight: '500',
-            }}>
-            Uploads
-          </Text>
-          <FlatList
-            style={{marginTop: responsiveHeight(2)}}
-            horizontal
-            data={uploads}
-            renderItem={RenderedUploads}
+        <Text style={styles.role}>Personal Trainer</Text>
+
+        <Text style={styles.bio}>{safe(trainer_data?.Bio)}</Text>
+
+        {/* ================= STATS ROW ================= */}
+        <View style={styles.statsRow}>
+          <StatItem label="Rating" value="0.0/5" />
+          <StatItem
+            label="Followers"
+            value={safe(trainer_data?.followers?.length)}
           />
+          <StatItem label="Years old" value="-" />
         </View>
 
-        <View
-          style={{
-            width: responsiveWidth(80),
-            alignSelf: 'center',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingBottom: responsiveHeight(1.5),
-            borderBottomColor: '#bbbbbb',
-            borderBottomWidth: responsiveWidth(0.2),
-          }}>
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: responsiveFontSize(2.3),
-              fontWeight: '500',
-            }}>
-            Hourly Rate
-          </Text>
-          <Text
-            style={{
-              color: '#bbbbbb',
-              fontSize: responsiveFontSize(2),
-              fontWeight: '500',
-            }}>
-            ${Hourly} (1 hr)
-          </Text>
-        </View>
+        {/* ================= UPLOADS ================= */}
+        <SectionTitle title="Uploads" />
 
-        <View
-          style={{
-            width: responsiveWidth(90),
-            marginVertical: responsiveHeight(3),
-            alignSelf: 'flex-end',
-          }}>
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: responsiveFontSize(2.5),
-              fontWeight: '500',
-            }}>
-            Availability
-          </Text>
-          <View style={{marginTop: responsiveHeight(2)}}>
-            <FlatList
-              horizontal
-              data={selectedTime}
-              renderItem={RenderedSelectedTimes}
-              keyExtractor={item => item}
-              ListEmptyComponent={WhenAvalibilitiesEmpth}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{alignItems: 'center'}}
-            />
-          </View>
-        </View>
+        <FlatList
+          horizontal
+          data={uploads}
+          renderItem={RenderedUploads}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{marginTop: 10}}
+        />
 
-        <View
-          style={{
-            width: responsiveWidth(90),
-            marginBottom: responsiveHeight(3),
-            alignSelf: 'flex-end',
-          }}>
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: responsiveFontSize(2.5),
-              fontWeight: '500',
-            }}>
-            Specialities
-          </Text>
+        {/* ================= HOURLY RATE ================= */}
+        <RowItem title="Hourly Rate" value={`$${safe(Hourly)}/hour`} />
 
-          <FlatList
-            ListEmptyComponent={WhenSpetialitiesEmpth}
-            style={{marginTop: responsiveHeight(2)}}
-            data={Speciality}
-            renderItem={({item}) => (
-              <RenderedSpecialities
-                item={item}
-                Speciality={selectedSpeciality}
-                setSpeciality={setSelectedSpeciality}
-              />
-            )}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{alignItems: 'center'}}
-            keyExtractor={item => item.key}
-          />
-        </View>
-        <View
-          style={{
-            width: responsiveWidth(80),
-            marginBottom: responsiveHeight(3),
-            alignSelf: 'center',
-          }}>
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: responsiveFontSize(2.5),
-              fontWeight: '500',
-            }}>
-            Location
-          </Text>
-          <TextInput
-            editable={false}
-            onChangeText={text => {
-              setAddress(text);
-            }}
-            value={trainer_data.Address}
-            placeholder="Enter your address"
-            style={{
-              color: '#fff',
-              width: responsiveWidth(80),
-            }}
-            placeholderTextColor={'#fff'}
-          />
-        </View>
-        <EditAddressModal
-          token={trainer_data.token}
-          Address={Address}
-          modalstate={AddressModal}
-          onRequestClose={() => setAddressModal(false)}
+        {/* ================= AVAILABILITY ================= */}
+        <SectionTitle title="Availability" />
+
+        <FlatList
+          horizontal
+          data={uniqueArray(selectedTime)}
+          renderItem={RenderedSelectedTimes}
+          ListEmptyComponent={<Text style={styles.empty}>-</Text>}
+        />
+
+        {/* ================= SPECIALITIES ================= */}
+        <SectionTitle title="Specialities" />
+
+        <FlatList
+          horizontal
+          data={uniqueSpecialities(Speciality)}
+          keyExtractor={item => item.key.toString()}
+          renderItem={({item}) => (
+            <View style={styles.chip}>
+              <Text style={styles.chipText}>{safe(item?.value)}</Text>
+            </View>
+          )}
+          ListEmptyComponent={<Text style={styles.empty}>-</Text>}
+        />
+
+        {/* ================= LOCATION ================= */}
+        <SectionTitle title="Location" />
+        <RowItem
+          title="Location"
+          value={safe(trainer_data?.Address) || 'Not added yet'}
         />
       </ScrollView>
+      <ProfileImageModal
+        visible={imageModal}
+        onClose={() => setImageModal(false)}
+        onChange={() => {
+          setImageModal(false);
+          setTimeout(() => setSourceModal(true), 300);
+        }}
+        onRemove={() => {
+          setImageModal(false);
+          deleteProfileImage(); // ⭐ API called here
+        }}
+      />
+      <ImageSourceModal
+        visible={sourceModal}
+        onClose={() => setSourceModal(false)}
+        onCamera={() => {
+          setSourceModal(false);
+          handleTakePhoto(); // your existing camera fn
+        }}
+        onGallery={() => {
+          setSourceModal(false);
+          handleChoosePhoto(); // your existing picker fn
+        }}
+      />
     </WrapperContainer>
   );
 };
@@ -770,6 +534,115 @@ const Profile = () => {
 export default Profile;
 
 const styles = StyleSheet.create({
+  profileHeader: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: responsiveHeight(3),
+  },
+
+  settingsBtn: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+
+  avatarWrapper: {
+    alignItems: 'center',
+  },
+  avatar: {
+    height: responsiveWidth(28),
+    width: responsiveWidth(28),
+    borderRadius: responsiveWidth(14),
+    borderWidth: 3,
+    borderColor: '#9FED3A',
+  },
+
+  editBtn: {
+    position: 'absolute',
+    bottom: -6,
+    right: -6,
+  },
+
+  name: {
+    textAlign: 'center',
+    color: '#fff',
+    fontSize: responsiveFontSize(3),
+    fontWeight: '600',
+    marginTop: 10,
+  },
+
+  role: {
+    textAlign: 'center',
+    color: '#9FED3A',
+    marginTop: 4,
+  },
+
+  bio: {
+    textAlign: 'center',
+    color: '#bbbbbb',
+    marginHorizontal: responsiveWidth(10),
+    marginTop: 8,
+  },
+
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: responsiveHeight(3),
+  },
+
+  statValue: {
+    color: '#fff',
+    fontSize: responsiveFontSize(2.6),
+    fontWeight: '700',
+  },
+
+  statLabel: {
+    color: '#9FED3A',
+    marginTop: 2,
+  },
+
+  sectionTitle: {
+    color: '#fff',
+    fontSize: responsiveFontSize(2.3),
+    fontWeight: '600',
+    marginLeft: responsiveWidth(1),
+    marginVertical: responsiveHeight(2),
+  },
+
+  rowItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: responsiveWidth(6),
+    paddingVertical: responsiveHeight(2),
+    borderBottomWidth: 0.3,
+    borderBottomColor: '#444',
+  },
+
+  rowTitle: {
+    color: '#fff',
+  },
+
+  rowValue: {
+    color: '#9FED3A',
+  },
+
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    backgroundColor: '#9FED3A',
+    borderRadius: 20,
+    marginHorizontal: 6,
+  },
+
+  chipText: {
+    color: '#000',
+    fontWeight: '600',
+  },
+
+  empty: {
+    color: '#888',
+    paddingHorizontal: 20,
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'flex-end',
