@@ -1,682 +1,500 @@
+import React, {useCallback, useState} from 'react';
+import {NativeModules} from 'react-native';
 import {
-  ScrollView,
   StyleSheet,
   Text,
   View,
   Image,
-  TextInput,
-  FlatList,
   TouchableOpacity,
+  FlatList,
+  ScrollView,
+  TextInput,
   Modal,
-  Button,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+
 import WrapperContainer from '../../Components/Wrapper';
+import ProfileImageModal from '../../Components/ProfileImageModal';
+import ImageSourceModal from '../../Components/ImageSourceModal';
+
 import {
   responsiveFontSize,
   responsiveHeight,
-  responsiveScreenFontSize,
-  responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {FontFamily, Images} from '../../utils/Images';
-import ButtonComp from '../../Components/ButtonComp';
-import {Specialities, TimeSlots} from '../../utils/Dummy';
+
+import {Images} from '../../utils/Images';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import {showMessage} from 'react-native-flash-message';
-import {useDispatch, useSelector} from 'react-redux';
-import Header from '../../Components/Header';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import {TouchableWithoutFeedback} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import moment from 'moment';
+
+import {useSelector, useDispatch} from 'react-redux';
 import {updateLogin} from '../../store/Slices/AuthSlice';
-import {format} from 'date-fns';
 
-const EditProfile = ({route}) => {
-  //UseSelectors
-  const logedInTrainer = useSelector(state => state.Auth.data);
-  console.log('loged in trainer data in edit profile screen :', logedInTrainer);
+import ImageCropPicker from 'react-native-image-crop-picker';
+import Geolocation from '@react-native-community/geolocation';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import moment from 'moment';
+import {MAP_API_KEY} from '../../config/urls';
+import {PermissionsAndroid} from 'react-native';
+// =======================================================
+// CONSTANTS
+// =======================================================
 
-  // Data States
-  const [firstname, setfirstname] = useState('');
-  const [secondname, setsecondname] = useState('');
-  const [Speciality, setSpeciality] = useState([]);
-  const [Email, setEmail] = useState('');
-  const [Bio, setBio] = useState('');
-  const [Hourly, setHourly] = useState();
-  const [selectedTime, setSelectedTime] = useState([]);
-  const [Address, setAddress] = useState('');
-  const [AddressModal, setAddressModal] = useState(false);
-  const [gender, setGender] = useState('');
-  const [dob, setDob] = useState('');
+const fitnessOptions = [
+  'Adventure Sports Coaching',
+  'Boxing',
+  'Core Strength Training',
+  'Cross-Fit',
+  'Cycling',
+  'Flexibility and Mobility Training',
+  'Functional Training',
+  'Group Fitness Classes',
+  'High-Intensity Interval Training (HIIT)',
+  'Kickboxing',
+  'Martial Arts',
+  'Nutrition Coaching',
+  'Pilates',
+  'Post-Rehabilitation Training',
+];
 
-  // Formik States
-  const [specialityformik, setspecialityformik] = useState(false);
-  const [Bioformik, setBioformik] = useState(false);
-  const [Hourlyformik, setHourlyformik] = useState(false);
-  const [timeformik, settimeformik] = useState(false);
+const goalOptions = [
+  'Body Composition',
+  'Enhanced Athletic Performance',
+  'Event Preparation',
+  'General Fitness',
+  'Healthy Aging',
+  'Improved Endurance',
+  'Mind-Body Connection',
+  'Muscle Gain',
+  'Posture Correction',
+  'Rehabilitation',
+  'Sport-Specific Training',
+  'Stress Relief',
+  'Weight Loss',
+];
 
-  // Formik Conditions
+const allSpecialities = [
+  {key: 1, value: 'Yoga'},
+  {key: 2, value: 'Strength Training'},
+  {key: 3, value: 'Crossfit'},
+  {key: 4, value: 'Cardio Fitness'},
+];
 
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalVisible2, setModalVisible2] = useState(false);
-  const [time, setTime] = useState(new Date());
-  const [selectedTimes, setSelectedTimes] = useState([]);
-  const [date, setDate] = useState(new Date());
-  const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [selectedSpecialities, setSelectedSpecialities] = useState([]);
-  const [formData, setFormData] = useState(logedInTrainer);
+// =======================================================
 
-  const Spec = useSelector(state => state?.Auth?.data?.Availiblity);
-
-  const condition1 = Hourly !== '0' && Hourly !== '';
-  const condition2 = selectedTimes.length !== 0;
-  const condition3 = Bio != '';
-  const condition4 = selectedSpecialities.length !== 0;
-  const condition5 = firstname !== '';
-  const condition6 = Email !== '';
-  const condition7 = gender !== '';
-  const condition8 = dob !== '';
-  const condition9 = Address !== '';
-
+const EditProfile = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const concat = () => {
-    const fullname = firstname + ' ' + secondname;
-    console.log('nameeee', fullname);
+  const auth = useSelector(state => state.Auth.data);
+
+  const {LocationModule} = NativeModules;
+
+  // ================= STATES =================
+
+  const [profile, setProfile] = useState(null);
+
+  const [bio, setBio] = useState('');
+  const [hourly, setHourly] = useState('');
+  const [specialities, setSpecialities] = useState([]);
+  const [times, setTimes] = useState([]);
+  const [dob, setDob] = useState('');
+  const [weight, setWeight] = useState('');
+  const [height, setHeight] = useState('');
+  const [pref, setPref] = useState('');
+  const [goal, setGoal] = useState('');
+  const [address, setAddress] = useState('');
+  const [coords, setCoords] = useState(null);
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [timePicker, setTimePicker] = useState(false);
+
+  const [prefModal, setPrefModal] = useState(false);
+  const [goalModal, setGoalModal] = useState(false);
+
+  const [imageModal, setImageModal] = useState(false);
+  const [sourceModal, setSourceModal] = useState(false);
+
+  // ================= FETCH PROFILE =================
+
+  const fetchProfile = async () => {
+    const res = await axiosBaseURL.get(`/Common/GetProfile/${auth.token}`);
+    const d = res.data.data;
+
+    console.log('Fresh Data From Database:', d);
+
+    setProfile(d);
+    setBio(d.Bio || '');
+    setHourly(d.Hourlyrate || '');
+    setSpecialities(d.Speciality || []);
+    setTimes(d.Availiblity || []);
+    setDob(d.Dob || '');
+    setWeight(d.weight || '');
+    setHeight(d.height || '');
+    setPref(d.fitnessPreference || '');
+    setGoal(d.goal || '');
+    setAddress(d.Address || '');
+    setCoords(d.location?.coordinates || null);
   };
-  const handleSpecialitySelect = speciality => {
-    setDropdownVisible(false);
-    setSelectedSpecialities(prev => {
-      if (prev.some(item => item.key === speciality.key)) {
-        return prev.filter(item => item.key !== speciality.key);
-      } else {
-        return [...prev, speciality];
-      }
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile();
+    }, []),
+  );
+
+  // ================= HELPERS =================
+
+  const calculateAge = d => {
+    if (!d) return '-';
+    const [day, month, year] = d.split('/');
+    const birth = new Date(`${year}-${month}-${day}`);
+    const today = new Date();
+
+    let age = today.getFullYear() - birth.getFullYear();
+    if (
+      today.getMonth() < birth.getMonth() ||
+      (today.getMonth() === birth.getMonth() &&
+        today.getDate() < birth.getDate())
+    )
+      age--;
+
+    return age;
+  };
+
+  // ================= IMAGE =================
+
+  const uploadImage = async image => {
+    const formData = new FormData();
+    formData.append('profileImage', {
+      uri: image.path,
+      type: image.mime,
+      name: 'profile.jpg',
     });
-  };
+    formData.append('email', auth.email);
 
-  const handleRemoveSpeciality = speciality => {
-    setSelectedSpecialities(prev =>
-      prev.filter(item => item.key !== speciality.key),
+    const res = await axiosBaseURL.post(
+      '/trainer/uploadProfileImage',
+      formData,
+      {
+        headers: {'Content-Type': 'multipart/form-data'},
+      },
     );
-  };
-  const onTimeChange = (event, selectedTime) => {
-    if (event.type === 'set') {
-      const currentTime = selectedTime || time;
 
-      if (currentTime instanceof Date && !isNaN(currentTime)) {
-        const formattedTime = moment(currentTime).format('hh:mm A');
-
-        setSelectedTimes(prevTimes => {
-          if (!prevTimes.includes(formattedTime)) {
-            return [...prevTimes, formattedTime];
-          } else {
-            showMessage({
-              message: 'Duplication',
-              description: 'Already added!.',
-              type: 'danger',
-            });
-          }
-          return prevTimes;
-        });
-        setTime(currentTime);
-        setModalVisible(false);
-      }
-    } else if (event.type === 'dismissed') {
-      setModalVisible(false);
-    }
+    dispatch(updateLogin({profileImage: res.data.url}));
+    fetchProfile();
   };
 
-  const removeTime = timeToRemove => {
-    setSelectedTimes(prevTimes =>
-      prevTimes.filter(time => time !== timeToRemove),
-    );
+  const deleteImage = async () => {
+    await axiosBaseURL.delete('/trainer/deleteProfileImage', {
+      headers: {Authorization: `Bearer ${auth.token}`},
+      data: {email: auth.email},
+    });
+    dispatch(updateLogin({profileImage: null}));
+    fetchProfile();
   };
 
-  const onDateChange = (event, selectedValue) => {
-    if (event.type === 'set') {
-      const currentDate = selectedValue || date;
+  const getCurrentLocation = async () => {
+    try {
+      const {LocationModule} = NativeModules;
 
-      // Get today's date
-      const today = new Date();
+      const res = await LocationModule.getCurrentLocation();
 
-      // Calculate age
-      const age = today.getFullYear() - currentDate.getFullYear();
-      const monthDifference = today.getMonth() - currentDate.getMonth();
+      const latitude = res.lat;
+      const longitude = res.lng;
 
-      // Adjust age if the birth date hasn't occurred yet this year
-      if (
-        monthDifference < 0 ||
-        (monthDifference === 0 && today.getDate() < currentDate.getDate())
-      ) {
-        age--;
-      }
+      console.log('Native coords:', latitude, longitude);
 
-      // Check if the age is less than 24
-      if (age < 24) {
+      setCoords([longitude, latitude]);
+
+      // ⭐ FIXED: add headers
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+        {
+          headers: {
+            'User-Agent': 'trainer-app',
+            Accept: 'application/json',
+          },
+        },
+      );
+
+      const data = await response.json();
+
+      console.log('Geo response:', data);
+
+      if (data?.display_name) {
+        setAddress(data.display_name);
+
         showMessage({
-          message: 'Error',
-          description: 'Age must be 24 years old.',
-          type: 'danger',
+          message: 'Location fetched successfully',
+          type: 'success',
         });
       } else {
-        const formattedDate = `${String(currentDate.getDate()).padStart(
-          2,
-          '0',
-        )}/${String(currentDate.getMonth() + 1).padStart(
-          2,
-          '0',
-        )}/${currentDate.getFullYear()}`;
-        setDob(formattedDate);
-        console.log(formattedDate);
+        throw new Error('No address found');
       }
-    }
-
-    setModalVisible2(false);
-  };
-
-  const toggleModalTimes = () => {
-    setModalVisible(true);
-  };
-
-  const toggleModalDob = () => {
-    setModalVisible2(true);
-  };
-
-  const Function = async () => {
-    if (!firstname || firstname.length <= 3) {
-      return showMessage({
-        message: 'Validation Error',
-        description: 'Name must be greater than 3 letters.',
-        type: 'danger',
-      });
-    }
-
-    if (!Bio.trim()) {
-      return showMessage({
-        message: 'Validation Error',
-        description: 'Please edit your bio.',
-        type: 'danger',
-      });
-    }
-
-    if (!gender.trim() || (gender !== 'Male' && gender !== 'Female')) {
-      return showMessage({
-        message: 'Validation Error',
-        description: 'Please select a valid gender (Male or Female).',
-        type: 'danger',
-      });
-    }
-
-    if (!dob) {
-      return showMessage({
-        message: 'Validation Error',
-        description: 'Please enter your date of birth.',
-        type: 'danger',
-      });
-    }
-
-    if (!Array.isArray(selectedTimes) || selectedTimes.length === 0) {
-      return showMessage({
-        message: 'Validation Error',
-        description: 'Please select your availability times.',
-        type: 'danger',
-      });
-    }
-
-    if (Hourly <= 0) {
-      return showMessage({
-        message: 'Validation Error',
-        description: 'Please enter a valid hourly rate.',
-        type: 'danger',
-      });
-    }
-
-    if (
-      !Array.isArray(selectedSpecialities) ||
-      selectedSpecialities.length === 0
-    ) {
-      return showMessage({
-        message: 'Validation Error',
-        description: 'Please select at least one speciality.',
-        type: 'danger',
-      });
-    }
-
-    if (!Address.trim()) {
-      return showMessage({
-        message: 'Validation Error',
-        description: 'Please edit your address.',
-        type: 'danger',
-      });
-    }
-
-    // Create the updateData object based on valid fields
-    const updateData = {};
-    if (logedInTrainer?.email) updateData.email = logedInTrainer.email;
-    if (firstname) updateData.fullName = firstname;
-    if (Bio.trim()) updateData.Bio = Bio;
-    if (gender.trim()) updateData.gender = gender;
-    if (dob) updateData.Dob = dob;
-    if (Array.isArray(selectedTimes) && selectedTimes.length > 0) {
-      updateData.Availiblity = selectedTimes;
-    }
-    if (Hourly > 0) updateData.Hourlyrate = Hourly;
-    if (
-      Array.isArray(selectedSpecialities) &&
-      selectedSpecialities.length > 0
-    ) {
-      updateData.Speciality = selectedSpecialities;
-    }
-    if (Address.trim()) updateData.Address = Address;
-
-    if (Object.keys(updateData).length === 0) {
-      return showMessage({
-        message: 'No Updates',
-        description: 'No fields to update.',
-        type: 'warning',
-      });
-    }
-
-    try {
-      const response = await axiosBaseURL.post('/trainer/update', updateData);
-      dispatch(updateLogin({...logedInTrainer, ...updateData}));
+    } catch (err) {
+      console.log('Location error:', err);
 
       showMessage({
-        message: 'Update Successful',
-        description: 'Your data has been updated!',
-        type: 'success',
+        message: 'Location failed',
+        description: 'Could not fetch address',
+        type: 'danger',
       });
-
-      navigation.navigate('Profile');
-    } catch (error) {
-      setUploadError('Upload failed.');
-      console.error('Error uploading data:', error);
-    } finally {
-      setUploading(false);
     }
   };
+
+  // ================= SAVE =================
+
+  const handleSave = async () => {
+    await axiosBaseURL.post(
+      '/trainer/update',
+      {
+        email: auth.email,
+        Bio: bio,
+        Hourlyrate: hourly,
+        Speciality: specialities,
+        Availiblity: times,
+        Dob: dob,
+        weight,
+        height,
+        fitnessPreference: pref,
+        goal,
+        Address: address,
+        location: {type: 'Point', coordinates: coords},
+      },
+      {headers: {Authorization: `Bearer ${auth.token}`}},
+    );
+
+    showMessage({message: 'Profile Updated', type: 'success'});
+    navigation.goBack();
+  };
+
+  // ================= COMPONENTS =================
+
+  const Label = ({title}) => <Text style={styles.label}>{title}</Text>;
+
+  const Chip = ({text, selected, onPress}) => (
+    <TouchableOpacity
+      style={[styles.chip, {backgroundColor: selected ? '#9FED3A' : '#181818'}]}
+      onPress={onPress}>
+      <Text style={{color: selected ? '#000' : '#9FED3A'}}>{text}</Text>
+    </TouchableOpacity>
+  );
+
+  const SelectModal = ({visible, data, onSelect, onClose}) => (
+    <Modal transparent visible={visible} animationType="slide">
+      <TouchableOpacity style={styles.modalOverlay} onPress={onClose}>
+        <View style={styles.modalBox}>
+          <FlatList
+            data={data}
+            renderItem={({item}) => (
+              <TouchableOpacity
+                style={styles.modalItem}
+                onPress={() => {
+                  onSelect(item);
+                  onClose();
+                }}>
+                <Text style={{color: '#fff'}}>{item}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      </TouchableOpacity>
+    </Modal>
+  );
+
+  // ================= UI =================
+
+  if (!profile) return null;
 
   return (
     <WrapperContainer>
-      <ScrollView>
-        <Header
-          onPress={() => {
-            navigation.goBack();
-          }}
-          rightView={
-            <Image
-              source={Images.logo}
-              style={{height: responsiveHeight(5), width: responsiveWidth(10)}}
-            />
-          }
-        />
-        <View style={styles.Main}>
-          <Text style={styles.subHeading}>Edit Profile</Text>
-          <View style={styles.FirstNameContainer}>
-            <View style={styles.FirstNameH}>
-              <Text style={{color: '#908C8D'}}>Full Name</Text>
-              <TextInput
-                editable={true}
-                value={firstname}
-                onChangeText={setfirstname}
-                placeholder={' Enter your full name'}
-                style={styles.FirstNameInput}
-                numberOfLines={1}
-                placeholderTextColor={'white'}
-              />
-            </View>
-            <View>
-              <Text
-                style={{
-                  color: Bioformik ? 'red' : 'white',
-                  marginBottom: responsiveHeight(1),
-                  fontSize: responsiveFontSize(2.5),
-                }}>
-                Bio
-              </Text>
-              <View
-                style={[
-                  {...styles.BioCont},
-                  {
-                    borderColor: Bioformik ? 'red' : '#908C8D',
-                  },
-                ]}>
-                <TextInput
-                  editable={true}
-                  placeholder={
-                    'A brief introduction about yourself and your training philosophy'
-                  }
-                  onChangeText={text => setBio(text)}
-                  value={Bio}
-                  style={[
-                    {...styles.BioInput},
-                    {height: Bio.length == 0 ? responsiveHeight(7) : 'auto'},
-                  ]}
-                  multiline
-                  placeholderTextColor={'grey'}
-                />
-              </View>
-            </View>
-            <View style={styles.EmailContainer}>
-              <Text style={{color: '#908C8D'}}>Gender</Text>
-              <TextInput
-                placeholder={'Enter gender'}
-                value={gender}
-                onChangeText={text => {
-                  setGender(text);
-                }}
-                style={styles.EmailInput}
-                numberOfLines={1}
-                placeholderTextColor={'white'}
-              />
-            </View>
-            <View style={styles.EmailContainer}>
-              <Text style={{color: '#908C8D'}}>Date of birth</Text>
-              <View
-                style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                {/* <TextInput
-                  value={date}
-                  placeholder={'Enter DOB'}
-                  style={styles.EmailInput}
-                  numberOfLines={1}
-                  placeholderTextColor={'white'}
-                /> */}
-                <Text style={{color: '#fff'}}>{dob ? dob : 'Enter dob'}</Text>
-
-                <TouchableOpacity onPress={toggleModalDob}>
-                  <Image source={Images.calendar} />
-                </TouchableOpacity>
-              </View>
-            </View>
-            {modalVisible && (
-              <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}>
-                <TouchableWithoutFeedback
-                  onPress={() => setModalVisible(false)}>
-                  <View style={styles.overlay}>
-                    <TouchableWithoutFeedback>
-                      <View>
-                        <DateTimePicker
-                          value={time}
-                          mode="time"
-                          display="default"
-                          onChange={onTimeChange}
-                          is24Hour={false}
-                        />
-                      </View>
-                    </TouchableWithoutFeedback>
-                  </View>
-                </TouchableWithoutFeedback>
-              </Modal>
-            )}
-
-            {modalVisible2 && (
-              <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible2}
-                onRequestClose={() => setModalVisible2(false)}>
-                <TouchableWithoutFeedback
-                  onPress={() => setModalVisible2(false)}>
-                  <View style={styles.overlay}>
-                    <TouchableWithoutFeedback>
-                      <View>
-                        <DateTimePicker
-                          value={date}
-                          mode="date"
-                          display="default"
-                          onChange={onDateChange}
-                        />
-                      </View>
-                    </TouchableWithoutFeedback>
-                  </View>
-                </TouchableWithoutFeedback>
-              </Modal>
-            )}
-
-            <TouchableOpacity
-              onPress={toggleModalTimes}
-              style={[{...styles.EmailContainer}, {flexDirection: 'column'}]}>
-              <Text style={{color: '#908C8D'}}>Set Availabilities</Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  paddingVertical: responsiveHeight(0.7),
-                }}>
-                <View style={{width: responsiveWidth(70)}}>
-                  {selectedTimes.length > 0 ? (
-                    <Text
-                      numberOfLines={1}
-                      style={{
-                        color: '#fff',
-                        fontSize: responsiveFontSize(1.5),
-                      }}>
-                      {selectedTimes.join(' , ')}
-                    </Text>
-                  ) : (
-                    <Text
-                      style={{
-                        color: '#fff',
-                        fontSize: responsiveFontSize(1.5),
-                      }}>
-                      Add Availabilities
-                    </Text>
-                  )}
-                </View>
-
-                <View>
-                  <Image source={Images.calendar} />
-                </View>
-              </View>
-            </TouchableOpacity>
-            <View>
-              <FlatList
-                data={selectedTimes}
-                renderItem={({item}) => (
-                  <View
-                    key={item}
-                    style={[
-                      {...styles.MainFlatlist},
-                      {
-                        backgroundColor: selectedTime.includes(item)
-                          ? '#9FED3A'
-                          : '#181818',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                      },
-                    ]}>
-                    <Text
-                      style={{
-                        color: selectedTime.includes(item)
-                          ? 'black'
-                          : '#9FED3A',
-                        fontSize: responsiveFontSize(2),
-                      }}>
-                      {item}
-                    </Text>
-                    <TouchableOpacity onPress={() => removeTime(item)}>
-                      <Image
-                        source={Images.Cross}
-                        style={{
-                          tintColor: '#9FED3A',
-                          marginLeft: responsiveWidth(4),
-                          height: responsiveHeight(1.5),
-                        }}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{alignItems: 'center'}}
-              />
-            </View>
-            <View style={[styles.EmailContainer]}>
-              <Text style={{color: '#908C8D'}}>Hourly Rate</Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}>
-                <Text style={{color: '#fff', fontSize: responsiveFontSize(2)}}>
-                  $
-                </Text>
-                <TextInput
-                  editable={true}
-                  placeholder={'00'}
-                  value={Hourly}
-                  onChangeText={text => {
-                    setHourly(text);
-                  }}
-                  style={styles.EmailInput}
-                  numberOfLines={1}
-                  placeholderTextColor={'white'}
-                />
-              </View>
-            </View>
-            <View style={[styles.EmailContainer, {position: 'relative'}]}>
-              <TouchableOpacity
-                onPress={() => setDropdownVisible(!dropdownVisible)}
-                style={[
-                  styles.inputContainer,
-                  {
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    paddingVertical: responsiveHeight(1.4),
-                  },
-                ]}>
-                <Text
-                  style={{color: '#fff', fontSize: responsiveFontSize(2.2)}}>
-                  Select Specialities
-                </Text>
-                <View>
-                  <Image source={Images.dropdown} />
-                </View>
-              </TouchableOpacity>
-
-              {dropdownVisible && (
-                <FlatList
-                  data={Specialities}
-                  keyExtractor={item => item.key.toString()}
-                  renderItem={({item}) => (
-                    <TouchableOpacity
-                      onPress={() => handleSpecialitySelect(item)}
-                      style={styles.dropdownItem}>
-                      <Text style={styles.dropdownText}>{item.value}</Text>
-                    </TouchableOpacity>
-                  )}
-                  style={styles.dropdownList}
-                />
-              )}
-            </View>
-          </View>
-          <View style={{marginVertical: responsiveHeight(1.5)}}>
-            <FlatList
-              data={selectedSpecialities}
-              renderItem={({item}) => (
-                <View
-                  key={item.key}
-                  style={[
-                    {...styles.MainFlatlist},
-                    {
-                      backgroundColor: Speciality.includes(item.value)
-                        ? '#9FED3A'
-                        : '#181818',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                    },
-                  ]}>
-                  <Text
-                    style={{
-                      color: Speciality.includes(item.value)
-                        ? 'black'
-                        : '#9FED3A',
-                      fontSize: responsiveFontSize(2),
-                    }}>
-                    {item.value}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => handleRemoveSpeciality(item)}>
-                    <Image
-                      source={Images.Cross}
-                      style={{
-                        tintColor: '#9FED3A',
-                        marginLeft: responsiveWidth(4),
-                        height: responsiveHeight(1.5),
-                      }}
-                    />
-                  </TouchableOpacity>
-                </View>
-              )}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{alignItems: 'center'}}
-            />
-          </View>
-          <Text style={{fontSize: responsiveFontSize(2.5), color: '#fff'}}>
-            Location
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}>
-            <TextInput
-              onChangeText={text => {
-                setAddress(text);
-              }}
-              value={Address}
-              placeholder="Enter your address"
-              style={{
-                color: '#fff',
-                width: responsiveWidth(70),
-              }}
-              placeholderTextColor={'#fff'}
-            />
-            {/* <TouchableOpacity
-              onPress={() => {
-                setAddressModal(true);
-              }}>
-              <Image
-                source={Images.edit}
-                style={{
-                  height: responsiveHeight(2),
-                  width: responsiveWidth(4),
-                }}
-              />
-            </TouchableOpacity> */}
-          </View>
-          {/* <EditAddressModal
-            token={logedInTrainer.token}
-            Address={Address}
-            modalstate={AddressModal}
-            onRequestClose={() => setAddressModal(false)}
-          /> */}
+      <ScrollView contentContainerStyle={{padding: 20}}>
+        {/* IMAGE */}
+        <View style={styles.avatarWrap}>
+          <Image
+            source={
+              profile.profileImage
+                ? {uri: profile.profileImage}
+                : Images.profile
+            }
+            style={styles.avatar}
+          />
+          <TouchableOpacity
+            style={styles.editBtn}
+            onPress={() => setImageModal(true)}>
+            <Image resizeMode="cover" source={Images.edit_icon} />
+          </TouchableOpacity>
         </View>
+
+        <Text style={styles.name}>{profile.fullName}</Text>
+
+        {/* BIO */}
+        <Label title="Bio" />
+        <TextInput style={styles.input} value={bio} onChangeText={setBio} />
+
+        {/* AGE */}
+        <Label title="Age" />
+        <TouchableOpacity
+          style={styles.input}
+          onPress={() => setShowDatePicker(true)}>
+          <Text style={{color: '#fff'}}>{calculateAge(dob) + ' '}Year's</Text>
+        </TouchableOpacity>
+
+        {/* WEIGHT */}
+        <Label title="Weight (lbs)" />
+        <TextInput
+          style={styles.input}
+          value={weight}
+          onChangeText={setWeight}
+        />
+
+        {/* HEIGHT */}
+        <Label title="Height (ft)" />
+        <TextInput
+          style={styles.input}
+          value={height}
+          onChangeText={setHeight}
+        />
+
+        {/* PREFERENCE */}
+        <Label title="Preference" />
+        <TouchableOpacity
+          style={styles.input}
+          onPress={() => setPrefModal(true)}>
+          <Text style={{color: '#fff'}}>{pref || 'Select Preference'}</Text>
+        </TouchableOpacity>
+
+        {/* GOAL */}
+        <Label title="Goal" />
+        <TouchableOpacity
+          style={styles.input}
+          onPress={() => setGoalModal(true)}>
+          <Text style={{color: '#fff'}}>{goal || 'Select Goal'}</Text>
+        </TouchableOpacity>
+
+        {/* SPECIALITIES */}
+        <Label title="Specialities" />
+        <FlatList
+          showsHorizontalScrollIndicator={false}
+          horizontal
+          data={allSpecialities}
+          renderItem={({item}) => {
+            const selected = specialities.some(s => s.key === item.key);
+            return (
+              <Chip
+                text={item.value}
+                selected={selected}
+                onPress={() =>
+                  selected
+                    ? setSpecialities(prev =>
+                        prev.filter(s => s.key !== item.key),
+                      )
+                    : setSpecialities(prev => [...prev, item])
+                }
+              />
+            );
+          }}
+        />
+
+        {/* AVAILABILITY */}
+        <View style={styles.rowBetween}>
+          <Label title="Availability" />
+          <TouchableOpacity
+            style={{marginTop: 10}}
+            onPress={() => setTimePicker(true)}>
+            <Image source={Images.edit_icon} />
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          horizontal
+          data={times}
+          renderItem={({item}) => <Chip text={item} selected />}
+        />
+
+        <View style={{marginBottom: responsiveHeight(2)}}>
+          <Text style={styles.fieldLabel}>Location</Text>
+
+          <TouchableOpacity
+            style={styles.inputBox}
+            onPress={getCurrentLocation}>
+            <Text style={styles.inputText}>
+              {address || 'Tap to fetch location'}
+            </Text>
+
+            <Image
+              source={Images.edit_icon}
+              style={{position: 'absolute', right: 10}}
+            />
+          </TouchableOpacity>
+        </View>
+        {/* SAVE */}
+        <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+          <Text style={{color: '#000'}}>Save</Text>
+        </TouchableOpacity>
       </ScrollView>
-      <ButtonComp
-        onPress={() => {
-          Function();
-          // concat();
+
+      {/* DATE PICKER */}
+      {showDatePicker && (
+        <DateTimePicker
+          value={new Date()}
+          mode="date"
+          maximumDate={new Date()}
+          onChange={(e, d) => {
+            setShowDatePicker(false);
+            if (d)
+              setDob(`${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`);
+          }}
+        />
+      )}
+
+      {/* TIME PICKER */}
+      {timePicker && (
+        <DateTimePicker
+          value={new Date()}
+          mode="time"
+          onChange={(e, d) => {
+            setTimePicker(false);
+            if (d) {
+              const t = moment(d).format('hh:mm A');
+              if (!times.includes(t)) setTimes([...times, t]);
+            }
+          }}
+        />
+      )}
+
+      <SelectModal
+        visible={prefModal}
+        data={fitnessOptions}
+        onSelect={setPref}
+        onClose={() => setPrefModal(false)}
+      />
+      <SelectModal
+        visible={goalModal}
+        data={goalOptions}
+        onSelect={setGoal}
+        onClose={() => setGoalModal(false)}
+      />
+
+      <ProfileImageModal
+        visible={imageModal}
+        onClose={() => setImageModal(false)}
+        onChange={() => {
+          setImageModal(false);
+          setTimeout(() => setSourceModal(true), 200);
         }}
-        text="Save"
-        mainStyle={{
-          marginVertical: responsiveHeight(3),
-          width: responsiveWidth(90),
-          alignSelf: 'center',
-        }}
+        onRemove={deleteImage}
+      />
+
+      <ImageSourceModal
+        visible={sourceModal}
+        onClose={() => setSourceModal(false)}
+        onCamera={() =>
+          ImageCropPicker.openCamera({cropping: true}).then(uploadImage)
+        }
+        onGallery={() =>
+          ImageCropPicker.openPicker({cropping: true}).then(uploadImage)
+        }
       />
     </WrapperContainer>
   );
@@ -684,203 +502,100 @@ const EditProfile = ({route}) => {
 
 export default EditProfile;
 
+// ================= STYLES =================
+
 const styles = StyleSheet.create({
-  MainFlatlist2: {
-    paddingVertical: responsiveWidth(2),
-    paddingHorizontal: responsiveWidth(4),
-    borderRadius: 25,
-    marginHorizontal: 5,
-    borderWidth: 1,
+  avatarWrap: {alignItems: 'center', marginVertical: 20},
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 3,
     borderColor: '#9FED3A',
   },
-  MainFlatlist: {
-    paddingVertical: responsiveWidth(2),
-    paddingHorizontal: responsiveWidth(4),
-    borderRadius: 25,
-    marginHorizontal: 5,
+  editBtn: {position: 'absolute', bottom: 0, right: responsiveWidth(30)},
+
+  name: {textAlign: 'center', color: '#fff', fontSize: 22, marginBottom: 20},
+
+  label: {color: '#9FED3A', marginBottom: 6},
+
+  input: {
+    borderWidth: 0.5,
+    borderColor: '#444',
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 15,
+    color: '#fff',
+  },
+
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginRight: 8,
     borderWidth: 1,
     borderColor: '#9FED3A',
+    marginBottom: 10,
   },
-  SpecialityMain: {
-    fontSize: responsiveFontSize(2),
-    fontFamily: FontFamily.Medium,
-    marginLeft: responsiveWidth(2),
-    marginTop: responsiveHeight(2),
-  },
-  BioInput: {
-    padding: 0,
-    fontFamily: FontFamily.Semi_Bold,
-    color: 'white',
-    fontSize: responsiveFontSize(1.5),
-  },
-  BioCont: {
-    paddingHorizontal: responsiveWidth(3),
-    paddingVertical: responsiveWidth(1),
-    borderWidth: 0.5,
-    borderRadius: 10,
-    height: responsiveHeight(20),
-  },
-  HourlyText1: {
-    fontSize: responsiveFontSize(2),
-    fontFamily: FontFamily.Medium,
-    marginLeft: responsiveWidth(2),
-    marginTop: responsiveHeight(2),
-  },
-  Avail: {
-    fontSize: responsiveFontSize(2),
-    fontFamily: FontFamily.Medium,
-    marginLeft: responsiveWidth(2),
-    marginTop: responsiveHeight(2),
-  },
-  HourlyText: {color: 'white', fontFamily: FontFamily.Semi_Bold},
-  Dollar: {color: 'white', fontFamily: FontFamily.Semi_Bold},
-  RateContainer: {
-    paddingHorizontal: responsiveWidth(2),
-    borderWidth: 0.5,
-    borderColor: '#908C8D',
-    width: responsiveWidth(14),
-    borderRadius: 5,
-    flexDirection: 'row',
+
+  saveBtn: {
+    backgroundColor: '#9FED3A',
     alignItems: 'center',
+    padding: 14,
+    borderRadius: 20,
+    marginTop: 25,
   },
-  HourlyContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginLeft: responsiveWidth(2),
-    marginTop: responsiveHeight(2),
-  },
-  Main: {
-    width: responsiveScreenWidth(90),
-    alignSelf: 'center',
-  },
-  Header: {justifyContent: 'space-between', flexDirection: 'row'},
-  H1: {color: 'white', fontSize: responsiveFontSize(2.4)},
-  greyH: {color: 'grey', fontSize: responsiveFontSize(2)},
-  subHeading: {color: 'white', fontSize: responsiveFontSize(3)},
-  ProfileContainer: {
-    flexDirection: 'row',
-    gap: responsiveWidth(7),
-    marginTop: responsiveHeight(1),
-  },
-  ProfileText: {flex: 1, justifyContent: 'space-around'},
-  UploadText: {
-    color: '#9FED3A',
-    fontSize: responsiveScreenFontSize(2),
-  },
-  UploadText2: {fontSize: responsiveScreenFontSize(2), color: 'white'},
-  FirstNameContainer: {
-    gap: responsiveHeight(2.5),
-    marginTop: responsiveHeight(2),
-  },
-  FirstNameH: {
-    paddingHorizontal: responsiveWidth(5),
-    paddingVertical: responsiveWidth(1),
-    borderWidth: 0.5,
-    borderColor: '#908C8D',
-    borderRadius: 10,
-  },
-  FirstNameInput: {
-    padding: 0,
-    fontFamily: FontFamily.Semi_Bold,
-    color: 'white',
-    fontSize: responsiveFontSize(2),
-    width: responsiveWidth(67),
-    height: responsiveHeight(4),
-  },
-  LastNameContainer: {
-    paddingHorizontal: responsiveWidth(5),
-    paddingVertical: responsiveWidth(1),
-    borderWidth: 0.5,
-    borderColor: '#908C8D',
-    borderRadius: 10,
-  },
-  LastNameInput: {
-    padding: 0,
-    fontFamily: FontFamily.Semi_Bold,
-    color: 'white',
-    fontSize: responsiveFontSize(2),
-    width: responsiveWidth(67),
-    height: responsiveHeight(4),
-  },
-  EmailContainer: {
-    paddingHorizontal: responsiveWidth(5),
-    paddingVertical: responsiveWidth(1),
-    borderWidth: 0.4,
-    borderColor: '#908C8D',
-    borderRadius: responsiveWidth(2),
-  },
-  EmailInput: {
-    padding: responsiveWidth(0),
-    fontFamily: FontFamily.Semi_Bold,
-    color: 'white',
-    fontSize: responsiveFontSize(2),
-    width: responsiveWidth(67),
-    height: responsiveHeight(4),
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContent: {
-    width: responsiveWidth(80),
-    height: responsiveHeight(30),
-    justifyContent: 'space-around',
-    padding: responsiveWidth(4),
-    backgroundColor: 'white',
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  modalText: {
-    fontSize: 18,
-    marginBottom: 20,
-    color: '#000',
-    fontWeight: '600',
-  },
-  closeButton: {
-    padding: 10,
-    backgroundColor: '#000',
-    borderRadius: 5,
-    marginHorizontal: responsiveWidth(1),
-  },
-  closeButtonText: {
-    color: '#9FED3A',
-    fontSize: responsiveFontSize(1.7),
-    fontWeight: '600',
-  },
-  selectedTimes: {
-    marginTop: 20,
-    textAlign: 'center',
-    color: 'white',
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  inputContainer: {
+
+  rowBetween: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  dropdownContainer: {
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  modalBox: {
+    backgroundColor: '#111',
+    padding: 20,
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+  },
+  modalItem: {paddingVertical: 15, borderBottomWidth: 0.5, borderColor: '#333'},
+  locationContainer: {
+    marginBottom: responsiveHeight(2.2),
+  },
+
+  fieldLabel: {
+    color: '#9FED3A',
+    // fontFamily: FontFamily.Medium,
+    fontSize: responsiveFontSize(1.9),
+    marginBottom: responsiveHeight(0.6),
+  },
+
+  inputBox: {
+    borderWidth: 1,
+    borderColor: '#333',
+    backgroundColor: '#111',
+    borderRadius: 16,
+    paddingVertical: responsiveHeight(1.6),
+    paddingHorizontal: responsiveWidth(4),
+    justifyContent: 'center',
+  },
+
+  inputText: {
+    color: '#fff',
+    // fontFamily: FontFamily.Semi_Bold,
+    fontSize: responsiveFontSize(2),
+  },
+
+  locationIcon: {
     position: 'absolute',
-    zIndex: 1000,
-  },
-  dropdownList: {
-    borderRadius: responsiveWidth(2),
-    marginVertical: responsiveHeight(2),
-  },
-  dropdownItem: {
-    padding: responsiveWidth(2),
-    borderBottomWidth: responsiveWidth(0.3),
-    borderBottomColor: 'grey',
-  },
-  dropdownText: {
-    color: 'white',
-    fontSize: responsiveFontSize(1.8),
+    right: responsiveWidth(4),
+    height: responsiveWidth(5),
+    width: responsiveWidth(5),
+    tintColor: '#9FED3A',
   },
 });

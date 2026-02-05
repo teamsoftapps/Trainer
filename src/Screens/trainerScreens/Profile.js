@@ -35,7 +35,7 @@ const Profile = () => {
       `/Common/GetProfile/${trainer_data.token}`,
     );
 
-    console.log('responce in profile:', res.data.data.Dob);
+    console.log('responce in profile:', res.data.data);
     setProfile(res.data.data);
   };
 
@@ -92,18 +92,6 @@ const Profile = () => {
           paddingBottom: responsiveHeight(4),
         }}
         showsVerticalScrollIndicator={false}>
-        {/* ========= HEADER ========= */}
-        {/* <View style={styles.profileHeader}>
-          <Image
-            source={
-              profile?.profileImage
-                ? {uri: profile.profileImage}
-                : Images.profile
-            }
-            style={styles.avatar}
-          />
-        </View> */}
-
         <View style={styles.profileHeader}>
           {/* avatar */}
           <Image
@@ -128,7 +116,7 @@ const Profile = () => {
         </View>
 
         <Text style={styles.name}>{safe(profile?.fullName)}</Text>
-        <Text style={styles.role}>Personal Trainer</Text>
+        <Text style={styles.role}>{safe(profile?.fitnessPreference)}</Text>
         <Text style={styles.bio}>{safe(profile?.Bio)}</Text>
 
         {/* ========= PERSONAL INFO ========= */}
@@ -285,6 +273,8 @@ const styles = StyleSheet.create({
 
   rowValue: {
     color: '#9FED3A',
+    width: responsiveWidth(50),
+    textAlign: 'right',
   },
 
   chip: {
