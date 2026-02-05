@@ -63,7 +63,7 @@ const TrainerStack = () => {
 
       previousBookings.current = newBookings;
     } catch (error) {
-      console.log('Error fetching bookings:', error);
+      // console.log('Error fetching bookings:', error);
     }
   };
 

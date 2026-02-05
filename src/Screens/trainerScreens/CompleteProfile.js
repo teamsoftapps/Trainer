@@ -11,6 +11,7 @@ import {
   Alert,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  KeyboardAvoidingView,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
@@ -35,6 +36,40 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import {IsLogin, updateLogin} from '../../store/Slices/AuthSlice';
 import Geolocation from '@react-native-community/geolocation';
+
+const fitnessOptions = [
+  'Adventure Sports Coaching',
+  'Boxing',
+  'Core Strength Training',
+  'Cross-Fit',
+  'Cycling',
+  'Flexibility and Mobility Training',
+  'Functional Training',
+  'Group Fitness Classes',
+  'High-Intensity Interval Training (HIIT)',
+  'Kickboxing',
+  'Martial Arts',
+  'Nutrition Coaching',
+  'Pilates',
+  'Post-Rehabilitation Training',
+];
+
+const goalOptions = [
+  'Body Composition',
+  'Enhanced Athletic Performance',
+  'Event Preparation',
+  'General Fitness',
+  'Healthy Aging',
+  'Improved Endurance',
+  'Mind-Body Connection',
+  'Muscle Gain',
+  'Posture Correction',
+  'Rehabilitation',
+  'Sport-Specific Training',
+  'Stress Relief',
+  'Weight Loss',
+];
+
 const CompleteProfile = ({route}) => {
   // Data States
   const [firstname, setfirstname] = useState('');
@@ -60,12 +95,35 @@ const CompleteProfile = ({route}) => {
   const [selectedSpecialities, setSelectedSpecialities] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTimes, setSelectedTimes] = useState([]);
+  const [weight, setweight] = useState('');
+  const [height, setheight] = useState('');
+  const [fitnessPreference, setFitnessPreference] = useState('');
+  const [goal, setGoal] = useState('');
+
+  const [dob, setDob] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const [fitnessModal, setFitnessModal] = useState(false);
+  const [goalModal, setGoalModal] = useState(false);
+
+  const [bundles, setBundles] = useState([]);
+  const [bundleModal, setBundleModal] = useState(false);
+
+  const [bundleName, setBundleName] = useState('');
+  const [bundleDesc, setBundleDesc] = useState('');
+  const [bundlePrice, setBundlePrice] = useState('');
+  const [bundleItems, setBundleItems] = useState([]);
+  const [newItem, setNewItem] = useState('');
+
+  const [focused, setFocused] = useState(null);
   const [time, setTime] = useState(new Date());
   const logedInTrainer = useSelector(state => state.Auth.data);
   console.log('trainer data in complete profile: ', logedInTrainer);
   const dispatch = useDispatch();
 
   const {LocationModule} = NativeModules;
+
+  const isGoogleUser = logedInTrainer?.authProvider === 'google';
 
   // Formik Conditions
   const condition1 = Hourly !== '0' && Hourly !== '';
@@ -110,25 +168,96 @@ const CompleteProfile = ({route}) => {
     }
   };
 
+  // const Function = async () => {
+  //   if (
+  //     !Bio.trim() ||
+  //     !Array.isArray(selectedSpecialities) ||
+  //     selectedSpecialities.length === 0 ||
+  //     Hourly <= 0 ||
+  //     !Array.isArray(selectedTimes) ||
+  //     selectedTimes.length === 0
+  //   ) {
+  //     return showMessage({
+  //       message: 'Validation Error',
+  //       description: 'Please fill in all required fields.',
+  //       type: 'danger',
+  //     });
+  //   }
+  //   const validationChecks = [
+  //     {
+  //       condition: Bio.trim() !== '',
+  //       message: 'Please edit your bio.',
+  //     },
+  //     {
+  //       condition:
+  //         Array.isArray(selectedSpecialities) &&
+  //         selectedSpecialities.length > 0,
+  //       message: 'Please select at least one speciality.',
+  //     },
+  //     {
+  //       condition: Hourly > 0,
+  //       message: 'Please enter a valid hourly rate.',
+  //     },
+  //     {
+  //       condition: Array.isArray(selectedTimes) && selectedTimes.length > 0,
+  //       message: 'Please select your availability times.',
+  //     },
+  //   ];
+
+  //   for (const {condition, message} of validationChecks) {
+  //     if (!condition) {
+  //       return showMessage({
+  //         message: 'Validation Error',
+  //         description: message,
+  //         type: 'danger',
+  //       });
+  //     }
+  //   }
+  //   try {
+  //     const response = await axiosBaseURL.post('/trainer/update', {
+  //       email: logedInTrainer?.email,
+  //       Bio: Bio,
+  //       Speciality: selectedSpecialities,
+  //       Hourlyrate: Hourly,
+  //       Availiblity: selectedTimes,
+  //     });
+
+  //     let payload = {
+  //       Bio: Bio,
+  //       Speciality: selectedSpecialities,
+  //       Hourlyrate: Hourly,
+  //       Availiblity: selectedTimes,
+  //     };
+  //     dispatch(updateLogin(payload));
+
+  //     console.log('responce in complete profile:', response.data);
+  //     // showMessage({
+  //     //   message: 'Updates Succesfully',
+  //     //   description: 'your data has been updated!',
+  //     //   type: 'success',
+  //     // });
+  //     showMessage({
+  //       message: 'Profile completed!',
+  //       description: 'Choose your subscription plan',
+  //       type: 'success',
+  //     });
+  //     navigation.replace('Subscription');
+
+  //     console.log('Upload successful:', response.data);
+  //   } catch (error) {
+  //     setUploadError('Upload failed.');
+  //     console.error('Error uploading file:', error);
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
+
   const Function = async () => {
-    if (
-      !Bio.trim() ||
-      !Array.isArray(selectedSpecialities) ||
-      selectedSpecialities.length === 0 ||
-      Hourly <= 0 ||
-      !Array.isArray(selectedTimes) ||
-      selectedTimes.length === 0
-    ) {
-      return showMessage({
-        message: 'Validation Error',
-        description: 'Please fill in all required fields.',
-        type: 'danger',
-      });
-    }
+    // ---------- VALIDATION ----------
     const validationChecks = [
       {
         condition: Bio.trim() !== '',
-        message: 'Please edit your bio.',
+        message: 'Please add your bio.',
       },
       {
         condition:
@@ -144,6 +273,27 @@ const CompleteProfile = ({route}) => {
         condition: Array.isArray(selectedTimes) && selectedTimes.length > 0,
         message: 'Please select your availability times.',
       },
+      {
+        condition: dob?.trim(),
+        message: 'Please select your age.',
+      },
+      {
+        condition: weight > 0,
+        message: 'Please enter your weight.',
+      },
+      {
+        condition: height > 0,
+        message: 'Please enter your height.',
+      },
+      {
+        condition: fitnessPreference,
+        message: 'Please select fitness preference.',
+      },
+      {
+        condition: goal,
+        message: 'Please select your goal.',
+      },
+      // ❌ bundles skipped (optional)
     ];
 
     for (const {condition, message} of validationChecks) {
@@ -155,40 +305,68 @@ const CompleteProfile = ({route}) => {
         });
       }
     }
+
     try {
-      const response = await axiosBaseURL.post('/trainer/update', {
-        email: logedInTrainer?.email,
-        Bio: Bio,
-        Speciality: selectedSpecialities,
-        Hourlyrate: Hourly,
-        Availiblity: selectedTimes,
-      });
+      setUploading(true);
 
-      let payload = {
-        Bio: Bio,
-        Speciality: selectedSpecialities,
-        Hourlyrate: Hourly,
-        Availiblity: selectedTimes,
-      };
-      dispatch(updateLogin(payload));
+      // ---------- API CALL ----------
+      const response = await axiosBaseURL.post(
+        '/trainer/update',
+        {
+          email: logedInTrainer?.email,
 
-      console.log('responce in complete profile:', response.data);
-      // showMessage({
-      //   message: 'Updates Succesfully',
-      //   description: 'your data has been updated!',
-      //   type: 'success',
-      // });
+          // old fields
+          Bio,
+          Speciality: selectedSpecialities,
+          Hourlyrate: Hourly,
+          Availiblity: selectedTimes,
+
+          // ⭐ NEW FIELDS
+          Dob: dob,
+          weight,
+          height,
+          fitnessPreference,
+          goal,
+          bundles: bundles || [], // optional
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${logedInTrainer?.token}`,
+          },
+        },
+      );
+
+      // ---------- REDUX UPDATE ----------
+      dispatch(
+        updateLogin({
+          Bio,
+          Speciality: selectedSpecialities,
+          Hourlyrate: Hourly,
+          Availiblity: selectedTimes,
+          Dob: dob,
+          weight,
+          height,
+          fitnessPreference,
+          goal,
+          bundles: bundles || [],
+        }),
+      );
+
+      // ---------- SUCCESS ----------
       showMessage({
         message: 'Profile completed!',
         description: 'Choose your subscription plan',
         type: 'success',
       });
-      navigation.replace('Subscription');
 
-      console.log('Upload successful:', response.data);
+      navigation.replace('Subscription');
     } catch (error) {
-      setUploadError('Upload failed.');
-      console.error('Error uploading file:', error);
+      console.log(error);
+      showMessage({
+        message: 'Error',
+        description: 'Failed to update profile',
+        type: 'danger',
+      });
     } finally {
       setUploading(false);
     }
@@ -302,6 +480,81 @@ const CompleteProfile = ({route}) => {
       getTrainerLocation();
     }
   }, [logedInTrainer]);
+
+  const fetchBundles = async () => {
+    const res = await axiosBaseURL.get('/trainer/bundle/list');
+    setBundles(res.data.data);
+  };
+
+  useEffect(() => {
+    fetchBundles();
+  }, []);
+
+  const createBundle = async () => {
+    try {
+      const res = await axiosBaseURL.post('/trainer/bundle/create', {
+        name: bundleName,
+        description: bundleDesc,
+        price: Number(bundlePrice),
+        items: bundleItems,
+      });
+
+      console.log('Response:', res);
+
+      setBundles([...bundles, res.data.data]);
+
+      setBundleModal(false);
+      setBundleName('');
+      setBundleDesc('');
+      setBundlePrice('');
+      setBundleItems([]);
+    } catch (e) {
+      console.log('sdsdsdsd', e);
+      showMessage({message: 'Error creating bundle', type: 'danger'});
+    }
+  };
+
+  const calculateAge = dateString => {
+    const [day, month, year] = dateString.split('/');
+    const birth = new Date(year, month - 1, day);
+    const today = new Date();
+
+    let age = today.getFullYear() - birth.getFullYear();
+
+    if (
+      today.getMonth() < birth.getMonth() ||
+      (today.getMonth() === birth.getMonth() &&
+        today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+
+  const SelectionModal = ({visible, onClose, data, onSelect}) => (
+    <Modal transparent animationType="slide" visible={visible}>
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <ScrollView>
+              {data.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.modalItem}
+                  onPress={() => {
+                    onSelect(item);
+                    onClose();
+                  }}>
+                  <Text style={{color: '#fff'}}>{item}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
+  );
 
   return (
     <WrapperContainer>
@@ -540,7 +793,6 @@ const CompleteProfile = ({route}) => {
             </View>
             <Text style={styles.HourlyText}>/hr</Text>
           </View>
-
           <TouchableOpacity
             onPress={toggleModalTimes}
             style={[
@@ -599,6 +851,207 @@ const CompleteProfile = ({route}) => {
               </TouchableWithoutFeedback>
             </Modal>
           )}
+          {isGoogleUser && (
+            <>
+              {/* ===== WEIGHT + HEIGHT ROW ===== */}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  width: responsiveWidth(85),
+                  justifyContent: 'space-between',
+                  marginTop: responsiveHeight(3),
+                }}>
+                {/* Weight */}
+                <View
+                  style={{
+                    width: responsiveWidth(40),
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    paddingHorizontal: responsiveWidth(4),
+                    paddingVertical: responsiveWidth(2),
+                    borderColor: focused === 'weight' ? '#9FED3A' : '#908C8D',
+                  }}>
+                  <Text style={{color: '#908C8D'}}>Weight in lbs</Text>
+                  <TextInput
+                    keyboardType="numeric"
+                    value={weight}
+                    onFocus={() => setFocused('weight')}
+                    onBlur={() => setFocused(null)}
+                    onChangeText={setweight}
+                    placeholder="Your Weight"
+                    placeholderTextColor="#908C8D"
+                    style={{color: 'white'}}
+                  />
+                </View>
+
+                {/* Height */}
+                <View
+                  style={{
+                    width: responsiveWidth(40),
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    paddingHorizontal: responsiveWidth(4),
+                    paddingVertical: responsiveWidth(2),
+                    borderColor: focused === 'height' ? '#9FED3A' : '#908C8D',
+                  }}>
+                  <Text style={{color: '#908C8D'}}>Height in ft</Text>
+                  <TextInput
+                    keyboardType="numeric"
+                    value={height}
+                    onFocus={() => setFocused('height')}
+                    onBlur={() => setFocused(null)}
+                    onChangeText={setheight}
+                    placeholder="Your Height"
+                    placeholderTextColor="#908C8D"
+                    style={{color: 'white'}}
+                  />
+                </View>
+              </View>
+
+              {/* AGE FIELD */}
+              <TouchableOpacity
+                style={styles.inputBox}
+                onPress={() => setShowDatePicker(true)}>
+                <Text style={{color: '#908C8D'}}>Age</Text>
+
+                <Text style={{color: '#fff'}}>
+                  {dob || 'Select Date of Birth'}
+                </Text>
+              </TouchableOpacity>
+
+              {showDatePicker && (
+                <DateTimePicker
+                  value={new Date()}
+                  mode="date"
+                  maximumDate={new Date()}
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    setShowDatePicker(false);
+
+                    if (selectedDate) {
+                      const d = selectedDate;
+                      const formatted = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+
+                      setDob(formatted);
+                    }
+                  }}
+                />
+              )}
+
+              {/* ===== FITNESS ===== */}
+              <TouchableOpacity
+                style={styles.inputBox}
+                onPress={() => setFitnessModal(true)}>
+                <Text style={{color: '#908C8D'}}>Fitness Preference</Text>
+                <Text style={{color: '#fff'}}>
+                  {fitnessPreference || 'Select Preference'}
+                </Text>
+              </TouchableOpacity>
+
+              {/* ===== GOAL ===== */}
+              <TouchableOpacity
+                style={styles.inputBox}
+                onPress={() => setGoalModal(true)}>
+                <Text style={{color: '#908C8D'}}>Goal</Text>
+                <Text style={{color: '#fff'}}>{goal || 'Select Goal'}</Text>
+              </TouchableOpacity>
+            </>
+          )}
+          <TouchableOpacity
+            style={styles.createBundleBtn}
+            onPress={() => setBundleModal(true)}>
+            <Text style={styles.createBundleText}>+ Create New Package</Text>
+          </TouchableOpacity>
+          {bundles.map((b, index) => (
+            <View key={index} style={styles.bundleCard}>
+              <Text style={styles.bundleTitle}>{b.name}</Text>
+              <Text style={styles.bundleDesc}>{b.description}</Text>
+              <Text style={styles.bundlePrice}>${b.price}</Text>
+            </View>
+          ))}
+          <Modal
+            visible={bundleModal}
+            animationType="fade"
+            transparent
+            statusBarTranslucent
+            onRequestClose={() => setBundleModal(false)}>
+            {/* OVERLAY */}
+            <TouchableOpacity
+              activeOpacity={1}
+              style={styles.bundleOverlay}
+              onPress={() => setBundleModal(false)}>
+              <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{width: '100%'}}>
+                <ScrollView
+                  keyboardShouldPersistTaps="handled"
+                  contentContainerStyle={styles.bundleSheet}>
+                  {/* BOTTOM SHEET */}
+                  <TouchableOpacity
+                    activeOpacity={1}
+                    style={styles.bundleSheet}>
+                    <Text style={styles.bundleHeader}>Create Package</Text>
+
+                    <TextInput
+                      placeholder="Package Name"
+                      placeholderTextColor="#888"
+                      value={bundleName}
+                      onChangeText={setBundleName}
+                      style={styles.bundleInput}
+                    />
+
+                    <TextInput
+                      placeholder="Description"
+                      placeholderTextColor="#888"
+                      multiline
+                      value={bundleDesc}
+                      onChangeText={setBundleDesc}
+                      style={[styles.bundleInput, {height: 90}]}
+                    />
+
+                    <TextInput
+                      placeholder="Price ($)"
+                      keyboardType="numeric"
+                      placeholderTextColor="#888"
+                      value={bundlePrice}
+                      onChangeText={setBundlePrice}
+                      style={styles.bundleInput}
+                    />
+
+                    {/* ADD ITEM */}
+                    <View style={{flexDirection: 'row', gap: 10}}>
+                      <TextInput
+                        placeholder="Add item"
+                        placeholderTextColor="#888"
+                        value={newItem}
+                        onChangeText={setNewItem}
+                        style={[styles.bundleInput, {flex: 1}]}
+                      />
+
+                      <TouchableOpacity
+                        style={styles.addBtn}
+                        onPress={() => {
+                          if (newItem) {
+                            setBundleItems([...bundleItems, newItem]);
+                            setNewItem('');
+                          }
+                        }}>
+                        <Text style={{color: '#000'}}>Add</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <TouchableOpacity
+                      style={styles.createBtn}
+                      onPress={createBundle}>
+                      <Text style={{color: '#000', fontWeight: '700'}}>
+                        Create Package
+                      </Text>
+                    </TouchableOpacity>
+                  </TouchableOpacity>
+                </ScrollView>
+              </KeyboardAvoidingView>
+            </TouchableOpacity>
+          </Modal>
           <ButtonComp
             mainStyle={{
               marginTop: responsiveHeight(5),
@@ -612,6 +1065,19 @@ const CompleteProfile = ({route}) => {
             }}
           />
         </View>
+        <SelectionModal
+          visible={fitnessModal}
+          onClose={() => setFitnessModal(false)}
+          data={fitnessOptions}
+          onSelect={setFitnessPreference}
+        />
+
+        <SelectionModal
+          visible={goalModal}
+          onClose={() => setGoalModal(false)}
+          data={goalOptions}
+          onSelect={setGoal}
+        />
       </ScrollView>
     </WrapperContainer>
   );
@@ -820,5 +1286,121 @@ const styles = StyleSheet.create({
     // justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  inputBox: {
+    width: responsiveWidth(85),
+    padding: 15,
+    borderWidth: 1,
+    borderColor: '#908C8D',
+    borderRadius: 17,
+    marginTop: 15,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+
+  modalBox: {
+    backgroundColor: '#111',
+    maxHeight: '60%',
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    padding: 20,
+  },
+
+  modalItem: {
+    paddingVertical: 18,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#333',
+  },
+  bundleCard: {
+    backgroundColor: '#9FED3A',
+    padding: 14,
+    borderRadius: 15,
+    marginVertical: 10,
+  },
+
+  bundleTitle: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+
+  bundleDesc: {
+    color: '#000',
+    marginVertical: 4,
+  },
+
+  bundlePrice: {
+    color: '#000',
+    fontWeight: '700',
+  },
+  bundleOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end',
+  },
+
+  bundleSheet: {
+    backgroundColor: '#1a1a1a',
+    padding: 20,
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    minHeight: '55%',
+  },
+
+  bundleHeader: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 15,
+  },
+
+  bundleInput: {
+    backgroundColor: '#222',
+    color: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+  },
+
+  addBtn: {
+    backgroundColor: '#9FED3A',
+    paddingHorizontal: 18,
+    justifyContent: 'center',
+    borderRadius: 12,
+  },
+
+  createBtn: {
+    backgroundColor: '#9FED3A',
+    padding: 15,
+    borderRadius: 25,
+    alignItems: 'center',
+    marginTop: 15,
+  },
+  createBundleBtn: {
+    backgroundColor: '#9FED3A',
+    marginHorizontal: responsiveWidth(6),
+    marginTop: responsiveHeight(2),
+    paddingVertical: responsiveHeight(1.8),
+
+    borderRadius: 40, // pill shape
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    elevation: 6, // Android shadow
+    shadowColor: '#9FED3A', // iOS glow
+    shadowOffset: {width: 0, height: 6},
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+  },
+
+  createBundleText: {
+    color: '#000',
+    fontSize: responsiveFontSize(2),
+    fontWeight: '700',
+    letterSpacing: 0.6,
   },
 });

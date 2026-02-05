@@ -264,44 +264,6 @@ const Signup = ({route, navigation}) => {
     }
   };
 
-  // const handleGoogleSignup = async () => {
-  //   try {
-  //     await GoogleSignin.hasPlayServices();
-
-  //     const {idToken} = await GoogleSignin.signIn();
-
-  //     const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-
-  //     const userCredential =
-  //       await auth().signInWithCredential(googleCredential);
-
-  //     const user = userCredential.user;
-
-  //     // 🔥 SEND TO BACKEND
-  //     const res = await fetch(`${baseUrl}common/auth/google`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({
-  //         role: user.checkUser,
-  //         email: user.email,
-  //         fullName: user.displayName,
-  //         profileImage: user.photoURL,
-  //         firebaseUID: user.uid,
-  //       }),
-  //     });
-
-  //     const data = await res.json();
-
-  //     // redux save
-  //     dispatch(IsLogin(data.data));
-  //   } catch (error) {
-  //     console.log(error);
-  //     showToast('Error', 'Google login failed', 'danger');
-  //   }
-  // };
-
   const handleGoogleSignup = async () => {
     try {
       await GoogleSignin.hasPlayServices();
