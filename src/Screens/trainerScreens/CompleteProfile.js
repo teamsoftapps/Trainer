@@ -115,23 +115,23 @@ const CompleteProfile = ({route}) => {
   const [bundleItems, setBundleItems] = useState([]);
   const [newItem, setNewItem] = useState('');
 
+  const [certificate, setCertificate] = useState(null);
+  const [certificatePreview, setCertificatePreview] = useState('');
+
   const [focused, setFocused] = useState(null);
   const [time, setTime] = useState(new Date());
   const logedInTrainer = useSelector(state => state.Auth.data);
-  console.log('trainer data in complete profile: ', logedInTrainer);
+  const isGoogleUser = logedInTrainer?.authProvider === 'google';
+
+  console.log('trainer data in complete profile: ', logedInTrainer.token);
+
+  const showBasicFields = isGoogleUser;
+
   const dispatch = useDispatch();
 
   const {LocationModule} = NativeModules;
 
-  const isGoogleUser = logedInTrainer?.authProvider === 'google';
-
-  // Formik Conditions
-  const condition1 = Hourly !== '0' && Hourly !== '';
-  const condition2 = selectedTimes.length !== 0;
-  const condition3 = Bio != '';
-  const condition4 = selectedSpecialities.length !== 0;
-
-  const handleSpecialitySelect = selectedSpecialities => {
+  const handleSpecialitySelect = useCallback(selectedSpecialities => {
     setDropdownVisible(false);
     setSelectedSpecialities(prev => {
       if (prev.some(item => item.key === selectedSpecialities.key)) {
@@ -140,7 +140,7 @@ const CompleteProfile = ({route}) => {
         return [...prev, selectedSpecialities];
       }
     });
-  };
+  });
 
   const toggleModalTimes = () => {
     setModalVisible(true);
@@ -152,148 +152,65 @@ const CompleteProfile = ({route}) => {
     );
   };
 
-  const onTimeChange = (event, selectedTime) => {
-    if (event.type === 'set') {
-      const currentTime = selectedTime || time;
+  const onTimeChange = useCallback((event, selectedTime) => {
+    if (event.type === 'set' && selectedTime) {
+      const formatted = moment(selectedTime).format('hh:mm A');
 
-      if (currentTime instanceof Date && !isNaN(currentTime.getTime())) {
-        const formattedTime = moment(currentTime).format('hh:mm A');
-        setSelectedTimes(prevTimes => [...prevTimes, formattedTime]);
-        setTime(currentTime);
-        setModalVisible(false);
-      } else {
-      }
-    } else if (event.type === 'dismissed') {
-      setModalVisible(false);
+      setSelectedTimes(prev =>
+        prev.includes(formatted) ? prev : [...prev, formatted],
+      );
+
+      setTime(selectedTime);
     }
+    setModalVisible(false);
+  }, []);
+
+  const handleCertificatePick = () => {
+    ImageCropPicker.openPicker({
+      mediaType: 'any', // ⭐ allow image/pdf both
+    })
+      .then(file => {
+        setCertificate(file);
+        setCertificatePreview(file.path);
+      })
+      .catch(() => {});
   };
-
-  // const Function = async () => {
-  //   if (
-  //     !Bio.trim() ||
-  //     !Array.isArray(selectedSpecialities) ||
-  //     selectedSpecialities.length === 0 ||
-  //     Hourly <= 0 ||
-  //     !Array.isArray(selectedTimes) ||
-  //     selectedTimes.length === 0
-  //   ) {
-  //     return showMessage({
-  //       message: 'Validation Error',
-  //       description: 'Please fill in all required fields.',
-  //       type: 'danger',
-  //     });
-  //   }
-  //   const validationChecks = [
-  //     {
-  //       condition: Bio.trim() !== '',
-  //       message: 'Please edit your bio.',
-  //     },
-  //     {
-  //       condition:
-  //         Array.isArray(selectedSpecialities) &&
-  //         selectedSpecialities.length > 0,
-  //       message: 'Please select at least one speciality.',
-  //     },
-  //     {
-  //       condition: Hourly > 0,
-  //       message: 'Please enter a valid hourly rate.',
-  //     },
-  //     {
-  //       condition: Array.isArray(selectedTimes) && selectedTimes.length > 0,
-  //       message: 'Please select your availability times.',
-  //     },
-  //   ];
-
-  //   for (const {condition, message} of validationChecks) {
-  //     if (!condition) {
-  //       return showMessage({
-  //         message: 'Validation Error',
-  //         description: message,
-  //         type: 'danger',
-  //       });
-  //     }
-  //   }
-  //   try {
-  //     const response = await axiosBaseURL.post('/trainer/update', {
-  //       email: logedInTrainer?.email,
-  //       Bio: Bio,
-  //       Speciality: selectedSpecialities,
-  //       Hourlyrate: Hourly,
-  //       Availiblity: selectedTimes,
-  //     });
-
-  //     let payload = {
-  //       Bio: Bio,
-  //       Speciality: selectedSpecialities,
-  //       Hourlyrate: Hourly,
-  //       Availiblity: selectedTimes,
-  //     };
-  //     dispatch(updateLogin(payload));
-
-  //     console.log('responce in complete profile:', response.data);
-  //     // showMessage({
-  //     //   message: 'Updates Succesfully',
-  //     //   description: 'your data has been updated!',
-  //     //   type: 'success',
-  //     // });
-  //     showMessage({
-  //       message: 'Profile completed!',
-  //       description: 'Choose your subscription plan',
-  //       type: 'success',
-  //     });
-  //     navigation.replace('Subscription');
-
-  //     console.log('Upload successful:', response.data);
-  //   } catch (error) {
-  //     setUploadError('Upload failed.');
-  //     console.error('Error uploading file:', error);
-  //   } finally {
-  //     setUploading(false);
-  //   }
-  // };
 
   const Function = async () => {
     // ---------- VALIDATION ----------
     const validationChecks = [
-      {
-        condition: Bio.trim() !== '',
-        message: 'Please add your bio.',
-      },
+      {condition: Bio.trim() !== '', message: 'Please add your bio.'},
       {
         condition:
           Array.isArray(selectedSpecialities) &&
           selectedSpecialities.length > 0,
         message: 'Please select at least one speciality.',
       },
-      {
-        condition: Hourly > 0,
-        message: 'Please enter a valid hourly rate.',
-      },
+      {condition: Hourly > 0, message: 'Please enter a valid hourly rate.'},
       {
         condition: Array.isArray(selectedTimes) && selectedTimes.length > 0,
         message: 'Please select your availability times.',
       },
       {
-        condition: dob?.trim(),
-        message: 'Please select your age.',
-      },
-      {
-        condition: weight > 0,
+        condition: isGoogleUser ? weight > 0 : true,
         message: 'Please enter your weight.',
       },
       {
-        condition: height > 0,
+        condition: isGoogleUser ? height > 0 : true,
         message: 'Please enter your height.',
       },
       {
-        condition: fitnessPreference,
+        condition: isGoogleUser ? fitnessPreference : true,
         message: 'Please select fitness preference.',
       },
       {
-        condition: goal,
-        message: 'Please select your goal.',
+        condition: isGoogleUser ? goal : true,
+        message: 'Please select goal.',
       },
-      // ❌ bundles skipped (optional)
+      {
+        condition: isGoogleUser ? !!dob : true,
+        message: 'Please select your age.',
+      },
     ];
 
     for (const {condition, message} of validationChecks) {
@@ -309,34 +226,55 @@ const CompleteProfile = ({route}) => {
     try {
       setUploading(true);
 
-      // ---------- API CALL ----------
-      const response = await axiosBaseURL.post(
-        '/trainer/update',
-        {
-          email: logedInTrainer?.email,
+      // =================================================
+      // ✅ FORM DATA (REQUIRED FOR FILE UPLOAD)
+      // =================================================
+      const formData = new FormData();
 
-          // old fields
-          Bio,
-          Speciality: selectedSpecialities,
-          Hourlyrate: Hourly,
-          Availiblity: selectedTimes,
+      formData.append('email', logedInTrainer?.email);
+      formData.append('Bio', Bio);
+      formData.append('Hourlyrate', Hourly);
 
-          // ⭐ NEW FIELDS
-          Dob: dob,
-          weight,
-          height,
-          fitnessPreference,
-          goal,
-          bundles: bundles || [], // optional
+      // arrays → stringify
+      formData.append('Speciality', JSON.stringify(selectedSpecialities));
+      formData.append('Availiblity', JSON.stringify(selectedTimes));
+      formData.append('bundles', JSON.stringify(bundles || []));
+
+      // google fields
+      if (isGoogleUser) {
+        formData.append('Dob', dob);
+        formData.append('weight', weight);
+        formData.append('height', height);
+        formData.append('fitnessPreference', fitnessPreference);
+        formData.append('goal', goal);
+      }
+
+      // =================================================
+      // ⭐ CERTIFICATE FILE
+      // =================================================
+      if (certificate) {
+        formData.append('certificate', {
+          uri: certificate.path,
+          type: certificate.mime || 'image/jpeg',
+          name: `certificate-${Date.now()}.jpg`,
+        });
+      }
+
+      // =================================================
+      // API CALL
+      // =================================================
+      const res = await axiosBaseURL.post('/trainer/update', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${logedInTrainer?.token}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${logedInTrainer?.token}`,
-          },
-        },
-      );
+      });
 
-      // ---------- REDUX UPDATE ----------
+      console.log('Update response:', res.data);
+
+      // =================================================
+      // REDUX UPDATE
+      // =================================================
       dispatch(
         updateLogin({
           Bio,
@@ -352,7 +290,9 @@ const CompleteProfile = ({route}) => {
         }),
       );
 
-      // ---------- SUCCESS ----------
+      // =================================================
+      // SUCCESS
+      // =================================================
       showMessage({
         message: 'Profile completed!',
         description: 'Choose your subscription plan',
@@ -362,6 +302,7 @@ const CompleteProfile = ({route}) => {
       navigation.replace('Subscription');
     } catch (error) {
       console.log(error);
+
       showMessage({
         message: 'Error',
         description: 'Failed to update profile',
@@ -371,6 +312,124 @@ const CompleteProfile = ({route}) => {
       setUploading(false);
     }
   };
+
+  // const Function = async () => {
+  //   // ---------- VALIDATION ----------
+  //   const validationChecks = [
+  //     {
+  //       condition: Bio.trim() !== '',
+  //       message: 'Please add your bio.',
+  //     },
+  //     {
+  //       condition:
+  //         Array.isArray(selectedSpecialities) &&
+  //         selectedSpecialities.length > 0,
+  //       message: 'Please select at least one speciality.',
+  //     },
+  //     {
+  //       condition: Hourly > 0,
+  //       message: 'Please enter a valid hourly rate.',
+  //     },
+  //     {
+  //       condition: Array.isArray(selectedTimes) && selectedTimes.length > 0,
+  //       message: 'Please select your availability times.',
+  //     },
+  //     {
+  //       condition: isGoogleUser ? weight > 0 : true,
+  //       message: 'Please enter your weight.',
+  //     },
+  //     {
+  //       condition: isGoogleUser ? height > 0 : true,
+  //       message: 'Please enter your height.',
+  //     },
+  //     {
+  //       condition: isGoogleUser ? fitnessPreference : true,
+  //       message: 'Please select fitness preference.',
+  //     },
+  //     {
+  //       condition: isGoogleUser ? goal : true,
+  //       message: 'Please select goal.',
+  //     },
+  //     {
+  //       condition: isGoogleUser ? !!dob : true,
+  //       message: 'Please select your age.',
+  //     },
+  //     // ❌ bundles skipped (optional)
+  //   ];
+
+  //   for (const {condition, message} of validationChecks) {
+  //     if (!condition) {
+  //       return showMessage({
+  //         message: 'Validation Error',
+  //         description: message,
+  //         type: 'danger',
+  //       });
+  //     }
+  //   }
+
+  //   try {
+  //     setUploading(true);
+  //     // ---------- API CALL ----------
+  //     const response = await axiosBaseURL.post(
+  //       '/trainer/update',
+  //       {
+  //         email: logedInTrainer?.email,
+
+  //         Bio,
+  //         Speciality: selectedSpecialities,
+  //         Hourlyrate: Hourly,
+  //         Availiblity: selectedTimes,
+
+  //         // ⭐ ONLY send if google user
+  //         Dob: isGoogleUser ? dob : undefined,
+  //         weight: isGoogleUser ? weight : undefined,
+  //         height: isGoogleUser ? height : undefined,
+  //         fitnessPreference: isGoogleUser ? fitnessPreference : undefined,
+  //         goal: isGoogleUser ? goal : undefined,
+  //         bundles: bundles || [],
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${logedInTrainer?.token}`,
+  //         },
+  //       },
+  //     );
+
+  //     // ---------- REDUX UPDATE ----------
+  //     dispatch(
+  //       updateLogin({
+  //         Bio,
+  //         Speciality: selectedSpecialities,
+  //         Hourlyrate: Hourly,
+  //         Availiblity: selectedTimes,
+  //         Dob: dob,
+  //         weight,
+  //         height,
+  //         fitnessPreference,
+  //         goal,
+  //         bundles: bundles || [],
+  //       }),
+  //     );
+
+  //     // ---------- SUCCESS ----------
+  //     showMessage({
+  //       message: 'Profile completed!',
+  //       description: 'Choose your subscription plan',
+  //       type: 'success',
+  //     });
+
+  //     navigation.replace('Subscription');
+  //   } catch (error) {
+  //     console.log(error);
+  //     showMessage({
+  //       message: 'Error',
+  //       description: 'Failed to update profile',
+  //       type: 'danger',
+  //     });
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
 
   const uploadImage = async image => {
     try {
@@ -439,14 +498,22 @@ const CompleteProfile = ({route}) => {
   };
 
   const requestLocationPermission = async () => {
-    if (Platform.OS === 'android') {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-      );
+    try {
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        );
 
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      }
+
+      // ✅ iOS (NO ARGUMENTS)
+      Geolocation.requestAuthorization();
+      return true;
+    } catch (e) {
+      console.log('Permission error:', e);
+      return false;
     }
-    return true;
   };
 
   const getTrainerLocation = async () => {
@@ -454,32 +521,39 @@ const CompleteProfile = ({route}) => {
       const hasPermission = await requestLocationPermission();
       if (!hasPermission) return;
 
-      const res = await LocationModule.getCurrentLocation();
+      Geolocation.getCurrentPosition(
+        async position => {
+          const {latitude, longitude} = position.coords;
 
-      console.log('Native Location:', res);
+          console.log('IOS Location:', latitude, longitude);
 
-      await axiosBaseURL.post('/trainer/updateLocation', {
-        email: logedInTrainer.email,
-        lat: res.lat,
-        lng: res.lng,
-      });
-
-      console.log('Location saved successfully');
+          await axiosBaseURL.post('/trainer/updateLocation', {
+            email: logedInTrainer.email,
+            lat: latitude,
+            lng: longitude,
+          });
+        },
+        error => {
+          console.log('Location error:', error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 10000,
+        },
+      );
     } catch (e) {
       console.log('Location error:', e);
     }
   };
 
-  useEffect(() => {
-    if (!logedInTrainer) return;
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!logedInTrainer) return;
 
-    if (
-      !logedInTrainer.location ||
-      logedInTrainer.location.coordinates[0] === 0
-    ) {
       getTrainerLocation();
-    }
-  }, [logedInTrainer]);
+    }, [logedInTrainer]),
+  );
 
   const fetchBundles = async () => {
     const res = await axiosBaseURL.get('/trainer/bundle/list');
@@ -691,6 +765,48 @@ const CompleteProfile = ({route}) => {
                 />
               </View>
             </View>
+
+            {/* ===== CERTIFICATE UPLOAD ===== */}
+            <TouchableOpacity
+              style={{
+                borderWidth: 1,
+                borderColor: '#908C8D',
+                borderRadius: 18,
+                padding: responsiveHeight(3),
+                marginTop: responsiveHeight(3),
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+              onPress={handleCertificatePick}>
+              <Text style={{color: '#fff', marginBottom: 10}}>
+                Verify Certification
+              </Text>
+
+              {certificatePreview ? (
+                <Image
+                  source={{uri: certificatePreview}}
+                  style={{
+                    width: 90,
+                    height: 90,
+                    borderRadius: 12,
+                  }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View
+                  style={{
+                    width: 70,
+                    height: 70,
+                    borderRadius: 40,
+                    borderWidth: 1,
+                    borderColor: '#fff',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Text style={{color: '#fff', fontSize: 30}}>＋</Text>
+                </View>
+              )}
+            </TouchableOpacity>
           </View>
           <View
             style={[
@@ -718,6 +834,8 @@ const CompleteProfile = ({route}) => {
 
             {dropdownVisible && (
               <FlatList
+                initialNumToRender={6}
+                removeClippedSubviews
                 data={Specialities}
                 keyExtractor={item => item.key.toString()}
                 renderItem={({item}) => (
@@ -733,6 +851,8 @@ const CompleteProfile = ({route}) => {
           </View>
           <View style={{marginTop: responsiveHeight(1.5)}}>
             <FlatList
+              initialNumToRender={6}
+              removeClippedSubviews
               data={selectedSpecialities}
               renderItem={({item}) => (
                 <View
@@ -777,7 +897,10 @@ const CompleteProfile = ({route}) => {
           <Text
             style={[
               {...styles.HourlyText1},
-              {color: Hourlyformik ? 'red' : 'white'},
+              {
+                color: Hourlyformik ? 'red' : 'white',
+                paddingTop: responsiveHeight(1),
+              },
             ]}>
             Hourly Rate
           </Text>
@@ -786,7 +909,11 @@ const CompleteProfile = ({route}) => {
               <Text style={styles.Dollar}>$</Text>
               <TextInput
                 keyboardType="numeric"
-                style={{paddingVertical: 0, color: 'white'}}
+                style={{
+                  paddingVertical: 0,
+                  color: 'white',
+                  width: responsiveWidth(20),
+                }}
                 value={Hourly}
                 onChangeText={setHourly}
               />
@@ -831,27 +958,39 @@ const CompleteProfile = ({route}) => {
           </TouchableOpacity>
           {modalVisible && (
             <Modal
-              animationType="slide"
-              transparent={true}
               visible={modalVisible}
+              transparent
+              animationType="slide"
               onRequestClose={() => setModalVisible(false)}>
-              <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-                <View style={styles.overlay}>
-                  <TouchableWithoutFeedback>
-                    <View style={styles.modalContainer}>
-                      <DateTimePicker
-                        value={time}
-                        mode="time"
-                        display="default"
-                        onChange={onTimeChange}
-                      />
-                    </View>
-                  </TouchableWithoutFeedback>
+              <View style={styles.overlay}>
+                <View style={styles.timeSheet}>
+                  <DateTimePicker
+                    value={time}
+                    mode="time"
+                    display="spinner" // ⭐ important for iOS
+                    onChange={(event, selectedTime) => {
+                      if (selectedTime) setTime(selectedTime);
+                    }}
+                  />
+
+                  <TouchableOpacity
+                    style={styles.okBtn}
+                    onPress={() => {
+                      const formatted = moment(time).format('hh:mm A');
+
+                      setSelectedTimes(prev =>
+                        prev.includes(formatted) ? prev : [...prev, formatted],
+                      );
+
+                      setModalVisible(false);
+                    }}>
+                    <Text style={styles.okText}>OK</Text>
+                  </TouchableOpacity>
                 </View>
-              </TouchableWithoutFeedback>
+              </View>
             </Modal>
           )}
-          {isGoogleUser && (
+          {showBasicFields && (
             <>
               {/* ===== WEIGHT + HEIGHT ROW ===== */}
               <View
@@ -908,18 +1047,7 @@ const CompleteProfile = ({route}) => {
                 </View>
               </View>
 
-              {/* AGE FIELD */}
-              <TouchableOpacity
-                style={styles.inputBox}
-                onPress={() => setShowDatePicker(true)}>
-                <Text style={{color: '#908C8D'}}>Age</Text>
-
-                <Text style={{color: '#fff'}}>
-                  {dob || 'Select Date of Birth'}
-                </Text>
-              </TouchableOpacity>
-
-              {showDatePicker && (
+              {/* {showDatePicker && (
                 <DateTimePicker
                   value={new Date()}
                   mode="date"
@@ -936,7 +1064,7 @@ const CompleteProfile = ({route}) => {
                     }
                   }}
                 />
-              )}
+              )} */}
 
               {/* ===== FITNESS ===== */}
               <TouchableOpacity
@@ -957,6 +1085,15 @@ const CompleteProfile = ({route}) => {
               </TouchableOpacity>
             </>
           )}
+
+          {/* AGE FIELD */}
+          <TouchableOpacity
+            style={styles.inputBox}
+            onPress={() => setShowDatePicker(true)}>
+            <Text style={{color: '#908C8D'}}>Age</Text>
+
+            <Text style={{color: '#fff'}}>{dob || 'Select Date of Birth'}</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.createBundleBtn}
             onPress={() => setBundleModal(true)}>
@@ -1078,6 +1215,71 @@ const CompleteProfile = ({route}) => {
           data={goalOptions}
           onSelect={setGoal}
         />
+
+        {/* GLOBAL AGE PICKER MODAL */}
+        <Modal
+          transparent
+          animationType="slide"
+          visible={showDatePicker}
+          onRequestClose={() => setShowDatePicker(false)}>
+          <View style={styles.overlay}>
+            <View style={styles.ageSheet}>
+              <DateTimePicker
+                value={dob ? moment(dob, 'DD/MM/YYYY').toDate() : new Date()}
+                mode="date"
+                display="spinner"
+                maximumDate={new Date()}
+                onChange={(event, selectedDate) => {
+                  if (selectedDate) {
+                    setTime(selectedDate); // temp store
+                  }
+                }}
+              />
+
+              <TouchableOpacity
+                style={styles.okBtn}
+                onPress={() => {
+                  const formatted = moment(time).format('DD/MM/YYYY');
+                  setDob(formatted);
+                  setShowDatePicker(false);
+                }}>
+                <Text
+                  style={[
+                    styles.okText,
+                    {width: responsiveWidth(80), textAlign: 'center'},
+                  ]}>
+                  OK
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+        {/* <Modal
+          transparent
+          animationType="fade"
+          visible={showDatePicker}
+          onRequestClose={() => setShowDatePicker(false)}>
+          <TouchableWithoutFeedback onPress={() => setShowDatePicker(false)}>
+            <View style={styles.overlay}>
+              <View style={{backgroundColor: '#9FED3A', borderRadius: 12}}>
+                <DateTimePicker
+                  value={dob ? moment(dob, 'DD/MM/YYYY').toDate() : new Date()}
+                  mode="date"
+                  maximumDate={new Date()}
+                  display="spinner"
+                  onChange={(event, selectedDate) => {
+                    if (event.type === 'set' && selectedDate) {
+                      const formatted =
+                        moment(selectedDate).format('DD/MM/YYYY');
+                      setDob(formatted);
+                    }
+                    setShowDatePicker(false);
+                  }}
+                />
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal> */}
       </ScrollView>
     </WrapperContainer>
   );
@@ -1086,6 +1288,39 @@ const CompleteProfile = ({route}) => {
 export default CompleteProfile;
 
 const styles = StyleSheet.create({
+  timeSheet: {
+    backgroundColor: '#9FED3A',
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+  },
+
+  ageSheet: {
+    backgroundColor: '#9FED3A',
+    borderRadius: 20,
+    padding: 20,
+    width: '90%',
+    alignItems: 'center',
+  },
+
+  okBtn: {
+    backgroundColor: '#000',
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 15,
+    alignItems: 'center',
+  },
+
+  okText: {
+    color: '#9FED3A',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+
   MainFlatlist2: {
     paddingVertical: responsiveWidth(2),
     paddingHorizontal: responsiveWidth(4),
@@ -1138,7 +1373,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: responsiveWidth(2),
     borderWidth: 0.5,
     borderColor: '#908C8D',
-    width: responsiveWidth(14),
+    height: responsiveHeight(5),
+    width: responsiveWidth(30),
     borderRadius: 5,
     flexDirection: 'row',
     alignItems: 'center',
@@ -1146,6 +1382,7 @@ const styles = StyleSheet.create({
   HourlyContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+
     gap: 8,
     marginLeft: responsiveWidth(2),
     marginTop: responsiveHeight(2),

@@ -6,6 +6,7 @@ import {
   FlatList,
   ScrollView,
   TouchableOpacity,
+  Modal,
 } from 'react-native';
 import React, {useCallback, useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
@@ -19,13 +20,19 @@ import {Images} from '../../utils/Images';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import MapView, {Marker} from 'react-native-maps';
-
+import StoryModal from '../../Components/StoryModal';
 const Profile = () => {
   const navigation = useNavigation();
 
   const trainer_data = useSelector(state => state.Auth.data);
 
+  console.log('trainer data in profile:', trainer_data);
+
   const [profile, setProfile] = useState(null);
+  const [uploads, setUploads] = useState([]);
+
+  const [stories, setStories] = useState([]);
+  const [storyVisible, setStoryVisible] = useState(false);
 
   const safe = v => (v ? v : '-');
 
@@ -34,9 +41,20 @@ const Profile = () => {
     const res = await axiosBaseURL.get(
       `/Common/GetProfile/${trainer_data.token}`,
     );
+    const uploadsRes = await axiosBaseURL.get('/trainer/getUploads');
+    const storyRes = await axiosBaseURL.get(
+      `/trainer/stories/${trainer_data._id}`,
+    );
 
-    console.log('responce in profile:', res.data.data);
-    setProfile(res.data.data);
+    const formattedStories = (storyRes.data.data || []).map(s => ({
+      id: s._id,
+      url: s.type === 'video' ? s.thumbnail || s.mediaUrl : s.mediaUrl,
+      videoUrl: s.type === 'video' ? s.mediaUrl : null,
+      type: s.type,
+    }));
+    setProfile(res.data?.data);
+    setUploads(uploadsRes?.data?.data);
+    setStories(formattedStories);
   };
 
   useFocusEffect(
@@ -69,6 +87,12 @@ const Profile = () => {
     return age;
   };
 
+  const age = calculateAge(profile?.Dob);
+
+  const rating = profile?.rating || 0;
+  const reviews = profile?.reviews || 0;
+  const followers = profile?.followers || 0;
+
   const RowItem = ({title, value}) => (
     <View style={styles.rowItem}>
       <Text style={styles.rowTitle}>{title}</Text>
@@ -93,15 +117,25 @@ const Profile = () => {
         }}
         showsVerticalScrollIndicator={false}>
         <View style={styles.profileHeader}>
-          {/* avatar */}
-          <Image
-            source={
-              profile?.profileImage
-                ? {uri: profile.profileImage}
-                : Images.profile
-            }
-            style={styles.avatar}
-          />
+          <TouchableOpacity
+            onPress={() => {
+              if (stories.length > 0) setStoryVisible(true);
+            }}>
+            <Image
+              source={
+                profile?.profileImage
+                  ? {uri: profile.profileImage}
+                  : Images.profile
+              }
+              style={[
+                styles.avatar,
+                stories.length > 0 && {
+                  borderColor: '#9FED3A',
+                  borderWidth: 4,
+                },
+              ]}
+            />
+          </TouchableOpacity>
 
           {/* settings button */}
           <TouchableOpacity
@@ -118,6 +152,30 @@ const Profile = () => {
         <Text style={styles.name}>{safe(profile?.fullName)}</Text>
         <Text style={styles.role}>{safe(profile?.fitnessPreference)}</Text>
         <Text style={styles.bio}>{safe(profile?.Bio)}</Text>
+
+        {/* ===== STATS ROW ===== */}
+        <View style={styles.statsRow}>
+          {/* Rating */}
+          <View style={styles.statItem}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Text style={styles.star}>★</Text>
+              <Text style={styles.statValue}>{rating}/5</Text>
+            </View>
+            <Text style={styles.statLabel}>({reviews} reviews)</Text>
+          </View>
+
+          {/* Followers */}
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{followers?.length || 0}</Text>
+            <Text style={styles.statLabel}>Followers</Text>
+          </View>
+
+          {/* Age */}
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{age}</Text>
+            <Text style={styles.statLabel}>Years old</Text>
+          </View>
+        </View>
 
         {/* ========= PERSONAL INFO ========= */}
         <Text style={styles.sectionTitle}>Personal Info</Text>
@@ -137,26 +195,73 @@ const Profile = () => {
         />
         <RowItem title="Goal" value={profile?.goal} />
 
+        {/* ========= UPLOADS ========= */}
+        <Text style={styles.sectionTitle}>Uploads</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {uploads.length === 0 ? (
+            <Text style={styles.emptyText}>No uploads yet</Text>
+          ) : (
+            <FlatList
+              // horizontal
+              data={uploads}
+              numColumns={3}
+              scrollEnabled={false}
+              keyExtractor={item => item.id}
+              columnWrapperStyle={{justifyContent: 'space-between'}}
+              renderItem={({item}) => {
+                const isVideo = item.type === 'video';
+
+                return (
+                  <TouchableOpacity style={styles.uploadCard}>
+                    <Image
+                      source={{
+                        uri: isVideo ? item.thumbnail || item.url : item.url,
+                      }}
+                      style={styles.uploadImg}
+                    />
+
+                    {isVideo && (
+                      <View style={styles.playOverlay}>
+                        <Text style={styles.playIcon}>▶</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          )}
+        </ScrollView>
+
         {/* ========= MAP ========= */}
         {coords && (
           <>
             <Text style={styles.sectionTitle}>Location</Text>
             <View style={styles.mapCard}>
-              <MapView
-                style={{flex: 1}}
-                region={{
-                  latitude: coords[1],
-                  longitude: coords[0],
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }}>
-                <Marker
-                  coordinate={{
-                    latitude: coords[1],
-                    longitude: coords[0],
-                  }}
-                />
-              </MapView>
+              {coords && coords[0] !== 0 && coords[1] !== 0 && (
+                <>
+                  <Text style={styles.sectionTitle}>Location</Text>
+
+                  <View style={styles.mapCard}>
+                    <MapView
+                      style={{flex: 1}}
+                      showsUserLocation
+                      showsMyLocationButton
+                      initialRegion={{
+                        latitude: Number(coords[1]),
+                        longitude: Number(coords[0]),
+                        latitudeDelta: 0.01,
+                        longitudeDelta: 0.01,
+                      }}>
+                      <Marker
+                        coordinate={{
+                          latitude: Number(coords[1]),
+                          longitude: Number(coords[0]),
+                        }}
+                      />
+                    </MapView>
+                  </View>
+                </>
+              )}
             </View>
           </>
         )}
@@ -197,6 +302,14 @@ const Profile = () => {
           )}
         />
       </ScrollView>
+      <StoryModal
+        visible={storyVisible}
+        onClose={() => setStoryVisible(false)}
+        stories={stories.map(s => ({
+          type: s.type,
+          url: s.type === 'video' ? s.videoUrl : s.url,
+        }))}
+      />
     </WrapperContainer>
   );
 };
@@ -295,5 +408,104 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     marginBottom: 16,
+  },
+  /* ===== STATS ===== */
+
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: responsiveHeight(2),
+    marginBottom: responsiveHeight(2),
+    paddingHorizontal: responsiveWidth(5),
+  },
+
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+
+  statValue: {
+    color: '#9FED3A',
+    fontSize: responsiveFontSize(2.5),
+    fontWeight: '700',
+  },
+
+  statLabel: {
+    color: '#bbb',
+    fontSize: responsiveFontSize(1.6),
+    marginTop: 2,
+  },
+
+  star: {
+    color: '#9FED3A',
+    fontSize: responsiveFontSize(2.7),
+    marginRight: 4,
+  },
+
+  emptyText: {
+    color: '#777',
+    marginBottom: 10,
+  },
+  playOverlay: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
+
+  playIcon: {
+    fontSize: 26,
+    color: '#fff',
+  },
+  uploadCard: {
+    width: responsiveWidth(50),
+    height: responsiveWidth(30),
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginBottom: 10,
+    backgroundColor: '#222',
+    marginRight: responsiveWidth(2),
+  },
+
+  uploadImg: {
+    width: '100%',
+    height: '100%',
+  },
+
+  playOverlay: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
+
+  playIcon: {
+    color: '#fff',
+    fontSize: 24,
+  },
+
+  emptyText: {
+    color: '#777',
+    marginBottom: 10,
+  },
+  storyContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+
+  closeStory: {
+    position: 'absolute',
+    top: 60,
+    right: 20,
+    zIndex: 10,
   },
 });

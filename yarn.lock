@@ -4487,6 +4487,7 @@ __metadata:
     react-native-dotenv: ^3.4.11
     react-native-element-dropdown: ^2.12.1
     react-native-elements: ^3.4.3
+    react-native-fast-image: ^8.6.3
     react-native-flash-message: ^0.4.2
     react-native-gesture-handler: ^2.16.2
     react-native-get-random-values: ^1.11.0
@@ -4512,7 +4513,8 @@ __metadata:
     react-native-screens: ^3.31.1
     react-native-svg: ^15.6.0
     react-native-tab-view: ^3.5.2
-    react-native-video: ^6.7.0
+    react-native-video: ^6.19.0
+    react-native-video-cache-control: ^1.2.4
     react-redux: ^9.1.2
     react-test-renderer: 18.2.0
     redux-persist: ^6.0.0
@@ -10134,6 +10136,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-fast-image@npm:^8.6.3":
+  version: 8.6.3
+  resolution: "react-native-fast-image@npm:8.6.3"
+  peerDependencies:
+    react: ^17 || ^18
+    react-native: ">=0.60.0"
+  checksum: 29289cb6b2eae0983c8922b22e2d9de3be07322bb7991c5def19f95eadefaedb0e308ff0b38cc1d0444e8bd4fe94a7621a99a2d3d9298100bcb60b3144677234
+  languageName: node
+  linkType: hard
+
 "react-native-flash-message@npm:^0.4.2":
   version: 0.4.2
   resolution: "react-native-flash-message@npm:0.4.2"
@@ -10551,13 +10563,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-video@npm:^6.7.0":
-  version: 6.7.0
-  resolution: "react-native-video@npm:6.7.0"
+"react-native-video-cache-control@npm:^1.2.4":
+  version: 1.2.4
+  resolution: "react-native-video-cache-control@npm:1.2.4"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: ad8b321ef5ac078fededcafa63d7a21fada7c13ecaf34cd795058868ef386791347ba3e5b6f320aa7ab6bf95bcb0b3958cfca540a0675c8c57fdeaf2e828b1cf
+  checksum: 8dc87c833c645670005a2edbd10664905e53be22d96ebb04a84c48322a1038ee7c2c621fb75b217e497c4d12efaf388dea99eb2ca31165c5dcd795e9f32789d8
+  languageName: node
+  linkType: hard
+
+"react-native-video@npm:^6.19.0":
+  version: 6.19.0
+  resolution: "react-native-video@npm:6.19.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: fd320422b57e850d907a8db2849cbd695a0d33c55ce45b603ad5b3e4133f19cac49ffad24bb87e6fc53e472f53d2d5a6799b10969347d116db204a741f5959ea
   languageName: node
   linkType: hard
 

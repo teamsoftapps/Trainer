@@ -105,6 +105,7 @@ const Subscription = ({navigation}) => {
       customerEphemeralKeySecret: ephemeralKey,
       paymentIntentClientSecret: paymentIntent,
       allowsDelayedPaymentMethods: true,
+      returnURL: 'trainerapp://stripe-redirect',
     });
 
     if (error) {
@@ -118,30 +119,36 @@ const Subscription = ({navigation}) => {
   const handleSubscribe = async () => {
     try {
       const amount = prices[selectedPlan];
-      console.log('hited', amount);
+
       const ready = await initializePaymentSheet(amount);
-      console.log('ready:', ready);
       if (!ready) return;
 
       const {error} = await presentPaymentSheet();
+      if (error) return;
 
-      if (error) {
-        console.log(error);
-        return;
-      }
-
-      // ⭐ payment success
+      // ⭐ SAVE SUBSCRIPTION
       const res = await axiosBaseURL.post('/common/activateSubscription', {
         trainerId: authData._id,
+        plan: selectedPlan,
+        price: prices[selectedPlan],
       });
 
-      console.log('Response:', res);
+      console.log('Response:', res.data);
 
-      dispatch(updateLogin({isSubscribed: true}));
+      dispatch(
+        updateLogin({
+          subscription: {
+            plan: selectedPlan,
+            price: prices[selectedPlan],
+            isActive: true,
+          },
+        }),
+      );
 
+      // ⭐ NAVIGATE
       navigation.replace('TrainerBttomStack');
     } catch (e) {
-      console.log(e);
+      console.log('Subscribe Error:', e);
     }
   };
 

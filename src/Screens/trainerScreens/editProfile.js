@@ -108,6 +108,9 @@ const EditProfile = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [timePicker, setTimePicker] = useState(false);
 
+  const [tempDate, setTempDate] = useState(new Date());
+  const [tempTime, setTempTime] = useState(new Date());
+
   const [prefModal, setPrefModal] = useState(false);
   const [goalModal, setGoalModal] = useState(false);
 
@@ -193,54 +196,101 @@ const EditProfile = () => {
     fetchProfile();
   };
 
+  const requestLocationPermission = async () => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return true;
+  };
+
   const getCurrentLocation = async () => {
     try {
-      const {LocationModule} = NativeModules;
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) return;
 
-      const res = await LocationModule.getCurrentLocation();
+      Geolocation.getCurrentPosition(
+        async position => {
+          const {latitude, longitude} = position.coords;
 
-      const latitude = res.lat;
-      const longitude = res.lng;
+          setCoords([longitude, latitude]);
 
-      console.log('Native coords:', latitude, longitude);
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+          );
 
-      setCoords([longitude, latitude]);
+          const data = await response.json();
 
-      // ⭐ FIXED: add headers
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
-        {
-          headers: {
-            'User-Agent': 'trainer-app',
-            Accept: 'application/json',
-          },
+          if (data?.display_name) {
+            setAddress(data.display_name);
+
+            showMessage({
+              message: 'Location fetched successfully',
+              type: 'success',
+            });
+          }
         },
+        error => {
+          console.log(error);
+          showMessage({message: 'Location failed', type: 'danger'});
+        },
+        {enableHighAccuracy: true, timeout: 15000},
       );
-
-      const data = await response.json();
-
-      console.log('Geo response:', data);
-
-      if (data?.display_name) {
-        setAddress(data.display_name);
-
-        showMessage({
-          message: 'Location fetched successfully',
-          type: 'success',
-        });
-      } else {
-        throw new Error('No address found');
-      }
     } catch (err) {
-      console.log('Location error:', err);
-
-      showMessage({
-        message: 'Location failed',
-        description: 'Could not fetch address',
-        type: 'danger',
-      });
+      console.log(err);
     }
   };
+
+  // const getCurrentLocation = async () => {
+  //   try {
+  //     const {LocationModule} = NativeModules;
+
+  //     const res = await LocationModule.getCurrentLocation();
+
+  //     const latitude = res.lat;
+  //     const longitude = res.lng;
+
+  //     console.log('Native coords:', latitude, longitude);
+
+  //     setCoords([longitude, latitude]);
+
+  //     // ⭐ FIXED: add headers
+  //     const response = await fetch(
+  //       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+  //       {
+  //         headers: {
+  //           'User-Agent': 'trainer-app',
+  //           Accept: 'application/json',
+  //         },
+  //       },
+  //     );
+
+  //     const data = await response.json();
+
+  //     console.log('Geo response:', data);
+
+  //     if (data?.display_name) {
+  //       setAddress(data.display_name);
+
+  //       showMessage({
+  //         message: 'Location fetched successfully',
+  //         type: 'success',
+  //       });
+  //     } else {
+  //       throw new Error('No address found');
+  //     }
+  //   } catch (err) {
+  //     console.log('Location error:', err);
+
+  //     showMessage({
+  //       message: 'Location failed',
+  //       description: 'Could not fetch address',
+  //       type: 'danger',
+  //     });
+  //   }
+  // };
 
   // ================= SAVE =================
 
@@ -434,34 +484,77 @@ const EditProfile = () => {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* DATE PICKER */}
-      {showDatePicker && (
-        <DateTimePicker
-          value={new Date()}
-          mode="date"
-          maximumDate={new Date()}
-          onChange={(e, d) => {
-            setShowDatePicker(false);
-            if (d)
-              setDob(`${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`);
-          }}
-        />
-      )}
+      <Modal transparent visible={showDatePicker} animationType="slide">
+        <View style={styles.overlay}>
+          <View style={styles.pickerSheet}>
+            <DateTimePicker
+              value={tempDate}
+              mode="date"
+              display="spinner"
+              maximumDate={new Date()}
+              onChange={(e, d) => d && setTempDate(d)}
+            />
 
-      {/* TIME PICKER */}
-      {timePicker && (
-        <DateTimePicker
-          value={new Date()}
-          mode="time"
-          onChange={(e, d) => {
-            setTimePicker(false);
-            if (d) {
-              const t = moment(d).format('hh:mm A');
-              if (!times.includes(t)) setTimes([...times, t]);
-            }
-          }}
-        />
-      )}
+            <TouchableOpacity
+              style={styles.okBtn}
+              onPress={() => {
+                const formatted = moment(tempDate).format('DD/MM/YYYY');
+                setDob(formatted);
+                setShowDatePicker(false);
+              }}>
+              <Text style={styles.okText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* TIME MODAL — 100% iOS SAFE */}
+      <Modal
+        visible={timePicker}
+        transparent
+        animationType="slide"
+        statusBarTranslucent>
+        <View style={styles.overlay}>
+          {/* tap outside to close */}
+          <TouchableOpacity
+            style={{flex: 1}}
+            activeOpacity={1}
+            onPress={() => setTimePicker(false)}
+          />
+
+          {/* BOTTOM SHEET */}
+          <View style={styles.timeSheet}>
+            <DateTimePicker
+              value={tempTime}
+              mode="time"
+              display="spinner"
+              onChange={(e, d) => d && setTempTime(d)}
+            />
+
+            <View style={styles.timeBtnRow}>
+              <TouchableOpacity
+                style={[styles.timeBtn, {backgroundColor: '#444'}]}
+                onPress={() => setTimePicker(false)}>
+                <Text style={{color: '#fff'}}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.timeBtn}
+                onPress={() => {
+                  const t = moment(tempTime).format('hh:mm A');
+
+                  if (!times.includes(t)) {
+                    setTimes(prev => [...prev, t]);
+                  }
+
+                  setTimePicker(false);
+                }}>
+                <Text style={{color: '#000', fontWeight: '700'}}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <SelectModal
         visible={prefModal}
@@ -518,6 +611,31 @@ const styles = StyleSheet.create({
   name: {textAlign: 'center', color: '#fff', fontSize: 22, marginBottom: 20},
 
   label: {color: '#9FED3A', marginBottom: 6},
+
+  pickerSheet: {
+    backgroundColor: '#9FED3A',
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    paddingVertical: 20,
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+  },
+
+  okBtn: {
+    backgroundColor: '#000',
+    marginHorizontal: 20,
+    marginTop: 15,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+
+  okText: {
+    color: '#9FED3A',
+    fontWeight: '700',
+    fontSize: 16,
+  },
 
   input: {
     borderWidth: 0.5,
@@ -587,7 +705,6 @@ const styles = StyleSheet.create({
 
   inputText: {
     color: '#fff',
-    // fontFamily: FontFamily.Semi_Bold,
     fontSize: responsiveFontSize(2),
   },
 
@@ -597,5 +714,32 @@ const styles = StyleSheet.create({
     height: responsiveWidth(5),
     width: responsiveWidth(5),
     tintColor: '#9FED3A',
+  },
+
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end', // ⭐ key fix
+  },
+
+  timeSheet: {
+    backgroundColor: '#9FED3A',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 20,
+  },
+
+  timeBtnRow: {
+    flexDirection: 'row',
+    marginTop: 15,
+    gap: 10,
+  },
+
+  timeBtn: {
+    flex: 1,
+    backgroundColor: '#9FED3A',
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
   },
 });

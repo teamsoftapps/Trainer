@@ -12,6 +12,7 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
+import {Platform} from 'react-native';
 import {
   responsiveFontSize,
   responsiveHeight,
@@ -32,6 +33,7 @@ import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {baseUrl} from '../../services/Urls.js';
 import {useDispatch} from 'react-redux';
 import {IsLogin} from '../../store/Slices/AuthSlice.js';
+import moment from 'moment';
 const fitnessOptions = [
   'Adventure Sports Coaching',
   'Boxing',
@@ -79,7 +81,7 @@ const Signup = ({route, navigation}) => {
   const [DoB, setDoB] = useState('');
   const [weight, setweight] = useState('');
   const [height, setheight] = useState('');
-  const [address, setAddress] = useState('');
+  // const [address, setAddress] = useState('');
   const [Gender, setGender] = useState('');
   const [modalVisible2, setModalVisible2] = useState(false);
   const [date, setDate] = useState(new Date());
@@ -97,6 +99,8 @@ const Signup = ({route, navigation}) => {
   const [goalModal, setGoalModal] = useState(false);
 
   const [focused, setFocused] = useState(null);
+
+  const [tempDob, setTempDob] = useState(new Date());
 
   // Icon touch activate Input
   const dobRef = useRef(null);
@@ -120,45 +124,47 @@ const Signup = ({route, navigation}) => {
   const toggleModalDob = () => {
     setModalVisible2(true);
   };
-  const onDateChange = async (event, selectedValue) => {
-    if (event.type === 'set') {
-      const currentDate = selectedValue || date;
 
-      const today = new Date();
-
-      const age = today.getFullYear() - currentDate.getFullYear();
-      const monthDifference = today.getMonth() - currentDate.getMonth();
-
-      if (
-        monthDifference < 0 ||
-        (monthDifference === 0 && today.getDate() < currentDate.getDate())
-      ) {
-        age--;
-      }
-
-      // Check if the age is less than 24
-      if (age < 24) {
-        showMessage({
-          message: 'Error',
-          description: 'Age must be 24 years old.',
-          type: 'danger',
-        });
-      } else {
-        const formattedDate = `${String(currentDate.getDate()).padStart(
-          2,
-          '0',
-        )}/${String(currentDate.getMonth() + 1).padStart(
-          2,
-          '0',
-        )}/${currentDate.getFullYear()}`;
-        await setDob(formattedDate);
-        handleDoBChange(formattedDate);
-        console.log('formated date', formattedDate);
-      }
+  const onDateChange = (event, selectedValue) => {
+    if (event.type !== 'set') {
+      setModalVisible2(false);
+      return;
     }
+
+    const currentDate = selectedValue;
+
+    const today = new Date();
+
+    let age = today.getFullYear() - currentDate.getFullYear();
+
+    const monthDifference = today.getMonth() - currentDate.getMonth();
+
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < currentDate.getDate())
+    ) {
+      age--;
+    }
+
+    if (age < 24) {
+      showMessage({
+        message: 'Error',
+        description: 'Age must be 24 years old.',
+        type: 'danger',
+      });
+      return;
+    }
+
+    const formatted = `${String(currentDate.getDate()).padStart(2, '0')}/${String(
+      currentDate.getMonth() + 1,
+    ).padStart(2, '0')}/${currentDate.getFullYear()}`;
+
+    setDob(formatted);
+    setDoB(formatted);
 
     setModalVisible2(false);
   };
+
   const handleDoBChange = value => {
     setDoB(value);
 
@@ -197,7 +203,6 @@ const Signup = ({route, navigation}) => {
   const handleSignup = async () => {
     const payload = {
       fullName: name,
-      Address: address,
       email: email,
       password: password,
       confirmpassword: confirmpassword,
@@ -205,6 +210,8 @@ const Signup = ({route, navigation}) => {
       Dob: DoB,
       weight: weight,
       height: height,
+      fitnessPreference,
+      goal,
     };
 
     const validationChecks = [
@@ -226,10 +233,10 @@ const Signup = ({route, navigation}) => {
       {condition: DoB, message: 'Please enter your date of birth.'},
       {condition: weight > 0, message: 'Please enter your weight.'},
       {condition: height > 0, message: 'Please enter your height.'},
-      {
-        condition: address.trim().length > 0,
-        message: 'Please enter your address.',
-      },
+      // {
+      //   condition: address.trim().length > 0,
+      //   message: 'Please enter your address.',
+      // },
     ];
 
     for (const {condition, message} of validationChecks) {
@@ -244,6 +251,12 @@ const Signup = ({route, navigation}) => {
       if (user.checkUser === 'user') {
         res = await SignUpUser(payload);
         if (res.data) {
+          dispatch(
+            IsLogin({
+              ...res.data.data,
+              authProvider: 'manual',
+            }),
+          );
           showToast('Success', 'User created successfully', 'success');
           navigation.navigate('signin', {checkUser: 'user'});
         } else if (res.error) {
@@ -308,7 +321,13 @@ const Signup = ({route, navigation}) => {
 
       const data = await res.json();
 
-      dispatch(IsLogin(data.data));
+      // dispatch(IsLogin(data.data));
+      dispatch(
+        IsLogin({
+          ...data.data,
+          authProvider: 'google',
+        }),
+      );
     } catch (error) {
       console.log('Google Error:', error);
       showToast('Error', 'Google login failed', 'danger');
@@ -691,7 +710,7 @@ const Signup = ({route, navigation}) => {
                 </TouchableOpacity>
               </View>
             </View>
-            {modalVisible2 && (
+            {/* {modalVisible2 && (
               <Modal
                 animationType="slide"
                 transparent={true}
@@ -713,7 +732,39 @@ const Signup = ({route, navigation}) => {
                   </View>
                 </TouchableWithoutFeedback>
               </Modal>
-            )}
+            )} */}
+
+            {/* {modalVisible2 && (
+              <Modal
+                transparent
+                animationType="fade"
+                visible={modalVisible2}
+                onRequestClose={() => setModalVisible2(false)}>
+                <TouchableWithoutFeedback
+                  onPress={() => setModalVisible2(false)}>
+                  <View style={styles.dateOverlay}>
+                    <TouchableWithoutFeedback>
+                      <View style={styles.dateCard}>
+                        <DateTimePicker
+                          value={date}
+                          mode="date"
+                          display="inline" // ⭐ best for iOS
+                          maximumDate={new Date()}
+                          onChange={onDateChange}
+                        />
+
+                        <TouchableOpacity
+                          style={styles.doneBtn}
+                          onPress={() => setModalVisible2(false)}>
+                          <Text style={styles.doneText}>Done</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </TouchableWithoutFeedback>
+                  </View>
+                </TouchableWithoutFeedback>
+              </Modal>
+            )} */}
+
             <View
               style={{
                 flexDirection: 'row',
@@ -871,6 +922,104 @@ const Signup = ({route, navigation}) => {
           onSelect={setGoal}
         />
       </WrapperContainer>
+      {/* ================= ANDROID ================= */}
+      {Platform.OS === 'android' && modalVisible2 && (
+        <DateTimePicker
+          value={tempDob}
+          mode="date"
+          display="default"
+          maximumDate={new Date()}
+          onChange={(event, selectedDate) => {
+            setModalVisible2(false);
+
+            if (event.type === 'set' && selectedDate) {
+              const today = new Date();
+
+              let age = today.getFullYear() - selectedDate.getFullYear();
+              const m = today.getMonth() - selectedDate.getMonth();
+
+              if (
+                m < 0 ||
+                (m === 0 && today.getDate() < selectedDate.getDate())
+              )
+                age--;
+
+              if (age < 24) {
+                showMessage({
+                  message: 'Error',
+                  description: 'Age must be 24 years old.',
+                  type: 'danger',
+                });
+                return;
+              }
+
+              const formatted = moment(selectedDate).format('DD/MM/YYYY');
+
+              setDob(formatted);
+              setDoB(formatted);
+            }
+          }}
+        />
+      )}
+
+      {/* ================= IOS ================= */}
+      {Platform.OS === 'ios' && (
+        <Modal visible={modalVisible2} transparent animationType="slide">
+          <View style={styles.overlay}>
+            <View style={styles.pickerSheet}>
+              <DateTimePicker
+                value={tempDob}
+                mode="date"
+                display="spinner"
+                maximumDate={new Date()}
+                onChange={(e, d) => d && setTempDob(d)}
+              />
+
+              <View style={styles.pickerBtnRow}>
+                <TouchableOpacity
+                  style={[styles.pickerBtn, {backgroundColor: '#444'}]}
+                  onPress={() => setModalVisible2(false)}>
+                  <Text style={{color: '#fff'}}>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.pickerBtn}
+                  onPress={() => {
+                    const today = new Date();
+
+                    let age = today.getFullYear() - tempDob.getFullYear();
+                    const m = today.getMonth() - tempDob.getMonth();
+
+                    if (
+                      m < 0 ||
+                      (m === 0 && today.getDate() < tempDob.getDate())
+                    )
+                      age--;
+
+                    if (age < 24) {
+                      showMessage({
+                        message: 'Error',
+                        description: 'Age must be 24 years old.',
+                        type: 'danger',
+                      });
+                      return;
+                    }
+
+                    const formatted = moment(tempDob).format('DD/MM/YYYY');
+
+                    setDob(formatted);
+                    setDoB(formatted);
+
+                    setModalVisible2(false);
+                  }}>
+                  <Text style={{color: '#000', fontWeight: '700'}}>OK</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
+
       <FlashMessage position="top" />
     </ScrollView>
   );
@@ -957,5 +1106,63 @@ const styles = StyleSheet.create({
     width: responsiveWidth(15),
     height: responsiveWidth(15),
     resizeMode: 'contain',
+  },
+  dateWrapper: {
+    backgroundColor: '#111',
+    borderRadius: 16,
+    marginTop: 20,
+    padding: 10,
+  },
+
+  datePicker: {
+    backgroundColor: '#111',
+  },
+
+  doneBtn: {
+    backgroundColor: '#9FED3A',
+    marginTop: 10,
+    paddingVertical: 10,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+
+  pickerSheet: {
+    backgroundColor: '#9FED3A',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 20,
+  },
+
+  pickerBtnRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 15,
+  },
+
+  pickerBtn: {
+    flex: 1,
+    backgroundColor: '#9FED3A',
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+
+  doneBtn: {
+    marginTop: 12,
+    backgroundColor: '#9FED3A',
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+
+  doneText: {
+    color: '#000',
+    fontWeight: '700',
   },
 });

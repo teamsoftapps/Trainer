@@ -39,7 +39,9 @@ const App = () => {
   }, []);
 
   return (
-    <StripeProvider publishableKey="pk_test_51MhKy0E1gqTY55tO7v4bGT0EifIECw1SHFcUx33Jgc7YF46jqRPNvDzGoSE1h9konayrzaNes7Jse3NGDLpawDql00rxdyk8Cw">
+    <StripeProvider
+      publishableKey="pk_test_51MhKy0E1gqTY55tO7v4bGT0EifIECw1SHFcUx33Jgc7YF46jqRPNvDzGoSE1h9konayrzaNes7Jse3NGDLpawDql00rxdyk8Cw"
+      urlScheme="trainerapp">
       <NavigationContainer>
         {authData?.token && authData?.isType === 'user' ? (
           <MainStack />
