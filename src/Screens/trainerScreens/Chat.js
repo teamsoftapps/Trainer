@@ -21,43 +21,31 @@ import {UserImages} from '../../utils/Dummy';
 import {FontFamily, Images} from '../../utils/Images';
 import WrapperContainer from '../../Components/Wrapper';
 import Header from '../../Components/Header';
-import {useGetChatsQuery} from '../../store/Apis/chat';
 import {FlashList} from '@shopify/flash-list';
 import useToast from '../../Hooks/Toast';
 
 const Chats = ({navigation}) => {
-  const {data, isError, isLoading} = useGetChatsQuery();
   const [allChats, setallChats] = useState([]);
   const {showToast} = useToast();
 
-  useEffect(() => {
-    if (data?.data) {
-      setallChats(data.data);
-    }
-
-    if (isError) {
-      showToast('Error', isError, 'danger');
-    }
-  }, [data, isError]);
-
-  const listemptyComp = () => {
-    return (
-      <View style={{alignItems: 'center', justifyContent: 'center'}}>
-        {isLoading ? (
-          <ActivityIndicator size={responsiveHeight(5)} color="gray" />
-        ) : (
-          <Text
-            style={{
-              fontFamily: FontFamily.Regular,
-              color: 'gray',
-              fontSize: responsiveFontSize(2),
-            }}>
-            No Chat found
-          </Text>
-        )}
-      </View>
-    );
-  };
+  // const listemptyComp = () => {
+  //   return (
+  //     <View style={{alignItems: 'center', justifyContent: 'center'}}>
+  //       {isLoading ? (
+  //         <ActivityIndicator size={responsiveHeight(5)} color="gray" />
+  //       ) : (
+  //         <Text
+  //           style={{
+  //             fontFamily: FontFamily.Regular,
+  //             color: 'gray',
+  //             fontSize: responsiveFontSize(2),
+  //           }}>
+  //           No Chat found
+  //         </Text>
+  //       )}
+  //     </View>
+  //   );
+  // };
 
   return (
     <WrapperContainer>
@@ -142,7 +130,7 @@ const Chats = ({navigation}) => {
 
         <View style={{height: '100%'}}>
           <FlashList
-            ListEmptyComponent={listemptyComp}
+            // ListEmptyComponent={listemptyComp}
             estimatedItemSize={20}
             data={allChats}
             extraData={allChats}

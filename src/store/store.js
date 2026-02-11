@@ -6,8 +6,6 @@ import {persistReducer, persistStore} from 'redux-persist';
 import {TrainerAuth} from './Apis/trainerAuth';
 import {userAuth} from './Apis/userAuth';
 import {Posts} from './Apis/Post';
-import {Chats} from './Apis/chat';
-import {messages} from './Apis/messages';
 
 const storage = new MMKV();
 const reduxPersistStorage = {
@@ -40,12 +38,6 @@ export const store = configureStore({
     getdefaultMiddleware({
       serializableCheck: false,
       // immutableCheck: false,
-    }).concat(
-      TrainerAuth.middleware,
-      userAuth.middleware,
-      Posts.middleware,
-      Chats.middleware,
-      messages.middleware,
-    ),
+    }).concat(TrainerAuth.middleware, userAuth.middleware, Posts.middleware),
 });
 export const persistore = persistStore(store);

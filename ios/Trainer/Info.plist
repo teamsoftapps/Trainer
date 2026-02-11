@@ -21,33 +21,28 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
-<array>
-
-  <!-- Google Signin -->
-  <dict>
-    <key>CFBundleTypeRole</key>
-    <string>Editor</string>
-    <key>CFBundleURLName</key>
-    <string>Google</string>
-    <key>CFBundleURLSchemes</key>
-    <array>
-      <string>com.googleusercontent.apps.791670162595-qn85i13jadlq3egiqfenciggkkr3u8ll</string>
-    </array>
-  </dict>
-
-  <!-- Stripe (ADD THIS NEW ONE) -->
-  <dict>
-    <key>CFBundleTypeRole</key>
-    <string>Editor</string>
-    <key>CFBundleURLName</key>
-    <string>Stripe</string>
-    <key>CFBundleURLSchemes</key>
-    <array>
-      <string>trainerapp</string>
-    </array>
-  </dict>
-
-</array>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>Google</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.791670162595-qn85i13jadlq3egiqfenciggkkr3u8ll</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>Stripe</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>trainerapp</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
@@ -64,7 +59,7 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need your location to show you to nearby users.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>This app needs your location to show nearby trainers</string>
+	<string>This app needs your location to show nearby trainers</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to your gallery to upload images</string>
 	<key>UIAppFonts</key>
@@ -76,6 +71,25 @@
 		<string>Manrope-Medium.ttf</string>
 		<string>Manrope-Regular.ttf</string>
 		<string>Manrope-SemiBold.ttf</string>
+		<string>Fontisto.ttf</string>
+		<string>Octicons.ttf</string>
+		<string>Feather.ttf</string>
+		<string>FontAwesome6_Regular.ttf</string>
+		<string>Entypo.ttf</string>
+		<string>FontAwesome5_Brands.ttf</string>
+		<string>MaterialCommunityIcons.ttf</string>
+		<string>AntDesign.ttf</string>
+		<string>Foundation.ttf</string>
+		<string>Ionicons.ttf</string>
+		<string>FontAwesome5_Solid.ttf</string>
+		<string>FontAwesome5_Regular.ttf</string>
+		<string>FontAwesome.ttf</string>
+		<string>Zocial.ttf</string>
+		<string>EvilIcons.ttf</string>
+		<string>FontAwesome6_Solid.ttf</string>
+		<string>SimpleLineIcons.ttf</string>
+		<string>FontAwesome6_Brands.ttf</string>
+		<string>MaterialIcons.ttf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

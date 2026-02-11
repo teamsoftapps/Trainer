@@ -37,12 +37,6 @@ import InstaStory from 'react-native-insta-story';
 import {store} from '../../store/store';
 import {useGetTrainersQuery} from '../../store/Apis/Post';
 import {FlashList} from '@shopify/flash-list';
-import {
-  NativeStackScreenProps,
-  NativeStackNavigationProp,
-} from '@react-navigation/native-stack';
-import {MainProps} from '../../Navigations/MainStack';
-import {useCreateChatMutation, useGetChatsQuery} from '../../store/Apis/chat';
 import {socketService} from '../../utils/socketService';
 import {SaveLogedInUser} from '../../store/Slices/db_ID';
 import {followTrainer, unfollowTrainer} from '../../store/Slices/follow';
@@ -183,15 +177,14 @@ const StoriesData = [
   },
 ];
 
-const Home = ({navigation, route}) => {
+const Home = () => {
+  const navigation = useNavigation();
   const {data, isLoading, refetch} = useGetTrainersQuery();
-  const [createChat] = useCreateChatMutation();
   const [trainerData, settrainerData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setloading] = useState(false);
   const dispatch = useDispatch();
   const {isFollow, unFollow, loading: loadingFollow} = followingHook();
-  const [isFollowing, setIsFollowing] = useState(false);
   const authData = useSelector(state => state?.Auth?.data);
   console.log('Auth', authData);
   const checkFollowed = useSelector(state => state?.follow);
@@ -515,7 +508,7 @@ const Home = ({navigation, route}) => {
                         <TouchableOpacity
                           activeOpacity={0.8}
                           onPress={() => {
-                            onPressMessage(item);
+                            navigation.navigate('Messages');
                           }}>
                           <Image
                             source={Images.messageGreen}

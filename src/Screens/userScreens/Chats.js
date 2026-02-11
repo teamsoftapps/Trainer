@@ -20,7 +20,6 @@ import {TrainerProfile, UserImages} from '../../utils/Dummy';
 import {FontFamily, Images} from '../../utils/Images';
 import WrapperContainer from '../../Components/Wrapper';
 import Header from '../../Components/Header';
-import {useGetChatsQuery} from '../../store/Apis/chat';
 import {FlashList} from '@shopify/flash-list';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {MainProps} from '../../Navigations/MainStack';
@@ -160,45 +159,34 @@ const StoriesData = [
   },
 ];
 
-type Props = NativeStackScreenProps<MainProps, 'Chat'>;
-const Chats: React.FC<Props> = ({navigation, route}) => {
-  const {data, isError, refetch, isLoading} = useGetChatsQuery();
+const Chats = ({navigation, route}) => {
   const [allChats, setallChats] = useState([]);
   const [searchText, setSearchText] = useState('');
   const {showToast} = useToast();
-  useEffect(() => {
-    if (data?.data) {
-      setallChats(data?.data);
-      console.log('All Chats', data.data);
-    }
-    if (isError) {
-      showToast('Error', isError, 'danger');
-    }
-  }, [data, isError]);
 
-  const listemptyComp = () => {
-    return (
-      <View style={{alignItems: 'center', justifyContent: 'center'}}>
-        {isLoading ? (
-          <ActivityIndicator size={responsiveHeight(5)} color={'gray'} />
-        ) : (
-          <Text
-            style={{
-              fontFamily: FontFamily.Regular,
-              color: 'gray',
-              fontSize: responsiveFontSize(2),
-            }}>
-            No Chat found
-          </Text>
-        )}
-      </View>
-    );
-  };
+  // const listemptyComp = () => {
+  //   return (
+  //     <View style={{alignItems: 'center', justifyContent: 'center'}}>
+  //       {isLoading ? (
+  //         <ActivityIndicator size={responsiveHeight(5)} color={'gray'} />
+  //       ) : (
+  //         <Text
+  //           style={{
+  //             fontFamily: FontFamily.Regular,
+  //             color: 'gray',
+  //             fontSize: responsiveFontSize(2),
+  //           }}>
+  //           No Chat found
+  //         </Text>
+  //       )}
+  //     </View>
+  //   );
+  // };
 
   const toLowerCase = searchText.toLowerCase();
 
   const filteredData = useMemo(() => {
-    return allChats.filter((item: any) => {
+    return allChats.filter(item => {
       return item?.participants[1]?.userId?.fullName
         ?.toLowerCase()
         .includes(toLowerCase);
@@ -282,7 +270,7 @@ const Chats: React.FC<Props> = ({navigation, route}) => {
 
       <FlashList
         contentContainerStyle={{paddingHorizontal: responsiveWidth(8)}}
-        ListEmptyComponent={listemptyComp}
+        // ListEmptyComponent={listemptyComp}
         estimatedItemSize={20}
         data={filteredData}
         extraData={filteredData}

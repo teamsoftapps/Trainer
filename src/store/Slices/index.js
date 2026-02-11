@@ -3,8 +3,6 @@ import authSlice from './AuthSlice';
 import {TrainerAuth} from '../Apis/trainerAuth';
 import {userAuth} from '../Apis/userAuth';
 import {Posts} from '../Apis/Post';
-import {Chats} from '../Apis/chat';
-import {messages} from '../Apis/messages';
 import profileImage from './profileImage';
 import db_ID from './db_ID';
 import follow from './follow';
@@ -21,7 +19,5 @@ const Reducers = combineReducers({
   [TrainerAuth.reducerPath]: TrainerAuth.reducer,
   [userAuth.reducerPath]: userAuth.reducer,
   [Posts.reducerPath]: Posts.reducer,
-  [Chats.reducerPath]: Chats.reducer,
-  [messages.reducerPath]: messages.reducer,
 });
 export default Reducers;

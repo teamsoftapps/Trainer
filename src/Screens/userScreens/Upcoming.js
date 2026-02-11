@@ -20,7 +20,6 @@ import {
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
 import axiosBaseURL from '../../services/AxiosBaseURL';
-import {useCreateChatMutation} from '../../store/Apis/chat';
 import {set} from 'date-fns';
 
 const Upcoming = () => {
@@ -30,7 +29,6 @@ const Upcoming = () => {
   const [isDelete, setDelete] = useState(false);
   const AuthData = useSelector(state => state.Auth.data);
   const [loading, setloading] = useState(false);
-  const [createChat] = useCreateChatMutation();
   useFocusEffect(
     useCallback(() => {
       getBookings();

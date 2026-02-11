@@ -77,6 +77,7 @@ PODS:
   - hermes-engine (0.74.2):
     - hermes-engine/Pre-built (= 0.74.2)
   - hermes-engine/Pre-built (0.74.2)
+  - HyphenateChat (4.10.2)
   - KTVCocoaHTTPServer (1.0.0):
     - CocoaAsyncSocket
   - KTVHTTPCache (2.0.1):
@@ -1046,6 +1047,9 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - react-native-chat-sdk (1.3.5):
+    - HyphenateChat (= 4.10.2)
+    - React-Core
   - react-native-create-thumbnail (2.2.0):
     - React-Core
   - react-native-geolocation (3.4.0):
@@ -1620,6 +1624,27 @@ PODS:
     - Yoga
   - RNSVG (15.7.1):
     - React-Core
+  - RNVectorIcons (10.3.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - SDWebImage (5.11.1):
     - SDWebImage/Core (= 5.11.1)
   - SDWebImage/Core (5.11.1)
@@ -1701,6 +1726,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - "react-native-cameraroll (from `../node_modules/@react-native-camera-roll/camera-roll`)"
+  - react-native-chat-sdk (from `../node_modules/react-native-agora-chat`)
   - react-native-create-thumbnail (from `../node_modules/react-native-create-thumbnail`)
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
@@ -1749,6 +1775,7 @@ DEPENDENCIES:
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
+  - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - "stripe-react-native (from `../node_modules/@stripe/stripe-react-native`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1768,6 +1795,7 @@ SPEC REPOS:
     - GoogleUtilities
     - GTMAppAuth
     - GTMSessionFetcher
+    - HyphenateChat
     - KTVCocoaHTTPServer
     - KTVHTTPCache
     - libwebp
@@ -1854,6 +1882,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   react-native-cameraroll:
     :path: "../node_modules/@react-native-camera-roll/camera-roll"
+  react-native-chat-sdk:
+    :path: "../node_modules/react-native-agora-chat"
   react-native-create-thumbnail:
     :path: "../node_modules/react-native-create-thumbnail"
   react-native-geolocation:
@@ -1950,6 +1980,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-screens"
   RNSVG:
     :path: "../node_modules/react-native-svg"
+  RNVectorIcons:
+    :path: "../node_modules/react-native-vector-icons"
   stripe-react-native:
     :path: "../node_modules/@stripe/stripe-react-native"
   Yoga:
@@ -1977,6 +2009,7 @@ SPEC CHECKSUMS:
   GTMAppAuth: 217a876b249c3c585a54fd6f73e6b58c4f5c4238
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   hermes-engine: 01d3e052018c2a13937aca1860fbedbccd4a41b7
+  HyphenateChat: 6924f613947f6301bee909fc12c3bb01b50f52c6
   KTVCocoaHTTPServer: df8d7b861e603ff8037e9b2138aca2563a6b768d
   KTVHTTPCache: 588c3eb16f6bd1e6fde1e230dabfb7bd4e490a4d
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
@@ -2008,6 +2041,7 @@ SPEC CHECKSUMS:
   React-logger: 70e002e04cc56ff5c12157537405d1644c050703
   React-Mapbuffer: 39d399e4d1115ba93442df1470e2ba8baef4b569
   react-native-cameraroll: 4c1424f786b73653584299e46aaa1f26f25a281e
+  react-native-chat-sdk: 4b07abfcb1521ed848a41281ab23b32ee32adfcc
   react-native-create-thumbnail: c15cedc37f3822777d44e6035be041f7961341ea
   react-native-geolocation: 4ec47ba1f4dd64272eb4179f6e1301432e6828c5
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
@@ -2057,6 +2091,7 @@ SPEC CHECKSUMS:
   RNReanimated: 8b46a5efa4b1c67dd7fdfeaf382f674e2bc11d73
   RNScreens: fcbb53e181aa978016abbb9012439364d4bdda05
   RNSVG: 38b927ba26d717c85522fbf9a04b87dcd2d8227a
+  RNVectorIcons: b99459bc8fad0e571c6e11bf38ac25b4b0f0f54c
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d

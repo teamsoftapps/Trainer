@@ -22,35 +22,13 @@ import {useNavigation} from '@react-navigation/native';
 
 import ButtonComp from '../../Components/ButtonComp';
 import WrapperContainer from '../../Components/Wrapper';
-import {useCreateChatMutation} from '../../store/Apis/chat';
 
 const BookingDetails = ({route}) => {
   const navigation = useNavigation();
-  const [createChat] = useCreateChatMutation();
   const {data} = route.params || {};
 
   console.log('ROUTEEEEEEEE', data?.Dob);
   console.log('ROUTEEEEEEEE', data);
-
-  const onPressMessage = async item => {
-    let payload = {
-      userId: data?.data?._id,
-      type: data?.data?.isType,
-    };
-    try {
-      const res = await createChat(payload);
-
-      if (res?.data.data) {
-        navigation.navigate('Messages', {
-          name: data?.data?.fullName,
-          profile: data?.data?.profileImage,
-          id: res?.data?.data?._id,
-        });
-      }
-    } catch (error) {
-      console.log('Successfull Error', error);
-    }
-  };
 
   return (
     <WrapperContainer>
@@ -119,7 +97,7 @@ const BookingDetails = ({route}) => {
               gap: responsiveWidth(3),
               alignItems: 'center',
             }}>
-            <TouchableOpacity onPress={onPressMessage}>
+            <TouchableOpacity onPress={() => {}}>
               <Image
                 source={Images.chat_icon}
                 style={{

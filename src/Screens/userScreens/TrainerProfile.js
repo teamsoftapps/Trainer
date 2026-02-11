@@ -28,7 +28,6 @@ import {
   favouriteTrainer,
   unfavouriteTrainer,
 } from '../../store/Slices/favourite';
-import {useCreateChatMutation} from '../../store/Apis/chat';
 import {SaveLogedInUser} from '../../store/Slices/db_ID';
 import followingHook from '../../Hooks/Follow';
 const TrainerProfile = ({route}) => {
@@ -48,7 +47,6 @@ const TrainerProfile = ({route}) => {
   const [filtered, setfiltered] = useState();
   const {Bookings} = useSelector(state => state?.bookings);
   console.log('Redux Trainer Booking', Bookings);
-  const [createChat] = useCreateChatMutation();
 
   const calculateAge = birthdateString => {
     const [month, day, year] = birthdateString.split('/');
@@ -219,25 +217,7 @@ const TrainerProfile = ({route}) => {
       setbookingTime(timeArray);
     }
   }, [Bookings]);
-  const onPressMessage = async () => {
-    let payload = {
-      userId: data._id,
-      type: data.isType,
-    };
-    try {
-      const res = await createChat(payload);
 
-      if (res?.data.data) {
-        navigation.navigate('Messages', {
-          name: data?.fullName,
-          profile: data?.profileImage,
-          id: res?.data.data._id,
-        });
-      }
-    } catch (error) {
-      console.log('Successfull Error', error);
-    }
-  };
   const isFavorite =
     filtered && filtered.some(item => item.trainerID === data?._id);
   return (
@@ -409,7 +389,9 @@ const TrainerProfile = ({route}) => {
                     alignItems: 'center',
                   }}>
                   <TouchableOpacity
-                    onPress={onPressMessage}
+                    onPress={() => {
+                      navigation.navigate('Messages');
+                    }}
                     activeOpacity={0.8}
                     style={{
                       ...styles.curve,
