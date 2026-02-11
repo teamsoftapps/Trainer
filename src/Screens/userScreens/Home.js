@@ -4,16 +4,12 @@ import {
   View,
   TouchableOpacity,
   Image,
-  FlatList,
   ImageBackground,
   ScrollView,
-  Pressable,
-  Dimensions,
-  ActivityIndicator,
-  Alert,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {
   responsiveHeight,
   responsiveWidth,
@@ -21,245 +17,309 @@ import {
 } from 'react-native-responsive-dimensions';
 import WrapperContainer from '../../Components/Wrapper';
 import {FontFamily, Images} from '../../utils/Images';
-import {TrainerProfile} from '../../utils/Dummy';
 import {AirbnbRating} from 'react-native-ratings';
 import LinearGradient from 'react-native-linear-gradient';
-import Animated, {
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
-import axiosBaseURL from '../../services/AxiosBaseURL';
-import {useDispatch, useSelector} from 'react-redux';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import InstaStory from 'react-native-insta-story';
-import {store} from '../../store/store';
-import {useGetTrainersQuery} from '../../store/Apis/Post';
+import {useSelector, useDispatch} from 'react-redux';
 import {FlashList} from '@shopify/flash-list';
-import {socketService} from '../../utils/socketService';
+import axiosBaseURL from '../../services/AxiosBaseURL';
+import {useGetTrainersQuery} from '../../store/Apis/Post';
 import {SaveLogedInUser} from '../../store/Slices/db_ID';
 import {followTrainer, unfollowTrainer} from '../../store/Slices/follow';
 import {saveBookings} from '../../store/Slices/trainerBookings';
 import followingHook from '../../Hooks/Follow';
 
-const StoriesData = [
-  {
-    user_id: '1',
-    storyType: 'image',
-    user_image:
-      'https://image.freepik.com/free-vector/universe-mobile-wallpaper-with-planets_79603-600.jpg',
-    user_name: 'Alex Morgan',
-    stories: [
-      {
-        story_id: '1',
-        story_image:
-          'https://image.freepik.com/free-vector/universe-mobile-wallpaper-with-planets_79603-600.jpg',
-        // swipeText: 'Custom swipe text for this story',
-        onPress: () => console.log('story 1 swiped'),
-      },
-      {
-        story_id: '2',
-        story_image:
-          'https://image.freepik.com/free-vector/mobile-wallpaper-with-fluid-shapes_79603-601.jpg',
-      },
-    ],
-  },
-  {
-    user_id: '2',
-    user_image:
-      'https://images.unsplash.com/photo-1511367461989-f85a21fda167?ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZmlsZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80',
-    user_name: 'Jordan',
-    stories: [
-      {
-        story_id: '1',
-        story_image:
-          'https://plus.unsplash.com/premium_photo-1666174933753-36abe3cb834b?q=80&w=1978&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-        // swipeText: 'Custom swipe text for this story',
-        onPress: () => console.log('story 1 swiped'),
-      },
-      {
-        story_id: '2',
-        story_image:
-          'https://images.unsplash.com/photo-1724268509269-cd2c9bd9bef3?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-        // swipeText: 'Custom swipe text for this story',
-        onPress: () => console.log('story 2 swiped'),
-      },
-    ],
-  },
-  {
-    user_id: '3',
-    user_image:
-      'https://images.unsplash.com/photo-1721332149267-ef9b10eaacd9?q=80&w=1936&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    user_name: 'Ruben Neves',
-    stories: [
-      {
-        story_id: '1',
-        story_image:
-          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjORKvjcbMRGYPR3QIs3MofoWkD4wHzRd_eg&usqp=CAU',
-        // swipeText: 'Custom swipe text for this story',
-        onPress: () => console.log('story 1 swiped'),
-      },
-      {
-        story_id: '2',
-        story_image:
-          'https://files.oyebesmartest.com/uploads/preview/vivo-u20-mobile-wallpaper-full-hd-(1)qm6qyz9v60.jpg',
-        // swipeText: 'Custom swipe text for this story',
-        onPress: () => console.log('story 2 swiped'),
-      },
-    ],
-  },
-  {
-    user_id: '4',
-    user_image:
-      'https://images.unsplash.com/photo-1720048171098-dba33b2c4806?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    user_name: 'Ryan',
-    stories: [
-      {
-        story_id: '1',
-        story_image:
-          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjORKvjcbMRGYPR3QIs3MofoWkD4wHzRd_eg&usqp=CAU',
-        // swipeText: 'Custom swipe text for this story',
-        onPress: () => console.log('story 1 swiped'),
-      },
-      {
-        story_id: '2',
-        story_image:
-          'https://files.oyebesmartest.com/uploads/preview/vivo-u20-mobile-wallpaper-full-hd-(1)qm6qyz9v60.jpg',
-        // swipeText: 'Custom swipe text for this story',
-        onPress: () => console.log('story 2 swiped'),
-      },
-    ],
-  },
-  {
-    user_id: '5',
-    user_image:
-      'https://images.unsplash.com/photo-1724313802205-6f70304e6c64?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    user_name: 'Emily',
-    stories: [
-      {
-        story_id: '1',
-        story_image:
-          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjORKvjcbMRGYPR3QIs3MofoWkD4wHzRd_eg&usqp=CAU',
-        // swipeText: 'Custom swipe text for this story',
-        onPress: () => console.log('story 1 swiped'),
-      },
-      {
-        story_id: '2',
-        story_image:
-          'https://files.oyebesmartest.com/uploads/preview/vivo-u20-mobile-wallpaper-full-hd-(1)qm6qyz9v60.jpg',
-        // swipeText: 'Custom swipe text for this story',
-        onPress: () => console.log('story 2 swiped'),
-      },
-    ],
-  },
-  {
-    user_id: '5',
-    user_image:
-      'https://images.unsplash.com/photo-1724313802205-6f70304e6c64?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    user_name: 'Emily',
-    stories: [
-      {
-        story_id: '1',
-        story_image:
-          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjORKvjcbMRGYPR3QIs3MofoWkD4wHzRd_eg&usqp=CAU',
-        // swipeText: 'Custom swipe text for this story',
-        onPress: () => console.log('story 1 swiped'),
-      },
-      {
-        story_id: '2',
-        story_image:
-          'https://files.oyebesmartest.com/uploads/preview/vivo-u20-mobile-wallpaper-full-hd-(1)qm6qyz9v60.jpg',
-        // swipeText: 'Custom swipe text for this story',
-        onPress: () => console.log('story 2 swiped'),
-      },
-    ],
-  },
-];
-
 const Home = () => {
   const navigation = useNavigation();
-  const {data, isLoading, refetch} = useGetTrainersQuery();
-  const [trainerData, settrainerData] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
-  const [loading, setloading] = useState(false);
   const dispatch = useDispatch();
-  const {isFollow, unFollow, loading: loadingFollow} = followingHook();
-  const authData = useSelector(state => state?.Auth?.data);
-  console.log('Auth', authData);
-  const checkFollowed = useSelector(state => state?.follow);
-  console.log('FOLLOWED', checkFollowed);
-  const token = useSelector(state => state?.Auth?.data?.token);
 
+  const {data, isLoading, isFetching, refetch} = useGetTrainersQuery(
+    undefined,
+    {
+      refetchOnMountOrArgChange: true,
+    },
+  );
+
+  const authData = useSelector(state => state?.Auth?.data);
+  const token = authData?.token;
+  const followedTrainers = useSelector(state => state?.follow?.follow || []);
+
+  const {isFollow, unFollow, loading: loadingFollow} = followingHook();
+
+  const [storiesData, setStoriesData] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Fetch current user profile once when token is available
   useEffect(() => {
-    console.log('data', data);
-    const fetchData = async () => {
+    if (!token) return;
+
+    const fetchProfile = async () => {
       try {
-        const profileResponse = await axiosBaseURL.get(
-          `/Common/GetProfile/${token}`,
-        );
-        const userData = profileResponse.data.data;
-        dispatch(SaveLogedInUser(userData));
+        const response = await axiosBaseURL.get(`/Common/GetProfile/${token}`);
+        dispatch(SaveLogedInUser(response.data.data));
       } catch (error) {
         console.error(
-          'Error fetching data:',
-          error.response?.data?.message || error.message,
+          'Profile fetch failed:',
+          error?.response?.data?.message || error.message,
         );
       }
     };
-    fetchData();
-  }, [token]);
 
-  useFocusEffect(
-    useCallback(() => {
-      onRefresh();
-    }, [data]),
-  );
-
-  useFocusEffect(
-    useCallback(() => {
-      getPosts();
-    }, [data]),
-  );
+    fetchProfile();
+  }, [token, dispatch]);
 
   useEffect(() => {
-    socketService.initializeSocket();
+    if (!data?.data?.length) {
+      setStoriesData([]);
+      return;
+    }
+
+    const loadStories = async () => {
+      try {
+        const requests = data.data.map(trainer => {
+          console.log('Fetching stories for trainer:', trainer._id);
+          // Return the promise (with fallback on error)
+          return axiosBaseURL
+            .get(`/trainer/stories/${trainer._id}`)
+            .catch(err => {
+              console.log(`Stories failed for ${trainer._id}:`, err.message);
+              return {data: {data: []}}; // fallback empty array
+            });
+        });
+
+        console.log('Number of story requests:', requests.length);
+
+        const responses = await Promise.all(requests);
+
+        const stories = responses
+          .map((res, idx) => {
+            const trainer = data.data[idx];
+            const trainerStories = res?.data?.data || [];
+
+            console.log('Stories>>>', trainerStories);
+
+            if (!trainerStories.length) return null;
+
+            return {
+              user_id: trainer._id,
+              user_image: trainer.profileImage,
+              user_name: trainer.fullName,
+              stories: trainerStories
+                .filter(s => {
+                  const url = s.thumbnail || s.mediaUrl;
+                  return !url?.toLowerCase().endsWith('.heic');
+                })
+                .map(s => ({
+                  story_id: s._id,
+                  story_image: s.thumbnail || s.mediaUrl,
+                  story_type: s.type === 'video' ? 'video' : 'image',
+                  url: s.type === 'video' ? s.mediaUrl : undefined,
+                  onPress: () => markSeen(s._id),
+                })),
+            };
+          })
+          .filter(Boolean);
+
+        console.log('Parsed stories count:', stories.length);
+        setStoriesData(stories);
+      } catch (err) {
+        console.log('Stories overall error:', err);
+        setStoriesData([]);
+      }
+    };
+
+    loadStories();
+  }, [data?.data]); // dependency is fine (reference stable from RTK Query)
+
+  const markSeen = useCallback(async storyId => {
+    try {
+      await axiosBaseURL.post('/trainer/story/seen', {storyId});
+    } catch (e) {
+      console.log('Mark seen failed:', e);
+    }
   }, []);
 
-  const getPosts = async () => {
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
     try {
-      const res = await data;
-      settrainerData(res?.data);
-    } catch (error) {
-      console.log('Errorr', error);
+      await refetch();
+      // stories will be reloaded via useEffect
+    } finally {
+      setRefreshing(false);
     }
-  };
+  }, [refetch]);
 
-  const onPressMessage = async item => {
-    let payload = {
-      userId: item._id,
-      type: item.isType,
-    };
-    try {
-      const res = await createChat(payload);
+  // Auto-refresh when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
 
-      if (res?.data.data) {
-        navigation.navigate('Messages', {
-          name: item?.fullName,
-          profile: item?.profileImage,
-          id: res?.data.data._id,
-        });
+  const getBookingAndNavigate = useCallback(
+    async trainer => {
+      if (!trainer?._id) return;
+
+      try {
+        const response = await axiosBaseURL.get(
+          `/user/getBookingbyId/${trainer._id}`,
+        );
+        dispatch(saveBookings(response.data?.data || []));
+        navigation.navigate('TrainerProfile', {data: trainer});
+      } catch (error) {
+        console.log('Booking fetch error:', error);
+        // Optionally show toast/alert here
       }
-    } catch (error) {
-      console.log('Successfull Error', error);
-    }
-  };
+    },
+    [dispatch, navigation],
+  );
 
-  const listemptyComp = () => {
-    return (
-      <View style={{alignItems: 'center', justifyContent: 'center'}}>
-        {isLoading ? (
-          <ActivityIndicator size={responsiveHeight(5)} color={'#fff'} />
+  const handleFollowToggle = useCallback(
+    async trainer => {
+      if (!authData?._id || !trainer?._id) return;
+
+      const isCurrentlyFollowing = followedTrainers.includes(trainer._id);
+      const action = isCurrentlyFollowing ? unFollow : isFollow;
+
+      try {
+        const success = await action(authData._id, trainer._id);
+        if (success) {
+          dispatch(
+            isCurrentlyFollowing
+              ? unfollowTrainer(trainer._id)
+              : followTrainer(trainer._id),
+          );
+          refetch(); // refresh trainers (in case they return follow count etc.)
+        }
+      } catch (err) {
+        console.log('Follow action failed:', err);
+      }
+    },
+    [authData?._id, followedTrainers, isFollow, unFollow, dispatch, refetch],
+  );
+
+  const renderTrainer = useCallback(
+    ({item}) => (
+      <ImageBackground
+        source={{uri: item?.profileImage}}
+        imageStyle={{borderRadius: responsiveWidth(1.5)}}
+        style={styles.Trainer}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => getBookingAndNavigate(item)}
+          style={{flex: 1, justifyContent: 'space-between'}}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => handleFollowToggle(item)}
+            style={[
+              styles.Follow,
+              {
+                backgroundColor: followedTrainers.includes(item._id)
+                  ? '#d7d7d7'
+                  : '#9FED3A',
+              },
+            ]}>
+            <Text
+              style={{
+                color: '#000',
+                fontFamily: FontFamily.Medium,
+                fontSize: responsiveFontSize(2),
+              }}>
+              {loadingFollow
+                ? 'wait...'
+                : followedTrainers.includes(item._id)
+                  ? 'Following'
+                  : 'Follow'}
+            </Text>
+            {!followedTrainers.includes(item._id) && (
+              <Image
+                style={{
+                  width: responsiveHeight(2),
+                  height: responsiveHeight(2),
+                }}
+                source={Images.plus}
+              />
+            )}
+          </TouchableOpacity>
+
+          <LinearGradient
+            colors={['transparent', '#000', '#000']}
+            start={{x: 0, y: 0}}
+            end={{x: 0, y: 1.5}}
+            style={styles.LinearMainView}>
+            <View>
+              <Text
+                style={{
+                  color: '#fff',
+                  fontFamily: FontFamily.Regular,
+                  fontSize: responsiveFontSize(2),
+                }}>
+                {item?.Speciality?.[0]?.value || 'Not available'}
+              </Text>
+              <Text
+                style={{
+                  color: '#fff',
+                  fontFamily: FontFamily.Semi_Bold,
+                  fontSize: responsiveFontSize(2.5),
+                  marginVertical: responsiveHeight(1),
+                }}>
+                {item?.fullName}
+              </Text>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: responsiveWidth(3),
+                }}>
+                <View style={styles.bottomSubView}>
+                  <Image source={Images.pin} style={styles.pin} />
+                  <Text style={styles.rating}>{item?.gender}</Text>
+                </View>
+
+                <View style={styles.bottomSubView}>
+                  <AirbnbRating
+                    size={responsiveHeight(2)}
+                    selectedColor="#9FED3A"
+                    showRating={false}
+                    isDisabled
+                    defaultRating={item?.Rating ?? 0}
+                  />
+                  <Text style={styles.rating}>{item?.Rating ?? '—'}</Text>
+                </View>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('Messages')}>
+              <Image source={Images.messageGreen} style={styles.messageGreen} />
+            </TouchableOpacity>
+          </LinearGradient>
+        </TouchableOpacity>
+      </ImageBackground>
+    ),
+    [
+      followedTrainers,
+      loadingFollow,
+      getBookingAndNavigate,
+      handleFollowToggle,
+      navigation,
+    ],
+  );
+
+  const ListEmpty = useCallback(
+    () => (
+      <View
+        style={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingVertical: 60,
+        }}>
+        {isLoading || isFetching ? (
+          <ActivityIndicator size={responsiveHeight(5)} color="#fff" />
         ) : (
           <Text
             style={{
@@ -267,56 +327,13 @@ const Home = () => {
               color: 'gray',
               fontSize: responsiveFontSize(2),
             }}>
-            No Chat found
+            No trainers found
           </Text>
         )}
       </View>
-    );
-  };
-  const onRefresh = () => {
-    refetch(); // This will fetch the latest data
-  };
-  const getBookingbyID = async item => {
-    try {
-      const response = await axiosBaseURL.get(
-        `/user/getBookingbyId/${item?._id}`,
-      );
-      console.log('By ID ===========', response);
-
-      dispatch(saveBookings(response.data?.data));
-      navigation.navigate('TrainerProfile', {
-        data: item,
-      });
-    } catch (error) {
-      console.log('By ID ERRORRORROORO ===========', error);
-    }
-  };
-
-  const handleFollow = async item => {
-    console.log('Follow Hitted');
-    const userID = authData?._id;
-    const trainerID = item?._id;
-
-    // return console.log('ID', trainerID);
-    const res = await isFollow(userID, trainerID);
-
-    if (res) {
-      await refetch();
-      dispatch(followTrainer(trainerID));
-      console.log('Success', res);
-    }
-  };
-  const handleUnFollow = async item => {
-    const userID = authData?._id;
-    const trainerID = item?._id;
-
-    const res = await unFollow(userID, trainerID);
-    if (res) {
-      await refetch();
-      dispatch(unfollowTrainer(trainerID));
-      console.log('unfollow', res);
-    }
-  };
+    ),
+    [isLoading, isFetching],
+  );
 
   return (
     <WrapperContainer>
@@ -342,18 +359,17 @@ const Home = () => {
             alignItems: 'center',
             gap: responsiveWidth(5),
           }}>
-          <TouchableOpacity onPress={getPosts} activeOpacity={0.8}>
+          <TouchableOpacity onPress={refetch} activeOpacity={0.8}>
             <Image source={Images.notification} style={styles.notifiaction} />
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => {
-              navigation.navigate('Chats');
-            }}>
+            onPress={() => navigation.navigate('Chats')}>
             <Image source={Images.messages} style={styles.notifiaction} />
           </TouchableOpacity>
         </View>
       </View>
+
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -370,158 +386,27 @@ const Home = () => {
             marginTop: responsiveHeight(1),
           }}>
           <Text style={styles.trainer}>Stories from trainers</Text>
-
-          <View>
-            <InstaStory
-              data={StoriesData}
-              duration={10000}
-              unPressedBorderColor={'#9FED3A'}
-              unPressedAvatarTextColor={'#fff'}
-              pressedAvatarTextColor={'#fff'}
-              swipeText={' '}
-            />
-          </View>
+          <InstaStory
+            data={storiesData}
+            duration={10000}
+            unPressedBorderColor="#9FED3A"
+            unPressedAvatarTextColor="#fff"
+            pressedAvatarTextColor="#fff"
+            swipeText=" "
+          />
         </View>
 
         <View>
           <Text style={styles.popular}>Popular Personal Trainers</Text>
 
-          <View style={{flex: 1}}>
-            <FlashList
-              estimatedItemSize={200}
-              scrollEnabled={false}
-              ListEmptyComponent={listemptyComp}
-              data={trainerData}
-              renderItem={({item, index}) => {
-                console.log('TRAINER DATA', trainerData[index]);
-
-                return (
-                  <ImageBackground
-                    onLoadStart={() => {
-                      setloading(true);
-                    }}
-                    onLoadEnd={() => {
-                      setloading(false);
-                    }}
-                    imageStyle={{borderRadius: responsiveWidth(1.5)}}
-                    source={{uri: item?.profileImage}}
-                    style={styles.Trainer}>
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      onPress={() => {
-                        getBookingbyID(item);
-                      }}
-                      style={{flex: 1, justifyContent: 'space-between'}}>
-                      <TouchableOpacity
-                        activeOpacity={0.9}
-                        accessibilityRole="button"
-                        onPress={() => {
-                          !checkFollowed.follow.includes(item?._id)
-                            ? handleFollow(item)
-                            : handleUnFollow(item);
-                        }}
-                        style={{
-                          backgroundColor: checkFollowed?.follow.includes(
-                            item?._id,
-                          )
-                            ? '#d7d7d7'
-                            : '#9FED3A',
-                          padding: responsiveWidth(1),
-                          borderRadius: responsiveHeight(5),
-                          alignItems: 'center',
-                          justifyContent: 'space-evenly',
-                          width: responsiveWidth(30),
-                          margin: responsiveHeight(2),
-                          paddingVertical: responsiveHeight(1.5),
-                          flexDirection: 'row',
-                        }}>
-                        <Text
-                          style={{
-                            color: '#000',
-                            fontFamily: FontFamily.Medium,
-                            fontSize: responsiveFontSize(2),
-                          }}>
-                          {loadingFollow
-                            ? 'waiting...'
-                            : checkFollowed?.follow.includes(item?._id)
-                              ? 'Following'
-                              : 'Follow'}
-                        </Text>
-                        {checkFollowed?.follow?.includes(item._id) ? null : (
-                          <Image
-                            style={{
-                              width: responsiveHeight(2),
-                              height: responsiveHeight(2),
-                            }}
-                            source={Images.plus}
-                          />
-                        )}
-                      </TouchableOpacity>
-                      <LinearGradient
-                        colors={['transparent', '#000', '#000']}
-                        start={{x: 0, y: 0}}
-                        end={{x: 0, y: 1.5}}
-                        style={styles.LinearMainView}>
-                        <View>
-                          <Text
-                            style={{
-                              color: '#fff',
-                              fontFamily: FontFamily.Regular,
-                              fontSize: responsiveFontSize(2),
-                            }}>
-                            {item?.Speciality?.[0]?.value || 'Not available'}
-                          </Text>
-                          <Text
-                            style={{
-                              color: '#fff',
-                              fontFamily: FontFamily.Semi_Bold,
-                              fontSize: responsiveFontSize(2.5),
-                              marginVertical: responsiveHeight(1),
-                            }}>
-                            {item?.fullName}
-                          </Text>
-
-                          <View
-                            style={{
-                              flexDirection: 'row',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              gap: responsiveWidth(3),
-                            }}>
-                            <View style={styles.bottomSubView}>
-                              <Image source={Images.pin} style={styles.pin} />
-                              <Text style={styles.rating}>{item?.gender}</Text>
-                            </View>
-
-                            <View style={styles.bottomSubView}>
-                              <AirbnbRating
-                                size={responsiveHeight(2)}
-                                selectedColor="#9FED3A"
-                                showRating={false}
-                                isDisabled
-                                defaultRating={item?.Rating}
-                              />
-                              <Text style={styles.rating}>{item?.Rating}</Text>
-                            </View>
-                          </View>
-                        </View>
-                        <TouchableOpacity
-                          activeOpacity={0.8}
-                          onPress={() => {
-                            navigation.navigate('Messages');
-                          }}>
-                          <Image
-                            source={Images.messageGreen}
-                            style={styles.messageGreen}
-                          />
-                        </TouchableOpacity>
-                      </LinearGradient>
-                    </TouchableOpacity>
-                  </ImageBackground>
-                );
-              }}
-            />
-          </View>
+          <FlashList
+            estimatedItemSize={responsiveHeight(50) + 40}
+            data={data?.data || []}
+            renderItem={renderTrainer}
+            keyExtractor={item => item._id}
+            ListEmptyComponent={ListEmpty}
+            scrollEnabled={false}
+          />
         </View>
       </ScrollView>
     </WrapperContainer>
@@ -529,7 +414,6 @@ const Home = () => {
 };
 
 export default Home;
-
 const styles = StyleSheet.create({
   notifiaction: {
     width: responsiveHeight(4),
