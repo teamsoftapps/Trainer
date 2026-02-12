@@ -723,9 +723,8 @@ const TrainerProfile = ({route}) => {
                 <Text style={{color: '#fff'}}>Message</Text>
               </TouchableOpacity>
             </View>
-
             {/* Hourly Rate Box (Hired Removed) */}
-            <View
+            {/* <View
               style={{
                 alignItems: 'center',
                 marginTop: 30,
@@ -751,7 +750,7 @@ const TrainerProfile = ({route}) => {
                   <Text style={{color: '#aaa'}}> / per hour</Text>
                 </Text>
               </View>
-            </View>
+            </View> */}
           </LinearGradient>
         </ImageBackground>
 
