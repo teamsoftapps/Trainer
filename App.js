@@ -18,7 +18,6 @@ const App = () => {
   }, []);
 
   const authData = useSelector(state => state?.Auth?.data);
-  console.log('first', authData);
 
   useEffect(() => {
     const init = async () => {
@@ -29,9 +28,7 @@ const App = () => {
       await BootSplash.hide({fade: true});
       await requestNotificationPermission();
       await requestMediaPermission()
-        .then(result => {
-          console.log('Result', result);
-        })
+        .then(result => {})
         .catch(error => {
           console.log('Error', error);
         });

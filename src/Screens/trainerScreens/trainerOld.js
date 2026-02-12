@@ -67,7 +67,6 @@ const CompletedTrainerHome = () => {
       );
       setSessions(responce.data.data);
       setIsLoading(false);
-      console.log('Sessions we get: ', responce.data.data);
     } catch (error) {
       console.log('first', error);
     }

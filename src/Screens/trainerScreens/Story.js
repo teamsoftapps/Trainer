@@ -410,6 +410,7 @@ const Story = () => {
           mediaType: 'photo',
           cropping: true,
           compressImageQuality: 0.7,
+          forceJpg: true,
         });
       } else {
         file = await ImageCropPicker.openPicker({

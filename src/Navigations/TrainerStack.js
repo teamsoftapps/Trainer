@@ -18,6 +18,7 @@ import StoryView from '../Screens/trainerScreens/storyView';
 import axiosBaseURL from '../services/AxiosBaseURL';
 import Subscription from '../Screens/trainerScreens/Subscription.js';
 import PostCaptionScreen from '../Screens/trainerScreens/PostCaptionScreen.js';
+import AllUploadsScreen from '../Screens/trainerScreens/AllUploadsScreen.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -106,6 +107,11 @@ const TrainerStack = () => {
       <Stack.Screen name="CompleteProfile" component={CompleteProfile} />
       <Stack.Screen name="StoryView" component={StoryView} />
       <Stack.Screen name="PostCaptionScreen" component={PostCaptionScreen} />
+      <Stack.Screen
+        name="AllUploadsScreen"
+        component={AllUploadsScreen}
+        options={{headerShown: false}}
+      />
     </Stack.Navigator>
   );
 };

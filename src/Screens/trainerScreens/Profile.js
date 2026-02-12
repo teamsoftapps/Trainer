@@ -21,6 +21,7 @@ import axiosBaseURL from '../../services/AxiosBaseURL';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import MapView, {Marker} from 'react-native-maps';
 import StoryModal from '../../Components/StoryModal';
+import {ActivityIndicator} from 'react-native';
 const Profile = () => {
   const navigation = useNavigation();
 
@@ -31,30 +32,61 @@ const Profile = () => {
   const [profile, setProfile] = useState(null);
   const [uploads, setUploads] = useState([]);
 
+  const [loading, setLoading] = useState(true);
+
   const [stories, setStories] = useState([]);
   const [storyVisible, setStoryVisible] = useState(false);
 
   const safe = v => (v ? v : '-');
 
   /* ================= FETCH ================= */
-  const fetchData = async () => {
-    const res = await axiosBaseURL.get(
-      `/Common/GetProfile/${trainer_data.token}`,
-    );
-    const uploadsRes = await axiosBaseURL.get('/trainer/getUploads');
-    const storyRes = await axiosBaseURL.get(
-      `/trainer/stories/${trainer_data._id}`,
-    );
+  // const fetchData = async () => {
+  //   const res = await axiosBaseURL.get(
+  //     `/Common/GetProfile/${trainer_data.token}`,
+  //   );
+  //   const uploadsRes = await axiosBaseURL.get('/trainer/getUploads');
+  //   const storyRes = await axiosBaseURL.get(
+  //     `/trainer/stories/${trainer_data._id}`,
+  //   );
 
-    const formattedStories = (storyRes.data.data || []).map(s => ({
-      id: s._id,
-      url: s.type === 'video' ? s.thumbnail || s.mediaUrl : s.mediaUrl,
-      videoUrl: s.type === 'video' ? s.mediaUrl : null,
-      type: s.type,
-    }));
-    setProfile(res.data?.data);
-    setUploads(uploadsRes?.data?.data);
-    setStories(formattedStories);
+  //   const formattedStories = (storyRes.data.data || []).map(s => ({
+  //     id: s._id,
+  //     url: s.type === 'video' ? s.thumbnail || s.mediaUrl : s.mediaUrl,
+  //     videoUrl: s.type === 'video' ? s.mediaUrl : null,
+  //     type: s.type,
+  //   }));
+  //   setProfile(res.data?.data);
+  //   setUploads(uploadsRes?.data?.data);
+  //   setStories(formattedStories);
+  // };
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+
+      const res = await axiosBaseURL.get(
+        `/Common/GetProfile/${trainer_data.token}`,
+      );
+
+      const uploadsRes = await axiosBaseURL.get('/trainer/getUploads');
+      const storyRes = await axiosBaseURL.get(
+        `/trainer/stories/${trainer_data._id}`,
+      );
+
+      setProfile(res.data?.data);
+      setUploads(uploadsRes?.data?.data);
+
+      const formattedStories = (storyRes.data.data || []).map(s => ({
+        id: s._id,
+        url: s.type === 'video' ? s.thumbnail || s.mediaUrl : s.mediaUrl,
+        videoUrl: s.type === 'video' ? s.mediaUrl : null,
+        type: s.type,
+      }));
+
+      setStories(formattedStories);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useFocusEffect(
@@ -63,7 +95,21 @@ const Profile = () => {
     }, []),
   );
 
-  if (!profile) return null;
+  if (loading) {
+    return (
+      <WrapperContainer>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: '#000',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <ActivityIndicator size="large" color="#9FED3A" />
+        </View>
+      </WrapperContainer>
+    );
+  }
   const calculateAge = dob => {
     console.log('age for calculation:', dob);
 
@@ -196,14 +242,31 @@ const Profile = () => {
         <RowItem title="Goal" value={profile?.goal} />
 
         {/* ========= UPLOADS ========= */}
-        <Text style={styles.sectionTitle}>Uploads</Text>
+        <View style={styles.uploadHeader}>
+          <Text style={styles.sectionTitle}>Uploads</Text>
+
+          {uploads.length > 3 && (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('AllUploadsScreen', {
+                  uploads,
+                  profileImage: profile?.profileImage,
+                  fullName: profile?.fullName,
+                  fitnessPreference: profile?.fitnessPreference,
+                  experience: profile?.experience,
+                })
+              }>
+              <Text style={styles.seeAll}>See All</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {uploads.length === 0 ? (
             <Text style={styles.emptyText}>No uploads yet</Text>
           ) : (
             <FlatList
               // horizontal
-              data={uploads}
+              data={[...uploads].slice(-3).reverse()}
               numColumns={3}
               scrollEnabled={false}
               keyExtractor={item => item.id}
@@ -344,6 +407,17 @@ const styles = StyleSheet.create({
     borderRadius: responsiveWidth(14),
     borderWidth: 3,
     borderColor: '#9FED3A',
+  },
+
+  uploadHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  seeAll: {
+    color: '#9FED3A',
+    fontWeight: '600',
   },
 
   name: {

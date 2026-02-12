@@ -1,5 +1,5 @@
 import React, {useCallback, useState} from 'react';
-import {NativeModules} from 'react-native';
+import {ActivityIndicator, NativeModules} from 'react-native';
 import {
   StyleSheet,
   Text,
@@ -74,10 +74,12 @@ const goalOptions = [
 ];
 
 const allSpecialities = [
-  {key: 1, value: 'Yoga'},
-  {key: 2, value: 'Strength Training'},
-  {key: 3, value: 'Crossfit'},
-  {key: 4, value: 'Cardio Fitness'},
+  {key: 1, value: 'Strength Training'},
+  {key: 2, value: 'Yoga'},
+  {key: 3, value: 'Cardio Fitness'},
+  {key: 4, value: 'Weight Loss Coaching'},
+  {key: 5, value: 'Bodybuilding'},
+  {key: 6, value: 'Crossfit'},
 ];
 
 // =======================================================
@@ -105,6 +107,8 @@ const EditProfile = () => {
   const [address, setAddress] = useState('');
   const [coords, setCoords] = useState(null);
 
+  const [loading, setLoading] = useState(true);
+
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [timePicker, setTimePicker] = useState(false);
 
@@ -119,24 +123,50 @@ const EditProfile = () => {
 
   // ================= FETCH PROFILE =================
 
+  // const fetchProfile = async () => {
+  //   const res = await axiosBaseURL.get(`/Common/GetProfile/${auth.token}`);
+  //   const d = res.data.data;
+
+  //   console.log('Fresh Data From Database:', d);
+
+  //   setProfile(d);
+  //   setBio(d.Bio || '');
+  //   setHourly(d.Hourlyrate || '');
+  //   setSpecialities(d.Speciality || []);
+  //   setTimes(d.Availiblity || []);
+  //   setDob(d.Dob || '');
+  //   setWeight(d.weight || '');
+  //   setHeight(d.height || '');
+  //   setPref(d.fitnessPreference || '');
+  //   setGoal(d.goal || '');
+  //   setAddress(d.Address || '');
+  //   setCoords(d.location?.coordinates || null);
+  // };
+
   const fetchProfile = async () => {
-    const res = await axiosBaseURL.get(`/Common/GetProfile/${auth.token}`);
-    const d = res.data.data;
+    try {
+      setLoading(true);
 
-    console.log('Fresh Data From Database:', d);
+      const res = await axiosBaseURL.get(`/Common/GetProfile/${auth.token}`);
+      const d = res.data.data;
 
-    setProfile(d);
-    setBio(d.Bio || '');
-    setHourly(d.Hourlyrate || '');
-    setSpecialities(d.Speciality || []);
-    setTimes(d.Availiblity || []);
-    setDob(d.Dob || '');
-    setWeight(d.weight || '');
-    setHeight(d.height || '');
-    setPref(d.fitnessPreference || '');
-    setGoal(d.goal || '');
-    setAddress(d.Address || '');
-    setCoords(d.location?.coordinates || null);
+      setProfile(d);
+      setBio(d.Bio || '');
+      setHourly(d.Hourlyrate || '');
+      setSpecialities(d.Speciality || []);
+      setTimes(d.Availiblity || []);
+      setDob(d.Dob || '');
+      setWeight(d.weight || '');
+      setHeight(d.height || '');
+      setPref(d.fitnessPreference || '');
+      setGoal(d.goal || '');
+      setAddress(d.Address || '');
+      setCoords(d.location?.coordinates || null);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useFocusEffect(
@@ -166,34 +196,88 @@ const EditProfile = () => {
 
   // ================= IMAGE =================
 
+  // const uploadImage = async image => {
+  //   const formData = new FormData();
+  //   formData.append('profileImage', {
+  //     uri: image.path,
+  //     type: image.mime,
+  //     name: 'profile.jpg',
+  //   });
+  //   formData.append('email', auth.email);
+
+  //   const res = await axiosBaseURL.post(
+  //     '/trainer/uploadProfileImage',
+  //     formData,
+  //     {
+  //       headers: {'Content-Type': 'multipart/form-data'},
+  //     },
+  //   );
+
+  //   dispatch(updateLogin({profileImage: res.data.url}));
+  //   fetchProfile();
+  // };
+
   const uploadImage = async image => {
-    const formData = new FormData();
-    formData.append('profileImage', {
-      uri: image.path,
-      type: image.mime,
-      name: 'profile.jpg',
-    });
-    formData.append('email', auth.email);
+    try {
+      const formData = new FormData();
 
-    const res = await axiosBaseURL.post(
-      '/trainer/uploadProfileImage',
-      formData,
-      {
-        headers: {'Content-Type': 'multipart/form-data'},
-      },
-    );
+      formData.append('profileImage', {
+        uri: image.path,
+        type: image.mime || 'image/jpeg',
+        name: `profile-${Date.now()}.jpg`,
+      });
 
-    dispatch(updateLogin({profileImage: res.data.url}));
-    fetchProfile();
+      console.log('token in upload image:', auth.token);
+
+      const res = await axiosBaseURL.post(
+        'trainer/uploadProfileImage',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${auth.token}`, // ⭐ IMPORTANT
+          },
+        },
+      );
+
+      console.log('responce in upload image:', res.data);
+
+      dispatch(updateLogin({profileImage: res.data.url}));
+
+      showMessage({
+        message: 'Profile picture updated',
+        type: 'success',
+      });
+
+      fetchProfile(); // refresh screen
+    } catch (error) {
+      console.log(error);
+      showMessage({
+        message: 'Image upload failed',
+        type: 'danger',
+      });
+    }
   };
 
   const deleteImage = async () => {
-    await axiosBaseURL.delete('/trainer/deleteProfileImage', {
-      headers: {Authorization: `Bearer ${auth.token}`},
-      data: {email: auth.email},
-    });
-    dispatch(updateLogin({profileImage: null}));
-    fetchProfile();
+    try {
+      await axiosBaseURL.delete('/trainer/deleteProfileImage', {
+        headers: {Authorization: `Bearer ${auth.token}`},
+      });
+
+      dispatch(updateLogin({profileImage: null}));
+      showMessage({
+        message: 'Profile picture removed',
+        type: 'success',
+      });
+
+      fetchProfile();
+    } catch (error) {
+      showMessage({
+        message: 'Failed to remove image',
+        type: 'danger',
+      });
+    }
   };
 
   const requestLocationPermission = async () => {
@@ -242,57 +326,6 @@ const EditProfile = () => {
       console.log(err);
     }
   };
-
-  // const getCurrentLocation = async () => {
-  //   try {
-  //     const {LocationModule} = NativeModules;
-
-  //     const res = await LocationModule.getCurrentLocation();
-
-  //     const latitude = res.lat;
-  //     const longitude = res.lng;
-
-  //     console.log('Native coords:', latitude, longitude);
-
-  //     setCoords([longitude, latitude]);
-
-  //     // ⭐ FIXED: add headers
-  //     const response = await fetch(
-  //       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
-  //       {
-  //         headers: {
-  //           'User-Agent': 'trainer-app',
-  //           Accept: 'application/json',
-  //         },
-  //       },
-  //     );
-
-  //     const data = await response.json();
-
-  //     console.log('Geo response:', data);
-
-  //     if (data?.display_name) {
-  //       setAddress(data.display_name);
-
-  //       showMessage({
-  //         message: 'Location fetched successfully',
-  //         type: 'success',
-  //       });
-  //     } else {
-  //       throw new Error('No address found');
-  //     }
-  //   } catch (err) {
-  //     console.log('Location error:', err);
-
-  //     showMessage({
-  //       message: 'Location failed',
-  //       description: 'Could not fetch address',
-  //       type: 'danger',
-  //     });
-  //   }
-  // };
-
-  // ================= SAVE =================
 
   const handleSave = async () => {
     await axiosBaseURL.post(
@@ -351,10 +384,24 @@ const EditProfile = () => {
       </TouchableOpacity>
     </Modal>
   );
-
+  console.log('Redux auth:', auth);
   // ================= UI =================
 
-  if (!profile) return null;
+  if (loading) {
+    return (
+      <WrapperContainer>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: '#000',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <ActivityIndicator size="large" color="#9FED3A" />
+        </View>
+      </WrapperContainer>
+    );
+  }
 
   return (
     <WrapperContainer>
@@ -363,9 +410,7 @@ const EditProfile = () => {
         <View style={styles.avatarWrap}>
           <Image
             source={
-              profile.profileImage
-                ? {uri: profile.profileImage}
-                : Images.profile
+              auth?.profileImage ? {uri: auth.profileImage} : Images.profile
             }
             style={styles.avatar}
           />
@@ -382,13 +427,62 @@ const EditProfile = () => {
         <Label title="Bio" />
         <TextInput style={styles.input} value={bio} onChangeText={setBio} />
 
-        {/* AGE */}
-        <Label title="Age" />
+        {/* ================= AGE ================= */}
+        <Text style={styles.label}>Date of birth (Age)</Text>
+
         <TouchableOpacity
           style={styles.input}
           onPress={() => setShowDatePicker(true)}>
-          <Text style={{color: '#fff'}}>{calculateAge(dob) + ' '}Year's</Text>
+          <Text style={{color: '#fff'}}>
+            {dob ? calculateAge(dob) + " Year's" : 'Select Date'}
+          </Text>
         </TouchableOpacity>
+
+        {/* ================= DATE PICKER ================= */}
+        {showDatePicker &&
+          (Platform.OS === 'android' ? (
+            <DateTimePicker
+              value={tempDate}
+              mode="date"
+              maximumDate={new Date()}
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false);
+
+                if (selectedDate) {
+                  const formatted = moment(selectedDate).format('DD/MM/YYYY');
+                  setDob(formatted);
+                }
+              }}
+            />
+          ) : (
+            <Modal transparent animationType="slide">
+              <View style={styles.overlay}>
+                <View style={styles.sheet}>
+                  <DateTimePicker
+                    value={tempDate}
+                    mode="date"
+                    display="spinner"
+                    maximumDate={new Date()}
+                    onChange={(event, selectedDate) => {
+                      if (selectedDate) {
+                        setTempDate(selectedDate);
+                      }
+                    }}
+                  />
+
+                  <TouchableOpacity
+                    style={styles.okBtn}
+                    onPress={() => {
+                      const formatted = moment(tempDate).format('DD/MM/YYYY');
+                      setDob(formatted);
+                      setShowDatePicker(false);
+                    }}>
+                    <Text style={{color: '#9FED3A'}}>OK</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+          ))}
 
         {/* WEIGHT */}
         <Label title="Weight (lbs)" />
@@ -446,17 +540,68 @@ const EditProfile = () => {
           }}
         />
 
-        {/* AVAILABILITY */}
-        <View style={styles.rowBetween}>
-          <Label title="Availability" />
-          <TouchableOpacity
-            style={{marginTop: 10}}
-            onPress={() => setTimePicker(true)}>
-            <Image source={Images.edit_icon} />
-          </TouchableOpacity>
-        </View>
+        {/* ================= AVAILABILITY ================= */}
+        <Text style={styles.label}>Availability</Text>
+
+        <TouchableOpacity
+          style={styles.input}
+          onPress={() => setTimePicker(true)}>
+          <Text style={{color: '#fff'}}>Add Time</Text>
+        </TouchableOpacity>
+
+        {/* ================= TIME PICKER ================= */}
+        {timePicker &&
+          (Platform.OS === 'android' ? (
+            <DateTimePicker
+              value={tempTime}
+              mode="time"
+              onChange={(event, selectedTime) => {
+                setTimePicker(false);
+
+                if (selectedTime) {
+                  const formatted = moment(selectedTime).format('hh:mm A');
+
+                  if (!times.includes(formatted)) {
+                    setTimes(prev => [...prev, formatted]);
+                  }
+                }
+              }}
+            />
+          ) : (
+            <Modal transparent animationType="slide">
+              <View style={styles.overlay}>
+                <View style={styles.sheet}>
+                  <DateTimePicker
+                    value={tempTime}
+                    mode="time"
+                    display="spinner"
+                    onChange={(event, selectedTime) => {
+                      if (selectedTime) {
+                        setTempTime(selectedTime);
+                      }
+                    }}
+                  />
+
+                  <TouchableOpacity
+                    style={styles.okBtn}
+                    onPress={() => {
+                      const formatted = moment(tempTime).format('hh:mm A');
+
+                      if (!times.includes(formatted)) {
+                        setTimes(prev => [...prev, formatted]);
+                      }
+
+                      setTimePicker(false);
+                    }}>
+                    <Text style={{color: '#9FED3A'}}>OK</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+          ))}
 
         <FlatList
+          showsHorizontalScrollIndicator={false}
           horizontal
           data={times}
           renderItem={({item}) => <Chip text={item} selected />}
@@ -483,78 +628,6 @@ const EditProfile = () => {
           <Text style={{color: '#000'}}>Save</Text>
         </TouchableOpacity>
       </ScrollView>
-
-      <Modal transparent visible={showDatePicker} animationType="slide">
-        <View style={styles.overlay}>
-          <View style={styles.pickerSheet}>
-            <DateTimePicker
-              value={tempDate}
-              mode="date"
-              display="spinner"
-              maximumDate={new Date()}
-              onChange={(e, d) => d && setTempDate(d)}
-            />
-
-            <TouchableOpacity
-              style={styles.okBtn}
-              onPress={() => {
-                const formatted = moment(tempDate).format('DD/MM/YYYY');
-                setDob(formatted);
-                setShowDatePicker(false);
-              }}>
-              <Text style={styles.okText}>OK</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* TIME MODAL — 100% iOS SAFE */}
-      <Modal
-        visible={timePicker}
-        transparent
-        animationType="slide"
-        statusBarTranslucent>
-        <View style={styles.overlay}>
-          {/* tap outside to close */}
-          <TouchableOpacity
-            style={{flex: 1}}
-            activeOpacity={1}
-            onPress={() => setTimePicker(false)}
-          />
-
-          {/* BOTTOM SHEET */}
-          <View style={styles.timeSheet}>
-            <DateTimePicker
-              value={tempTime}
-              mode="time"
-              display="spinner"
-              onChange={(e, d) => d && setTempTime(d)}
-            />
-
-            <View style={styles.timeBtnRow}>
-              <TouchableOpacity
-                style={[styles.timeBtn, {backgroundColor: '#444'}]}
-                onPress={() => setTimePicker(false)}>
-                <Text style={{color: '#fff'}}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.timeBtn}
-                onPress={() => {
-                  const t = moment(tempTime).format('hh:mm A');
-
-                  if (!times.includes(t)) {
-                    setTimes(prev => [...prev, t]);
-                  }
-
-                  setTimePicker(false);
-                }}>
-                <Text style={{color: '#000', fontWeight: '700'}}>OK</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
 
       <SelectModal
         visible={prefModal}
@@ -741,5 +814,25 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: 'center',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+
+  sheet: {
+    backgroundColor: '#9FED3A',
+    padding: 20,
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+  },
+
+  okBtn: {
+    backgroundColor: '#000',
+    padding: 15,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginTop: 15,
   },
 });

@@ -12,7 +12,6 @@ export const Posts = createApi({
 
     prepareHeaders: headers => {
       const token = store?.getState().Auth?.data?.token;
-      console.log('Token Dtaa', token);
       if (token) {
         headers.set('authorization', `Bearer ${token}`);
       }

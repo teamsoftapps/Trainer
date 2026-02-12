@@ -59,7 +59,6 @@ const TrainerHome = () => {
           `/Common/GetProfile/${trainer_data.token}`,
         );
         const userData = profileResponse.data.data;
-        console.log('profileResponce', userData);
         dispatch(SaveLogedInUser(userData));
       } catch (error) {
         console.error(

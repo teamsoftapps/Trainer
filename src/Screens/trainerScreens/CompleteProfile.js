@@ -70,6 +70,19 @@ const goalOptions = [
   'Weight Loss',
 ];
 
+const experienceOptions = [
+  '1 Year',
+  '2 Years',
+  '3 Years',
+  '4 Years',
+  '5 Years',
+  '6 Years',
+  '7 Years',
+  '8 Years',
+  '9 Years',
+  '10+ Years',
+];
+
 const CompleteProfile = ({route}) => {
   // Data States
   const [firstname, setfirstname] = useState('');
@@ -117,6 +130,9 @@ const CompleteProfile = ({route}) => {
 
   const [certificate, setCertificate] = useState(null);
   const [certificatePreview, setCertificatePreview] = useState('');
+
+  const [experience, setExperience] = useState('');
+  const [experienceModal, setExperienceModal] = useState(false);
 
   const [focused, setFocused] = useState(null);
   const [time, setTime] = useState(new Date());
@@ -211,6 +227,10 @@ const CompleteProfile = ({route}) => {
         condition: isGoogleUser ? !!dob : true,
         message: 'Please select your age.',
       },
+      {
+        condition: experience !== '',
+        message: 'Please select your experience.',
+      },
     ];
 
     for (const {condition, message} of validationChecks) {
@@ -234,7 +254,7 @@ const CompleteProfile = ({route}) => {
       formData.append('email', logedInTrainer?.email);
       formData.append('Bio', Bio);
       formData.append('Hourlyrate', Hourly);
-
+      formData.append('experience', experience);
       // arrays → stringify
       formData.append('Speciality', JSON.stringify(selectedSpecialities));
       formData.append('Availiblity', JSON.stringify(selectedTimes));
@@ -287,6 +307,7 @@ const CompleteProfile = ({route}) => {
           fitnessPreference,
           goal,
           bundles: bundles || [],
+          experience,
         }),
       );
 
@@ -588,24 +609,6 @@ const CompleteProfile = ({route}) => {
     }
   };
 
-  const calculateAge = dateString => {
-    const [day, month, year] = dateString.split('/');
-    const birth = new Date(year, month - 1, day);
-    const today = new Date();
-
-    let age = today.getFullYear() - birth.getFullYear();
-
-    if (
-      today.getMonth() < birth.getMonth() ||
-      (today.getMonth() === birth.getMonth() &&
-        today.getDate() < birth.getDate())
-    ) {
-      age--;
-    }
-
-    return age;
-  };
-
   const SelectionModal = ({visible, onClose, data, onSelect}) => (
     <Modal transparent animationType="slide" visible={visible}>
       <TouchableWithoutFeedback onPress={onClose}>
@@ -831,22 +834,50 @@ const CompleteProfile = ({route}) => {
                 <Image source={Images.dropdown} />
               </View>
             </TouchableOpacity>
+            {Platform.OS === 'ios' && (
+              <Modal
+                transparent
+                animationType="slide"
+                visible={dropdownVisible}
+                onRequestClose={() => setDropdownVisible(false)}>
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalBox}>
+                    <ScrollView>
+                      {Specialities.map(item => (
+                        <TouchableOpacity
+                          key={item.key}
+                          style={styles.modalItem}
+                          onPress={() => handleSpecialitySelect(item)}>
+                          <Text style={{color: '#000'}}>{item.value}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                </View>
+              </Modal>
+            )}
 
-            {dropdownVisible && (
-              <FlatList
-                initialNumToRender={6}
-                removeClippedSubviews
-                data={Specialities}
-                keyExtractor={item => item.key.toString()}
-                renderItem={({item}) => (
-                  <TouchableOpacity
-                    onPress={() => handleSpecialitySelect(item)}
-                    style={styles.dropdownItem}>
-                    <Text style={styles.dropdownText}>{item.value}</Text>
-                  </TouchableOpacity>
-                )}
-                style={styles.dropdownList}
-              />
+            {Platform.OS === 'android' && (
+              <Modal
+                transparent
+                animationType="fade"
+                visible={dropdownVisible}
+                onRequestClose={() => setDropdownVisible(false)}>
+                <View style={styles.centerOverlay}>
+                  <View style={styles.centerModalBox}>
+                    <ScrollView>
+                      {Specialities.map(item => (
+                        <TouchableOpacity
+                          key={item.key}
+                          style={styles.modalItem}
+                          onPress={() => handleSpecialitySelect(item)}>
+                          <Text style={{color: '#000'}}>{item.value}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                </View>
+              </Modal>
             )}
           </View>
           <View style={{marginTop: responsiveHeight(1.5)}}>
@@ -956,9 +987,10 @@ const CompleteProfile = ({route}) => {
               </View>
             </View>
           </TouchableOpacity>
-          {modalVisible && (
+          {/* ===== IOS BOTTOM SHEET ===== */}
+          {Platform.OS === 'ios' && modalVisible && (
             <Modal
-              visible={modalVisible}
+              visible
               transparent
               animationType="slide"
               onRequestClose={() => setModalVisible(false)}>
@@ -967,21 +999,17 @@ const CompleteProfile = ({route}) => {
                   <DateTimePicker
                     value={time}
                     mode="time"
-                    display="spinner" // ⭐ important for iOS
-                    onChange={(event, selectedTime) => {
-                      if (selectedTime) setTime(selectedTime);
-                    }}
+                    display="spinner"
+                    onChange={(e, t) => t && setTime(t)}
                   />
 
                   <TouchableOpacity
                     style={styles.okBtn}
                     onPress={() => {
                       const formatted = moment(time).format('hh:mm A');
-
                       setSelectedTimes(prev =>
                         prev.includes(formatted) ? prev : [...prev, formatted],
                       );
-
                       setModalVisible(false);
                     }}>
                     <Text style={styles.okText}>OK</Text>
@@ -990,6 +1018,25 @@ const CompleteProfile = ({route}) => {
               </View>
             </Modal>
           )}
+
+          {/* ===== ANDROID INLINE PICKER ===== */}
+          {Platform.OS === 'android' && modalVisible && (
+            <DateTimePicker
+              value={time}
+              mode="time"
+              display="default"
+              onChange={(event, selectedTime) => {
+                setModalVisible(false);
+                if (selectedTime) {
+                  const formatted = moment(selectedTime).format('hh:mm A');
+                  setSelectedTimes(prev =>
+                    prev.includes(formatted) ? prev : [...prev, formatted],
+                  );
+                }
+              }}
+            />
+          )}
+
           {showBasicFields && (
             <>
               {/* ===== WEIGHT + HEIGHT ROW ===== */}
@@ -1047,25 +1094,6 @@ const CompleteProfile = ({route}) => {
                 </View>
               </View>
 
-              {/* {showDatePicker && (
-                <DateTimePicker
-                  value={new Date()}
-                  mode="date"
-                  maximumDate={new Date()}
-                  display="default"
-                  onChange={(event, selectedDate) => {
-                    setShowDatePicker(false);
-
-                    if (selectedDate) {
-                      const d = selectedDate;
-                      const formatted = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
-
-                      setDob(formatted);
-                    }
-                  }}
-                />
-              )} */}
-
               {/* ===== FITNESS ===== */}
               <TouchableOpacity
                 style={styles.inputBox}
@@ -1094,6 +1122,94 @@ const CompleteProfile = ({route}) => {
 
             <Text style={{color: '#fff'}}>{dob || 'Select Date of Birth'}</Text>
           </TouchableOpacity>
+
+          {/* ===== EXPERIENCE FIELD ===== */}
+          <TouchableOpacity
+            style={styles.inputBox}
+            onPress={() => setExperienceModal(true)}>
+            <Text style={{color: '#908C8D'}}>Experience</Text>
+            <Text style={{color: '#fff'}}>
+              {experience || 'Select Experience'}
+            </Text>
+          </TouchableOpacity>
+
+          {Platform.OS === 'ios' && (
+            <Modal
+              transparent
+              animationType="slide"
+              visible={experienceModal}
+              onRequestClose={() => setExperienceModal(false)}>
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalBox}>
+                  <ScrollView>
+                    {experienceOptions.map((item, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.modalItem}
+                        onPress={() => {
+                          setExperience(item);
+                          setExperienceModal(false);
+                        }}>
+                        <Text style={{color: '#000'}}>{item}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              </View>
+            </Modal>
+          )}
+
+          {/* {Platform.OS === 'ios' && (
+            <Modal
+              transparent
+              animationType="slide"
+              visible={experienceModal}
+              onRequestClose={() => setExperienceModal(false)}>
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalBox}>
+                  <ScrollView>
+                    {experienceOptions.map((item, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.modalItem}
+                        onPress={() => {
+                          setExperience(item);
+                          setExperienceModal(false);
+                        }}>
+                        <Text style={{color: '#000'}}>{item}dsd</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              </View>
+            </Modal>
+          )} */}
+          {Platform.OS === 'android' && (
+            <Modal
+              transparent
+              animationType="fade"
+              visible={experienceModal}
+              onRequestClose={() => setExperienceModal(false)}>
+              <View style={styles.centerOverlay}>
+                <View style={styles.centerModalBox}>
+                  <ScrollView showsVerticalScrollIndicator={false}>
+                    {experienceOptions.map((item, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.modalItem}
+                        onPress={() => {
+                          setExperience(item);
+                          setExperienceModal(false);
+                        }}>
+                        <Text style={{color: '#000'}}>{item}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              </View>
+            </Modal>
+          )}
+
           <TouchableOpacity
             style={styles.createBundleBtn}
             onPress={() => setBundleModal(true)}>
@@ -1216,70 +1332,62 @@ const CompleteProfile = ({route}) => {
           onSelect={setGoal}
         />
 
-        {/* GLOBAL AGE PICKER MODAL */}
-        <Modal
-          transparent
-          animationType="slide"
-          visible={showDatePicker}
-          onRequestClose={() => setShowDatePicker(false)}>
-          <View style={styles.overlay}>
-            <View style={styles.ageSheet}>
-              <DateTimePicker
-                value={dob ? moment(dob, 'DD/MM/YYYY').toDate() : new Date()}
-                mode="date"
-                display="spinner"
-                maximumDate={new Date()}
-                onChange={(event, selectedDate) => {
-                  if (selectedDate) {
-                    setTime(selectedDate); // temp store
-                  }
-                }}
-              />
-
-              <TouchableOpacity
-                style={styles.okBtn}
-                onPress={() => {
-                  const formatted = moment(time).format('DD/MM/YYYY');
-                  setDob(formatted);
-                  setShowDatePicker(false);
-                }}>
-                <Text
-                  style={[
-                    styles.okText,
-                    {width: responsiveWidth(80), textAlign: 'center'},
-                  ]}>
-                  OK
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-        {/* <Modal
-          transparent
-          animationType="fade"
-          visible={showDatePicker}
-          onRequestClose={() => setShowDatePicker(false)}>
-          <TouchableWithoutFeedback onPress={() => setShowDatePicker(false)}>
+        {Platform.OS === 'ios' && (
+          <Modal
+            transparent
+            animationType="slide"
+            visible={showDatePicker}
+            onRequestClose={() => setShowDatePicker(false)}>
             <View style={styles.overlay}>
-              <View style={{backgroundColor: '#9FED3A', borderRadius: 12}}>
+              <View style={styles.ageSheet}>
                 <DateTimePicker
                   value={dob ? moment(dob, 'DD/MM/YYYY').toDate() : new Date()}
                   mode="date"
-                  maximumDate={new Date()}
                   display="spinner"
+                  maximumDate={new Date()}
                   onChange={(event, selectedDate) => {
-                    if (event.type === 'set' && selectedDate) {
-                      const formatted =
-                        moment(selectedDate).format('DD/MM/YYYY');
-                      setDob(formatted);
+                    if (selectedDate) {
+                      setTime(selectedDate);
                     }
-                    setShowDatePicker(false);
                   }}
                 />
+
+                <TouchableOpacity
+                  style={styles.okBtn}
+                  onPress={() => {
+                    const formatted = moment(time).format('DD/MM/YYYY');
+                    setDob(formatted);
+                    setShowDatePicker(false);
+                  }}>
+                  <Text
+                    style={[
+                      styles.okText,
+                      {width: responsiveWidth(80), textAlign: 'center'},
+                    ]}>
+                    OK
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
-          </TouchableWithoutFeedback>
-        </Modal> */}
+          </Modal>
+        )}
+
+        {Platform.OS === 'android' && showDatePicker && (
+          <DateTimePicker
+            value={dob ? moment(dob, 'DD/MM/YYYY').toDate() : new Date()}
+            mode="date"
+            display="default"
+            maximumDate={new Date()}
+            onChange={(event, selectedDate) => {
+              setShowDatePicker(false);
+
+              if (event.type === 'set' && selectedDate) {
+                const formatted = moment(selectedDate).format('DD/MM/YYYY');
+                setDob(formatted);
+              }
+            }}
+          />
+        )}
       </ScrollView>
     </WrapperContainer>
   );
@@ -1540,7 +1648,7 @@ const styles = StyleSheet.create({
   },
 
   modalBox: {
-    backgroundColor: '#111',
+    backgroundColor: '#9FED3A',
     maxHeight: '60%',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
@@ -1639,5 +1747,19 @@ const styles = StyleSheet.create({
     fontSize: responsiveFontSize(2),
     fontWeight: '700',
     letterSpacing: 0.6,
+  },
+  centerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  centerModalBox: {
+    backgroundColor: '#9FED3A',
+    width: '85%',
+    maxHeight: '60%',
+    borderRadius: 20,
+    padding: 20,
   },
 });
