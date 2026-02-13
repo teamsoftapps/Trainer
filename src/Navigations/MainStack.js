@@ -26,6 +26,7 @@ import Filter from '../Screens/userScreens/Filter';
 import ChangePassword from '../Screens/userScreens/ChangePassword';
 import TrainerMediaScreen from '../Screens/userScreens/TrainerMediaScreen';
 import AddReviewScreen from '../Screens/userScreens/AddReviewScreen';
+import AllReviewsScreen from '../Screens/userScreens/AllReviewsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -55,6 +56,7 @@ const MainStack = () => {
       <Stack.Screen name="ChangePassword" component={ChangePassword} />
       <Stack.Screen name="TrainerMediaScreen" component={TrainerMediaScreen} />
       <Stack.Screen name="AddReviewScreen" component={AddReviewScreen} />
+      <Stack.Screen name="AllReviewsScreen" component={AllReviewsScreen} />
     </Stack.Navigator>
   );
 };

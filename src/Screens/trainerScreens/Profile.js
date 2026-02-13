@@ -39,27 +39,6 @@ const Profile = () => {
 
   const safe = v => (v ? v : '-');
 
-  /* ================= FETCH ================= */
-  // const fetchData = async () => {
-  //   const res = await axiosBaseURL.get(
-  //     `/Common/GetProfile/${trainer_data.token}`,
-  //   );
-  //   const uploadsRes = await axiosBaseURL.get('/trainer/getUploads');
-  //   const storyRes = await axiosBaseURL.get(
-  //     `/trainer/stories/${trainer_data._id}`,
-  //   );
-
-  //   const formattedStories = (storyRes.data.data || []).map(s => ({
-  //     id: s._id,
-  //     url: s.type === 'video' ? s.thumbnail || s.mediaUrl : s.mediaUrl,
-  //     videoUrl: s.type === 'video' ? s.mediaUrl : null,
-  //     type: s.type,
-  //   }));
-  //   setProfile(res.data?.data);
-  //   setUploads(uploadsRes?.data?.data);
-  //   setStories(formattedStories);
-  // };
-
   const fetchData = async () => {
     try {
       setLoading(true);

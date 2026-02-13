@@ -212,12 +212,20 @@ const Signup = ({route, navigation}) => {
       height: height,
       fitnessPreference,
       goal,
+      phone: {
+        countryCode: countryCode,
+        number: phone,
+      },
     };
 
     const validationChecks = [
       {
         condition: name.length > 3,
         message: 'Name must be greater than 3 letters.',
+      },
+      {
+        condition: phone.trim().length > 5,
+        message: 'Enter valid phone number.',
       },
       {
         condition:
@@ -278,6 +286,7 @@ const Signup = ({route, navigation}) => {
   };
 
   const handleGoogleSignup = async () => {
+    console.log('clicked');
     try {
       await GoogleSignin.hasPlayServices();
 

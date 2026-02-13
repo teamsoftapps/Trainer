@@ -1,14 +1,14 @@
 import {
-  Alert,
   FlatList,
   Image,
   ImageBackground,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  Modal,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
@@ -20,7 +20,6 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import Button from '../../Components/Button';
 import {useDispatch, useSelector} from 'react-redux';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import {followTrainer, unfollowTrainer} from '../../store/Slices/follow';
@@ -31,23 +30,32 @@ import {
 import {SaveLogedInUser} from '../../store/Slices/db_ID';
 import followingHook from '../../Hooks/Follow';
 import MapView, {Marker} from 'react-native-maps';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {showMessage} from 'react-native-flash-message';
+import Video from 'react-native-video';
 const TrainerProfile = ({route}) => {
-  const {data, booking} = route.params;
+  const {data} = route.params;
+
+  console.log('Data from route in trainer Profile:', data);
 
   const [bookingTime, setbookingTime] = useState([]);
-  const [readmore, setreadmore] = useState(true);
   const [heart, setheart] = useState(false);
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [showReadMore, setShowReadMore] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const [reviews, setReviews] = useState([]);
-  const [loadingReviews, setLoadingReviews] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [activeMenu, setActiveMenu] = useState(null);
+  const [menuPosition, setMenuPosition] = useState({x: 0, y: 0});
   const navigation = useNavigation();
   const {isFollow, unFollow, loading: loadingFollow} = followingHook();
   const authData = useSelector(state => state?.Auth.data);
   const token = useSelector(state => state?.Auth?.data?.token);
   const checkFollowed = useSelector(state => state?.follow);
+
+  const [followersCount, setFollowersCount] = useState(
+    data?.followers?.length || 0,
+  );
 
   const dispatch = useDispatch();
   const [filtered, setfiltered] = useState();
@@ -74,13 +82,23 @@ const TrainerProfile = ({route}) => {
   };
   const age = calculateAge(data.Dob);
 
+  const fetchReviews = async () => {
+    try {
+      const res = await axiosBaseURL.get(`/user/trainer/${data._id}`);
+      console.log('responce in trainer prfile for the reviews:', res.data.data);
+      if (res.data.status) {
+        setReviews(res.data.data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const fetchTrainerPosts = async () => {
     try {
       setLoadingPosts(true);
 
       const res = await axiosBaseURL.get(`/trainer/posts/${data._id}`);
-
-      console.log('responce>>>>>>>>>>>>', res.data);
 
       if (res.data.success) {
         setPosts(res.data.data);
@@ -119,9 +137,8 @@ const TrainerProfile = ({route}) => {
           `/user/Getfavoritetrainers/${authData?._id}`,
         );
 
-        // Correct filtering logic
         const filtered = res?.data?.data?.filter(
-          item => item.trainerID === data?._id, // Ensure you're comparing correctly
+          item => item.trainerID === data?._id,
         );
 
         setfiltered(filtered);
@@ -135,13 +152,13 @@ const TrainerProfile = ({route}) => {
     useCallback(() => {
       fetchFavoriteTrainers();
       fetchTrainerPosts();
+      fetchReviews();
     }, [heart]),
   );
 
   const AddFavouriteTrainer = async () => {
     if (authData.isType === 'user') {
       try {
-        // Ensure 'filtered' is an array before using it
         var isFavorite =
           filtered && filtered.some(item => item.trainerID === data?._id);
 
@@ -174,27 +191,32 @@ const TrainerProfile = ({route}) => {
   };
 
   const handleFollow = async () => {
-    console.log('Follow Hitted');
     const userID = authData?._id;
     const trainerID = data._id;
 
     const res = await isFollow(userID, trainerID);
 
     if (res) {
-      // await refetch();
       dispatch(followTrainer(trainerID));
-      console.log('Success', res);
+
+      setFollowersCount(prev => prev + 1);
+
+      console.log('Follow success');
     }
   };
+
   const handleUnFollow = async () => {
     const userID = authData?._id;
     const trainerID = data._id;
 
     const res = await unFollow(userID, trainerID);
+
     if (res) {
-      // await refetch();
       dispatch(unfollowTrainer(trainerID));
-      console.log('unfollow', res);
+
+      setFollowersCount(prev => (prev > 0 ? prev - 1 : 0));
+
+      console.log('Unfollow success');
     }
   };
   const renderItem = ({item, index}) => {
@@ -239,320 +261,6 @@ const TrainerProfile = ({route}) => {
 
   const isFavorite =
     filtered && filtered.some(item => item.trainerID === data?._id);
-  // return (
-  //   <WrapperContainer style={{backgroundColor: 'black'}}>
-  //     <ScrollView>
-  //       <ImageBackground
-  //         resizeMode="cover"
-  //         source={Images.ProfileBG}
-  //         style={{width: responsiveWidth(100)}}>
-  //         <StatusBar hidden />
-  //         <View style={{flex: 1}}>
-  //           <LinearGradient
-  //             colors={['transparent', '#000', '#000']}
-  //             start={{x: 0, y: 0}}
-  //             end={{x: 0, y: 1.4}}
-  //             style={{
-  //               flex: 1,
-  //             }}>
-  //             <View
-  //               style={{
-  //                 flexDirection: 'row',
-  //                 justifyContent: 'space-between',
-  //                 paddingHorizontal: responsiveHeight(3),
-  //                 marginTop: responsiveHeight(5),
-  //               }}>
-  //               <TouchableOpacity
-  //                 onPress={() => {
-  //                   navigation.goBack();
-  //                 }}>
-  //                 <Image source={Images.back} tintColor={'white'} />
-  //               </TouchableOpacity>
-  //               <TouchableOpacity
-  //                 onPress={() => {
-  //                   AddFavouriteTrainer();
-  //                   // setheart(!heart);
-  //                 }}>
-  //                 <Image
-  //                   source={isFavorite ? Images.heart_filled : Images.fav_heart}
-  //                   resizeMode="contain"
-  //                   style={{
-  //                     width: responsiveWidth(6),
-  //                     height: responsiveWidth(6),
-  //                   }}
-  //                 />
-  //               </TouchableOpacity>
-  //             </View>
-  //             <View
-  //               style={{
-  //                 justifyContent: 'center',
-  //                 alignItems: 'center',
-  //                 gap: responsiveHeight(1),
-  //               }}>
-  //               <Image
-  //                 src={data?.profileImage}
-  //                 style={{
-  //                   width: responsiveWidth(28),
-  //                   borderRadius: 70,
-  //                   height: responsiveWidth(28),
-  //                   borderWidth: 1.4,
-  //                   borderColor: 'white',
-  //                 }}
-  //                 resizeMode="contain"
-  //               />
-  //               <Text
-  //                 style={{fontSize: responsiveFontSize(3.5), color: 'white'}}>
-  //                 {data?.fullName}
-  //               </Text>
-
-  //               <Text
-  //                 style={{
-  //                   fontSize: responsiveFontSize(1.8),
-  //                   color: 'white',
-  //                   marginTop: responsiveHeight(-1.2),
-  //                 }}>
-  //                 Certified Personal trainer
-  //               </Text>
-  //               <View
-  //                 style={{
-  //                   flexDirection: 'row',
-  //                   gap: responsiveWidth(4),
-  //                   marginTop: responsiveHeight(1.5),
-  //                 }}>
-  //                 <Text
-  //                   style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
-  //                   {data?.Speciality?.[0]?.value}
-  //                 </Text>
-  //                 <Text
-  //                   style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
-  //                   •
-  //                 </Text>
-  //                 <Text
-  //                   style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
-  //                   7 Year Experience
-  //                 </Text>
-  //               </View>
-  //             </View>
-  //             <View
-  //               style={{
-  //                 flexDirection: 'row',
-  //                 justifyContent: 'space-evenly',
-  //                 marginTop: responsiveHeight(2),
-  //               }}>
-  //               <View
-  //                 style={{
-  //                   justifyContent: 'center',
-  //                   alignItems: 'center',
-  //                 }}>
-  //                 <View
-  //                   style={{
-  //                     ...styles.curve,
-  //                     borderRadius: responsiveWidth(10),
-  //                     backgroundColor: '#9FED3A',
-  //                     marginBottom: responsiveHeight(1),
-  //                   }}>
-  //                   <Text style={styles.blacktext}>Available</Text>
-  //                 </View>
-  //                 <Text
-  //                   style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
-  //                   {data?.Rating ? data?.Rating : '--'}
-  //                 </Text>
-  //                 <Text
-  //                   style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
-  //                   Rating
-  //                 </Text>
-  //               </View>
-  //               <View
-  //                 style={{
-  //                   justifyContent: 'center',
-  //                   alignItems: 'center',
-  //                 }}>
-  //                 <TouchableOpacity
-  //                   accessibilityRole="button"
-  //                   activeOpacity={0.8}
-  //                   onPress={() => {
-  //                     !checkFollowed.follow.includes(data._id)
-  //                       ? handleFollow()
-  //                       : handleUnFollow();
-  //                   }}
-  //                   style={{
-  //                     ...styles.curve,
-  //                     borderRadius: responsiveWidth(10),
-  //                     backgroundColor: checkFollowed?.follow.includes(data?._id)
-  //                       ? '#d7d7d7'
-  //                       : '#9FED3A',
-  //                     marginBottom: responsiveHeight(1),
-  //                   }}>
-  //                   <Text style={styles.blacktext}>
-  //                     {loadingFollow
-  //                       ? 'Waiting...'
-  //                       : checkFollowed?.follow.includes(data?._id)
-  //                         ? 'Following'
-  //                         : 'Follow +'}
-  //                   </Text>
-  //                 </TouchableOpacity>
-  //                 <Text
-  //                   style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
-  //                   {data?.followers?.length > 0
-  //                     ? checkFollowed?.follow.length
-  //                     : 0}
-  //                 </Text>
-  //                 <Text
-  //                   style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
-  //                   Followers
-  //                 </Text>
-  //               </View>
-  //               <View
-  //                 style={{
-  //                   justifyContent: 'center',
-  //                   alignItems: 'center',
-  //                 }}>
-  //                 <TouchableOpacity
-  //                   onPress={() => {
-  //                     navigation.navigate('Messages');
-  //                   }}
-  //                   activeOpacity={0.8}
-  //                   style={{
-  //                     ...styles.curve,
-  //                     borderRadius: responsiveWidth(10),
-  //                     backgroundColor: '#9FED3A',
-  //                     marginBottom: responsiveHeight(1),
-  //                   }}>
-  //                   <Text style={styles.blacktext}>Message</Text>
-  //                 </TouchableOpacity>
-  //                 <Text
-  //                   style={{fontSize: responsiveFontSize(1.8), color: 'white'}}>
-  //                   {data?.Dob ? age : '--'}
-  //                 </Text>
-
-  //                 <Text
-  //                   style={{
-  //                     fontSize: responsiveFontSize(1.8),
-  //                     color: 'white',
-  //                   }}>
-  //                   Years old
-  //                 </Text>
-  //               </View>
-  //             </View>
-  //             <View style={styles.BoxContainer}>
-  //               <View style={styles.box}>
-  //                 <Text
-  //                   style={{color: '#9FED3A', fontSize: responsiveFontSize(2)}}>
-  //                   Hourly Rate
-  //                 </Text>
-
-  //                 <Text
-  //                   style={{
-  //                     color: 'white',
-  //                     fontSize: responsiveFontSize(2.2),
-  //                   }}>
-  //                   {data.rate}{' '}
-  //                   <Text
-  //                     style={{
-  //                       color: 'grey',
-  //                       fontSize: responsiveFontSize(1.8),
-  //                     }}>
-  //                     ${data?.Hourlyrate}
-  //                   </Text>
-  //                 </Text>
-  //               </View>
-  //               <View style={styles.box}>
-  //                 <Text
-  //                   style={{color: '#9FED3A', fontSize: responsiveFontSize(2)}}>
-  //                   Hired
-  //                 </Text>
-  //                 <Text
-  //                   style={{
-  //                     color: 'white',
-  //                     fontSize: responsiveFontSize(2.2),
-  //                     verticalAlign: 'middle',
-  //                   }}>
-  //                   362{' '}
-  //                   <Text
-  //                     style={{
-  //                       color: 'grey',
-  //                       fontSize: responsiveFontSize(1.8),
-  //                     }}>
-  //                     times
-  //                   </Text>
-  //                 </Text>
-
-  //                 {/* </View> */}
-  //               </View>
-  //             </View>
-  //           </LinearGradient>
-  //         </View>
-  //       </ImageBackground>
-  //       <View style={styles.SpecialitiesContainer}>
-  //         <Text style={styles.heading}>Specialities</Text>
-  //         <Text style={{color: 'gray', marginBottom: responsiveHeight(1)}}>
-  //           Verified by Business
-  //         </Text>
-  //         {data?.Speciality?.map((item, index) => {
-  //           return (
-  //             <View key={index}>
-  //               <Text style={styles.whiteText}>• {item?.value}</Text>
-  //             </View>
-  //           );
-  //         })}
-  //       </View>
-  //       <View style={styles.BioContainer}>
-  //         <Text style={styles.heading}>Description</Text>
-
-  //         <Text numberOfLines={readmore ? 4 : 13} style={styles.whiteText}>
-  //           {data?.Bio}
-  //         </Text>
-  //         <Text
-  //           onPress={() => {
-  //             setreadmore(!readmore);
-  //           }}
-  //           style={{color: '#9FED3A'}}>
-  //           {readmore ? 'Read more' : 'See less'}
-  //         </Text>
-  //       </View>
-  //       <View style={{marginTop: responsiveHeight(1.5)}}>
-  //         <Text
-  //           style={{
-  //             paddingHorizontal: responsiveWidth(7),
-  //             color: 'white',
-  //             fontSize: responsiveFontSize(2.2),
-  //             fontFamily: FontFamily.Bold,
-  //             marginBottom: responsiveHeight(1.5),
-  //           }}>
-  //           Schedule
-  //         </Text>
-  //         <FlatList
-  //           style={{marginHorizontal: responsiveWidth(6)}}
-  //           data={data?.Availiblity}
-  //           renderItem={renderItem}
-  //           keyExtractor={item => item}
-  //           horizontal
-  //           showsHorizontalScrollIndicator={false}
-  //           contentContainerStyle={{alignItems: 'center'}}
-  //         />
-  //       </View>
-  //       <View style={styles.addressContainer}>
-  //         <Text style={styles.heading}>Location</Text>
-
-  //         <Text numberOfLines={readmore ? 4 : 13} style={styles.whiteText}>
-  //           {data?.Address || 'Address Not Added '}
-  //         </Text>
-  //       </View>
-  //       <View
-  //         style={{
-  //           marginBottom: responsiveHeight(5),
-  //           alignItems: 'center',
-  //         }}>
-  //         <Button
-  //           text="Book Now"
-  //           onPress={() => navigation.navigate('Schedule', {Data: data})}
-  //           containerstyles={{}}
-  //         />
-  //       </View>
-  //     </ScrollView>
-  //   </WrapperContainer>
-  // );
-
   const videoPosts = posts.filter(p => p.type === 'video');
   const imagePosts = posts.filter(p => p.type === 'image');
 
@@ -563,6 +271,37 @@ const TrainerProfile = ({route}) => {
   } else {
     previewPosts = imagePosts.slice(0, 3);
   }
+
+  const handleDeleteReview = async reviewId => {
+    console.log('review ID:', reviewId);
+    try {
+      const res = await axiosBaseURL.delete(`/user/delete/${reviewId}`, {
+        headers: {
+          Authorization: `Bearer ${authData.token}`,
+        },
+      });
+
+      console.log('R......', res);
+
+      setActiveMenu(null);
+
+      // refresh reviews after delete
+      fetchReviews();
+
+      showMessage({
+        message: 'Review deleted successfully',
+        type: 'success',
+      });
+    } catch (error) {
+      showMessage({
+        message: error.message,
+        type: 'danger',
+      });
+    }
+  };
+
+  const currentUserId = authData?._id;
+  const latestReviews = reviews.slice(0, 3);
   return (
     <WrapperContainer style={{backgroundColor: 'black'}}>
       <ScrollView
@@ -573,7 +312,7 @@ const TrainerProfile = ({route}) => {
         {/* ================= HEADER SECTION ================= */}
         <ImageBackground
           source={Images.ProfileBG}
-          style={{width: responsiveWidth(100), height: responsiveHeight(55)}}
+          style={{width: responsiveWidth(100)}}
           resizeMode="cover">
           <LinearGradient
             colors={['transparent', '#000', '#000']}
@@ -592,7 +331,7 @@ const TrainerProfile = ({route}) => {
               <TouchableOpacity onPress={AddFavouriteTrainer}>
                 <Image
                   source={isFavorite ? Images.heart_filled : Images.fav_heart}
-                  style={{width: 24, height: 24}}
+                  style={{width: 28, height: 24}}
                 />
               </TouchableOpacity>
             </View>
@@ -620,7 +359,7 @@ const TrainerProfile = ({route}) => {
                   marginTop: 10,
                 }}>
                 <Text style={{color: '#000', fontWeight: '600'}}>
-                  Available
+                  {data?.isAvailable ? 'Available' : 'Not-Available'}
                 </Text>
               </View>
 
@@ -672,7 +411,8 @@ const TrainerProfile = ({route}) => {
 
               <View style={{alignItems: 'center'}}>
                 <Text style={{color: '#fff', fontSize: 18}}>
-                  {data?.followers?.length || 0}
+                  {/* {data?.followers?.length || 0} */}
+                  {followersCount}
                 </Text>
                 <Text style={{color: '#aaa'}}>Followers</Text>
               </View>
@@ -724,33 +464,36 @@ const TrainerProfile = ({route}) => {
               </TouchableOpacity>
             </View>
             {/* Hourly Rate Box (Hired Removed) */}
-            {/* <View
+            <View
               style={{
                 alignItems: 'center',
-                marginTop: 30,
-                height: responsiveHeight(20),
-                width: '100',
+                marginTop: 25,
               }}>
               <View
                 style={{
                   borderWidth: 1,
                   borderColor: '#444',
                   padding: 18,
-                  borderRadius: 12,
-                  width: responsiveWidth(85),
+                  borderRadius: 16,
+                  width: responsiveWidth(88),
+                  backgroundColor: '#0f0f0f',
                 }}>
-                <Text style={{color: '#9FED3A'}}>Hourly Rate</Text>
+                <Text style={{color: '#9FED3A', fontSize: 14}}>
+                  Hourly Rate
+                </Text>
+
                 <Text
                   style={{
                     color: '#fff',
-                    fontSize: 18,
-                    marginTop: 4,
+                    fontSize: 20,
+                    marginTop: 6,
+                    fontWeight: '600',
                   }}>
                   ${data?.Hourlyrate}{' '}
-                  <Text style={{color: '#aaa'}}> / per hour</Text>
+                  <Text style={{color: '#aaa', fontSize: 14}}>/ per hour</Text>
                 </Text>
               </View>
-            </View> */}
+            </View>
           </LinearGradient>
         </ImageBackground>
 
@@ -929,56 +672,171 @@ const TrainerProfile = ({route}) => {
             }}>
             <Text style={styles.heading}>Reviews</Text>
 
-            <TouchableOpacity>
-              <Text style={{color: '#9FED3A'}}>See all ›</Text>
-            </TouchableOpacity>
+            {reviews.length > 3 && (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('AllReviewsScreen', {
+                    reviews: reviews,
+                    trainerData: data,
+                  })
+                }>
+                <Text style={{color: '#9FED3A'}}>See all ›</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
-          {/* Dummy Review Card */}
-          <View
-            style={{
-              backgroundColor: '#111',
-              borderRadius: 18,
-              padding: 15,
-              marginTop: 15,
-            }}>
-            {/* User Info */}
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Image
-                source={{
-                  uri: 'https://i.pravatar.cc/150?img=12',
-                }}
-                style={{
-                  width: 45,
-                  height: 45,
-                  borderRadius: 22,
-                  marginRight: 10,
-                }}
-              />
+          {latestReviews.map(item => (
+            <View key={item._id} style={styles.reviewCard}>
+              {/* Top Row */}
+              <View style={styles.reviewTopRow}>
+                <Image
+                  source={{
+                    uri:
+                      item.userId?.profileImage ||
+                      'https://i.pravatar.cc/150?img=12',
+                  }}
+                  style={styles.reviewAvatar}
+                />
 
-              <View style={{flex: 1}}>
-                <Text style={{color: '#fff', fontWeight: '600'}}>
-                  Loynie Brown
-                </Text>
+                <View style={{flex: 1}}>
+                  <Text style={styles.reviewName}>
+                    {item.userId?.fullName || 'User'}
+                  </Text>
 
-                <Text style={{color: '#888', fontSize: 12}}>1 month ago</Text>
+                  <Text style={styles.reviewTime}>
+                    {new Date(item.createdAt).toLocaleDateString()}
+                  </Text>
+                </View>
+
+                {/* ⭐ Stars */}
+                <View style={{flexDirection: 'row', marginRight: 8}}>
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <Text
+                      key={star}
+                      style={{
+                        color: star <= item.rating ? '#FFD700' : '#333',
+                        fontSize: 16,
+                        marginLeft: 2,
+                      }}>
+                      ★
+                    </Text>
+                  ))}
+                </View>
+
+                {item.userId?._id === currentUserId && (
+                  <>
+                    <TouchableOpacity
+                      onPress={event => {
+                        const {pageX, pageY} = event.nativeEvent;
+                        setMenuPosition({x: pageX, y: pageY});
+                        setActiveMenu(item._id);
+                      }}
+                      style={{paddingLeft: 6}}>
+                      <Ionicons
+                        name="ellipsis-vertical"
+                        size={18}
+                        color="#9FED3A"
+                      />
+                    </TouchableOpacity>
+
+                    {activeMenu === item._id && (
+                      <Modal transparent animationType="fade">
+                        <TouchableWithoutFeedback
+                          onPress={() => setActiveMenu(null)}>
+                          <View style={styles.overlay}>
+                            <TouchableWithoutFeedback>
+                              <View
+                                style={[
+                                  styles.dropdownMenu,
+                                  {
+                                    position: 'absolute',
+                                    top: menuPosition.y + 10,
+                                    left: menuPosition.x - 140,
+                                  },
+                                ]}>
+                                <TouchableOpacity
+                                  style={styles.menuItem}
+                                  onPress={() => {
+                                    setActiveMenu(null);
+                                    navigation.navigate('AddReviewScreen', {
+                                      trainerId: data._id,
+                                      editMode: true,
+                                      reviewData: item,
+                                    });
+                                  }}>
+                                  <Ionicons
+                                    name="create-outline"
+                                    size={16}
+                                    color="#fff"
+                                    style={{marginRight: 8}}
+                                  />
+                                  <Text style={styles.dropdownText}>
+                                    Update
+                                  </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                  style={styles.menuItem}
+                                  onPress={() => handleDeleteReview(item._id)}>
+                                  <Ionicons
+                                    name="trash-outline"
+                                    size={16}
+                                    color="red"
+                                    style={{marginRight: 8}}
+                                  />
+                                  <Text
+                                    style={[
+                                      styles.dropdownText,
+                                      {color: 'red'},
+                                    ]}>
+                                    Delete
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+                            </TouchableWithoutFeedback>
+                          </View>
+                        </TouchableWithoutFeedback>
+                      </Modal>
+                    )}
+                  </>
+                )}
               </View>
 
-              {/* Stars */}
-              <Text style={{color: '#FFD700', fontSize: 14}}>⭐⭐⭐⭐⭐</Text>
-            </View>
+              {/* Review Text */}
+              <Text style={styles.reviewText}>{item.reviewText}</Text>
 
-            {/* Review Text */}
-            <Text style={{color: '#ccc', marginTop: 12, lineHeight: 20}}>
-              Great trainer! A lot of knowledge and very professional. Highly
-              recommended.
-            </Text>
-          </View>
+              {/* 🔥 Media (if exists) */}
+              {item.mediaUrl && (
+                <View style={{marginTop: 10}}>
+                  {item.mediaType === 'video' ? (
+                    <Video
+                      source={{uri: item.mediaUrl}}
+                      style={{height: 180, borderRadius: 12}}
+                      controls
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <Image
+                      source={{uri: item.mediaUrl}}
+                      style={{
+                        width: '100%',
+                        height: 180,
+                        borderRadius: 12,
+                      }}
+                      resizeMode="cover"
+                    />
+                  )}
+                </View>
+              )}
+            </View>
+          ))}
 
           {/* Add Review Button */}
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate('AddReviewScreen');
+              navigation.navigate('AddReviewScreen', {
+                trainerId: data._id,
+              });
             }}
             style={{marginTop: 15, alignSelf: 'center'}}>
             <Text
@@ -1031,6 +889,93 @@ const styles = StyleSheet.create({
 
     // Android shadow
     elevation: 10,
+  },
+
+  reviewCard: {
+    backgroundColor: '#111',
+    borderRadius: 20,
+    padding: 16,
+    marginTop: 15,
+  },
+
+  reviewTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  reviewAvatar: {
+    width: 45,
+    height: 45,
+    borderRadius: 22,
+    marginRight: 12,
+  },
+
+  dropdownMenu: {
+    position: 'absolute',
+    top: 25,
+    right: 0,
+    backgroundColor: '#9FED3A',
+    borderRadius: 10,
+    paddingVertical: 6,
+    width: 120,
+    elevation: 8,
+    zIndex: 999,
+  },
+
+  dropdownText: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    color: '#000',
+    fontSize: 14,
+  },
+
+  overlay: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+
+  dropdownMenu: {
+    width: 150,
+    backgroundColor: '#1c1c1c',
+    borderRadius: 14,
+    paddingVertical: 6,
+
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 5},
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 10,
+  },
+
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+
+  dropdownText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+
+  reviewName: {
+    color: '#fff',
+    fontSize: responsiveFontSize(1.9),
+    fontWeight: '600',
+  },
+
+  reviewTime: {
+    color: '#888',
+    fontSize: responsiveFontSize(1.5),
+    marginTop: 2,
+  },
+
+  reviewText: {
+    color: '#ccc',
+    marginTop: 12,
+    lineHeight: 20,
+    fontSize: responsiveFontSize(1.8),
   },
 
   floatingText: {

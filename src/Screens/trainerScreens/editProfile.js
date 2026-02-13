@@ -21,21 +21,18 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-
 import {Images} from '../../utils/Images';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import {showMessage} from 'react-native-flash-message';
-
 import {useSelector, useDispatch} from 'react-redux';
 import {updateLogin} from '../../store/Slices/AuthSlice';
-
 import ImageCropPicker from 'react-native-image-crop-picker';
 import Geolocation from '@react-native-community/geolocation';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
-import {MAP_API_KEY} from '../../config/urls';
 import {PermissionsAndroid} from 'react-native';
+import {Switch} from 'react-native';
 // =======================================================
 // CONSTANTS
 // =======================================================
@@ -82,12 +79,12 @@ const allSpecialities = [
   {key: 6, value: 'Crossfit'},
 ];
 
-// =======================================================
-
 const EditProfile = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const auth = useSelector(state => state.Auth.data);
+
+  console.log('Auth data from redux:', auth);
 
   const {LocationModule} = NativeModules;
 
@@ -121,27 +118,9 @@ const EditProfile = () => {
   const [imageModal, setImageModal] = useState(false);
   const [sourceModal, setSourceModal] = useState(false);
 
-  // ================= FETCH PROFILE =================
+  const [isAvailable, setIsAvailable] = useState(true);
 
-  // const fetchProfile = async () => {
-  //   const res = await axiosBaseURL.get(`/Common/GetProfile/${auth.token}`);
-  //   const d = res.data.data;
-
-  //   console.log('Fresh Data From Database:', d);
-
-  //   setProfile(d);
-  //   setBio(d.Bio || '');
-  //   setHourly(d.Hourlyrate || '');
-  //   setSpecialities(d.Speciality || []);
-  //   setTimes(d.Availiblity || []);
-  //   setDob(d.Dob || '');
-  //   setWeight(d.weight || '');
-  //   setHeight(d.height || '');
-  //   setPref(d.fitnessPreference || '');
-  //   setGoal(d.goal || '');
-  //   setAddress(d.Address || '');
-  //   setCoords(d.location?.coordinates || null);
-  // };
+  const [saving, setSaving] = useState(false);
 
   const fetchProfile = async () => {
     try {
@@ -149,7 +128,7 @@ const EditProfile = () => {
 
       const res = await axiosBaseURL.get(`/Common/GetProfile/${auth.token}`);
       const d = res.data.data;
-
+      console.log('data in edit profile:', d);
       setProfile(d);
       setBio(d.Bio || '');
       setHourly(d.Hourlyrate || '');
@@ -162,6 +141,7 @@ const EditProfile = () => {
       setGoal(d.goal || '');
       setAddress(d.Address || '');
       setCoords(d.location?.coordinates || null);
+      setIsAvailable(d.isAvailable ?? true);
     } catch (error) {
       console.log(error);
     } finally {
@@ -193,29 +173,6 @@ const EditProfile = () => {
 
     return age;
   };
-
-  // ================= IMAGE =================
-
-  // const uploadImage = async image => {
-  //   const formData = new FormData();
-  //   formData.append('profileImage', {
-  //     uri: image.path,
-  //     type: image.mime,
-  //     name: 'profile.jpg',
-  //   });
-  //   formData.append('email', auth.email);
-
-  //   const res = await axiosBaseURL.post(
-  //     '/trainer/uploadProfileImage',
-  //     formData,
-  //     {
-  //       headers: {'Content-Type': 'multipart/form-data'},
-  //     },
-  //   );
-
-  //   dispatch(updateLogin({profileImage: res.data.url}));
-  //   fetchProfile();
-  // };
 
   const uploadImage = async image => {
     try {
@@ -327,31 +284,66 @@ const EditProfile = () => {
     }
   };
 
-  const handleSave = async () => {
-    await axiosBaseURL.post(
-      '/trainer/update',
-      {
-        email: auth.email,
-        Bio: bio,
-        Hourlyrate: hourly,
-        Speciality: specialities,
-        Availiblity: times,
-        Dob: dob,
-        weight,
-        height,
-        fitnessPreference: pref,
-        goal,
-        Address: address,
-        location: {type: 'Point', coordinates: coords},
-      },
-      {headers: {Authorization: `Bearer ${auth.token}`}},
-    );
+  // const handleSave = async () => {
+  //   setSaving(true);
+  //   await axiosBaseURL.post(
+  //     '/trainer/update',
+  //     {
+  //       email: auth.email,
+  //       Bio: bio,
+  //       Hourlyrate: hourly,
+  //       Speciality: specialities,
+  //       Availiblity: times,
+  //       Dob: dob,
+  //       weight,
+  //       height,
+  //       fitnessPreference: pref,
+  //       goal,
+  //       Address: address,
+  //       location: {type: 'Point', coordinates: coords},
+  //       isAvailable,
+  //     },
+  //     {headers: {Authorization: `Bearer ${auth.token}`}},
+  //   );
 
-    showMessage({message: 'Profile Updated', type: 'success'});
-    navigation.goBack();
-  };
+  //   showMessage({message: 'Profile Updated', type: 'success'});
+  //   navigation.goBack();
+  // };
 
   // ================= COMPONENTS =================
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+
+      await axiosBaseURL.post(
+        '/trainer/update',
+        {
+          email: auth.email,
+          Bio: bio,
+          Hourlyrate: hourly,
+          Speciality: specialities,
+          Availiblity: times,
+          Dob: dob,
+          weight,
+          height,
+          fitnessPreference: pref,
+          goal,
+          Address: address,
+          location: {type: 'Point', coordinates: coords},
+          isAvailable,
+        },
+        {headers: {Authorization: `Bearer ${auth.token}`}},
+      );
+
+      showMessage({message: 'Profile Updated', type: 'success'});
+      navigation.goBack();
+    } catch (error) {
+      showMessage({message: 'Update failed', type: 'danger'});
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const Label = ({title}) => <Text style={styles.label}>{title}</Text>;
 
@@ -384,8 +376,6 @@ const EditProfile = () => {
       </TouchableOpacity>
     </Modal>
   );
-  console.log('Redux auth:', auth);
-  // ================= UI =================
 
   if (loading) {
     return (
@@ -540,8 +530,23 @@ const EditProfile = () => {
           }}
         />
 
-        {/* ================= AVAILABILITY ================= */}
-        <Text style={styles.label}>Availability</Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginVertical: responsiveHeight(1),
+          }}>
+          <Text style={styles.label}>Availability</Text>
+
+          <Switch
+            value={isAvailable}
+            onValueChange={setIsAvailable}
+            trackColor={{false: '#444', true: '#9FED3A'}}
+            thumbColor={isAvailable ? '#000' : '#ccc'}
+            style={{width: responsiveWidth(16)}}
+          />
+        </View>
 
         <TouchableOpacity
           style={styles.input}
@@ -623,9 +628,15 @@ const EditProfile = () => {
             />
           </TouchableOpacity>
         </View>
-        {/* SAVE */}
-        <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-          <Text style={{color: '#000'}}>Save</Text>
+        <TouchableOpacity
+          style={styles.saveBtn}
+          onPress={handleSave}
+          disabled={saving}>
+          {saving ? (
+            <ActivityIndicator size="small" color="#000" />
+          ) : (
+            <Text style={{color: '#000'}}>Save</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
 

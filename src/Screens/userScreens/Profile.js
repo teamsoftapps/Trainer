@@ -58,11 +58,12 @@ const Profile = () => {
       const fetchData = async () => {
         try {
           const profileResponse = await axiosBaseURL.get(
-            `/Common/GetProfile/${authData.token}`
+            `/Common/GetProfile/${authData.token}`,
           );
 
-          console.log("responce in profile:",profileResponse)
+          console.log('responce in profile:', profileResponse);
           const userData = profileResponse.data.data;
+          console.log('user Data in profile screen:', userData);
           setImageUri(userData.profileImage);
           setAddress(userData.Address);
           setname(userData.fullName);
@@ -71,13 +72,13 @@ const Profile = () => {
         } catch (error) {
           console.error(
             'Error fetching data:',
-            error.response?.data?.message || error.message
+            error.response?.data?.message || error.message,
           );
         }
       };
 
       fetchData();
-    }, [authData?.token])
+    }, [authData?.token]),
   );
 
   const handleChoosePhoto = () => {
@@ -162,9 +163,8 @@ const Profile = () => {
   const initializepaymentsheet = async () => {
     if (!stripeId) return;
     try {
-      const {ephemeralKey, setupIntents} = await fetchSetupSheetparams(
-        stripeId
-      );
+      const {ephemeralKey, setupIntents} =
+        await fetchSetupSheetparams(stripeId);
       const {error} = await initPaymentSheet({
         customerId: stripeId,
         customerEphemeralKeySecret: ephemeralKey,
@@ -181,7 +181,7 @@ const Profile = () => {
     } catch (error) {
       console.error(
         'Error during payment sheet initialization:',
-        error.message
+        error.message,
       );
     }
   };
@@ -199,13 +199,13 @@ const Profile = () => {
   useFocusEffect(
     useCallback(() => {
       fetchFavoriteTrainers();
-    }, [])
+    }, []),
   );
   const fetchFavoriteTrainers = async () => {
     if (authData.isType === 'user') {
       try {
         const res = await axiosBaseURL.get(
-          `/user/Getfavoritetrainers/${authData._id}`
+          `/user/Getfavoritetrainers/${authData._id}`,
         );
         setFavoriteTrainers(res.data.data);
       } catch (error) {}
@@ -320,10 +320,10 @@ const Profile = () => {
                             index === 0
                               ? null
                               : index === 1
-                              ? 15
-                              : index === 2
-                              ? 25
-                              : null,
+                                ? 15
+                                : index === 2
+                                  ? 25
+                                  : null,
                         }}
                       />
                     );
@@ -382,16 +382,16 @@ const Profile = () => {
                         item.card.brand === 'mastercard'
                           ? Images.mastersilver
                           : item.card.brand === 'visa'
-                          ? Images.visasilver
-                          : item.card.brand === 'jcb'
-                          ? Images.JCBCard
-                          : item.card.brand === 'amex'
-                          ? Images.AmericanExpressCard
-                          : item.card.brand === 'diners'
-                          ? Images.DinersClub
-                          : item.card.brand === 'UnionPay'
-                          ? Images.UnionPay
-                          : Images.DicoverCard
+                            ? Images.visasilver
+                            : item.card.brand === 'jcb'
+                              ? Images.JCBCard
+                              : item.card.brand === 'amex'
+                                ? Images.AmericanExpressCard
+                                : item.card.brand === 'diners'
+                                  ? Images.DinersClub
+                                  : item.card.brand === 'UnionPay'
+                                    ? Images.UnionPay
+                                    : Images.DicoverCard
                       }
                       resizeMode="contain"
                       style={{
@@ -467,12 +467,12 @@ const Profile = () => {
         )} */}
 
         <EditAddressModal
-  token={authData.token}
-  Address={Address}
-   setAddress={setAddress}  
-  modalstate={AddressModal}
-  onRequestClose={() => setAddressModal(false)}
-/>
+          token={authData.token}
+          Address={Address}
+          setAddress={setAddress}
+          modalstate={AddressModal}
+          onRequestClose={() => setAddressModal(false)}
+        />
         <DeleteCardModal
           modalstate={CardModal}
           paymentId={StripeCardData}

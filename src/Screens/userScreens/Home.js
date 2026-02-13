@@ -1,549 +1,3 @@
-// import {
-//   StyleSheet,
-//   Text,
-//   View,
-//   TouchableOpacity,
-//   Image,
-//   ImageBackground,
-//   ScrollView,
-//   RefreshControl,
-//   ActivityIndicator,
-// } from 'react-native';
-// import React, {useState, useCallback, useEffect} from 'react';
-// import {
-//   responsiveHeight,
-//   responsiveWidth,
-//   responsiveFontSize,
-// } from 'react-native-responsive-dimensions';
-// import WrapperContainer from '../../Components/Wrapper';
-// import {FontFamily, Images} from '../../utils/Images';
-// import {AirbnbRating} from 'react-native-ratings';
-// import LinearGradient from 'react-native-linear-gradient';
-// import {useFocusEffect, useNavigation} from '@react-navigation/native';
-// import {useSelector, useDispatch} from 'react-redux';
-// import {FlashList} from '@shopify/flash-list';
-// import axiosBaseURL from '../../services/AxiosBaseURL';
-// import {useGetTrainersQuery} from '../../store/Apis/Post';
-// import {SaveLogedInUser} from '../../store/Slices/db_ID';
-// import {followTrainer, unfollowTrainer} from '../../store/Slices/follow';
-// import {saveBookings} from '../../store/Slices/trainerBookings';
-// import followingHook from '../../Hooks/Follow';
-// import StoryRing from '../../Components/StoryRing';
-
-// const Home = () => {
-//   const navigation = useNavigation();
-//   const dispatch = useDispatch();
-
-//   const {data, isLoading, isFetching, refetch} = useGetTrainersQuery(
-//     undefined,
-//     {
-//       refetchOnMountOrArgChange: true,
-//     },
-//   );
-
-//   const authData = useSelector(state => state?.Auth?.data);
-//   const token = authData?.token;
-//   const followedTrainers = useSelector(state => state?.follow?.follow || []);
-
-//   const {isFollow, unFollow, loading: loadingFollow} = followingHook();
-
-//   const [storiesData, setStoriesData] = useState([]);
-//   const [refreshing, setRefreshing] = useState(false);
-
-//   const [seenUsers, setSeenUsers] = useState([]);
-
-//   // Fetch current user profile
-//   useEffect(() => {
-//     if (!token) return;
-
-//     const fetchProfile = async () => {
-//       try {
-//         const response = await axiosBaseURL.get(`/Common/GetProfile/${token}`);
-//         dispatch(SaveLogedInUser(response.data.data));
-//       } catch (error) {
-//         console.error(
-//           'Profile fetch failed:',
-//           error?.response?.data?.message || error.message,
-//         );
-//       }
-//     };
-
-//     fetchProfile();
-//   }, [token, dispatch]);
-
-//   // Load stories when trainers data changes
-//   useEffect(() => {
-//     if (!data?.data?.length) {
-//       setStoriesData([]);
-//       return;
-//     }
-
-//     const loadStories = async () => {
-//       try {
-//         const requests = data.data.map(trainer =>
-//           axiosBaseURL.get(`/trainer/stories/${trainer._id}`).catch(err => {
-//             console.log(`Stories failed for ${trainer._id}:`, err.message);
-//             return {data: {data: []}};
-//           }),
-//         );
-
-//         const responses = await Promise.all(requests);
-
-//         const stories = responses
-//           .map((res, idx) => {
-//             const trainer = data.data[idx];
-//             const trainerStories = res?.data?.data || [];
-
-//             console.log('Stories:', trainerStories);
-
-//             if (!trainerStories.length) return null;
-
-//             return {
-//               user_id: trainer._id,
-//               user_image: trainer.profileImage,
-//               user_name: trainer.fullName,
-//               stories: trainerStories
-//                 .filter(s => {
-//                   const url = s.thumbnail || s.mediaUrl;
-//                   return !url?.toLowerCase().endsWith('.heic');
-//                 })
-//                 .map(s => ({
-//                   story_id: s._id,
-//                   story_image: s.thumbnail || s.mediaUrl,
-//                   story_type: s.type === 'video' ? 'video' : 'image',
-//                   url: s.type === 'video' ? s.mediaUrl : undefined,
-//                   onPress: () => markSeen(s._id),
-//                 })),
-//             };
-//           })
-//           .filter(Boolean);
-
-//         setStoriesData(stories);
-//       } catch (err) {
-//         console.log('Stories load error:', err);
-//         setStoriesData([]);
-//       }
-//     };
-
-//     loadStories();
-//   }, [data?.data]);
-
-//   const markSeen = useCallback(async storyId => {
-//     try {
-//       await axiosBaseURL.post('/trainer/story/seen', {storyId});
-//     } catch (e) {
-//       console.log('Mark seen failed:', e);
-//     }
-//   }, []);
-
-//   const onRefresh = useCallback(async () => {
-//     setRefreshing(true);
-//     try {
-//       await refetch();
-//     } finally {
-//       setRefreshing(false);
-//     }
-//   }, [refetch]);
-
-//   useFocusEffect(
-//     useCallback(() => {
-//       refetch();
-//     }, [refetch]),
-//   );
-
-//   const getBookingAndNavigate = useCallback(
-//     async trainer => {
-//       if (!trainer?._id) return;
-//       try {
-//         const response = await axiosBaseURL.get(
-//           `/user/getBookingbyId/${trainer._id}`,
-//         );
-//         dispatch(saveBookings(response.data?.data || []));
-//         navigation.navigate('TrainerProfile', {data: trainer});
-//       } catch (error) {
-//         console.log('Booking fetch error:', error);
-//       }
-//     },
-//     [dispatch, navigation],
-//   );
-
-//   const handleFollowToggle = useCallback(
-//     async trainer => {
-//       if (!authData?._id || !trainer?._id) return;
-
-//       const isFollowing = followedTrainers.includes(trainer._id);
-//       const action = isFollowing ? unFollow : isFollow;
-
-//       try {
-//         const success = await action(authData._id, trainer._id);
-//         if (success) {
-//           dispatch(
-//             isFollowing
-//               ? unfollowTrainer(trainer._id)
-//               : followTrainer(trainer._id),
-//           );
-//           refetch();
-//         }
-//       } catch (err) {
-//         console.log('Follow toggle failed:', err);
-//       }
-//     },
-//     [authData?._id, followedTrainers, isFollow, unFollow, dispatch, refetch],
-//   );
-
-//   const renderTrainer = useCallback(
-//     ({item}) => (
-//       <ImageBackground
-//         source={{uri: item?.profileImage}}
-//         imageStyle={{borderRadius: responsiveWidth(1.5)}}
-//         style={styles.Trainer}>
-//         <TouchableOpacity
-//           activeOpacity={0.8}
-//           onPress={() => getBookingAndNavigate(item)}
-//           style={{flex: 1, justifyContent: 'space-between'}}>
-//           <TouchableOpacity
-//             activeOpacity={0.9}
-//             onPress={() => handleFollowToggle(item)}
-//             style={[
-//               styles.Follow,
-//               {
-//                 backgroundColor: followedTrainers.includes(item._id)
-//                   ? '#d7d7d7'
-//                   : '#9FED3A',
-//               },
-//             ]}>
-//             <Text
-//               style={{
-//                 color: '#000',
-//                 fontFamily: FontFamily.Medium,
-//                 fontSize: responsiveFontSize(2),
-//               }}>
-//               {loadingFollow
-//                 ? 'wait...'
-//                 : followedTrainers.includes(item._id)
-//                   ? 'Following'
-//                   : 'Follow'}
-//             </Text>
-//             {!followedTrainers.includes(item._id) && (
-//               <Image
-//                 style={{
-//                   width: responsiveHeight(2),
-//                   height: responsiveHeight(2),
-//                 }}
-//                 source={Images.plus}
-//               />
-//             )}
-//           </TouchableOpacity>
-
-//           <LinearGradient
-//             colors={['transparent', '#000', '#000']}
-//             start={{x: 0, y: 0}}
-//             end={{x: 0, y: 1.5}}
-//             style={styles.LinearMainView}>
-//             <View>
-//               <Text
-//                 style={{
-//                   color: '#fff',
-//                   fontFamily: FontFamily.Regular,
-//                   fontSize: responsiveFontSize(2),
-//                 }}>
-//                 {item?.Speciality?.[0]?.value || 'Not available'}
-//               </Text>
-//               <Text
-//                 style={{
-//                   color: '#fff',
-//                   fontFamily: FontFamily.Semi_Bold,
-//                   fontSize: responsiveFontSize(2.5),
-//                   marginVertical: responsiveHeight(1),
-//                 }}>
-//                 {item?.fullName}
-//               </Text>
-
-//               <View
-//                 style={{
-//                   flexDirection: 'row',
-//                   alignItems: 'center',
-//                   justifyContent: 'space-between',
-//                   gap: responsiveWidth(3),
-//                 }}>
-//                 <View style={styles.bottomSubView}>
-//                   <Image source={Images.pin} style={styles.pin} />
-//                   <Text style={styles.rating}>{item?.gender}</Text>
-//                 </View>
-
-//                 <View style={styles.bottomSubView}>
-//                   <AirbnbRating
-//                     size={responsiveHeight(2)}
-//                     selectedColor="#9FED3A"
-//                     showRating={false}
-//                     isDisabled
-//                     defaultRating={item?.Rating ?? 0}
-//                   />
-//                   <Text style={styles.rating}>{item?.Rating ?? '—'}</Text>
-//                 </View>
-//               </View>
-//             </View>
-
-//             <TouchableOpacity
-//               activeOpacity={0.8}
-//               onPress={() => navigation.navigate('Messages')}>
-//               <Image source={Images.messageGreen} style={styles.messageGreen} />
-//             </TouchableOpacity>
-//           </LinearGradient>
-//         </TouchableOpacity>
-//       </ImageBackground>
-//     ),
-//     [
-//       followedTrainers,
-//       loadingFollow,
-//       getBookingAndNavigate,
-//       handleFollowToggle,
-//       navigation,
-//     ],
-//   );
-
-//   const ListEmpty = useCallback(
-//     () => (
-//       <View
-//         style={{
-//           alignItems: 'center',
-//           justifyContent: 'center',
-//           paddingVertical: 60,
-//         }}>
-//         {isLoading || isFetching ? (
-//           <ActivityIndicator size={responsiveHeight(5)} color="#fff" />
-//         ) : (
-//           <Text
-//             style={{
-//               fontFamily: FontFamily.Regular,
-//               color: 'gray',
-//               fontSize: responsiveFontSize(2),
-//             }}>
-//             No trainers found
-//           </Text>
-//         )}
-//       </View>
-//     ),
-//     [isLoading, isFetching],
-//   );
-
-//   return (
-//     <WrapperContainer>
-//       {/* Header */}
-//       <View
-//         style={{
-//           height: responsiveHeight(8),
-//           flexDirection: 'row',
-//           alignItems: 'center',
-//           justifyContent: 'space-between',
-//           paddingHorizontal: responsiveWidth(7),
-//         }}>
-//         <Image
-//           source={Images.logo}
-//           style={{
-//             width: responsiveWidth(12),
-//             height: responsiveHeight(12),
-//             resizeMode: 'contain',
-//           }}
-//         />
-//         <View
-//           style={{
-//             flexDirection: 'row',
-//             alignItems: 'center',
-//             gap: responsiveWidth(5),
-//           }}>
-//           <TouchableOpacity onPress={refetch} activeOpacity={0.8}>
-//             <Image source={Images.notification} style={styles.notifiaction} />
-//           </TouchableOpacity>
-//           <TouchableOpacity
-//             activeOpacity={0.8}
-//             onPress={() => navigation.navigate('Chats')}>
-//             <Image source={Images.messages} style={styles.notifiaction} />
-//           </TouchableOpacity>
-//         </View>
-//       </View>
-
-//       {/* Stories - fixed at top, outside ScrollView */}
-//       {/* Stories section */}
-//       <View
-//         style={{
-//           borderBottomWidth: responsiveHeight(0.03),
-//           borderTopWidth: responsiveHeight(0.05),
-//           borderColor: '#fff',
-//           marginTop: responsiveHeight(1),
-//           paddingTop: responsiveHeight(2),
-//         }}>
-//         <Text style={styles.trainer}>Stories from trainers</Text>
-
-//         {/* Critical: fixed height parent + flex to help measurement */}
-//         <View
-//           style={{
-//             // backgroundColor: 'red',
-//             width: '100%',
-//             height: 130, // increased slightly for safety (80 ring + name + margins)
-//             flexDirection: 'row', // optional - sometimes helps horizontal lists
-//             alignItems: 'center', // optional
-//           }}>
-//           <FlashList
-//             horizontal
-//             data={storiesData}
-//             estimatedItemSize={90}
-//             keyExtractor={item => item.user_id}
-//             showsHorizontalScrollIndicator={false}
-//             // FIXED: remove alignItems – it's invalid here
-//             contentContainerStyle={{
-//               paddingHorizontal: 16, // safe (padding is allowed)
-//               paddingVertical: 8, // optional – if you want top/bottom breathing room
-//               backgroundColor: 'transparent', // only if needed
-//             }}
-//             // Optional: helps initial scroll & measurement on some devices
-//             getItemLayout={(data, index) => ({
-//               length: 96, // ≈ 80 width + 16 marginRight
-//               offset: 96 * index,
-//               index,
-//             })}
-//             renderItem={({item}) => (
-//               <TouchableOpacity
-//                 onPress={() => {
-//                   // setSeenUsers(prev => [...prev, item.user_id]);
-//                   navigation.navigate('StoryViewer', {
-//                     user: item,
-//                     onSeen: userId => {
-//                       setSeenUsers(prev => [...new Set([...prev, userId])]); // unique
-//                     },
-//                   });
-//                 }}
-//                 style={{
-//                   alignItems: 'center',
-//                   marginRight: 16, // moved margin here (from contentContainer)
-//                 }}>
-//                 <View style={{width: 80, height: 80}}>
-//                   {/* <StoryRing count={item.stories.length} /> */}
-//                   <StoryRing
-//                     count={item.stories.length}
-//                     color={
-//                       seenUsers.includes(item.user_id)
-//                         ? '#666' // gray after seen
-//                         : '#9FED3A' // green new
-//                     }
-//                   />
-//                   <Image
-//                     source={{uri: item.user_image}}
-//                     style={{
-//                       position: 'absolute',
-//                       top: 5,
-//                       left: 5,
-//                       width: 70,
-//                       height: 70,
-//                       borderRadius: 35,
-//                     }}
-//                   />
-//                 </View>
-//                 <Text
-//                   numberOfLines={1}
-//                   style={{
-//                     color: '#fff',
-//                     fontSize: 12,
-//                     marginTop: 6,
-//                     width: 80,
-//                     textAlign: 'center',
-//                   }}>
-//                   {item.user_name}
-//                 </Text>
-//               </TouchableOpacity>
-//             )}
-//           />
-//         </View>
-//       </View>
-
-//       {/* Main content */}
-//       <ScrollView
-//         refreshControl={
-//           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-//         }
-//         showsVerticalScrollIndicator={false}>
-//         <View style={{paddingTop: responsiveHeight(2)}}>
-//           <Text style={styles.popular}>Popular Personal Trainers</Text>
-
-//           <FlashList
-//             estimatedItemSize={responsiveHeight(50) + 40}
-//             data={data?.data || []}
-//             renderItem={renderTrainer}
-//             keyExtractor={item => item._id}
-//             ListEmptyComponent={ListEmpty}
-//             scrollEnabled={false}
-//           />
-//         </View>
-//       </ScrollView>
-//     </WrapperContainer>
-//   );
-// };
-
-// export default Home;
-
-// const styles = StyleSheet.create({
-//   notifiaction: {
-//     width: responsiveHeight(4),
-//     height: responsiveHeight(4),
-//     resizeMode: 'contain',
-//   },
-//   trainer: {
-//     color: '#fff',
-//     fontFamily: FontFamily.Regular,
-//     fontSize: responsiveFontSize(2),
-//     marginHorizontal: responsiveWidth(6),
-//     marginBottom: 8,
-//   },
-//   popular: {
-//     color: '#fff',
-//     fontFamily: FontFamily.Medium,
-//     fontSize: responsiveFontSize(2.5),
-//     marginHorizontal: responsiveWidth(6),
-//     marginBottom: responsiveHeight(2),
-//   },
-//   Trainer: {
-//     height: responsiveHeight(50),
-//     marginHorizontal: responsiveWidth(3),
-//     overflow: 'hidden',
-//     marginVertical: responsiveHeight(1.5),
-//   },
-//   Follow: {
-//     alignSelf: 'flex-start',
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     gap: responsiveWidth(2),
-//     borderRadius: responsiveWidth(6),
-//     paddingVertical: responsiveHeight(1),
-//     paddingHorizontal: responsiveWidth(4),
-//     margin: responsiveHeight(2),
-//   },
-//   pin: {
-//     width: responsiveWidth(4),
-//     height: responsiveWidth(4),
-//     resizeMode: 'contain',
-//     tintColor: '#fff',
-//   },
-//   messageGreen: {
-//     width: responsiveWidth(12),
-//     height: responsiveWidth(12),
-//   },
-//   LinearMainView: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     justifyContent: 'space-between',
-//     padding: responsiveHeight(2),
-//   },
-//   bottomSubView: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     gap: responsiveWidth(2),
-//   },
-//   rating: {
-//     color: '#fff',
-//     fontSize: responsiveFontSize(1.7),
-//   },
-// });
-
 import {
   StyleSheet,
   Text,
@@ -578,7 +32,6 @@ import {saveBookings} from '../../store/Slices/trainerBookings';
 import followingHook from '../../Hooks/Follow';
 import StoryRing from '../../Components/StoryRing';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 const adsData = [
   {
@@ -586,16 +39,15 @@ const adsData = [
     title: 'Fuel Your Workout',
     description: 'Discover premium supplements for better performance.',
     buttonText: 'Learn More',
-    image: require('../../assets/Images/add1.png'), // your asset image 1
+    image: require('../../assets/Images/add1.png'),
   },
   {
     id: '2',
     title: 'Boost Recovery Now',
     description: 'High-quality protein for faster muscle repair.',
     buttonText: 'Shop Now',
-    image: require('../../assets/Images/add2.png'), // your asset image 1
+    image: require('../../assets/Images/add2.png'),
   },
-  // You can add more later
 ];
 
 const Home = () => {
@@ -633,12 +85,11 @@ const Home = () => {
       });
 
       setCurrentAdIndex(nextIndex);
-    }, 4500); // change every 4.5 seconds
+    }, 4500);
 
     return () => clearInterval(interval);
   }, [currentAdIndex]);
 
-  // Fetch current user profile
   useEffect(() => {
     if (!token) return;
 
@@ -657,7 +108,6 @@ const Home = () => {
     fetchProfile();
   }, [token, dispatch]);
 
-  // Load stories when trainers change
   useEffect(() => {
     if (!data?.data?.length) {
       setStoriesData([]);
@@ -921,6 +371,10 @@ const Home = () => {
             })}
             renderItem={({item}) => {
               const isSeen = seenUsers.has(item.user_id);
+
+              const RING_SIZE = responsiveWidth(22); // responsive but stable
+              const IMAGE_SIZE = RING_SIZE - 10;
+
               return (
                 <TouchableOpacity
                   onPress={() =>
@@ -933,41 +387,46 @@ const Home = () => {
                           return next;
                         });
                       },
-                      markStorySeen, // ← add this line
+                      markStorySeen,
                     })
                   }
                   style={{
                     alignItems: 'center',
-                    marginRight: 16, // moved margin here (from contentContainer)
+                    marginRight: responsiveWidth(4),
+                    width: RING_SIZE,
                   }}>
-                  <View style={{width: 80, height: 80}}>
-                    {/* <StoryRing count={item.stories.length} /> */}
+                  <View
+                    style={{
+                      width: RING_SIZE,
+                      height: RING_SIZE,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
                     <StoryRing
                       count={item.stories.length}
                       color={isSeen ? '#666666' : '#9FED3A'}
-                      size={86}
-                      strokeWidth={4.5}
+                      size={RING_SIZE}
+                      strokeWidth={4}
                     />
+
                     <Image
                       source={{uri: item.user_image}}
                       style={{
                         position: 'absolute',
-                        top: responsiveHeight(0.5),
-                        left: responsiveWidth(1),
-                        width: responsiveHeight(9),
-                        height: responsiveHeight(9),
-                        borderRadius: responsiveWidth(15),
+                        width: IMAGE_SIZE,
+                        height: IMAGE_SIZE,
+                        borderRadius: IMAGE_SIZE / 2,
                       }}
                     />
                   </View>
+
                   <Text
                     numberOfLines={1}
                     style={{
                       color: '#fff',
                       fontSize: responsiveFontSize(1.5),
                       fontWeight: '500',
-                      marginTop: 6,
-                      width: '100%',
+                      marginTop: responsiveHeight(0.8),
                       textAlign: 'center',
                     }}>
                     {item.user_name}

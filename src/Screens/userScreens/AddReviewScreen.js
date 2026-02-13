@@ -7,6 +7,7 @@ import {
   TextInput,
   Image,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import Video from 'react-native-video';
 import ImagePicker from 'react-native-image-crop-picker';
@@ -17,14 +18,28 @@ import {
 } from 'react-native-responsive-dimensions';
 import WrapperContainer from '../../Components/Wrapper';
 import {Images} from '../../utils/Images';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
+import axiosBaseURL from '../../services/AxiosBaseURL';
+import {showMessage} from 'react-native-flash-message';
 
 const AddReviewScreen = () => {
   const navigation = useNavigation();
-
-  const [rating, setRating] = useState(0);
-  const [review, setReview] = useState('');
-  const [media, setMedia] = useState(null);
+  const route = useRoute();
+  const {trainerId, editMode, reviewData} = route.params || {};
+  const authData = useSelector(state => state?.Auth?.data);
+  const [loading, setLoading] = useState(false);
+  const [rating, setRating] = useState(editMode ? reviewData?.rating : 0);
+  const [review, setReview] = useState(editMode ? reviewData?.reviewText : '');
+  const [media, setMedia] = useState(
+    editMode && reviewData?.mediaUrl
+      ? {
+          path: reviewData.mediaUrl,
+          mime: reviewData.mediaType === 'video' ? 'video/mp4' : 'image/jpeg',
+          isExisting: true,
+        }
+      : null,
+  );
   const [previewModal, setPreviewModal] = useState(false);
 
   /* ===== OPEN PICKER ===== */
@@ -54,6 +69,136 @@ const AddReviewScreen = () => {
     ));
   };
 
+  // const handleSubmit = async () => {
+  //   if (!rating || !review.trim()) {
+  //     showMessage({
+  //       message: 'Incomplete',
+  //       description: 'Please add rating and review',
+  //       type: 'danger',
+  //     });
+  //     return;
+  //   }
+
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append('rating', rating);
+  //     formData.append('reviewText', review);
+
+  //     if (media && !media.isExisting) {
+  //       formData.append('file', {
+  //         uri: media.path,
+  //         type: media.mime,
+  //         name: `review-${Date.now()}`,
+  //       });
+  //     }
+
+  //     if (editMode) {
+  //       await axiosBaseURL.put(`/user/update/${reviewData._id}`, formData, {
+  //         headers: {
+  //           Authorization: `Bearer ${authData.token}`,
+  //           'Content-Type': 'multipart/form-data',
+  //         },
+  //       });
+
+  //       showMessage({
+  //         message: 'Updated',
+  //         description: 'Review updated successfully',
+  //         type: 'success',
+  //       });
+  //     } else {
+  //       formData.append('trainerId', trainerId);
+
+  //       await axiosBaseURL.post('/user/addReview', formData, {
+  //         headers: {
+  //           Authorization: `Bearer ${authData.token}`,
+  //           'Content-Type': 'multipart/form-data',
+  //         },
+  //       });
+
+  //       showMessage({
+  //         message: 'Success',
+  //         description: 'Review added successfully',
+  //         type: 'success',
+  //       });
+  //     }
+
+  //     navigation.goBack();
+  //   } catch (error) {
+  //     showMessage({
+  //       message: 'Error',
+  //       description: error?.response?.data?.message || 'Something went wrong',
+  //       type: 'danger',
+  //     });
+  //   }
+  // };
+
+  const handleSubmit = async () => {
+    if (!rating || !review.trim()) {
+      showMessage({
+        message: 'Incomplete',
+        description: 'Please add rating and review',
+        type: 'danger',
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append('rating', rating);
+      formData.append('reviewText', review);
+
+      if (media && !media.isExisting) {
+        formData.append('file', {
+          uri: media.path,
+          type: media.mime,
+          name: `review-${Date.now()}`,
+        });
+      }
+
+      if (editMode) {
+        await axiosBaseURL.put(`/user/update/${reviewData._id}`, formData, {
+          headers: {
+            Authorization: `Bearer ${authData.token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        showMessage({
+          message: 'Updated',
+          description: 'Review updated successfully',
+          type: 'success',
+        });
+      } else {
+        formData.append('trainerId', trainerId);
+
+        await axiosBaseURL.post('/user/addReview', formData, {
+          headers: {
+            Authorization: `Bearer ${authData.token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        showMessage({
+          message: 'Success',
+          description: 'Review added successfully',
+          type: 'success',
+        });
+      }
+
+      navigation.goBack();
+    } catch (error) {
+      showMessage({
+        message: 'Error',
+        description: error?.response?.data?.message || 'Something went wrong',
+        type: 'danger',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <WrapperContainer style={{backgroundColor: '#000'}}>
       {/* HEADER */}
@@ -62,7 +207,9 @@ const AddReviewScreen = () => {
           <Image source={Images.back} tintColor="#fff" />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Add Review</Text>
+        <Text style={styles.headerTitle}>
+          {editMode ? 'Edit Review' : 'Add Review'}
+        </Text>
         <View style={{width: 24}} />
       </View>
 
@@ -114,9 +261,17 @@ const AddReviewScreen = () => {
         )}
       </TouchableOpacity>
 
-      {/* SUBMIT */}
-      <TouchableOpacity style={styles.submitBtn}>
-        <Text style={styles.submitText}>Submit</Text>
+      <TouchableOpacity
+        style={[styles.submitBtn, {opacity: loading ? 0.7 : 1}]}
+        onPress={handleSubmit}
+        disabled={loading}>
+        {loading ? (
+          <ActivityIndicator size="small" color="#000" />
+        ) : (
+          <Text style={styles.submitText}>
+            {editMode ? 'Update' : 'Submit'}
+          </Text>
+        )}
       </TouchableOpacity>
 
       {/* FULL SCREEN PREVIEW */}

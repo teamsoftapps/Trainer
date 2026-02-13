@@ -139,7 +139,26 @@ const CompleteProfile = ({route}) => {
   const logedInTrainer = useSelector(state => state.Auth.data);
   const isGoogleUser = logedInTrainer?.authProvider === 'google';
 
-  console.log('trainer data in complete profile: ', logedInTrainer.token);
+  console.log('trainer data in complete profile: ', logedInTrainer);
+
+  useEffect(() => {
+    if (!logedInTrainer) return;
+
+    setfirstname(logedInTrainer?.fullName || '');
+    setEmail(logedInTrainer?.email || '');
+    setBio(logedInTrainer?.Bio || '');
+    setHourly(logedInTrainer?.Hourlyrate || '');
+    setSelectedSpecialities(logedInTrainer?.Speciality || []);
+    setSelectedTimes(logedInTrainer?.Availiblity || []);
+    setDob(logedInTrainer?.Dob || '');
+    setweight(logedInTrainer?.weight || '');
+    setheight(logedInTrainer?.height || '');
+    setFitnessPreference(logedInTrainer?.fitnessPreference || '');
+    setGoal(logedInTrainer?.goal || '');
+    setExperience(logedInTrainer?.experience || '');
+    setImageUri(logedInTrainer?.profileImage || '');
+    setCertificatePreview(logedInTrainer?.certificate || '');
+  }, [logedInTrainer]);
 
   const showBasicFields = isGoogleUser;
 
@@ -183,7 +202,7 @@ const CompleteProfile = ({route}) => {
 
   const handleCertificatePick = () => {
     ImageCropPicker.openPicker({
-      mediaType: 'any', // ⭐ allow image/pdf both
+      mediaType: 'any',
     })
       .then(file => {
         setCertificate(file);
@@ -246,9 +265,6 @@ const CompleteProfile = ({route}) => {
     try {
       setUploading(true);
 
-      // =================================================
-      // ✅ FORM DATA (REQUIRED FOR FILE UPLOAD)
-      // =================================================
       const formData = new FormData();
 
       formData.append('email', logedInTrainer?.email);
@@ -269,9 +285,6 @@ const CompleteProfile = ({route}) => {
         formData.append('goal', goal);
       }
 
-      // =================================================
-      // ⭐ CERTIFICATE FILE
-      // =================================================
       if (certificate) {
         formData.append('certificate', {
           uri: certificate.path,
@@ -280,9 +293,6 @@ const CompleteProfile = ({route}) => {
         });
       }
 
-      // =================================================
-      // API CALL
-      // =================================================
       const res = await axiosBaseURL.post('/trainer/update', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -290,37 +300,50 @@ const CompleteProfile = ({route}) => {
         },
       });
 
+      console.log('fresh reponce from the update api:', res.data.data);
+
+      const updatedTrainer = res?.data?.data || logedInTrainer;
+
+      const isSubscriptionValid =
+        updatedTrainer?.subscription &&
+        updatedTrainer?.subscription?.isActive &&
+        new Date(updatedTrainer?.subscription?.endDate) > new Date();
+
       console.log('Update response:', res.data);
+      dispatch(updateLogin(updatedTrainer));
 
-      // =================================================
-      // REDUX UPDATE
-      // =================================================
-      dispatch(
-        updateLogin({
-          Bio,
-          Speciality: selectedSpecialities,
-          Hourlyrate: Hourly,
-          Availiblity: selectedTimes,
-          Dob: dob,
-          weight,
-          height,
-          fitnessPreference,
-          goal,
-          bundles: bundles || [],
-          experience,
-        }),
-      );
+      // dispatch(
+      //   updateLogin({
+      //     Bio,
+      //     Speciality: selectedSpecialities,
+      //     Hourlyrate: Hourly,
+      //     Availiblity: selectedTimes,
+      //     Dob: dob,
+      //     weight,
+      //     height,
+      //     fitnessPreference,
+      //     goal,
+      //     bundles: bundles || [],
+      //     experience,
+      //   }),
+      // );
 
-      // =================================================
-      // SUCCESS
-      // =================================================
       showMessage({
         message: 'Profile completed!',
         description: 'Choose your subscription plan',
         type: 'success',
       });
 
-      navigation.replace('Subscription');
+      // navigation.replace('Subscription');
+      if (isSubscriptionValid) {
+        // navigation.replace('TrainerFlow');
+        // navigation.reset({
+        //   index: 0,
+        //   routes: [{name: 'TrainerBttomStack'}],
+        // });
+      } else {
+        // navigation.navigate('Subscription');
+      }
     } catch (error) {
       console.log(error);
 
@@ -333,124 +356,6 @@ const CompleteProfile = ({route}) => {
       setUploading(false);
     }
   };
-
-  // const Function = async () => {
-  //   // ---------- VALIDATION ----------
-  //   const validationChecks = [
-  //     {
-  //       condition: Bio.trim() !== '',
-  //       message: 'Please add your bio.',
-  //     },
-  //     {
-  //       condition:
-  //         Array.isArray(selectedSpecialities) &&
-  //         selectedSpecialities.length > 0,
-  //       message: 'Please select at least one speciality.',
-  //     },
-  //     {
-  //       condition: Hourly > 0,
-  //       message: 'Please enter a valid hourly rate.',
-  //     },
-  //     {
-  //       condition: Array.isArray(selectedTimes) && selectedTimes.length > 0,
-  //       message: 'Please select your availability times.',
-  //     },
-  //     {
-  //       condition: isGoogleUser ? weight > 0 : true,
-  //       message: 'Please enter your weight.',
-  //     },
-  //     {
-  //       condition: isGoogleUser ? height > 0 : true,
-  //       message: 'Please enter your height.',
-  //     },
-  //     {
-  //       condition: isGoogleUser ? fitnessPreference : true,
-  //       message: 'Please select fitness preference.',
-  //     },
-  //     {
-  //       condition: isGoogleUser ? goal : true,
-  //       message: 'Please select goal.',
-  //     },
-  //     {
-  //       condition: isGoogleUser ? !!dob : true,
-  //       message: 'Please select your age.',
-  //     },
-  //     // ❌ bundles skipped (optional)
-  //   ];
-
-  //   for (const {condition, message} of validationChecks) {
-  //     if (!condition) {
-  //       return showMessage({
-  //         message: 'Validation Error',
-  //         description: message,
-  //         type: 'danger',
-  //       });
-  //     }
-  //   }
-
-  //   try {
-  //     setUploading(true);
-  //     // ---------- API CALL ----------
-  //     const response = await axiosBaseURL.post(
-  //       '/trainer/update',
-  //       {
-  //         email: logedInTrainer?.email,
-
-  //         Bio,
-  //         Speciality: selectedSpecialities,
-  //         Hourlyrate: Hourly,
-  //         Availiblity: selectedTimes,
-
-  //         // ⭐ ONLY send if google user
-  //         Dob: isGoogleUser ? dob : undefined,
-  //         weight: isGoogleUser ? weight : undefined,
-  //         height: isGoogleUser ? height : undefined,
-  //         fitnessPreference: isGoogleUser ? fitnessPreference : undefined,
-  //         goal: isGoogleUser ? goal : undefined,
-  //         bundles: bundles || [],
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${logedInTrainer?.token}`,
-  //         },
-  //       },
-  //     );
-
-  //     // ---------- REDUX UPDATE ----------
-  //     dispatch(
-  //       updateLogin({
-  //         Bio,
-  //         Speciality: selectedSpecialities,
-  //         Hourlyrate: Hourly,
-  //         Availiblity: selectedTimes,
-  //         Dob: dob,
-  //         weight,
-  //         height,
-  //         fitnessPreference,
-  //         goal,
-  //         bundles: bundles || [],
-  //       }),
-  //     );
-
-  //     // ---------- SUCCESS ----------
-  //     showMessage({
-  //       message: 'Profile completed!',
-  //       description: 'Choose your subscription plan',
-  //       type: 'success',
-  //     });
-
-  //     navigation.replace('Subscription');
-  //   } catch (error) {
-  //     console.log(error);
-  //     showMessage({
-  //       message: 'Error',
-  //       description: 'Failed to update profile',
-  //       type: 'danger',
-  //     });
-  //   } finally {
-  //     setUploading(false);
-  //   }
-  // };
 
   const uploadImage = async image => {
     try {
@@ -623,7 +528,7 @@ const CompleteProfile = ({route}) => {
                     onSelect(item);
                     onClose();
                   }}>
-                  <Text style={{color: '#fff'}}>{item}</Text>
+                  <Text style={{color: '#000'}}>{item}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -720,7 +625,7 @@ const CompleteProfile = ({route}) => {
             <View style={styles.FirstNameH}>
               <Text style={{color: '#908C8D'}}>First Name</Text>
               <TextInput
-                value={logedInTrainer?.fullName}
+                value={firstname}
                 onChangeText={setfirstname}
                 placeholder="Enter First Name"
                 style={styles.FirstNameInput}
@@ -1104,7 +1009,7 @@ const CompleteProfile = ({route}) => {
                 </Text>
               </TouchableOpacity>
 
-              {/* ===== GOAL ===== */}
+              {/* ===== goal ===== */}
               <TouchableOpacity
                 style={styles.inputBox}
                 onPress={() => setGoalModal(true)}>
@@ -1116,7 +1021,7 @@ const CompleteProfile = ({route}) => {
 
           {/* AGE FIELD */}
           <TouchableOpacity
-            style={styles.inputBox}
+            style={[styles.inputBox, {width: '100%'}]}
             onPress={() => setShowDatePicker(true)}>
             <Text style={{color: '#908C8D'}}>Age</Text>
 
@@ -1125,7 +1030,7 @@ const CompleteProfile = ({route}) => {
 
           {/* ===== EXPERIENCE FIELD ===== */}
           <TouchableOpacity
-            style={styles.inputBox}
+            style={[styles.inputBox, {width: '100%'}]}
             onPress={() => setExperienceModal(true)}>
             <Text style={{color: '#908C8D'}}>Experience</Text>
             <Text style={{color: '#fff'}}>
