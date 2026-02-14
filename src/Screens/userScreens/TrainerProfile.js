@@ -404,7 +404,7 @@ const TrainerProfile = ({route}) => {
               }}>
               <View style={{alignItems: 'center'}}>
                 <Text style={{color: '#9FED3A', fontSize: 18}}>
-                  ⭐ {data?.Rating || 4.5}
+                  ⭐ {data?.Rating || '0.0'}
                 </Text>
                 <Text style={{color: '#aaa'}}>Rating</Text>
               </View>

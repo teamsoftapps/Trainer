@@ -179,6 +179,7 @@ const Home = () => {
 
   const getBookingAndNavigate = useCallback(
     async trainer => {
+      console.log('Trainer in list:>>>>>', trainer);
       if (!trainer?._id) return;
       try {
         const response = await axiosBaseURL.get(

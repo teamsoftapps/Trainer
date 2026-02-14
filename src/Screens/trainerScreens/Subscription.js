@@ -116,43 +116,6 @@ const Subscription = ({navigation}) => {
     return true;
   };
 
-  // const handleSubscribe = async () => {
-  //   try {
-  //     const amount = prices[selectedPlan];
-
-  //     const ready = await initializePaymentSheet(amount);
-  //     if (!ready) return;
-
-  //     const {error} = await presentPaymentSheet();
-  //     if (error) return;
-
-  //     // ⭐ SAVE SUBSCRIPTION
-  //     const res = await axiosBaseURL.post('/common/activateSubscription', {
-  //       trainerId: authData._id,
-  //       plan: selectedPlan,
-  //       price: prices[selectedPlan],
-  //     });
-
-  //     console.log('Response:', res.data);
-
-  //     dispatch(
-  //       updateLogin({
-  //         subscription: {
-  //           plan: selectedPlan,
-  //           price: prices[selectedPlan],
-  //           isActive: true,
-  //         },
-  //       }),
-  //     );
-
-  //     // ⭐ NAVIGATE
-  //     navigation.replace('TrainerFlow');
-  //     // navigation.replace('TrainerBttomStack');
-  //   } catch (e) {
-  //     console.log('Subscribe Error:', e);
-  //   }
-  // };
-
   const handleSubscribe = async () => {
     try {
       const amount = prices[selectedPlan];
@@ -162,8 +125,6 @@ const Subscription = ({navigation}) => {
 
       const {error} = await presentPaymentSheet();
       if (error) return;
-
-      // ⭐ Activate subscription in backend
       const res = await axiosBaseURL.post('/common/activateSubscription', {
         trainerId: authData._id,
         plan: selectedPlan,
@@ -173,13 +134,7 @@ const Subscription = ({navigation}) => {
       console.log('Subscription response:', res.data);
 
       const updatedTrainer = res.data.data;
-
-      // ⭐ VERY IMPORTANT: update full trainer object
       dispatch(updateLogin(updatedTrainer));
-
-      // ❌ REMOVE ALL NAVIGATION
-      // navigation.replace('TrainerFlow');
-      // navigation.replace('TrainerBttomStack');
     } catch (e) {
       console.log('Subscribe Error:', e);
     }
