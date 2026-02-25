@@ -76,7 +76,7 @@ import {
   requestMediaPermission,
   requestNotificationPermission,
 } from './src/Hooks/Permission';
-
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {configureGoogle} from './src/config/googleAuth';
 
 const App = () => {
@@ -138,19 +138,21 @@ const App = () => {
   }
 
   return (
-    <StripeProvider
-      publishableKey="pk_test_51MhKy0E1gqTY55tO7v4bGT0EifIECw1SHFcUx33Jgc7YF46jqRPNvDzGoSE1h9konayrzaNes7Jse3NGDLpawDql00rxdyk8Cw"
-      urlScheme="trainerapp">
-      <NavigationContainer>
-        {authData?.token && authData?.isType === 'user' ? (
-          <UserStack />
-        ) : authData?.token && authData?.isType === 'trainer' ? (
-          <TrainerStack />
-        ) : (
-          <AuthStack />
-        )}
-      </NavigationContainer>
-    </StripeProvider>
+    <GestureHandlerRootView style={{flex: 1}}>
+      <StripeProvider
+        publishableKey="pk_test_51MhKy0E1gqTY55tO7v4bGT0EifIECw1SHFcUx33Jgc7YF46jqRPNvDzGoSE1h9konayrzaNes7Jse3NGDLpawDql00rxdyk8Cw"
+        urlScheme="trainerapp">
+        <NavigationContainer>
+          {authData?.token && authData?.isType === 'user' ? (
+            <UserStack />
+          ) : authData?.token && authData?.isType === 'trainer' ? (
+            <TrainerStack />
+          ) : (
+            <AuthStack />
+          )}
+        </NavigationContainer>
+      </StripeProvider>
+    </GestureHandlerRootView>
   );
 };
 

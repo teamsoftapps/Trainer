@@ -20,7 +20,8 @@ import Subscription from '../Screens/trainerScreens/Subscription.js';
 import PostCaptionScreen from '../Screens/trainerScreens/PostCaptionScreen.js';
 import AllUploadsScreen from '../Screens/trainerScreens/AllUploadsScreen.js';
 import TrainerFlow from './TrainerFlow.js';
-
+import Chats from '../Screens/userScreens/Chats.js';
+import ChatScreen from '../Screens/chat/ChatScreen';
 const Stack = createNativeStackNavigator();
 
 // const TrainerStack = () => {
@@ -154,10 +155,10 @@ const TrainerStack = () => {
       ) : (
         <Stack.Screen name="TrainerBttomStack" component={TrainerBttomStack} />
       )}
-
-      {/* Always accessible screens */}
-      <Stack.Screen name="Chat" component={Chat} />
-      <Stack.Screen name="Message" component={Message} />
+      {/* <Stack.Screen name="Chat" component={Chat} /> */}
+      {/* <Stack.Screen name="Message" component={Message} /> */}
+      <Stack.Screen name="Chats" component={Chats} />
+      <Stack.Screen name="ChatScreen" component={ChatScreen} />
       <Stack.Screen name="Settings" component={Settings} />
       <Stack.Screen name="Notification" component={Notification} />
       <Stack.Screen name="EditProfile" component={EditProfile} />

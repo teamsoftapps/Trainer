@@ -302,6 +302,26 @@ const TrainerProfile = ({route}) => {
 
   const currentUserId = authData?._id;
   const latestReviews = reviews.slice(0, 3);
+  const handleOpenChat = async () => {
+    try {
+      const res = await axiosBaseURL.post('/chat/create-conversation', {
+        userId: authData?._id,
+        trainerId: data?._id,
+      });
+
+      if (res.data.success) {
+        // backend may return: { conversation } or { data }
+        const conversation = res.data.conversation || res.data.data;
+
+        navigation.navigate('ChatScreen', {
+          conversationId: conversation?._id,
+          trainerData: data,
+        });
+      }
+    } catch (error) {
+      console.log('Chat error:', error?.response?.data || error.message);
+    }
+  };
   return (
     <WrapperContainer style={{backgroundColor: 'black'}}>
       <ScrollView
@@ -452,7 +472,7 @@ const TrainerProfile = ({route}) => {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => navigation.navigate('Messages')}
+                onPress={handleOpenChat}
                 style={{
                   borderWidth: 1,
                   borderColor: '#fff',

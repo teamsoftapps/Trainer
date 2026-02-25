@@ -10,48 +10,17 @@ import {
   SafeAreaView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
 const Message = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+
+  const {trainerData} = route.params || {};
+
   const [text, setText] = useState('');
 
-  const [messages, setMessages] = useState([
-    {
-      id: '1',
-      text: 'Could you help me lose this terrible weight quickly and without excessive pain',
-      sender: 'me',
-      time: '10:11 AM',
-    },
-    {
-      id: '2',
-      text: 'Sure!',
-      sender: 'other',
-      time: '11:25 AM',
-    },
-    {
-      id: '3',
-      text: 'I really want to help you anytime',
-      sender: 'other',
-      time: '11:25 AM',
-    },
-    {
-      id: '4',
-      text: 'Thank you in advance',
-      sender: 'me',
-      time: '11:35 AM',
-    },
-    {
-      id: '5',
-      text: 'I was very worried about my condition because it can hamper my daily performance',
-      sender: 'me',
-      time: '11:35 AM',
-    },
-    {
-      id: '6',
-      text: "Ok it's very easy",
-      sender: 'other',
-      time: '11:42 AM',
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
 
   const sendMessage = () => {
     if (!text.trim()) return;
@@ -81,9 +50,7 @@ const Message = () => {
         ]}>
         <View
           style={[styles.bubble, isMe ? styles.myBubble : styles.otherBubble]}>
-          <Text style={[styles.messageText, {color: isMe ? '#000' : '#000'}]}>
-            {item.text}
-          </Text>
+          <Text style={styles.messageText}>{item.text}</Text>
           <Text style={styles.timeText}>{item.time}</Text>
         </View>
       </View>
@@ -92,18 +59,25 @@ const Message = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* HEADER */}
+      {/* ✅ DYNAMIC HEADER */}
       <View style={styles.header}>
-        <Icon name="arrow-back" size={24} color="#fff" />
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
 
         <Image
-          source={{uri: 'https://i.pravatar.cc/150?img=12'}}
+          source={{
+            uri:
+              trainerData?.profileImage || 'https://i.pravatar.cc/150?img=12',
+          }}
           style={styles.avatar}
         />
 
         <View style={{flex: 1}}>
-          <Text style={styles.name}>Alex Morgan</Text>
-          <Text style={styles.status}>Active now</Text>
+          <Text style={styles.name}>{trainerData?.fullName || 'Trainer'}</Text>
+          <Text style={styles.status}>
+            {trainerData?.isAvailable ? 'Active now' : 'Offline'}
+          </Text>
         </View>
 
         <Icon name="videocam" size={24} color="#fff" style={styles.icon} />
@@ -118,7 +92,7 @@ const Message = () => {
         contentContainerStyle={{padding: 16}}
       />
 
-      {/* INPUT BAR */}
+      {/* INPUT */}
       <View style={styles.inputContainer}>
         <TouchableOpacity style={styles.plusBtn}>
           <Icon name="add" size={26} color="#fff" />

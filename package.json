@@ -55,6 +55,7 @@
     "react-native-gifted-chat": "^2.6.3",
     "react-native-google-places-autocomplete": "^2.5.7",
     "react-native-image-crop-picker": "^0.41.2",
+    "react-native-image-picker": "^8.2.1",
     "react-native-insta-story": "^1.1.9",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-maps": "^1.18.2",

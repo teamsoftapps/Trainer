@@ -28,6 +28,7 @@ import TrainerMediaScreen from '../Screens/userScreens/TrainerMediaScreen';
 import AddReviewScreen from '../Screens/userScreens/AddReviewScreen';
 import AllReviewsScreen from '../Screens/userScreens/AllReviewsScreen';
 import PaymentCards from '../Screens/userScreens/PaymentCards';
+import ChatScreen from '../Screens/chat/ChatScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -41,7 +42,7 @@ const MainStack = () => {
       <Stack.Screen name="Upcoming" component={Upcoming} />
       <Stack.Screen name="Previous" component={Previous} />
       <Stack.Screen name="ReviewBooking" component={ReviewBooking} />
-      <Stack.Screen name="Messages" component={Message} />
+      {/* <Stack.Screen name="Messages" component={Message} /> */}
       <Stack.Screen name="TrainerProfile" component={TrainerProfile} />
       <Stack.Screen name="PaymentCards" component={PaymentCards} />
       <Stack.Screen name="AddCard" component={AddCard} />
@@ -59,6 +60,7 @@ const MainStack = () => {
       <Stack.Screen name="TrainerMediaScreen" component={TrainerMediaScreen} />
       <Stack.Screen name="AddReviewScreen" component={AddReviewScreen} />
       <Stack.Screen name="AllReviewsScreen" component={AllReviewsScreen} />
+      <Stack.Screen name="ChatScreen" component={ChatScreen} />
     </Stack.Navigator>
   );
 };

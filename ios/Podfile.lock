@@ -1070,6 +1070,27 @@ PODS:
     - Yoga
   - react-native-get-random-values (1.11.0):
     - React-Core
+  - react-native-image-picker (8.2.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-insta-story (1.1.9):
     - React
   - react-native-maps (1.18.2):
@@ -1722,6 +1743,7 @@ DEPENDENCIES:
   - react-native-create-thumbnail (from `../node_modules/react-native-create-thumbnail`)
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
+  - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-insta-story (from `../node_modules/react-native-insta-story`)
   - react-native-maps (from `../node_modules/react-native-maps`)
   - react-native-mmkv (from `../node_modules/react-native-mmkv`)
@@ -1878,6 +1900,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/geolocation"
   react-native-get-random-values:
     :path: "../node_modules/react-native-get-random-values"
+  react-native-image-picker:
+    :path: "../node_modules/react-native-image-picker"
   react-native-insta-story:
     :path: "../node_modules/react-native-insta-story"
   react-native-maps:
@@ -2028,6 +2052,7 @@ SPEC CHECKSUMS:
   react-native-create-thumbnail: c15cedc37f3822777d44e6035be041f7961341ea
   react-native-geolocation: 4ec47ba1f4dd64272eb4179f6e1301432e6828c5
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
+  react-native-image-picker: 8e0eee3463521800cbf40016f2137c694efeaff8
   react-native-insta-story: 2f1028459065547b4b4cd81dd0a3f5a08fa25eb1
   react-native-maps: c34648af107791f0e1d7cd054a29db15f290c272
   react-native-mmkv: cbb7cc0f2479caa4d2f5e5a0951b3acb28bec375

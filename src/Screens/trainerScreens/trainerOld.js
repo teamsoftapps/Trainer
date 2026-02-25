@@ -16,23 +16,13 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {FontFamily, Images} from '../../utils/Images';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
 import {LineChart} from 'react-native-chart-kit';
 import axiosBaseURL from '../../services/AxiosBaseURL';
-import {useEffect, useState} from 'react';
-import notifee, {EventType} from '@notifee/react-native';
+import {useCallback, useEffect, useState} from 'react';
 const CompletedTrainerHome = () => {
-  // const data = {
-  //   labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-  //   datasets: [
-  //     {
-  //       data: [0, 1, 2, 3, 4],
-  //       color: (opacity = 1) => `rgba(159, 237, 58, ${opacity})`,
-  //       strokeWidth: 4, //
-  //     },
-  //   ],
-  // };
+  const [unreadTotal, setUnreadTotal] = useState(0);
   const data = {
     labels: ['Jan', 'Mar', 'May', 'Jul', 'Sep', 'Nov'],
     datasets: [
@@ -59,6 +49,29 @@ const CompletedTrainerHome = () => {
   useEffect(() => {
     getSessions();
   }, []);
+
+  const fetchUnreadTotal = async () => {
+    try {
+      const res = await axiosBaseURL.get(
+        `/chat/conversation-list-trainer/${trainer_data._id}`,
+      );
+      const list = res.data?.conversations || [];
+      const total = list.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
+      setUnreadTotal(total);
+    } catch (e) {
+      console.log('Unread total error:', e?.response?.data || e.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadTotal();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUnreadTotal();
+    }, []),
+  );
 
   const getSessions = async () => {
     try {
@@ -126,6 +139,24 @@ const CompletedTrainerHome = () => {
       </View>
     );
   };
+  const MessageIconWithBadge = ({count, onPress}) => {
+    const display = count > 99 ? '99+' : String(count || 0);
+
+    return (
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.8}
+        style={{position: 'relative'}}>
+        <Image source={Images.messages} style={styles.notifiaction} />
+
+        {count > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{display}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <WrapperContainer>
@@ -157,13 +188,10 @@ const CompletedTrainerHome = () => {
               activeOpacity={0.8}>
               <Image source={Images.notification} style={styles.notifiaction} />
             </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => {
-                navigation.navigate('Chat');
-              }}>
-              <Image source={Images.messages} style={styles.notifiaction} />
-            </TouchableOpacity>
+            <MessageIconWithBadge
+              count={unreadTotal}
+              onPress={() => navigation.navigate('Chats')}
+            />
           </View>
         </View>
         <View style={styles.cont_1}>
@@ -179,46 +207,6 @@ const CompletedTrainerHome = () => {
           </Text>
           <Text style={{color: '#bbbbbb'}}>{formattedDate}</Text>
         </View>
-
-        {/* <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            paddingVertical: responsiveHeight(2),
-            paddingHorizontal: responsiveWidth(7),
-          }}>
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: responsiveFontSize(2),
-              fontWeight: '500',
-            }}>
-            Upcoming Sessions
-          </Text>
-          <TouchableOpacity
-            style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={{color: '#9FED3A'}}>See all</Text>
-            <Image
-              source={Images.rightarrow}
-              style={{
-                tintColor: '#9FED3A',
-                marginLeft: responsiveWidth(1),
-                height: responsiveHeight(1.3),
-                width: responsiveWidth(1.8),
-              }}
-            />
-          </TouchableOpacity>
-        </View> */}
-
-        {/* <View style={{paddingHorizontal: responsiveWidth(7)}}>
-          <FlatList
-            ListEmptyComponent={WhenListEmpty}
-            showsHorizontalScrollIndicator={false}
-            horizontal
-            data={sessions}
-            renderItem={RenderedBookings}
-          />
-        </View> */}
 
         <View
           style={{
@@ -278,46 +266,6 @@ const CompletedTrainerHome = () => {
               <Text style={{color: '#9FED3A', marginLeft: 10}}>▲ 0.0%</Text>
             </View>
           </View>
-          {/* <Text
-            style={{
-              color: '#9FED3A',
-              paddingHorizontal: responsiveWidth(6),
-              paddingTop: responsiveHeight(3),
-            }}>
-            Total Earning
-          </Text>
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: responsiveFontSize(2.5),
-              marginTop: responsiveHeight(1),
-              paddingLeft: responsiveWidth(6),
-              paddingTop: responsiveHeight(0.5),
-              paddingBottom: responsiveHeight(2),
-            }}>
-            $5,392
-          </Text> */}
-          {/* <LineChart
-            data={data}
-            width={responsiveWidth(85)}
-            height={responsiveHeight(30)}
-            yAxisLabel="k"
-            chartConfig={{
-              decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(159, 237, 58, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              style: {
-                borderRadius: 16,
-              },
-              propsForDots: {
-                r: '6',
-                strokeWidth: '2',
-                fill: '#9FED3A',
-                stroke: '#fff',
-              },
-            }}
-            bezier
-          /> */}
 
           <LineChart
             data={data}
@@ -430,5 +378,24 @@ const styles = StyleSheet.create({
   },
   main_child_2: {
     marginLeft: responsiveWidth(3),
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -6,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 5,
+    borderRadius: 9,
+    backgroundColor: '#9FED3A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#0b0b0b',
+  },
+  badgeText: {
+    color: '#000',
+    fontSize: 11,
+    fontWeight: '800',
   },
 });

@@ -53,12 +53,31 @@ const adsData = [
 const Home = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const [unreadTotal, setUnreadTotal] = useState(0);
 
   const {data, isLoading, isFetching, refetch} = useGetTrainersQuery(
     undefined,
     {
       refetchOnMountOrArgChange: true,
     },
+  );
+  const fetchUnreadTotal = async () => {
+    try {
+      const res = await axiosBaseURL.get(
+        `/chat/conversation-list/${authData._id}`,
+      );
+      const list = res.data?.conversations || [];
+      const total = list.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
+      setUnreadTotal(total);
+    } catch (e) {
+      console.log('Unread total error:', e?.response?.data || e.message);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUnreadTotal();
+    }, [authData?._id]),
   );
 
   const authData = useSelector(state => state?.Auth?.data);
@@ -194,6 +213,33 @@ const Home = () => {
     [dispatch, navigation],
   );
 
+  const handleOpenChatFromHome = useCallback(
+    async trainer => {
+      try {
+        const res = await axiosBaseURL.post('/chat/create-conversation', {
+          userId: authData?._id,
+          trainerId: trainer?._id,
+        });
+
+        if (res.data?.success) {
+          const conversation = res.data.conversation || res.data.data;
+
+          // navigation.navigate('ChatScreen', {
+          //   conversationId: conversation?._id,
+          //   trainerData: trainer, // has name/avatar already
+          // });
+          navigation.navigate('ChatScreen', {
+            conversationId: conversation?._id,
+            otherUser: trainer,
+          });
+        }
+      } catch (error) {
+        console.log('Chat open error:', error?.response?.data || error.message);
+      }
+    },
+    [authData?._id, navigation],
+  );
+
   const handleFollowToggle = useCallback(
     async trainer => {
       if (!authData?._id || !trainer?._id) return;
@@ -285,7 +331,7 @@ const Home = () => {
               </View>
             </View>
 
-            <TouchableOpacity onPress={() => navigation.navigate('Messages')}>
+            <TouchableOpacity onPress={() => handleOpenChatFromHome(item)}>
               <Image source={Images.messageGreen} style={styles.messageIcon} />
             </TouchableOpacity>
           </LinearGradient>
@@ -324,22 +370,70 @@ const Home = () => {
     }
   }, []);
 
+  const MessageIconWithBadge = ({count, onPress}) => {
+    const display = count > 99 ? '99+' : String(count || 0);
+
+    return (
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.8}
+        style={{position: 'relative'}}>
+        <Image
+          source={Images.messages}
+          style={{height: responsiveHeight(3.3), width: responsiveWidth(7)}}
+        />
+
+        {count > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{display}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <WrapperContainer>
       {/* Header */}
-      <View style={styles.header}>
-        <Image source={Images.logo} style={styles.logo} resizeMode="contain" />
-        <View style={styles.headerIcons}>
-          <TouchableOpacity onPress={refetch} activeOpacity={0.7}>
-            <Ionicons name="notifications-outline" color={'#fff'} size={30} />
-            {/* <Image source={Images.notification} style={styles.headerIcon} /> */}
-          </TouchableOpacity>
+      <View
+        style={{
+          height: responsiveHeight(8),
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: responsiveWidth(7),
+        }}>
+        <Image
+          source={Images.logo}
+          style={{
+            width: responsiveWidth(12),
+            height: responsiveHeight(12),
+            resizeMode: 'contain',
+          }}
+        />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: responsiveWidth(5),
+          }}>
           <TouchableOpacity
-            onPress={() => navigation.navigate('Chats')}
-            activeOpacity={0.7}>
-            {/* <AntDesign name="message" size={30} color={'#fff'} /> */}
-            <Image source={Images.messages} style={styles.headerIcon} />
+            onPress={() => navigation.navigate('Notification')}
+            activeOpacity={0.8}>
+            <Image source={Images.notification} style={styles.notifiaction} />
           </TouchableOpacity>
+          {/* <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      // navigation.navigate('Chat');
+                      navigation.navigate('Chats');
+                    }}>
+                    <Image source={Images.messages} style={styles.notifiaction} />
+                  </TouchableOpacity> */}
+          <MessageIconWithBadge
+            count={unreadTotal}
+            onPress={() => navigation.navigate('Chats')}
+          />
         </View>
       </View>
 
@@ -563,6 +657,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  notifiaction: {
+    width: responsiveHeight(4),
+    height: responsiveHeight(4),
+    resizeMode: 'contain',
+  },
   storyAvatar: {
     width: 74,
     height: 74,
@@ -716,6 +815,25 @@ const styles = StyleSheet.create({
     color: '#aaa',
     fontFamily: FontFamily.Regular,
     fontSize: responsiveFontSize(2),
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -6,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 5,
+    borderRadius: 9,
+    backgroundColor: '#9FED3A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#0b0b0b',
+  },
+  badgeText: {
+    color: '#000',
+    fontSize: 11,
+    fontWeight: '800',
   },
 });
 

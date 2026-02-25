@@ -345,7 +345,7 @@ const CompleteProfile = ({route}) => {
         // navigation.navigate('Subscription');
       }
     } catch (error) {
-      console.log(error);
+      console.log('Error:', error);
 
       showMessage({
         message: 'Error',
