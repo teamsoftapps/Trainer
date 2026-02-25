@@ -438,7 +438,7 @@ const Home = () => {
       </View>
 
       {/* Stories Section */}
-      <View style={styles.storiesSection}>
+      {/* <View style={styles.storiesSection}>
         <Text style={styles.sectionTitle}>Stories from trainers</Text>
         <View
           style={{
@@ -531,7 +531,105 @@ const Home = () => {
             }}
           />
         </View>
-      </View>
+      </View> */}
+
+      {/* Stories Section */}
+      {storiesData?.length > 0 ? (
+        <View style={styles.storiesSection}>
+          <Text style={styles.sectionTitle}>Stories from trainers</Text>
+
+          <View
+            style={{
+              width: '100%',
+              height: 120,
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
+            <FlashList
+              horizontal
+              data={storiesData}
+              estimatedItemSize={90}
+              keyExtractor={item => item.user_id}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                backgroundColor: 'transparent',
+              }}
+              getItemLayout={(data, index) => ({
+                length: 96,
+                offset: 96 * index,
+                index,
+              })}
+              renderItem={({item}) => {
+                const isSeen = seenUsers.has(item.user_id);
+
+                const RING_SIZE = responsiveWidth(22);
+                const IMAGE_SIZE = RING_SIZE - 10;
+
+                return (
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate('StoryViewer', {
+                        user: item,
+                        onAllSeen: () => {
+                          setSeenUsers(prev => {
+                            const next = new Set(prev);
+                            next.add(item.user_id);
+                            return next;
+                          });
+                        },
+                        markStorySeen,
+                      })
+                    }
+                    style={{
+                      alignItems: 'center',
+                      marginRight: responsiveWidth(4),
+                      width: RING_SIZE,
+                    }}>
+                    <View
+                      style={{
+                        width: RING_SIZE,
+                        height: RING_SIZE,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}>
+                      <StoryRing
+                        count={item.stories.length}
+                        color={isSeen ? '#666666' : '#9FED3A'}
+                        size={RING_SIZE}
+                        strokeWidth={4}
+                      />
+
+                      <Image
+                        source={{uri: item.user_image}}
+                        style={{
+                          position: 'absolute',
+                          width: IMAGE_SIZE,
+                          height: IMAGE_SIZE,
+                          borderRadius: IMAGE_SIZE / 2,
+                        }}
+                      />
+                    </View>
+
+                    <Text
+                      numberOfLines={1}
+                      style={{
+                        color: '#fff',
+                        fontSize: responsiveFontSize(1.5),
+                        fontWeight: '500',
+                        marginTop: responsiveHeight(0.8),
+                        textAlign: 'center',
+                      }}>
+                      {item.user_name}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </View>
+        </View>
+      ) : null}
 
       {/* Trainers ScrollView */}
       <ScrollView

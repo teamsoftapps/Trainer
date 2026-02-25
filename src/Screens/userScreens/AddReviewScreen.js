@@ -69,69 +69,6 @@ const AddReviewScreen = () => {
     ));
   };
 
-  // const handleSubmit = async () => {
-  //   if (!rating || !review.trim()) {
-  //     showMessage({
-  //       message: 'Incomplete',
-  //       description: 'Please add rating and review',
-  //       type: 'danger',
-  //     });
-  //     return;
-  //   }
-
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append('rating', rating);
-  //     formData.append('reviewText', review);
-
-  //     if (media && !media.isExisting) {
-  //       formData.append('file', {
-  //         uri: media.path,
-  //         type: media.mime,
-  //         name: `review-${Date.now()}`,
-  //       });
-  //     }
-
-  //     if (editMode) {
-  //       await axiosBaseURL.put(`/user/update/${reviewData._id}`, formData, {
-  //         headers: {
-  //           Authorization: `Bearer ${authData.token}`,
-  //           'Content-Type': 'multipart/form-data',
-  //         },
-  //       });
-
-  //       showMessage({
-  //         message: 'Updated',
-  //         description: 'Review updated successfully',
-  //         type: 'success',
-  //       });
-  //     } else {
-  //       formData.append('trainerId', trainerId);
-
-  //       await axiosBaseURL.post('/user/addReview', formData, {
-  //         headers: {
-  //           Authorization: `Bearer ${authData.token}`,
-  //           'Content-Type': 'multipart/form-data',
-  //         },
-  //       });
-
-  //       showMessage({
-  //         message: 'Success',
-  //         description: 'Review added successfully',
-  //         type: 'success',
-  //       });
-  //     }
-
-  //     navigation.goBack();
-  //   } catch (error) {
-  //     showMessage({
-  //       message: 'Error',
-  //       description: error?.response?.data?.message || 'Something went wrong',
-  //       type: 'danger',
-  //     });
-  //   }
-  // };
-
   const handleSubmit = async () => {
     if (!rating || !review.trim()) {
       showMessage({
@@ -173,12 +110,14 @@ const AddReviewScreen = () => {
       } else {
         formData.append('trainerId', trainerId);
 
-        await axiosBaseURL.post('/user/addReview', formData, {
+        const res = await axiosBaseURL.post('/user/addReview', formData, {
           headers: {
             Authorization: `Bearer ${authData.token}`,
             'Content-Type': 'multipart/form-data',
           },
         });
+
+        console.log('responce in review:', res);
 
         showMessage({
           message: 'Success',
@@ -189,6 +128,7 @@ const AddReviewScreen = () => {
 
       navigation.goBack();
     } catch (error) {
+      console.log('Erro::::::', error);
       showMessage({
         message: 'Error',
         description: error?.response?.data?.message || 'Something went wrong',

@@ -40,6 +40,13 @@ PODS:
     - "GoogleUtilities/NSData+zlib (~> 8.1)"
   - fmt (9.1.0)
   - glog (0.3.5)
+  - Google-Maps-iOS-Utils (5.0.0):
+    - GoogleMaps (~> 8.0)
+  - GoogleMaps (8.4.0):
+    - GoogleMaps/Maps (= 8.4.0)
+  - GoogleMaps/Base (8.4.0)
+  - GoogleMaps/Maps (8.4.0):
+    - GoogleMaps/Base
   - GoogleSignIn (9.1.0):
     - AppAuth (~> 2.0)
     - AppCheckCore (~> 11.0)
@@ -1070,6 +1077,10 @@ PODS:
     - Yoga
   - react-native-get-random-values (1.11.0):
     - React-Core
+  - react-native-google-maps (1.18.2):
+    - Google-Maps-iOS-Utils (= 5.0.0)
+    - GoogleMaps (= 8.4.0)
+    - React-Core
   - react-native-image-picker (8.2.1):
     - DoubleConversion
     - glog
@@ -1743,6 +1754,7 @@ DEPENDENCIES:
   - react-native-create-thumbnail (from `../node_modules/react-native-create-thumbnail`)
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
+  - react-native-google-maps (from `../node_modules/react-native-maps`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-insta-story (from `../node_modules/react-native-insta-story`)
   - react-native-maps (from `../node_modules/react-native-maps`)
@@ -1803,6 +1815,8 @@ SPEC REPOS:
     - FirebaseCore
     - FirebaseCoreExtension
     - FirebaseCoreInternal
+    - Google-Maps-iOS-Utils
+    - GoogleMaps
     - GoogleSignIn
     - GoogleUtilities
     - GTMAppAuth
@@ -1900,6 +1914,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/geolocation"
   react-native-get-random-values:
     :path: "../node_modules/react-native-get-random-values"
+  react-native-google-maps:
+    :path: "../node_modules/react-native-maps"
   react-native-image-picker:
     :path: "../node_modules/react-native-image-picker"
   react-native-insta-story:
@@ -2013,6 +2029,8 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: fe5fa466aeb314787093a7dce9f0beeaad5a2a21
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
   glog: fdfdfe5479092de0c4bdbebedd9056951f092c4f
+  Google-Maps-iOS-Utils: 66d6de12be1ce6d3742a54661e7a79cb317a9321
+  GoogleMaps: 8939898920281c649150e0af74aa291c60f2e77d
   GoogleSignIn: fcee2257188d5eda57a5e2b6a715550ffff9206d
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   GTMAppAuth: 217a876b249c3c585a54fd6f73e6b58c4f5c4238
@@ -2052,6 +2070,7 @@ SPEC CHECKSUMS:
   react-native-create-thumbnail: c15cedc37f3822777d44e6035be041f7961341ea
   react-native-geolocation: 4ec47ba1f4dd64272eb4179f6e1301432e6828c5
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
+  react-native-google-maps: d907bdfbe3db2057c3310bb5b38c98af1bde9082
   react-native-image-picker: 8e0eee3463521800cbf40016f2137c694efeaff8
   react-native-insta-story: 2f1028459065547b4b4cd81dd0a3f5a08fa25eb1
   react-native-maps: c34648af107791f0e1d7cd054a29db15f290c272
@@ -2114,6 +2133,6 @@ SPEC CHECKSUMS:
   TOCropViewController: 80b8985ad794298fb69d3341de183f33d1853654
   Yoga: 9ad2c02dbd9811bb5a35fe23081cb0f5d5a3f9dd
 
-PODFILE CHECKSUM: 1c7856813f89f7c7045869fb37fe438a6808aa86
+PODFILE CHECKSUM: a86457fcbd2666c8a56c924239d551461610057b
 
 COCOAPODS: 1.16.2

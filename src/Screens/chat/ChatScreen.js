@@ -44,6 +44,7 @@ const Message = () => {
   // const {trainerData, conversationId} = route.params || {};
 
   const {otherUser, conversationId} = route.params || {};
+  console.log('Other user data in chat screen:', otherUser);
   const user = useSelector(state => state.Auth.data);
   const myUserId = user?._id;
 
@@ -651,7 +652,10 @@ const Message = () => {
               centerContent>
               <Image
                 source={{uri: previewUrl || ''}}
-                style={styles.previewImage}
+                style={[
+                  styles.previewImage,
+                  {width: responsiveWidth(100), height: responsiveHeight(100)},
+                ]}
                 resizeMode="contain"
               />
             </ScrollView>

@@ -84,7 +84,7 @@ const TrainerProfile = ({route}) => {
 
   const fetchReviews = async () => {
     try {
-      const res = await axiosBaseURL.get(`/user/trainer/${data._id}`);
+      const res = await axiosBaseURL.get(`/user/trainer/${data._id}/reviews`);
       console.log('responce in trainer prfile for the reviews:', res.data.data);
       if (res.data.status) {
         setReviews(res.data.data);
@@ -315,7 +315,7 @@ const TrainerProfile = ({route}) => {
 
         navigation.navigate('ChatScreen', {
           conversationId: conversation?._id,
-          trainerData: data,
+          otherUser: data,
         });
       }
     } catch (error) {
