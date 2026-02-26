@@ -57,7 +57,6 @@
 // export default App;
 
 // const styles = StyleSheet.create({});
-
 import React, {useEffect, useState} from 'react';
 import {StyleSheet} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';

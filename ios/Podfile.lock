@@ -1075,8 +1075,6 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-get-random-values (1.11.0):
-    - React-Core
   - react-native-google-maps (1.18.2):
     - Google-Maps-iOS-Utils (= 5.0.0)
     - GoogleMaps (= 8.4.0)
@@ -1753,7 +1751,6 @@ DEPENDENCIES:
   - react-native-chat-sdk (from `../node_modules/react-native-agora-chat`)
   - react-native-create-thumbnail (from `../node_modules/react-native-create-thumbnail`)
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
-  - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-google-maps (from `../node_modules/react-native-maps`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-insta-story (from `../node_modules/react-native-insta-story`)
@@ -1912,8 +1909,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-create-thumbnail"
   react-native-geolocation:
     :path: "../node_modules/@react-native-community/geolocation"
-  react-native-get-random-values:
-    :path: "../node_modules/react-native-get-random-values"
   react-native-google-maps:
     :path: "../node_modules/react-native-maps"
   react-native-image-picker:
@@ -2069,7 +2064,6 @@ SPEC CHECKSUMS:
   react-native-chat-sdk: 4b07abfcb1521ed848a41281ab23b32ee32adfcc
   react-native-create-thumbnail: c15cedc37f3822777d44e6035be041f7961341ea
   react-native-geolocation: 4ec47ba1f4dd64272eb4179f6e1301432e6828c5
-  react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
   react-native-google-maps: d907bdfbe3db2057c3310bb5b38c98af1bde9082
   react-native-image-picker: 8e0eee3463521800cbf40016f2137c694efeaff8
   react-native-insta-story: 2f1028459065547b4b4cd81dd0a3f5a08fa25eb1

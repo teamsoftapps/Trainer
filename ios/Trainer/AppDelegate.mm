@@ -7,7 +7,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  [GMSServices provideAPIKey:@"AIzaSyBBlrR_ENS10a9haJIpIgCHIu4dD9A_rE4"];
+  [GMSServices provideAPIKey:@"AIzaSyD3QYkN3hF2nkO-ovTan98BPweQh-fw840"];
   self.moduleName = @"Trainer";
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
