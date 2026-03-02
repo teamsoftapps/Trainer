@@ -34,6 +34,7 @@
     "axios": "^1.7.3",
     "credit-card-type": "^10.0.1",
     "date-fns": "^3.6.0",
+    "lottie-react-native": "^7.3.6",
     "moment": "^2.30.1",
     "react": "18.2.0",
     "react-native": "0.74.2",

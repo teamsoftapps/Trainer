@@ -1,3 +1,4 @@
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -6,258 +7,303 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
-import WrapperContainer from '../../Components/Wrapper';
-import {FontFamily, Images} from '../../utils/Images';
+} from "react-native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveScreenWidth,
   responsiveWidth,
-} from 'react-native-responsive-dimensions';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import {useSelector} from 'react-redux';
-import axiosBaseURL from '../../services/AxiosBaseURL';
+} from "react-native-responsive-dimensions";
+import WrapperContainer from "../../Components/Wrapper";
+import { FontFamily } from "../../utils/Images";
+import { TrainerBookingAPI } from "../../services/trainerBookingApi";
+import { showMessage } from "react-native-flash-message";
 
-const upcoming = [
-  {
-    id: 1,
-    name: 'Alex Morgan',
-    date: 'Monday, Oct, 23',
-    time: '8:00 AM (1Hour)',
-    timeage: '30 mins before',
-    status: 'Completed',
-    image: Images.trainer2,
-  },
-  {
-    id: 2,
-    name: 'Barbra Michelle',
-    date: 'Monday, Oct, 2',
-    time: '10:00 AM (2Hour)',
-    timeage: '15 mins before',
-    status: 'Completed',
-    image: Images.trainer,
-  },
-  {
-    id: 3,
-    name: 'Mathues Pablo',
-    date: 'Sunday, Oct, 21',
-    time: '12:00 PM (3Hour)',
-    timeage: 'None',
-    status: 'Cancelled',
-    image: Images.trainer3,
-  },
-];
+const getStatusColor = (status) => {
+  switch (status) {
+    case "pending":
+      return "#FFA500";
+    case "confirmed":
+      return "#9FED3A";
+    case "rejected":
+      return "#FF2D55";
+    case "completed":
+      return "#4A90E2";
+    case "cancelled":
+      return "#999";
+    default:
+      return "#666";
+  }
+};
 
-const Previous = () => {
-  const trainer_data = useSelector(state => state.Auth.data);
+const getPaymentChip = (paymentStatus) => {
+  // Stripe paymentIntent statuses: succeeded, requires_payment_method, requires_action, processing, canceled...
+  if (paymentStatus === "succeeded") return { text: "PAID", bg: "#9FED3A", color: "#000" };
+  if (!paymentStatus) return { text: "UNPAID", bg: "#333", color: "#fff" };
+  if (paymentStatus === "processing") return { text: "PROCESSING", bg: "#777", color: "#000" };
+  if (paymentStatus === "requires_payment_method") return { text: "PAYMENT FAILED", bg: "#FF2D55", color: "#fff" };
+  return { text: paymentStatus.toUpperCase(), bg: "#444", color: "#fff" };
+};
+
+const Upcoming = () => {
   const navigation = useNavigation();
+  const token = useSelector((state) => state?.Auth?.data?.token);
+
   const [sessions, setSessions] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState(null);
+
+  const load = async () => {
+    try {
+      setLoading(true);
+      const res = await TrainerBookingAPI.getMyBookings(token);
+
+      if (!res?.success) {
+        showMessage({ message: res?.message || "Failed to load sessions", type: "danger" });
+        return;
+      }
+
+      // Trainer upcoming: show pending + confirmed (optionally also show paid-but-pending first)
+      const filtered = (res.data || []).filter(
+        (b) => b.status === "pending" || b.status === "confirmed"
+      );
+
+      // Sort: paid pending first, then by date
+      filtered.sort((a, b) => {
+        const aPaid = a?.payment?.paymentStatus === "succeeded" ? 0 : 1;
+        const bPaid = b?.payment?.paymentStatus === "succeeded" ? 0 : 1;
+        if (aPaid !== bPaid) return aPaid - bPaid;
+        return (a.date || "").localeCompare(b.date || "");
+      });
+
+      setSessions(filtered);
+    } catch (e) {
+      console.log("trainer upcoming error:", e?.response?.data || e.message);
+      showMessage({ message: e?.response?.data?.message || e.message, type: "danger" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
-      getSessions();
-    }, []),
+      load();
+    }, [])
   );
-  const getSessions = async () => {
+
+  const updateStatus = async (bookingId, status) => {
     try {
-      const responce = await axiosBaseURL.get(
-        `/user/getBookingbyId/${trainer_data._id}`,
-      );
-      setSessions(responce.data.data);
-      setIsLoading(false);
-      console.log('Sessions we get in upcoming: ', responce.data.data);
-    } catch (error) {
-      console.log('error in getSessions:', error);
+      setUpdatingId(bookingId);
+      const res = await TrainerBookingAPI.updateStatus(token, bookingId, status);
+
+      if (!res?.success) {
+        showMessage({ message: res?.message || "Update failed", type: "danger" });
+        return;
+      }
+
+      showMessage({ message: `Booking ${status}`, type: "success" });
+      load();
+    } catch (e) {
+      console.log("updateStatus error:", e?.response?.data || e.message);
+      showMessage({ message: e?.response?.data?.message || e.message, type: "danger" });
+    } finally {
+      setUpdatingId(null);
     }
   };
 
-  const acceptSession = async item => {
-    console.log('ID', item?._id);
-    try {
-      const responce = await axiosBaseURL.post('/common/acceptBooking', {
-        bookingId: item?._id, //booking id
-      });
+  const renderItem = ({ item }) => {
+    const user = item.userId;
+    const statusText = item.status.charAt(0).toUpperCase() + item.status.slice(1);
+    const statusBg = item.status === "confirmed" ? "#9FED3A" : "#C7C7CC";
+    const statusTextColor = item.status === "confirmed" ? "black" : "white";
 
-      console.log('Res Data', responce?.data);
-      getSessions();
-    } catch (error) {
-      console.log('Errrrr', error);
-    }
-  };
-
-  const upComingSessions = ({item, index}) => {
-    if (item?.paymentStatus === 'accepted') {
-      return;
-    }
     return (
-      <View style={styles.border}>
-        <View style={styles.container}>
-          <View style={styles.left}>
-            <Image
-              src={item.profileImage}
-              style={{
-                height: responsiveWidth(14),
-                width: responsiveWidth(14),
-                borderRadius: responsiveWidth(7),
-              }}
-            />
-            <View>
-              <Text style={styles.whitetext} numberOfLines={1}>
-                {item.userName}
-              </Text>
-              <Text style={styles.whitetext} numberOfLines={1}>
-                {item.Date}
-              </Text>
-              <Text style={styles.greytext} numberOfLines={1}>
-                {item.bookingTime} (1 Hour)
-              </Text>
-            </View>
+      <View style={styles.card}>
+        <View style={styles.cardContent}>
+          <Image source={{ uri: user?.profileImage }} style={styles.avatar} />
+
+          <View style={styles.infoContainer}>
+            <Text style={styles.name}>{user?.fullName || "User"}</Text>
+            <Text style={styles.dateText}>{item.date}</Text>
+            <Text style={styles.timeText}>
+              {item.time} ({Math.round((item.durationMinutes || 60) / 60)} Hour)
+            </Text>
           </View>
-          <View style={styles.right}>
-            <Text style={{color: '#9FED3A'}}>View Details</Text>
-            <View
-              style={{
-                ...styles.curve,
-                borderRadius: responsiveScreenWidth(10),
-                backgroundColor:
-                  item.status === 'Completed'
-                    ? '#9FED3A'
-                    : item.status === 'Cancelled'
-                      ? '#FF2D55'
-                      : item.status === 'pending'
-                        ? '#bbbbbb'
-                        : 'none',
-                marginVertical: responsiveHeight(0.5),
-              }}>
-              <Text
-                style={
-                  item.status === 'pending'
-                    ? styles.blacktext
-                    : styles.whitetext
-                }>
-                {item.status}
-              </Text>
+
+          <View style={styles.rightInfoContainer}>
+            <TouchableOpacity onPress={() => navigation.navigate("BookingDetails", { data: item })}>
+              <Text style={styles.viewDetailsText}>View Details</Text>
+            </TouchableOpacity>
+            <View style={[styles.statusPill, { backgroundColor: statusBg }]}>
+              <Text style={[styles.statusText, { color: statusTextColor }]}>{statusText}</Text>
             </View>
           </View>
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignSelf: 'flex-end',
-            paddingHorizontal: responsiveWidth(6),
-            paddingBottom: responsiveHeight(3),
-          }}>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('ReviewBooking', {data: item});
-            }}
-            style={{
-              height: responsiveHeight(4),
-              justifyContent: 'center',
-              alignItems: 'center',
-              paddingHorizontal: responsiveWidth(3),
-              borderColor: '#B8B8B8',
-              borderWidth: responsiveWidth(0.3),
-              borderRadius: responsiveWidth(2),
-              marginHorizontal: responsiveWidth(3),
-              width: responsiveWidth(30),
-            }}>
-            <Text
-              style={{
-                color: '#bbbbbb',
-                fontSize: responsiveFontSize(1.7),
-                fontWeight: '500',
-              }}>
-              Review
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              acceptSession(item);
-            }}
-            style={{
-              height: responsiveHeight(4),
-              justifyContent: 'center',
-              alignItems: 'center',
-              paddingHorizontal: responsiveWidth(3),
-              borderColor: '#B8B8B8',
-              backgroundColor: '#9FED3A',
-              borderRadius: responsiveWidth(2),
-              width: responsiveWidth(30),
-            }}>
-            <Text
-              style={{
-                color: '#000',
-                fontWeight: '500',
-                fontSize: responsiveFontSize(1.7),
-              }}>
-              Accept
-            </Text>
-          </TouchableOpacity>
+
+        {/* Action buttons */}
+        <View style={styles.actionsRow}>
+          {item.status === "pending" ? (
+            <>
+              <TouchableOpacity
+                style={styles.outlineBtn}
+                onPress={() => navigation.navigate("BookingDetails", { data: item })}
+              >
+                <Text style={styles.outlineBtnText}>Review</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.filledBtn}
+                disabled={updatingId === item._id}
+                onPress={() => updateStatus(item._id, "confirmed")}
+              >
+                <Text style={styles.filledBtnText}>
+                  {updatingId === item._id ? "..." : "Accept"}
+                </Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <TouchableOpacity
+                style={styles.outlineBtn}
+                onPress={() => updateStatus(item._id, "cancelled")}
+              >
+                <Text style={styles.outlineBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.filledBtn}
+                onPress={() => showMessage({ message: "Reschedule coming soon", type: "info" })}
+              >
+                <Text style={styles.filledBtnText}>Reschedule</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
+        <View style={styles.separator} />
       </View>
     );
   };
 
-  const WhenListEmpty = () => {
-    return (
-      <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-        {isLoading ? (
-          <ActivityIndicator size={responsiveHeight(5)} color={'#fff'} />
-        ) : (
-          <Text
-            style={{
-              fontFamily: FontFamily.Regular,
-              color: 'gray',
-              fontSize: responsiveFontSize(2),
-            }}>
-            No Sessions found
-          </Text>
-        )}
-      </View>
-    );
-  };
+  const Empty = () => (
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", marginTop: 40 }}>
+      {loading ? (
+        <ActivityIndicator size="large" color={"#9FED3A"} />
+      ) : (
+        <Text style={{ color: "gray", fontSize: responsiveFontSize(2), textAlign: 'center' }}>
+          No upcoming sessions found
+        </Text>
+      )}
+    </View>
+  );
+
   return (
-    <WrapperContainer style={{backgroundColor: '#181818'}}>
+    <WrapperContainer style={{ backgroundColor: "#181818" }}>
       <FlatList
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
         data={sessions}
-        renderItem={upComingSessions}
-        ListEmptyComponent={WhenListEmpty}
+        keyExtractor={(item) => item._id}
+        renderItem={renderItem}
+        ListEmptyComponent={Empty}
       />
     </WrapperContainer>
   );
 };
 
-export default Previous;
+export default Upcoming;
 
 const styles = StyleSheet.create({
-  border: {borderBottomColor: '#B8B8B8', borderBottomWidth: 0.5},
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '88%',
-    alignSelf: 'center',
-    paddingVertical: responsiveScreenWidth(5),
+  card: {
+    paddingHorizontal: responsiveWidth(6),
+    marginTop: 20,
   },
-  left: {
-    flexDirection: 'row',
-    gap: responsiveScreenWidth(3),
-    alignItems: 'center',
+  cardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingBottom: 20,
   },
-  whitetext: {color: 'white', fontWeight: '500'},
-  blacktext: {color: 'black', fontWeight: '500'},
-  greytext: {color: '#B8B8B8', fontWeight: '400'},
-  right: {justifyContent: 'space-evenly', alignItems: 'flex-end'},
-  timeago: {color: '#B8B8B8', fontWeight: '400'},
-  curve: {
-    width: '100%',
-    alignItems: 'center',
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    marginRight: 15,
+  },
+  infoContainer: {
+    flex: 1,
     justifyContent: 'center',
-    padding: responsiveScreenWidth(1),
-    paddingHorizontal: responsiveScreenWidth(5),
+  },
+  name: {
+    color: "white",
+    fontSize: responsiveFontSize(2.2),
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  dateText: {
+    color: "#8E8E93",
+    fontSize: responsiveFontSize(1.8),
+    marginBottom: 2,
+  },
+  timeText: {
+    color: "#8E8E93",
+    fontSize: responsiveFontSize(1.8),
+  },
+  rightInfoContainer: {
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  viewDetailsText: {
+    color: "#9FED3A",
+    fontSize: responsiveFontSize(1.6),
+    fontFamily: FontFamily.Medium,
+    marginBottom: 8,
+  },
+  statusPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    borderRadius: 20,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  statusText: {
+    fontSize: responsiveFontSize(1.6),
+    fontWeight: "700",
+  },
+  actionsRow: {
+    flexDirection: "row",
+    gap: 12,
+    paddingBottom: 20,
+  },
+  filledBtn: {
+    flex: 1,
+    height: 44,
+    backgroundColor: "#9FED3A",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  filledBtnText: {
+    color: "black",
+    fontWeight: "700",
+    fontSize: responsiveFontSize(1.8),
+  },
+  outlineBtn: {
+    flex: 1,
+    height: 44,
+    borderWidth: 1,
+    borderColor: "#3A3A3C",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  outlineBtnText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: responsiveFontSize(1.8),
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#2C2C2E',
+    width: '100%',
   },
 });

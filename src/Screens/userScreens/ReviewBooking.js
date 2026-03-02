@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
@@ -15,13 +15,16 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {useNavigation, useFocusEffect} from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {formatDate} from '../../utils/Dummy';
-import {useSelector} from 'react-redux';
+import { formatDate } from '../../utils/Dummy';
+import { useSelector } from 'react-redux';
+import { useStripe } from "@stripe/stripe-react-native";
+import { BookingAPI } from "../../services/bookingApi";
+import { showMessage } from "react-native-flash-message";
 
-const ReviewBooking = ({route}) => {
-  const {Data, selectedCard: passedCard} = route.params || {};
+const ReviewBooking = ({ route }) => {
+  const { Data } = route.params || {};
   const navigation = useNavigation();
   const authData = useSelector(state => state.Auth.data);
 
@@ -33,18 +36,13 @@ const ReviewBooking = ({route}) => {
   const [weeklyReminder, setWeeklyReminder] = useState(true);
   const [selectedDay, setSelectedDay] = useState('Thursday');
   const [dayModalVisible, setDayModalVisible] = useState(false);
-  const [selectedCard, setSelectedCard] = useState(passedCard || null);
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const token = useSelector(state => state?.Auth?.data?.token);
 
-  const isFormValid = selectedCard && selectedDay && Data?.Date && Data?.time;
+  const bookingId = Data?.bookingId;
 
-  // 🔥 Listen when coming back from PaymentCards
-  useFocusEffect(
-    useCallback(() => {
-      if (route.params?.selectedCard) {
-        setSelectedCard(route.params.selectedCard);
-      }
-    }, [route.params?.selectedCard]),
-  );
+  const isFormValid = selectedDay && Data?.Date && Data?.time;
+
 
   const daysList = [
     'Sunday',
@@ -55,6 +53,45 @@ const ReviewBooking = ({route}) => {
     'Friday',
     'Saturday',
   ];
+
+  const payForBooking = async () => {
+    if (!bookingId) {
+      showMessage({ message: "Missing bookingId", type: "danger" });
+      return false;
+    }
+
+    // 1) create payment intent
+    const intentRes = await BookingAPI.createStripeIntent(token, bookingId);
+    if (!intentRes?.success) {
+      showMessage({ message: intentRes?.message || "Payment init failed", type: "danger" });
+      return false;
+    }
+
+    const { paymentIntent, ephemeralKey, customer, publishableKey } = intentRes.data;
+
+    // 2) init payment sheet
+    const initRes = await initPaymentSheet({
+      merchantDisplayName: "Trainer App",
+      customerId: customer,
+      customerEphemeralKeySecret: ephemeralKey,
+      paymentIntentClientSecret: paymentIntent,
+      allowsDelayedPaymentMethods: false,
+    });
+
+    if (initRes.error) {
+      showMessage({ message: initRes.error.message, type: "danger" });
+      return false;
+    }
+
+    // 3) present payment sheet
+    const presentRes = await presentPaymentSheet();
+    if (presentRes.error) {
+      showMessage({ message: presentRes.error.message, type: "danger" });
+      return false;
+    }
+
+    return true;
+  };
 
   return (
     <WrapperContainer>
@@ -77,7 +114,7 @@ const ReviewBooking = ({route}) => {
 
         {/* Trainer */}
         <View style={styles.section}>
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={styles.label}>Trainer</Text>
             <Text style={styles.value}>{trainer?.fullName}</Text>
             <Text style={styles.subValue}>
@@ -85,35 +122,42 @@ const ReviewBooking = ({route}) => {
             </Text>
           </View>
 
-          <Image source={{uri: trainer?.profileImage}} style={styles.avatar} />
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {/* <TouchableOpacity
+              onPress={async () => {
+                try {
+                  const res = await BookingAPI.createConversation(authData?._id, trainer?._id);
+                  if (res.success) {
+                    const conversation = res.conversation || res.data;
+                    navigation.navigate('ChatScreen', {
+                      conversationId: conversation?._id,
+                      otherUser: trainer,
+                    });
+                  }
+                } catch (error) {
+                  console.log('Chat error:', error?.response?.data || error.message);
+                  showMessage({
+                    message: "Failed to start chat",
+                    type: "danger"
+                  });
+                }
+              }}
+              style={styles.messageIconContainer}
+            >
+              <Icon name="chatbubble-ellipses-outline" size={24} color="#9FED3A" />
+            </TouchableOpacity> */}
+            <Image source={{ uri: trainer?.profileImage }} style={styles.avatar} />
+          </View>
         </View>
 
         {/* Address */}
         <View style={styles.section}>
-          <View style={{flex: 1}}>
+          <View style={{ flex: 1 }}>
             <Text style={styles.label}>Address</Text>
             <Text style={styles.value}>{trainer?.Address}</Text>
           </View>
         </View>
 
-        {/* Payment Method */}
-        <TouchableOpacity
-          style={styles.section}
-          onPress={() =>
-            navigation.navigate('PaymentCards', {
-              selectedCard: selectedCard,
-            })
-          }>
-          <View>
-            <Text style={styles.label}>Payment Method</Text>
-            <Text style={styles.value}>
-              {selectedCard
-                ? `**** **** **** ${selectedCard.card.last4}`
-                : 'Select Card'}
-            </Text>
-          </View>
-          <Icon name="chevron-forward" size={20} color="#888" />
-        </TouchableOpacity>
 
         {/* Price */}
         <View style={styles.priceContainer}>
@@ -150,13 +194,13 @@ const ReviewBooking = ({route}) => {
           style={styles.dayRow}
           onPress={() => setDayModalVisible(true)}>
           <Text style={styles.value}>Day</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Text style={styles.value}>{selectedDay}</Text>
             <Icon name="chevron-down" size={18} color="#888" />
           </View>
         </TouchableOpacity>
 
-        <View style={{height: responsiveHeight(12)}} />
+        <View style={{ height: responsiveHeight(12) }} />
       </ScrollView>
 
       {/* Confirm Button */}
@@ -169,14 +213,49 @@ const ReviewBooking = ({route}) => {
             },
           ]}
           disabled={!isFormValid}
-          onPress={() => {
+          onPress={async () => {
             if (!isFormValid) return;
-            console.log('Booking Confirmed');
-          }}>
+
+            try {
+              const paid = await payForBooking();
+              if (!paid) return;
+
+              // webhook may take a moment → poll once or twice
+              const details = await BookingAPI.getBooking(token, bookingId);
+
+              if (details?.success && details?.data?.status === "confirmed") {
+                navigation.navigate("BookingSuccessfull", {
+                  ...details.data, // pass full booking object
+                  trainerData: trainer, // keep trainer for legacy
+                  Date: formattedDate,
+                  time: Data?.time,
+                  bookingId,
+                });
+              } else {
+                // still pending? show message and let user refresh
+                showMessage({
+                  message: "Payment done. Booking will confirm in a moment.",
+                  type: "success",
+                });
+
+                navigation.navigate("BookingSuccessfull", {
+                  data: trainer, // fallback if fetch failed or still draft structure
+                  amount: total * 100, // ensure amount is passed
+                  Date: formattedDate,
+                  time: Data?.time,
+                  bookingId,
+                });
+              }
+            } catch (e) {
+              showMessage({ message: e.message || "Payment error", type: "danger" });
+            }
+          }}
+
+        >
           <Text
             style={[
               styles.confirmText,
-              {color: isFormValid ? 'black' : '#777'},
+              { color: isFormValid ? 'black' : '#777' },
             ]}>
             Confirm
           </Text>
@@ -205,7 +284,7 @@ const ReviewBooking = ({route}) => {
                 <Text
                   style={[
                     styles.modalText,
-                    selectedDay === day && {color: '#9FED3A'},
+                    selectedDay === day && { color: '#9FED3A' },
                   ]}>
                   {day}
                 </Text>
@@ -370,5 +449,14 @@ const styles = StyleSheet.create({
   modalText: {
     color: 'white',
     fontSize: responsiveFontSize(2.2),
+  },
+  messageIconContainer: {
+    backgroundColor: '#1C1C1E',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
 });

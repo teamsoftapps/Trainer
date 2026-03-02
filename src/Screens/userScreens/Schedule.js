@@ -8,16 +8,20 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import WrapperContainer from '../../Components/Wrapper';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {Calendar} from 'react-native-calendars';
-import {useNavigation} from '@react-navigation/native';
-import {useSelector} from 'react-redux';
+import { Calendar } from 'react-native-calendars';
+import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { BookingAPI } from '../../services/bookingApi';
+import { cleanSingle } from 'react-native-image-crop-picker';
+import { showMessage } from 'react-native-flash-message';
+
 
 const goalsList = [
   'Body Composition',
@@ -37,12 +41,13 @@ const goalsList = [
 
 const sessionTypes = ['Online', 'Physical', 'Hybrid'];
 
-const Schedule = ({route}) => {
-  const {Data} = route.params || {};
+const Schedule = ({ route }) => {
+  const { Data } = route.params || {};
   console.log('Data in schedule screen:', Data);
   const navigation = useNavigation();
-  const {Bookings} = useSelector(state => state?.bookings);
-
+  const { Bookings } = useSelector(state => state?.bookings);
+  const token = useSelector(state => state?.Auth?.data?.token);
+  console.log('Token in schedule screen:', token);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [selectedGoals, setSelectedGoals] = useState([]);
@@ -50,14 +55,37 @@ const Schedule = ({route}) => {
   const [alertModalVisible, setAlertModalVisible] = useState(false);
   const [selectedAlert, setSelectedAlert] = useState('30 min');
 
+
+
+  const [bookedTimes, setBookedTimes] = useState([]);
+  const [loadingBookedTimes, setLoadingBookedTimes] = useState(false);
+
+  useEffect(() => {
+    const fetchBookedTimes = async () => {
+      try {
+        if (!selectedDate || !Data?._id) return;
+        setLoadingBookedTimes(true);
+
+        const res = await BookingAPI.getBookedTimes(Data._id, selectedDate);
+
+        if (res?.success) setBookedTimes(res.data || []);
+        else setBookedTimes([]);
+      } catch (e) {
+        setBookedTimes([]);
+      } finally {
+        setLoadingBookedTimes(false);
+      }
+    };
+
+    fetchBookedTimes();
+  }, [selectedDate, Data?._id]);
+
   const reminderOptions = [
     '5 Minutes',
     '10 Minutes',
     '15 Minutes',
     '30 Minutes',
   ];
-
-  const [bookedTimes, setBookedTimes] = useState([]);
 
   useEffect(() => {
     if (Bookings) {
@@ -134,8 +162,9 @@ const Schedule = ({route}) => {
           data={Data?.Availiblity}
           keyExtractor={item => item}
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{paddingHorizontal: responsiveWidth(4)}}
-          renderItem={({item}) =>
+          contentContainerStyle={{ paddingHorizontal: responsiveWidth(4) }}
+          renderItem={({ item }) =>
+
             renderChip(
               item,
               selectedTime === item,
@@ -152,17 +181,17 @@ const Schedule = ({route}) => {
           style={styles.reminderRow}
           onPress={() => setAlertModalVisible(true)}>
           <Text style={styles.reminderText}>Select Alert</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={{color: 'grey'}}>{selectedAlert}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={{ color: 'grey' }}>{selectedAlert}</Text>
           </View>
         </TouchableOpacity>
 
         {/* Training Time */}
         <Text style={styles.sectionTitle}>Training Time</Text>
         <View style={styles.trainingRow}>
-          <Text style={{color: 'white'}}>${Data?.Hourlyrate}/hour</Text>
+          <Text style={{ color: 'white' }}>${Data?.Hourlyrate}/hour</Text>
           <View style={styles.dropdown}>
-            <Text style={{color: 'white'}}>1 hr</Text>
+            <Text style={{ color: 'white' }}>1 hr</Text>
           </View>
         </View>
 
@@ -187,33 +216,94 @@ const Schedule = ({route}) => {
         </View>
 
         {/* Bottom Space */}
-        <View style={{height: responsiveHeight(10)}} />
+        <View style={{ height: responsiveHeight(10) }} />
       </ScrollView>
 
       {/* Fixed Bottom Button */}
       <TouchableOpacity
-        disabled={!selectedDate || !selectedTime}
-        onPress={() =>
-          navigation.navigate('ReviewBooking', {
-            Data: {
-              Date: selectedDate,
+        disabled={
+          !selectedDate ||
+          !selectedTime ||
+          selectedGoals.length === 0 ||
+          !selectedSession
+        }
+        // onPress={() =>
+        //   navigation.navigate('ReviewBooking', {
+        //     Data: {
+        //       Date: selectedDate,
+        //       time: selectedTime,
+        //       rate: Data?.Hourlyrate,
+        //       goals: selectedGoals,
+        //       sessionType: selectedSession,
+        //       trainer: Data,
+        //     },
+        //   })
+        // }
+        onPress={async () => {
+          try {
+            const payload = {
+              trainerId: Data?._id,
+              date: selectedDate,
               time: selectedTime,
-              rate: Data?.Hourlyrate,
               goals: selectedGoals,
               sessionType: selectedSession,
-              trainer: Data,
-            },
-          })
-        }
+              reminder: selectedAlert,
+              durationMinutes: 60,
+            };
+
+            const res = await BookingAPI.createDraft(token, payload);
+
+            if (!res?.success) {
+              showMessage({
+                message: res?.message || "Failed to create booking",
+                type: "danger",
+              });
+              return;
+            }
+
+            const { bookingId } = res.data;
+
+            navigation.navigate("ReviewBooking", {
+              Data: {
+                Date: selectedDate,
+                time: selectedTime,
+                rate: Data?.Hourlyrate,
+                goals: selectedGoals,
+                sessionType: selectedSession,
+                trainer: Data,
+                reminder: selectedAlert,
+                bookingId, // ✅ important
+              },
+            });
+          } catch (e) {
+            console.log("Booking error full:", e?.response?.data || e.message);
+            showMessage({
+              message: e?.response?.data?.message || "Slot already booked",
+              type: "danger",
+            });
+          }
+        }}
         style={[
           styles.nextBtn,
           {
-            backgroundColor: selectedDate && selectedTime ? '#9FED3A' : '#222',
+            backgroundColor:
+              selectedDate &&
+                selectedTime &&
+                selectedGoals.length > 0 &&
+                selectedSession
+                ? '#9FED3A'
+                : '#222',
           },
         ]}>
         <Text
           style={{
-            color: selectedDate && selectedTime ? '#000' : '#fff',
+            color:
+              selectedDate &&
+                selectedTime &&
+                selectedGoals.length > 0 &&
+                selectedSession
+                ? '#000'
+                : '#fff',
             fontSize: responsiveFontSize(2.2),
           }}>
           Next

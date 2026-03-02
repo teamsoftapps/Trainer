@@ -1,182 +1,166 @@
+import React, { useCallback, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import React from 'react';
-import WrapperContainer from '../../Components/Wrapper';
-import {Images} from '../../utils/Images';
+} from "react-native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveScreenWidth,
   responsiveWidth,
-} from 'react-native-responsive-dimensions';
-
-const upcoming = [
-  {
-    id: 1,
-    name: 'Alex Morgan',
-    date: 'Monday, Oct, 23',
-    time: '8:00 AM (1Hour)',
-    timeage: '30 mins before',
-    status: 'Completed',
-    image: Images.trainer2,
-  },
-  {
-    id: 2,
-    name: 'Barbra Michelle',
-    date: 'Monday, Oct, 2',
-    time: '10:00 AM (2Hour)',
-    timeage: '15 mins before',
-    status: 'Completed',
-    image: Images.trainer,
-  },
-  {
-    id: 3,
-    name: 'Mathues Pablo',
-    date: 'Sunday, Oct, 21',
-    time: '12:00 PM (3Hour)',
-    timeage: 'None',
-    status: 'Cancelled',
-    image: Images.trainer3,
-  },
-];
+} from "react-native-responsive-dimensions";
+import WrapperContainer from "../../Components/Wrapper";
+import { FontFamily } from "../../utils/Images";
+import { TrainerBookingAPI } from "../../services/trainerBookingApi";
 
 const Previous = () => {
+  const navigation = useNavigation();
+  const token = useSelector((state) => state?.Auth?.data?.token);
+
+  const [sessions, setSessions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    try {
+      setLoading(true);
+      const res = await TrainerBookingAPI.getMyBookings(token);
+
+      if (res?.success) {
+        const filtered = (res.data || []).filter(
+          (b) =>
+            b.status === "completed" ||
+            b.status === "cancelled" ||
+            b.status === "rejected"
+        );
+        setSessions(filtered);
+      }
+    } catch (e) {
+      console.log("trainer previous error:", e?.response?.data || e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [])
+  );
+
+  const renderItem = ({ item }) => {
+    const user = item.userId;
+    const statusText = item.status.toUpperCase();
+
+    let statusColor = "#999";
+    if (item.status === "completed") statusColor = "#9FED3A";
+    if (item.status === "cancelled" || item.status === "rejected") statusColor = "#FF2D55";
+
+    return (
+      <View style={styles.card}>
+        <TouchableOpacity
+          style={styles.cardContent}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate("BookingDetails", { data: item })}
+        >
+          <Image source={{ uri: user?.profileImage }} style={styles.avatar} />
+
+          <View style={styles.infoContainer}>
+            <Text style={styles.name}>{user?.fullName || "User"}</Text>
+            <Text style={styles.subText}>
+              {item.date} • {item.time}
+            </Text>
+            <Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
+          </View>
+
+          <View style={styles.rightContainer}>
+            <Text style={styles.viewDetailsText}>View Details</Text>
+          </View>
+        </TouchableOpacity>
+        <View style={styles.separator} />
+      </View>
+    );
+  };
+
+  const Empty = () => (
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", marginTop: 40 }}>
+      {loading ? (
+        <ActivityIndicator size="large" color={"#9FED3A"} />
+      ) : (
+        <Text style={{ color: "gray", fontSize: responsiveFontSize(2), textAlign: 'center' }}>
+          No session history found
+        </Text>
+      )}
+    </View>
+  );
+
   return (
-    <WrapperContainer style={{backgroundColor: '#181818'}}>
+    <WrapperContainer style={{ backgroundColor: "#181818" }}>
       <FlatList
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
-        data={upcoming}
-        renderItem={({item, index}) => {
-          return (
-            <View style={styles.border}>
-              <View style={styles.container}>
-                <View style={styles.left}>
-                  <Image source={item.image} />
-                  <View>
-                    <Text style={styles.whitetext} numberOfLines={1}>
-                      {item.name}
-                    </Text>
-                    <Text style={styles.whitetext} numberOfLines={1}>
-                      {item.date}
-                    </Text>
-                    <Text style={styles.greytext} numberOfLines={1}>
-                      {item.time}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.right}>
-                  <Text style={{color: '#9FED3A'}}>View Details</Text>
-                  <View
-                    style={{
-                      ...styles.curve,
-                      borderRadius: responsiveScreenWidth(10),
-                      backgroundColor:
-                        item.status === 'Completed'
-                          ? '#9FED3A'
-                          : item.status === 'Cancelled'
-                          ? '#FF2D55'
-                          : 'none',
-                    }}>
-                    <Text
-                      style={
-                        item.status === 'Cancelled'
-                          ? styles.whitetext
-                          : styles.blacktext
-                      }>
-                      {item.status}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignSelf: 'flex-end',
-                  paddingHorizontal: responsiveWidth(6),
-                  paddingBottom: responsiveHeight(3),
-                }}>
-                <TouchableOpacity
-                  style={{
-                    height: responsiveHeight(4),
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    paddingHorizontal: responsiveWidth(3),
-                    borderColor: '#B8B8B8',
-                    borderWidth: responsiveWidth(0.3),
-                    borderRadius: responsiveWidth(2),
-                    marginHorizontal: responsiveWidth(3),
-                    width: responsiveWidth(30),
-                  }}>
-                  <Text
-                    style={{
-                      color: '#bbbbbb',
-                      fontSize: responsiveFontSize(1.7),
-                      fontWeight: '500',
-                    }}>
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={{
-                    height: responsiveHeight(4),
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    paddingHorizontal: responsiveWidth(3),
-                    borderColor: '#B8B8B8',
-                    backgroundColor: '#9FED3A',
-                    borderRadius: responsiveWidth(2),
-                    width: responsiveWidth(30),
-                  }}>
-                  <Text
-                    style={{
-                      color: '#000',
-                      fontWeight: '500',
-                      fontSize: responsiveFontSize(1.7),
-                    }}>
-                    Reschedule
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          );
-        }}
+        data={sessions}
+        keyExtractor={(item) => item._id}
+        renderItem={renderItem}
+        ListEmptyComponent={Empty}
       />
     </WrapperContainer>
   );
 };
 
-export default Previous;
-
 const styles = StyleSheet.create({
-  border: {borderBottomColor: '#B8B8B8', borderBottomWidth: 0.5},
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '88%',
-    alignSelf: 'center',
-    paddingVertical: responsiveScreenWidth(5),
+  card: {
+    paddingHorizontal: responsiveWidth(6),
   },
-  left: {
-    flexDirection: 'row',
-    gap: responsiveScreenWidth(3),
-    alignItems: 'center',
+  cardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 20,
   },
-  whitetext: {color: 'white', fontWeight: '500'},
-  blacktext: {color: 'black', fontWeight: '500'},
-  greytext: {color: '#B8B8B8', fontWeight: '400'},
-  right: {justifyContent: 'space-evenly', alignItems: 'flex-end'},
-  timeago: {color: '#B8B8B8', fontWeight: '400'},
-  curve: {
-    width: '100%',
-    alignItems: 'center',
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    marginRight: 15,
+  },
+  infoContainer: {
+    flex: 1,
+  },
+  name: {
+    color: "white",
+    fontSize: responsiveFontSize(2),
+    fontWeight: "700",
+  },
+  subText: {
+    color: "#aaa",
+    fontSize: responsiveFontSize(1.6),
+    marginTop: 4,
+  },
+  statusText: {
+    marginTop: 8,
+    fontWeight: "700",
+    fontSize: responsiveFontSize(1.6),
+  },
+  rightContainer: {
     justifyContent: 'center',
-    padding: responsiveScreenWidth(1),
-    paddingHorizontal: responsiveScreenWidth(5),
+  },
+  viewDetailsText: {
+    color: "#9FED3A",
+    fontSize: responsiveFontSize(1.6),
+    fontFamily: FontFamily.Medium,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#2C2C2E',
+    width: '100%',
   },
 });
+
+export default Previous;

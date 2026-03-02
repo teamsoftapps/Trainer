@@ -30,7 +30,7 @@ export const Images = {
   call_icon: require('../assets/Images/call_Icon.png'),
   chat_icon: require('../assets/Images/chatIcon.png'),
   edit: require('../assets/Images/edit.png'),
-  logo: require('../assets/Images/logo.png'),
+  logo: require('../assets/Images/dogIcon.png'),
   eye_off: require('../assets/Images/eye-off.png'),
   eye: require('../assets/Images/eye.png'),
   checked: require('../assets/Images/checked(2).png'),

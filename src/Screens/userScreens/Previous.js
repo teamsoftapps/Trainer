@@ -1,123 +1,164 @@
-import {FlatList, Image, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
-import WrapperContainer from '../../Components/Wrapper';
-import {Images} from '../../utils/Images';
+import React, { useCallback, useState } from "react";
 import {
-  responsiveHeight,
-  responsiveScreenWidth,
-} from 'react-native-responsive-dimensions';
-
-const upcoming = [
-  {
-    id: 1,
-    name: 'Alex Morgan',
-    date: 'Monday, Oct, 23',
-    time: '8:00 AM',
-    timeage: '30 mins before',
-    status: 'Completed',
-    image: Images.trainer2,
-  },
-  {
-    id: 2,
-    name: 'Barbra Michelle',
-    date: 'Monday, Oct, 2',
-    time: '10:00 AM',
-    timeage: '15 mins before',
-    status: 'Completed',
-    image: Images.trainer,
-  },
-  {
-    id: 3,
-    name: 'Mathues Pablo',
-    date: 'Sunday, Oct, 21',
-    time: '12:00 PM',
-    timeage: 'None',
-    status: 'Cancelled',
-    image: Images.trainer3,
-  },
-];
+  View,
+  Text,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { useSelector } from "react-redux";
+import {
+  responsiveFontSize,
+  responsiveWidth,
+} from "react-native-responsive-dimensions";
+import { BookingAPI } from "../../services/bookingApi";
 
 const Previous = () => {
-  return (
-    <WrapperContainer style={{backgroundColor: '#181818'}}>
-      <FlatList
-        showsVerticalScrollIndicator={false}
-        data={upcoming}
-        renderItem={({item, index}) => {
-          return (
-            <View style={styles.border}>
-              <View style={styles.container}>
-                <View style={styles.left}>
-                  <Image source={item.image} />
-                  <View>
-                    <Text style={styles.whitetext} numberOfLines={1}>
-                      {item.name}
-                    </Text>
-                    <Text style={styles.whitetext} numberOfLines={1}>
-                      {item.date}
-                    </Text>
-                    <Text style={styles.greytext} numberOfLines={1}>
-                      {item.time}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.right}>
-                  <View
-                    style={{
-                      ...styles.curve,
-                      borderRadius: responsiveScreenWidth(10),
-                      backgroundColor:
-                        item.status === 'Completed'
-                          ? '#9FED3A'
-                          : item.status === 'Cancelled'
-                          ? '#FF2D55'
-                          : 'none',
-                    }}>
-                    <Text
-                      style={
-                        item.status === 'Cancelled'
-                          ? styles.whitetext
-                          : styles.blacktext
-                      }>
-                      {item.status}
-                    </Text>
-                  </View>
-                </View>
-              </View>
+  const token = useSelector((state) => state?.Auth?.data?.token);
+
+  const [bookings, setBookings] = useState([]);
+
+  const fetchBookings = async () => {
+    try {
+      const res = await BookingAPI.getMyBookings(token);
+
+      if (res?.success) {
+        const filtered = res.data.filter(
+          (b) =>
+            b.status === "completed" ||
+            b.status === "cancelled" ||
+            b.status === "rejected"
+        );
+        setBookings(filtered);
+      }
+    } catch (e) {
+      console.log("Previous error:", e.message);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchBookings();
+    }, [])
+  );
+
+  const renderItem = ({ item }) => {
+    const trainer = item.trainerId;
+
+    const statusBg = item.status === "completed" ? "#9FED3A" : "#FF4B4B";
+    const statusTextColor = item.status === "completed" ? "black" : "white";
+    const statusText = item.status.charAt(0).toUpperCase() + item.status.slice(1);
+
+    return (
+      <View style={styles.card}>
+        <View style={styles.cardContent}>
+          <Image source={{ uri: trainer?.profileImage }} style={styles.avatar} />
+          <View style={styles.infoContainer}>
+            <Text style={styles.name}>{trainer?.fullName}</Text>
+            <Text style={styles.dateText}>{item.date}</Text>
+            <Text style={styles.timeText}>{item.time}</Text>
+          </View>
+          <View style={styles.rightContainer}>
+            <Text style={styles.reminderText}>{item.reminder || 'None'}</Text>
+            <View style={[styles.statusPill, { backgroundColor: statusBg }]}>
+              <Text style={[styles.statusText, { color: statusTextColor }]}>{statusText}</Text>
             </View>
-          );
-        }}
+          </View>
+        </View>
+        <View style={styles.separator} />
+      </View>
+    );
+  };
+
+  if (!bookings.length) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: "gray", textAlign: "center", marginTop: 40, fontSize: responsiveFontSize(2) }}>
+          No previous bookings
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={bookings}
+        keyExtractor={(item) => item._id}
+        renderItem={renderItem}
+        contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
       />
-    </WrapperContainer>
+    </View>
   );
 };
 
 export default Previous;
 
 const styles = StyleSheet.create({
-  border: {borderBottomColor: '#B8B8B8', borderBottomWidth: 0.5},
   container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '88%',
-    alignSelf: 'center',
-    paddingVertical: responsiveScreenWidth(5),
+    flex: 1,
+    backgroundColor: '#181818',
   },
-  left: {
-    flexDirection: 'row',
-    gap: responsiveScreenWidth(3),
-    alignItems: 'center',
+  card: {
+    paddingHorizontal: responsiveWidth(6),
+    marginTop: 20,
   },
-  whitetext: {color: 'white', fontWeight: '500'},
-  blacktext: {color: 'black', fontWeight: '500'},
-  greytext: {color: '#B8B8B8', fontWeight: '400'},
-  right: {justifyContent: 'space-evenly', alignItems: 'flex-end'},
-  timeago: {color: '#B8B8B8', fontWeight: '400'},
-  curve: {
-    width: '100%',
-    alignItems: 'center',
+  cardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingBottom: 20,
+  },
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    marginRight: 15,
+  },
+  infoContainer: {
+    flex: 1,
     justifyContent: 'center',
-    padding: responsiveScreenWidth(1),
-    paddingHorizontal: responsiveScreenWidth(5),
+  },
+  name: {
+    color: "white",
+    fontSize: responsiveFontSize(2.2),
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  dateText: {
+    color: "#8E8E93",
+    fontSize: responsiveFontSize(1.8),
+    marginBottom: 2,
+  },
+  timeText: {
+    color: "#8E8E93",
+    fontSize: responsiveFontSize(1.8),
+  },
+  rightContainer: {
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  reminderText: {
+    color: "#8E8E93",
+    fontSize: responsiveFontSize(1.6),
+    marginBottom: 8,
+  },
+  statusPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 20,
+    minWidth: 90,
+    alignItems: 'center',
+  },
+  statusText: {
+    fontSize: responsiveFontSize(1.7),
+    fontWeight: "600",
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#333',
+    width: '100%',
   },
 });

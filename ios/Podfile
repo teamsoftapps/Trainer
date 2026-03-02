@@ -8,12 +8,12 @@
 
 # prepare_react_native_project!
 
-# # ✅ THIS is the correct fix (NOT modular headers)
 # use_frameworks! :linkage => :static
 
 # target 'Trainer' do
 #   config = use_native_modules!
 
+#   # ✅ Add these two lines to fix the "AirGoogleMaps dir" error
 #   rn_maps_path = '../node_modules/react-native-maps'
 #   pod 'react-native-google-maps', :path => rn_maps_path
 
@@ -28,11 +28,13 @@
 #     installer.pods_project.targets.each do |target|
 #       target.build_configurations.each do |config|
 #         config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+        
+#         # ✅ Ensure the AirGoogleMaps headers are found
+#         config.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = 'NO'
 #       end
 #     end
 #   end
 # end
-
 
 require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
@@ -49,7 +51,6 @@ use_frameworks! :linkage => :static
 target 'Trainer' do
   config = use_native_modules!
 
-  # ✅ Add these two lines to fix the "AirGoogleMaps dir" error
   rn_maps_path = '../node_modules/react-native-maps'
   pod 'react-native-google-maps', :path => rn_maps_path
 
@@ -62,11 +63,14 @@ target 'Trainer' do
     react_native_post_install(installer, config[:reactNativePath])
 
     installer.pods_project.targets.each do |target|
-      target.build_configurations.each do |config|
-        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
-        
-        # ✅ Ensure the AirGoogleMaps headers are found
-        config.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = 'NO'
+      target.build_configurations.each do |build_config|
+        build_config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+        build_config.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = 'NO'
+
+        # ✅ Add this: make sure Release builds generate dSYMs (important for Hermes)
+        if build_config.name == 'Release'
+          build_config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf-with-dsym'
+        end
       end
     end
   end

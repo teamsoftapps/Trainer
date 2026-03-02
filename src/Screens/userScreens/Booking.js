@@ -1,5 +1,5 @@
-import {StyleSheet, Text, View, TouchableOpacity, Image} from 'react-native';
-import React, {useState} from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
+import React, { useState } from 'react';
 import WrapperContainer from '../../Components/Wrapper';
 import Header from '../../Components/Header';
 import {
@@ -7,32 +7,32 @@ import {
   responsiveWidth,
   responsiveHeight,
 } from 'react-native-responsive-dimensions';
-import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Upcoming from './Upcoming';
 import Previous from './Previous';
-import {useNavigation} from '@react-navigation/native';
-import {Images} from '../../utils/Images';
+import { useNavigation } from '@react-navigation/native';
+import { Images } from '../../utils/Images';
 
 const Tab = createMaterialTopTabNavigator();
 const Booking = () => {
   const navigation = useNavigation();
   return (
-    <WrapperContainer style={{backgroundColor: '#181818'}}>
+    <WrapperContainer style={{ backgroundColor: '#181818' }}>
       <Header
         text="Bookings"
-        textstyle={{fontSize: responsiveFontSize(3.5), color: 'white'}}
+        textstyle={{ fontSize: responsiveFontSize(3.5), color: 'white' }}
         onPress={() => {
           navigation.goBack();
         }}
         rightView={
           <Image
             source={Images.logo}
-            style={{height: responsiveHeight(5), width: responsiveWidth(10)}}
+            style={{ height: responsiveHeight(5), width: responsiveWidth(10) }}
           />
         }
       />
       <Tab.Navigator
-        tabBar={({navigation, state}) => (
+        tabBar={({ navigation, state }) => (
           <View
             style={{
               flexDirection: 'row',
@@ -59,7 +59,7 @@ const Booking = () => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate('Previous', {data: 'Ok'});
+                navigation.navigate('Previous', { data: 'Ok' });
               }}
               activeOpacity={0.8}
               style={{
