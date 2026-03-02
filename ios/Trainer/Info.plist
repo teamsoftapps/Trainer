@@ -56,10 +56,10 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>We need camera access to take profile photos</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We need your location to show you to nearby users.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app needs your location to show nearby trainers</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need your location to show you to nearby users.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to your gallery to upload images</string>
 	<key>UIAppFonts</key>
@@ -90,6 +90,10 @@
 		<string>SimpleLineIcons.ttf</string>
 		<string>FontAwesome6_Brands.ttf</string>
 		<string>MaterialIcons.ttf</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

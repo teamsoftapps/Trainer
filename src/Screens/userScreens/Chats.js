@@ -37,8 +37,6 @@ const Chats = ({navigation}) => {
   const myId = auth?._id;
   const socketRef = useRef(null);
 
-  // ✅ role can be: "user" or "trainer"
-  // (your project uses isType in many places)
   const viewerRole = (auth?.isType || auth?.role || 'user').toLowerCase();
 
   const [allChats, setAllChats] = useState([]);
@@ -46,8 +44,6 @@ const Chats = ({navigation}) => {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  // ✅ For USER screen: show trainer
-  // ✅ For TRAINER screen: show user
   const getOtherUser = useCallback(
     conv => {
       const wantRole = viewerRole === 'trainer' ? 'user' : 'trainer';
@@ -63,7 +59,6 @@ const Chats = ({navigation}) => {
     [viewerRole],
   );
 
-  // ✅ decide which endpoint based on role
   const getConversationListUrl = useCallback(() => {
     if (viewerRole === 'trainer') {
       console.log(joinUrl(API_BASE, `/chat/conversation-list-trainer/${myId}`));
@@ -103,25 +98,6 @@ const Chats = ({navigation}) => {
     }, [fetchConversations]),
   );
 
-  // useEffect(() => {
-  //   const s = io(API_BASE, {
-  //     transports: ['websocket'],
-  //     reconnection: true,
-  //   });
-
-  //   socketRef.current = s;
-
-  //   // ✅ when ANY new message happens, refresh conversation list
-  //   s.on('conversationUpdated', ({conversationId}) => {
-  //     fetchConversations(); // calls your API again
-  //   });
-
-  //   return () => {
-  //     s.disconnect();
-  //     socketRef.current = null;
-  //   };
-  // }, [fetchConversations]);
-
   const upsertConversationFromSocket = useCallback(
     payload => {
       const convId = payload?.conversationId || payload?._id;
@@ -130,14 +106,11 @@ const Chats = ({navigation}) => {
       setAllChats(prev => {
         const idx = prev.findIndex(c => c?._id === convId);
 
-        // ✅ Determine if this update should increase unread
         const incomingMsg = payload?.lastMessage;
         const isIncoming =
           incomingMsg?.senderId && incomingMsg.senderId !== myId;
 
         if (idx === -1) {
-          // If conversation not in list yet, easiest safe move: refetch
-          // (or you can prepend payload.fullConversation if backend sends it)
           fetchConversations();
           return prev;
         }
@@ -189,12 +162,10 @@ const Chats = ({navigation}) => {
 
       const onConnect = () => {
         console.log('✅ socket connected:', s.id);
-        // backend must do: socket.join(`user:${userId}`)
         s.emit('joinUserRoom', {userId: myId, role: viewerRole});
       };
 
       const onConversationUpdated = payload => {
-        // ✅ instant UI update (no refresh needed)
         upsertConversationFromSocket(payload);
       };
 
@@ -205,9 +176,6 @@ const Chats = ({navigation}) => {
       s.on('connect', onConnect);
       s.on('conversationUpdated', onConversationUpdated);
       s.on('connect_error', onConnectError);
-
-      // optional debug
-      // s.onAny((event, ...args) => console.log('SOCKET EVENT:', event, args));
 
       return () => {
         s.off('connect', onConnect);

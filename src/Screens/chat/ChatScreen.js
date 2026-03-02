@@ -41,12 +41,24 @@ const joinUrl = (base, path) => {
 const Message = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  // const {trainerData, conversationId} = route.params || {};
+  const {
+    otherUser: otherUserParam,
+    conversationId,
+    viewerRole,
+  } = route.params || {};
 
-  const {otherUser, conversationId} = route.params || {};
-  console.log('Other user data in chat screen:', otherUser);
   const user = useSelector(state => state.Auth.data);
   const myUserId = user?._id;
+
+  const [otherUserState, setOtherUserState] = useState(otherUserParam || null);
+  const otherUser = otherUserState;
+
+  console.log('Other user param:', otherUserParam);
+  console.log('Other user state:', otherUser);
+  // const {trainerData, conversationId} = route.params || {};
+
+  // const {otherUser, conversationId} = route.params || {};
+  console.log('Other user data in chat screen:', otherUser);
 
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
@@ -89,6 +101,7 @@ const Message = () => {
       upload: () => joinUrl(API_BASE, `/chat/upload-chat-media`),
       deleteMsg: id => joinUrl(API_BASE, `/chat/message/${id}`),
       markSeen: () => joinUrl(API_BASE, `/chat/mark-seen`),
+      conversationById: id => joinUrl(API_BASE, `/chat/conversation/${id}`),
     }),
     [],
   );
@@ -96,6 +109,42 @@ const Message = () => {
   const scrollToEnd = useCallback((animated = true) => {
     setTimeout(() => flatListRef.current?.scrollToEnd({animated}), 80);
   }, []);
+
+  useEffect(() => {
+    const loadConversationIfNeeded = async () => {
+      try {
+        if (!conversationId) return;
+        if (otherUserState) return;
+
+        console.log('Fetching conversation for:', conversationId);
+
+        const res = await axios.get(API.conversationById(conversationId));
+        console.log('Conversation API response:', res.data);
+
+        if (!res.data?.success) return;
+
+        const conv = res.data.conversation;
+
+        const otherParticipant = conv?.participants?.find(
+          p => String(p?.userId?._id || p?.userId) !== String(myUserId),
+        );
+
+        const other = otherParticipant?.userId || null;
+
+        console.log('Resolved other participant:', otherParticipant);
+        console.log('Resolved other user:', other);
+
+        setOtherUserState(other);
+      } catch (e) {
+        console.log(
+          'loadConversationIfNeeded error:',
+          e?.response?.data || e?.message,
+        );
+      }
+    };
+
+    loadConversationIfNeeded();
+  }, [conversationId, myUserId, API, otherUserState]);
 
   // Load previous messages
   const loadMessages = useCallback(async () => {
@@ -484,7 +533,8 @@ const Message = () => {
         />
 
         <View style={{flex: 1, marginLeft: 12}}>
-          <Text style={styles.name}>{otherUser?.fullName || 'Trainer'}</Text>
+          <Text style={styles.name}>{otherUser?.fullName || 'Chat'}</Text>
+
           <Text style={styles.status}>
             {otherUser?.isAvailable ? 'Active now' : 'Offline'}
           </Text>

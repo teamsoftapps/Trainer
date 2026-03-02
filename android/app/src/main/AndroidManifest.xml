@@ -21,6 +21,13 @@
       android:roundIcon="@mipmap/ic_launcher"
       android:allowBackup="false"
       android:theme="@style/AppTheme">
+      <meta-data
+  android:name="com.google.firebase.messaging.default_notification_icon"
+  android:resource="@drawable/ic_stat_notification" />
+
+<meta-data
+  android:name="com.google.firebase.messaging.default_notification_color"
+  android:resource="@color/white" />
        <meta-data
      android:name="com.google.android.geo.API_KEY"
      android:value="AIzaSyArxJNX49_nbTyy-fjiGIOTw6O0-IEih90"/>

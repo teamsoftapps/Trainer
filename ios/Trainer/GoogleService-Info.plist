@@ -3,9 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>791670162595-qn85i13jadlq3egiqfenciggkkr3u8ll.apps.googleusercontent.com</string>
+	<string>791670162595-d5eh05huqbinbqj0e2q4ucapl5gfdlem.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.791670162595-qn85i13jadlq3egiqfenciggkkr3u8ll</string>
+	<string>com.googleusercontent.apps.791670162595-d5eh05huqbinbqj0e2q4ucapl5gfdlem</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>791670162595-7k9soro0pnf7abdkjg0bs26kgckn5n0o.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyBkkPDbHj4eZe3amUUBdFmNmYotOGkQQJg</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.trainer</string>
+	<string>com.sternsgym.app</string>
 	<key>PROJECT_ID</key>
 	<string>stern-s-gym-trainers-connect</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:791670162595:ios:fed295dcf6376b0e262b16</string>
+	<string>1:791670162595:ios:6ad298c53e2f002a262b16</string>
 </dict>
 </plist>

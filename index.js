@@ -7,6 +7,14 @@ import App from './App';
 import FlashMessage from 'react-native-flash-message';
 import {FontFamily} from './src/utils/Images';
 import {responsiveFontSize} from 'react-native-responsive-dimensions';
+import messaging from '@react-native-firebase/messaging';
+
+// ✅ REQUIRED: background handler (Android)
+messaging().setBackgroundMessageHandler(async remoteMessage => {
+  // Don't show notifee here because FCM "notification" payload already shows system notification
+  // You can log if you want:
+  console.log('📩 Background message:', remoteMessage);
+});
 
 const Routes = () => {
   return (

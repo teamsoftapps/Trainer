@@ -3480,6 +3480,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-firebase/messaging@npm:^23.8.6":
+  version: 23.8.6
+  resolution: "@react-native-firebase/messaging@npm:23.8.6"
+  peerDependencies:
+    "@react-native-firebase/app": 23.8.6
+    expo: ">=47.0.0"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+  checksum: 03d19b92341b103020962387dc821d97d0691a1d20d887abb4d09109f9b7e9b32d20ba4805a54e6592dc439a23d968dde1d7a563f7e192b850fb74abc1dcd6ea
+  languageName: node
+  linkType: hard
+
 "@react-native-google-signin/google-signin@npm:^16.1.1":
   version: 16.1.1
   resolution: "@react-native-google-signin/google-signin@npm:16.1.1"
@@ -4458,6 +4471,7 @@ __metadata:
     "@react-native-community/slider": ^4.5.2
     "@react-native-firebase/app": ^23.8.4
     "@react-native-firebase/auth": ^23.8.4
+    "@react-native-firebase/messaging": ^23.8.6
     "@react-native-google-signin/google-signin": ^16.1.1
     "@react-native-masked-view/masked-view": ^0.3.1
     "@react-native/babel-preset": 0.74.84
