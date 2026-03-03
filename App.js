@@ -308,27 +308,30 @@
 
 // const styles = StyleSheet.create({});
 
-import React, {useEffect, useState, useRef} from 'react';
-import {StyleSheet} from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
-import {useSelector, useDispatch} from 'react-redux';
-import {StripeProvider} from '@stripe/stripe-react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { StyleSheet } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { useSelector, useDispatch } from 'react-redux';
+import { StripeProvider } from '@stripe/stripe-react-native';
 import BootSplash from 'react-native-bootsplash';
-import messaging from '@react-native-firebase/messaging';
+import messaging, { getMessaging } from '@react-native-firebase/messaging';
+import notifee, { EventType } from '@notifee/react-native';
+
+const firebaseMessaging = getMessaging();
 
 import AuthStack from './src/Navigations/AuthStack';
 import TrainerStack from './src/Navigations/TrainerStack';
 import UserStack from './src/Navigations/UserStack';
 
 import axiosBaseURL from './src/services/AxiosBaseURL';
-import {updateLogin, SignOut} from './src/store/Slices/AuthSlice';
+import { updateLogin, SignOut } from './src/store/Slices/AuthSlice';
 
 import {
   requestMediaPermission,
   requestNotificationPermission,
 } from './src/Hooks/Permission';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import {configureGoogle} from './src/config/googleAuth';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { configureGoogle } from './src/config/googleAuth';
 
 import {
   setupNotificationChannel,
@@ -338,7 +341,23 @@ import {
   showForegroundNotification,
 } from './src/Notifications/notificationService';
 
-import {navigationRef, navigate} from './src/Navigations/navigationService';
+import { navigationRef, navigate } from './src/Navigations/navigationService';
+
+const handleDeepLink = (data) => {
+  if (!data) return;
+  if (data.conversationId) {
+    navigate('ChatScreen', { conversationId: data.conversationId });
+  } else if (data.bookingId) {
+    navigate('BookingDetails', { bookingId: data.bookingId });
+  }
+};
+
+// ✅ Handle notification clicks even if app is backgrounded/killed
+notifee.onBackgroundEvent(async ({ type, detail }) => {
+  if (type === EventType.PRESS) {
+    handleDeepLink(detail.notification?.data);
+  }
+});
 
 const App = () => {
   const dispatch = useDispatch();
@@ -384,7 +403,7 @@ const App = () => {
   /* ---------------- BOOTSTRAP ---------------- */
   useEffect(() => {
     const init = async () => {
-      await BootSplash.hide({fade: true});
+      await BootSplash.hide({ fade: true });
       await requestNotificationPermission();
       await requestMediaPermission();
     };
@@ -422,7 +441,7 @@ const App = () => {
           }
 
           // handle token refresh
-          unsubscribeTokenRefresh = messaging().onTokenRefresh(
+          unsubscribeTokenRefresh = firebaseMessaging.onTokenRefresh(
             async newToken => {
               savedTokenRef.current = newToken;
 
@@ -442,26 +461,28 @@ const App = () => {
     initNotifications();
 
     /* -------- Foreground message -------- */
-    unsubscribeForeground = messaging().onMessage(async remoteMessage => {
+    unsubscribeForeground = firebaseMessaging.onMessage(async remoteMessage => {
       await showForegroundNotification(remoteMessage);
     });
 
-    /* -------- App opened from background -------- */
-    unsubscribeOpen = messaging().onNotificationOpenedApp(remoteMessage => {
-      const conversationId = remoteMessage?.data?.conversationId;
-      if (conversationId) {
-        navigate('ChatScreen', {conversationId});
+    /* -------- Notifee (Foreground) -------- */
+    const unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
+      if (type === EventType.PRESS) {
+        handleDeepLink(detail.notification?.data);
       }
     });
 
-    /* -------- App opened from killed state -------- */
+    /* -------- App opened from background (FCM) -------- */
+    unsubscribeOpen = firebaseMessaging.onNotificationOpenedApp(remoteMessage => {
+      handleDeepLink(remoteMessage?.data);
+    });
+
+    /* -------- App opened from killed state (FCM) -------- */
     const checkInitialNotification = async () => {
-      const initial = await messaging().getInitialNotification();
-      if (initial?.data?.conversationId) {
+      const initial = await firebaseMessaging.getInitialNotification();
+      if (initial?.data) {
         setTimeout(() => {
-          navigate('ChatScreen', {
-            conversationId: initial.data.conversationId,
-          });
+          handleDeepLink(initial.data);
         }, 800);
       }
     };
@@ -472,13 +493,14 @@ const App = () => {
       unsubscribeForeground?.();
       unsubscribeOpen?.();
       unsubscribeTokenRefresh?.();
+      unsubscribeNotifee?.();
     };
   }, [authData?._id, authData?.token]);
 
   if (appLoading) return null;
 
   return (
-    <GestureHandlerRootView style={{flex: 1}}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <StripeProvider
         publishableKey="pk_test_51MhKy0E1gqTY55tO7v4bGT0EifIECw1SHFcUx33Jgc7YF46jqRPNvDzGoSE1h9konayrzaNes7Jse3NGDLpawDql00rxdyk8Cw"
         urlScheme="trainerapp">

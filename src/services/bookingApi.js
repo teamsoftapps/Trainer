@@ -58,4 +58,12 @@ export const BookingAPI = {
         });
         return res.data;
     },
+    approveCompletion: async (token, bookingId) => {
+        const res = await axiosBaseURL.patch(
+            `/booking/${bookingId}/approve-completion`,
+            {},
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        return res.data;
+    },
 };

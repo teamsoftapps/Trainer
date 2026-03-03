@@ -1,154 +1,242 @@
 import {
   FlatList,
   Image,
-  ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
+  ActivityIndicator,
 } from 'react-native';
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import WrapperContainer from '../../Components/Wrapper';
 import Header from '../../Components/Header';
 import {
   responsiveFontSize,
   responsiveHeight,
-  responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {Images} from '../../utils/Images';
-import {useNavigation} from '@react-navigation/native';
-const Notifications = [
-  {
-    id: 1,
-    heading: 'Booking Request Pending',
-    desc: 'Your request to book a session with Alex Morgan is pending approval',
-    bottom: 'View Booking',
-    bottom2: 'Mark as done',
-    timeago: '15 mins ago',
-  },
-  {
-    id: 2,
-    heading: 'Booking Confirmed',
-    desc: 'Your sessio with Samantha has been confirmed for June 5 at 8:00 AM',
-    bottom: 'View Details',
-    bottom2: 'Mark as done',
-    timeago: '3 hours ago',
-  },
-  {
-    id: 3,
-    heading: 'Message from Jordan Lee',
-    desc: 'Hi! Looking forward to our session tomorrow. Do you have any specific goals for me?',
-    bottom: 'Reply',
-    timeago: 'Yesterday',
-  },
-  {
-    id: 4,
-    heading: 'Payment Successful',
-    desc: 'Your payment of $70 to Ryan Mitchell was succefull',
-    bottom: 'View Recipt',
-    timeago: 'Yesterday',
-  },
-  {
-    id: 5,
-    heading: 'Payment Successful',
-    desc: 'Your payment of $70 to Ryan Mitchell was succefull',
-    bottom: 'View Recipt',
-    timeago: 'Yesterday',
-  },
-];
+import { Images } from '../../utils/Images';
+import { useNavigation } from '@react-navigation/native';
+import axiosBaseURL from '../../services/AxiosBaseURL';
+import { getMessaging } from '@react-native-firebase/messaging';
+import moment from 'moment';
+
+const firebaseMessaging = getMessaging();
+
 const Notification = () => {
   const navigation = useNavigation();
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await axiosBaseURL.get('/notification/list');
+      if (res.data.success) {
+        setNotifications(res.data.data);
+      }
+    } catch (err) {
+      console.log('Fetch notifications error:', err?.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  // ✅ Auto-refresh: listen for foreground notifications
+  useEffect(() => {
+    const unsub = firebaseMessaging.onMessage(async () => {
+      fetchNotifications();
+    });
+    return () => unsub();
+  }, [fetchNotifications]);
+
+  // ✅ Re-fetch when screen comes back into focus
+  useEffect(() => {
+    const unsub = navigation.addListener('focus', () => {
+      fetchNotifications();
+    });
+    return unsub;
+  }, [navigation, fetchNotifications]);
+
+  const hasUnread = notifications.some(n => !n.isRead);
+
+  const markAllRead = async () => {
+    try {
+      await axiosBaseURL.patch('/notification/read-all');
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    } catch (err) {
+      console.log('Mark all read error:', err?.message);
+    }
+  };
+
+  const getTimeAgo = date => moment(date).fromNow();
+
+  const getActionLabel = type => {
+    switch (type) {
+      case 'booking_confirmed':
+      case 'booking_rescheduled':
+        return 'View Booking';
+      case 'booking_rejected':
+      case 'booking_cancelled':
+        return 'View Details';
+      case 'booking_completed':
+        return 'Approve Session';
+      default:
+        return 'View Details';
+    }
+  };
+
+  const renderItem = ({ item }) => {
+    const actionLabel = getActionLabel(item.type);
+    return (
+      <View style={[styles.card, !item.isRead && styles.unread]}>
+        <View style={styles.cardInner}>
+          <View style={styles.topRow}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+              {!item.isRead && <View style={styles.dot} />}
+              <Text style={styles.heading} numberOfLines={1}>
+                {item.title}
+              </Text>
+            </View>
+            <Text style={styles.timeago}>{getTimeAgo(item.createdAt)}</Text>
+          </View>
+          <Text numberOfLines={2} style={styles.body}>
+            {item.body}
+          </Text>
+          {item.bookingId && (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('BookingDetails', {
+                  bookingId: item.bookingId,
+                })
+              }>
+              <Text style={styles.action}>{actionLabel}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    );
+  };
+
   return (
-    <WrapperContainer style={{backgroundColor: '#181818'}}>
+    <WrapperContainer style={{ backgroundColor: '#181818' }}>
       <Header
-        onPress={() => {
-          navigation.goBack();
-        }}
+        onPress={() => navigation.goBack()}
         rightView={
           <Image
             source={Images.logo}
-            style={{height: responsiveHeight(5), width: responsiveWidth(10)}}
+            style={{ height: responsiveHeight(5), width: responsiveWidth(10) }}
           />
         }
       />
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          width: '85%',
-          alignSelf: 'center',
-          marginBottom: responsiveHeight(2),
-        }}>
-        <Text style={{color: 'white', fontSize: responsiveFontSize(3.3)}}>
-          Notification
-        </Text>
-        <Image source={Images.filter} />
+      <View style={styles.titleRow}>
+        <Text style={styles.title}>Notifications</Text>
+        {notifications.length > 0 && hasUnread && (
+          <TouchableOpacity onPress={markAllRead}>
+            <Text style={styles.markAll}>Mark all read</Text>
+          </TouchableOpacity>
+        )}
       </View>
-      <FlatList
-        data={Notifications}
-        renderItem={({item}) => {
-          return (
-            <View style={{backgroundColor: '#232323'}}>
-              <View
-                style={{
-                  width: '85%',
-                  alignSelf: 'center',
-                  gap: responsiveHeight(2),
-                  paddingVertical: responsiveHeight(3),
-                }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                  }}>
-                  <Text
-                    style={{color: 'white', fontSize: responsiveFontSize(2)}}>
-                    {item.heading}
-                  </Text>
-                  <Text
-                    style={{
-                      color: '#B8B8B8',
-                      fontSize: responsiveFontSize(1.5),
-                    }}>
-                    {item.timeago}
-                  </Text>
-                </View>
-                <Text
-                  numberOfLines={2}
-                  style={{color: '#B8B8B8', width: '80%'}}>
-                  {item.desc}
-                </Text>
-                <View
-                  style={{
-                    alignItems: 'center',
-                    flexDirection: 'row',
-                    gap: responsiveScreenWidth(3),
-                  }}>
-                  <Text style={{color: '#9BE639'}}>{item.bottom}</Text>
-                  {item.bottom2 ? (
-                    <>
-                      <View
-                        style={{
-                          width: 5,
-                          height: 5,
-                          borderRadius: 50,
-                          backgroundColor: '#9BE639',
-                        }}
-                      />
-                      <Text style={{color: '#9BE639'}}>{item.bottom2}</Text>
-                    </>
-                  ) : (
-                    <View />
-                  )}
-                </View>
-              </View>
-            </View>
-          );
-        }}
-      />
+
+      {loading ? (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color="#9BE639" />
+        </View>
+      ) : notifications.length === 0 ? (
+        <View style={styles.center}>
+          <Text style={styles.empty}>No notifications yet</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={notifications}
+          keyExtractor={item => item._id}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: responsiveHeight(4) }}
+        />
+      )}
     </WrapperContainer>
   );
 };
+
 export default Notification;
-const styles = StyleSheet.create({});
+
+const styles = StyleSheet.create({
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '85%',
+    alignSelf: 'center',
+    marginBottom: responsiveHeight(2),
+  },
+  title: {
+    color: 'white',
+    fontSize: responsiveFontSize(3.3),
+    fontWeight: '700',
+  },
+  markAll: {
+    color: '#9BE639',
+    fontSize: responsiveFontSize(1.5),
+  },
+  card: {
+    backgroundColor: '#232323',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#333',
+  },
+  unread: {
+    backgroundColor: '#1e2a14',
+  },
+  cardInner: {
+    width: '85%',
+    alignSelf: 'center',
+    gap: responsiveHeight(1),
+    paddingVertical: responsiveHeight(2.5),
+  },
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#9BE639',
+    marginRight: 8,
+  },
+  heading: {
+    color: 'white',
+    fontSize: responsiveFontSize(1.9),
+    fontWeight: '600',
+    flex: 1,
+  },
+  timeago: {
+    color: '#888',
+    fontSize: responsiveFontSize(1.3),
+    marginLeft: 8,
+  },
+  body: {
+    color: '#B8B8B8',
+    fontSize: responsiveFontSize(1.6),
+    lineHeight: 20,
+  },
+  action: {
+    color: '#9BE639',
+    fontSize: responsiveFontSize(1.5),
+    fontWeight: '500',
+    marginTop: 4,
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  empty: {
+    color: '#888',
+    fontSize: responsiveFontSize(2),
+  },
+});

@@ -1,4 +1,4 @@
-import {Dropdown} from 'react-native-element-dropdown';
+import { Dropdown } from 'react-native-element-dropdown';
 import {
   ImageBackground,
   TouchableOpacity,
@@ -11,28 +11,28 @@ import {
   Modal,
   TouchableWithoutFeedback,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
-import {Platform} from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Platform } from 'react-native';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import ButtonComp from '../../Components/ButtonComp.js';
-import {FontFamily, Images} from '../../utils/Images.js';
+import { FontFamily, Images } from '../../utils/Images.js';
 import WrapperContainer from '../../Components/Wrapper.js';
 import FlashMessage from 'react-native-flash-message';
-import {showMessage} from 'react-native-flash-message';
-import {useSignUpUserMutation} from '../../store/Apis/userAuth.js';
-import {useSignUpTrainerMutation} from '../../store/Apis/trainerAuth.js';
+import { showMessage } from 'react-native-flash-message';
+import { useSignUpUserMutation } from '../../store/Apis/userAuth.js';
+import { useSignUpTrainerMutation } from '../../store/Apis/trainerAuth.js';
 import useToast from '../../Hooks/Toast.js';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CountryPicker from 'react-native-country-picker-modal';
 import auth from '@react-native-firebase/auth';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {baseUrl} from '../../services/Urls.js';
-import {useDispatch} from 'react-redux';
-import {IsLogin} from '../../store/Slices/AuthSlice.js';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { baseUrl } from '../../services/Urls.js';
+import { useDispatch } from 'react-redux';
+import { IsLogin } from '../../store/Slices/AuthSlice.js';
 import moment from 'moment';
 const fitnessOptions = [
   'Adventure Sports Coaching',
@@ -66,13 +66,13 @@ const goalOptions = [
   'Stress Relief',
   'Weight Loss',
 ];
-const Signup = ({route, navigation}) => {
+const Signup = ({ route, navigation }) => {
   const user = route.params;
   console.log('Routes', user);
   const dispatch = useDispatch();
-  const {showToast} = useToast();
-  const [SignUpUser, {isLoading: SignupUserLoading}] = useSignUpUserMutation();
-  const [SignUpTrainer, {isLoading: SignupTrainerLoading}] =
+  const { showToast } = useToast();
+  const [SignUpUser, { isLoading: SignupUserLoading }] = useSignUpUserMutation();
+  const [SignUpTrainer, { isLoading: SignupTrainerLoading }] =
     useSignUpTrainerMutation();
   const [name, setname] = useState('');
   const [email, setemail] = useState('');
@@ -117,8 +117,8 @@ const Signup = ({route, navigation}) => {
   const [secure2, setsecure2] = useState(false);
 
   const data = [
-    {label: 'Male', value: 'Male'},
-    {label: 'Female', value: 'Female'},
+    { label: 'Male', value: 'Male' },
+    { label: 'Female', value: 'Female' },
   ];
 
   const toggleModalDob = () => {
@@ -237,17 +237,17 @@ const Signup = ({route, navigation}) => {
         condition: password.length >= 6 && password === confirmpassword,
         message: 'Password must be the same and at least 6 characters long.',
       },
-      {condition: Gender, message: 'Please enter your gender.'},
-      {condition: DoB, message: 'Please enter your date of birth.'},
-      {condition: weight > 0, message: 'Please enter your weight.'},
-      {condition: height > 0, message: 'Please enter your height.'},
+      { condition: Gender, message: 'Please enter your gender.' },
+      { condition: DoB, message: 'Please enter your date of birth.' },
+      { condition: weight > 0, message: 'Please enter your weight.' },
+      { condition: height > 0, message: 'Please enter your height.' },
       // {
       //   condition: address.trim().length > 0,
       //   message: 'Please enter your address.',
       // },
     ];
 
-    for (const {condition, message} of validationChecks) {
+    for (const { condition, message } of validationChecks) {
       if (!condition) {
         return showToast('Error', message, 'danger');
       }
@@ -266,7 +266,7 @@ const Signup = ({route, navigation}) => {
             }),
           );
           showToast('Success', 'User created successfully', 'success');
-          navigation.navigate('signin', {checkUser: 'user'});
+          navigation.navigate('signin', { checkUser: 'user' });
         } else if (res.error) {
           showToast('Error', res.error?.data?.message, 'danger');
         }
@@ -274,7 +274,7 @@ const Signup = ({route, navigation}) => {
         res = await SignUpTrainer(payload);
         if (res.data) {
           showToast('Success', 'Trainer created successfully', 'success');
-          navigation.navigate('signin', {checkUser: 'trainer'});
+          navigation.navigate('signin', { checkUser: 'trainer' });
         } else if (res.error) {
           showToast('Error', res.error?.data.message, 'danger');
         }
@@ -343,7 +343,7 @@ const Signup = ({route, navigation}) => {
     }
   };
 
-  const SelectionModal = ({visible, onClose, data, onSelect}) => {
+  const SelectionModal = ({ visible, onClose, data, onSelect }) => {
     return (
       <Modal transparent animationType="slide" visible={visible}>
         <TouchableWithoutFeedback onPress={onClose}>
@@ -358,7 +358,7 @@ const Signup = ({route, navigation}) => {
                       onSelect(item);
                       onClose();
                     }}>
-                    <Text style={{color: '#fff'}}>{item}</Text>
+                    <Text style={{ color: '#fff' }}>{item}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
@@ -370,17 +370,17 @@ const Signup = ({route, navigation}) => {
   };
 
   return (
-    <ScrollView style={{flexGrow: 1}}>
+    <ScrollView style={{ flexGrow: 1 }}>
       <WrapperContainer>
         <ImageBackground
           resizeMode="cover"
           source={Images.bg}
-          style={{flex: 1}}>
+          style={{ flex: 1 }}>
           <View
             style={{
               alignItems: 'center',
             }}>
-            <Image source={Images.logo} />
+            <Image source={Images.logo} style={{ width: responsiveWidth(40), height: responsiveHeight(20) }} />
             <Text
               style={{
                 color: 'white',
@@ -400,7 +400,7 @@ const Signup = ({route, navigation}) => {
               Create An Account
             </Text>
 
-            <View style={{gap: responsiveHeight(3)}}>
+            <View style={{ gap: responsiveHeight(3) }}>
               <View
                 style={{
                   width: responsiveWidth(85),
@@ -414,7 +414,7 @@ const Signup = ({route, navigation}) => {
                   justifyContent: 'space-between',
                 }}>
                 <View>
-                  <Text style={{color: '#908C8D'}}>Full name</Text>
+                  <Text style={{ color: '#908C8D' }}>Full name</Text>
                   <TextInput
                     ref={nameRef}
                     onFocus={() => setFocused('name')}
@@ -456,7 +456,7 @@ const Signup = ({route, navigation}) => {
                   justifyContent: 'space-between',
                 }}>
                 <View>
-                  <Text style={{color: '#908C8D'}}>Email</Text>
+                  <Text style={{ color: '#908C8D' }}>Email</Text>
                   <TextInput
                     ref={emailRef}
                     onFocus={() => setFocused('email')}
@@ -478,7 +478,7 @@ const Signup = ({route, navigation}) => {
                 <TouchableOpacity onPress={handleEmailInput}>
                   <Image
                     source={Images.email}
-                    style={{width: responsiveWidth(5)}}
+                    style={{ width: responsiveWidth(5) }}
                   />
                 </TouchableOpacity>
               </View>
@@ -521,7 +521,7 @@ const Signup = ({route, navigation}) => {
                     }}
                   />
 
-                  <Text style={{color: '#fff', marginLeft: 6}}>
+                  <Text style={{ color: '#fff', marginLeft: 6 }}>
                     +{countryCode}
                   </Text>
                 </TouchableOpacity>
@@ -557,7 +557,7 @@ const Signup = ({route, navigation}) => {
                   justifyContent: 'space-between',
                 }}>
                 <View>
-                  <Text style={{color: '#908C8D'}}>Password</Text>
+                  <Text style={{ color: '#908C8D' }}>Password</Text>
                   <TextInput
                     ref={passwordRef}
                     onFocus={() => setFocused('password')}
@@ -583,7 +583,7 @@ const Signup = ({route, navigation}) => {
                   }}>
                   <Image
                     source={secure ? Images.eye_off : Images.eye}
-                    style={{width: responsiveWidth(6)}}
+                    style={{ width: responsiveWidth(6) }}
                     resizeMode="contain"
                   />
                 </TouchableOpacity>
@@ -601,7 +601,7 @@ const Signup = ({route, navigation}) => {
                   justifyContent: 'space-between',
                 }}>
                 <View>
-                  <Text style={{color: '#908C8D'}}>Confirm Password</Text>
+                  <Text style={{ color: '#908C8D' }}>Confirm Password</Text>
                   <TextInput
                     ref={confirmRef}
                     onFocus={() => setFocused('confirm')}
@@ -627,7 +627,7 @@ const Signup = ({route, navigation}) => {
                   }}>
                   <Image
                     source={secure2 ? Images.eye_off : Images.eye}
-                    style={{width: responsiveWidth(6)}}
+                    style={{ width: responsiveWidth(6) }}
                     resizeMode="contain"
                   />
                 </TouchableOpacity>
@@ -651,8 +651,8 @@ const Signup = ({route, navigation}) => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{width: responsiveWidth(34)}}>
-                  <Text style={{color: '#908C8D'}}>Gender</Text>
+                <View style={{ width: responsiveWidth(34) }}>
+                  <Text style={{ color: '#908C8D' }}>Gender</Text>
                   <Dropdown
                     style={styles.dropdown}
                     placeholderStyle={styles.placeholderStyle}
@@ -661,7 +661,7 @@ const Signup = ({route, navigation}) => {
                     renderRightIcon={() => (
                       <Image
                         source={Images.dropdown}
-                        style={{width: responsiveWidth(5)}}
+                        style={{ width: responsiveWidth(5) }}
                         resizeMode="contain"
                       />
                     )}
@@ -674,7 +674,7 @@ const Signup = ({route, navigation}) => {
                     onChange={item => {
                       setGender(item.value);
                     }}
-                    itemTextStyle={{color: '#000'}}
+                    itemTextStyle={{ color: '#000' }}
                   />
                 </View>
               </View>
@@ -689,8 +689,8 @@ const Signup = ({route, navigation}) => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{width: responsiveWidth(27)}}>
-                  <Text style={{color: '#908C8D'}}>Date of Birth</Text>
+                <View style={{ width: responsiveWidth(27) }}>
+                  <Text style={{ color: '#908C8D' }}>Date of Birth</Text>
 
                   {dob ? (
                     <Text
@@ -713,7 +713,7 @@ const Signup = ({route, navigation}) => {
                 <TouchableOpacity onPress={toggleModalDob}>
                   <Image
                     source={Images.calendar}
-                    style={{width: responsiveWidth(4.5)}}
+                    style={{ width: responsiveWidth(4.5) }}
                     resizeMode="contain"
                   />
                 </TouchableOpacity>
@@ -792,8 +792,8 @@ const Signup = ({route, navigation}) => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{width: responsiveWidth(27)}}>
-                  <Text style={{color: '#908C8D'}}>Weight in lbs</Text>
+                <View style={{ width: responsiveWidth(27) }}>
+                  <Text style={{ color: '#908C8D' }}>Weight in lbs</Text>
                   <TextInput
                     ref={weightRef}
                     onFocus={() => setFocused('weight')}
@@ -824,8 +824,8 @@ const Signup = ({route, navigation}) => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <View style={{width: responsiveWidth(27)}}>
-                  <Text style={{color: '#908C8D'}}>Height in ft</Text>
+                <View style={{ width: responsiveWidth(27) }}>
+                  <Text style={{ color: '#908C8D' }}>Height in ft</Text>
                   <TextInput
                     ref={heightRef}
                     onFocus={() => setFocused('height')}
@@ -849,9 +849,9 @@ const Signup = ({route, navigation}) => {
             <TouchableOpacity
               style={styles.inputBox}
               onPress={() => setFitnessModal(true)}>
-              <Text style={{color: '#908C8D'}}>Fitness Preference</Text>
+              <Text style={{ color: '#908C8D' }}>Fitness Preference</Text>
 
-              <Text style={{color: '#fff'}}>
+              <Text style={{ color: '#fff' }}>
                 {fitnessPreference || 'Select Preference'}
               </Text>
             </TouchableOpacity>
@@ -859,9 +859,9 @@ const Signup = ({route, navigation}) => {
             <TouchableOpacity
               style={styles.inputBox}
               onPress={() => setGoalModal(true)}>
-              <Text style={{color: '#908C8D'}}>Goal</Text>
+              <Text style={{ color: '#908C8D' }}>Goal</Text>
 
-              <Text style={{color: '#fff'}}>{goal || 'Select Goal'}</Text>
+              <Text style={{ color: '#fff' }}>{goal || 'Select Goal'}</Text>
             </TouchableOpacity>
 
             <ButtonComp
@@ -875,7 +875,7 @@ const Signup = ({route, navigation}) => {
               }}
               isLoading={SignupUserLoading || SignupTrainerLoading}
             />
-            <Text style={{color: '#aaa', marginTop: 20}}>Or continue with</Text>
+            <Text style={{ color: '#aaa', marginTop: 20 }}>Or continue with</Text>
 
             <View style={styles.socialRow}>
               <TouchableOpacity onPress={handleGoogleSignup}>
@@ -986,9 +986,9 @@ const Signup = ({route, navigation}) => {
 
               <View style={styles.pickerBtnRow}>
                 <TouchableOpacity
-                  style={[styles.pickerBtn, {backgroundColor: '#444'}]}
+                  style={[styles.pickerBtn, { backgroundColor: '#444' }]}
                   onPress={() => setModalVisible2(false)}>
-                  <Text style={{color: '#fff'}}>Cancel</Text>
+                  <Text style={{ color: '#fff' }}>Cancel</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -1021,7 +1021,7 @@ const Signup = ({route, navigation}) => {
 
                     setModalVisible2(false);
                   }}>
-                  <Text style={{color: '#000', fontWeight: '700'}}>OK</Text>
+                  <Text style={{ color: '#000', fontWeight: '700' }}>OK</Text>
                 </TouchableOpacity>
               </View>
             </View>

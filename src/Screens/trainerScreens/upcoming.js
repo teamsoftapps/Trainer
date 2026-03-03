@@ -29,6 +29,8 @@ const getStatusColor = (status) => {
       return "#9FED3A";
     case "rejected":
       return "#FF2D55";
+    case "trainer_completed":
+      return "#FFA500";
     case "completed":
       return "#4A90E2";
     case "cancelled":
@@ -67,7 +69,7 @@ const Upcoming = () => {
 
       // Trainer upcoming: show pending + confirmed (optionally also show paid-but-pending first)
       const filtered = (res.data || []).filter(
-        (b) => b.status === "pending" || b.status === "confirmed"
+        (b) => b.status === "pending" || b.status === "confirmed" || b.status === "trainer_completed"
       );
 
       // Sort: paid pending first, then by date
@@ -115,9 +117,16 @@ const Upcoming = () => {
 
   const renderItem = ({ item }) => {
     const user = item.userId;
-    const statusText = item.status.charAt(0).toUpperCase() + item.status.slice(1);
-    const statusBg = item.status === "confirmed" ? "#9FED3A" : "#C7C7CC";
-    const statusTextColor = item.status === "confirmed" ? "black" : "white";
+    const statusText =
+      item.status === 'trainer_completed'
+        ? 'Awaiting Approval'
+        : item.status.charAt(0).toUpperCase() + item.status.slice(1);
+    const statusBg =
+      item.status === 'confirmed' || item.status === 'trainer_completed'
+        ? '#9FED3A'
+        : '#C7C7CC';
+    const statusTextColor =
+      item.status === 'confirmed' || item.status === 'trainer_completed' ? 'black' : 'white';
 
     return (
       <View style={styles.card}>
@@ -162,22 +171,22 @@ const Upcoming = () => {
                 </Text>
               </TouchableOpacity>
             </>
-          ) : (
+          ) : item.status === "confirmed" ? (
             <>
               <TouchableOpacity
                 style={styles.outlineBtn}
-                onPress={() => updateStatus(item._id, "cancelled")}
+                onPress={() => updateStatus(item._id, "trainer_completed")}
               >
-                <Text style={styles.outlineBtnText}>Cancel</Text>
+                <Text style={styles.outlineBtnText}>Complete</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.filledBtn}
-                onPress={() => showMessage({ message: "Reschedule coming soon", type: "info" })}
+                onPress={() => navigation.navigate("BookingDetails", { data: item })}
               >
                 <Text style={styles.filledBtnText}>Reschedule</Text>
               </TouchableOpacity>
             </>
-          )}
+          ) : null}
         </View>
         <View style={styles.separator} />
       </View>

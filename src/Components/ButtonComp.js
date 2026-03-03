@@ -15,18 +15,21 @@ const ButtonComp = ({
   text = '',
   mainStyle = {},
   textstyle = {},
-  onPress = () => {},
+  onPress = () => { },
   isDisable = false,
   isLoading = false,
 }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
-      disabled={isDisable}
+      disabled={isDisable || isLoading}
       activeOpacity={0.9}
       style={[styles.main, mainStyle]}>
       {isLoading ? (
-        <ActivityIndicator color="#000" size={responsiveHeight(5)} />
+        <ActivityIndicator
+          color={textstyle?.color || '#000'}
+          size={responsiveHeight(3.5)}
+        />
       ) : (
         <Text style={[styles.text, textstyle]}>{text || 'SignUp'}</Text>
       )}

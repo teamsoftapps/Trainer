@@ -15,14 +15,19 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {FontFamily, Images} from '../../utils/Images';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import {useSelector} from 'react-redux';
-import {LineChart} from 'react-native-chart-kit';
+import { FontFamily, Images } from '../../utils/Images';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { LineChart } from 'react-native-chart-kit';
 import axiosBaseURL from '../../services/AxiosBaseURL';
-import {useCallback, useEffect, useState} from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { getMessaging } from '@react-native-firebase/messaging';
+
+const firebaseMessaging = getMessaging();
+
 const CompletedTrainerHome = () => {
   const [unreadTotal, setUnreadTotal] = useState(0);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const data = {
     labels: ['Jan', 'Mar', 'May', 'Jul', 'Sep', 'Nov'],
     datasets: [
@@ -46,9 +51,28 @@ const CompletedTrainerHome = () => {
   //UseStates
   const [sessions, setSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [earningsData, setEarningsData] = useState({
+    totalEarnings: "0.00",
+    chartData: {
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      datasets: [{ data: [0, 0, 0, 0, 0, 0] }],
+    },
+  });
   useEffect(() => {
     getSessions();
+    fetchEarnings();
   }, []);
+
+  const fetchEarnings = async () => {
+    try {
+      const res = await axiosBaseURL.get(`/trainer/${trainer_data._id}/earnings`);
+      if (res.data.success) {
+        setEarningsData(res.data.data);
+      }
+    } catch (e) {
+      console.log("Error fetching earnings:", e);
+    }
+  };
 
   const fetchUnreadTotal = async () => {
     try {
@@ -67,10 +91,32 @@ const CompletedTrainerHome = () => {
     fetchUnreadTotal();
   }, []);
 
+  const fetchUnreadNotifCount = useCallback(async () => {
+    try {
+      const res = await axiosBaseURL.get('/notification/list');
+      if (res.data.success) {
+        const count = res.data.data.filter(n => !n.isRead).length;
+        setUnreadNotifCount(count);
+      }
+    } catch (err) {
+      // silent
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUnreadNotifCount();
+
+    const unsub = firebaseMessaging.onMessage(async (remoteMessage) => {
+      fetchUnreadNotifCount();
+    });
+    return () => unsub();
+  }, [fetchUnreadNotifCount]);
+
   useFocusEffect(
     useCallback(() => {
       fetchUnreadTotal();
-    }, []),
+      fetchUnreadNotifCount();
+    }, [fetchUnreadNotifCount]),
   );
 
   const getSessions = async () => {
@@ -85,7 +131,7 @@ const CompletedTrainerHome = () => {
     }
   };
 
-  const RenderedBookings = ({item, index}) => {
+  const RenderedBookings = ({ item, index }) => {
     if (item?.paymentStatus === 'pending' || item?.paymentStatus === 'failed') {
       return;
     }
@@ -110,10 +156,10 @@ const CompletedTrainerHome = () => {
               }}
             />
           </View>
-          <View style={{marginLeft: responsiveWidth(3)}}>
-            <Text style={{color: '#fff'}}>{item.userName}</Text>
-            <Text style={{color: '#fff'}}>{item.Date}</Text>
-            <Text style={{color: '#bbbbbb'}}>
+          <View style={{ marginLeft: responsiveWidth(3) }}>
+            <Text style={{ color: '#fff' }}>{item.userName}</Text>
+            <Text style={{ color: '#fff' }}>{item.Date}</Text>
+            <Text style={{ color: '#bbbbbb' }}>
               {item.bookingTime} {'(1 Hour)'}
             </Text>
           </View>
@@ -123,7 +169,7 @@ const CompletedTrainerHome = () => {
   };
   const WhenListEmpty = () => {
     return (
-      <View style={{alignItems: 'center', justifyContent: 'center'}}>
+      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
         {isLoading ? (
           <ActivityIndicator size={responsiveHeight(5)} color={'#fff'} />
         ) : (
@@ -139,14 +185,14 @@ const CompletedTrainerHome = () => {
       </View>
     );
   };
-  const MessageIconWithBadge = ({count, onPress}) => {
+  const MessageIconWithBadge = ({ count, onPress }) => {
     const display = count > 99 ? '99+' : String(count || 0);
 
     return (
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.8}
-        style={{position: 'relative'}}>
+        style={{ position: 'relative' }}>
         <Image source={Images.messages} style={styles.notifiaction} />
 
         {count > 0 && (
@@ -186,7 +232,19 @@ const CompletedTrainerHome = () => {
             <TouchableOpacity
               onPress={() => navigation.navigate('Notification')}
               activeOpacity={0.8}>
-              <Image source={Images.notification} style={styles.notifiaction} />
+              <View style={{ position: 'relative' }}>
+                <Image
+                  source={Images.notification}
+                  style={styles.notifiaction}
+                />
+                {unreadNotifCount > 0 && (
+                  <View style={styles.badge_red}>
+                    <Text style={styles.badgeText_white}>
+                      {unreadNotifCount > 99 ? '99+' : unreadNotifCount}
+                    </Text>
+                  </View>
+                )}
+              </View>
             </TouchableOpacity>
             <MessageIconWithBadge
               count={unreadTotal}
@@ -199,13 +257,13 @@ const CompletedTrainerHome = () => {
             Hello{' '}
             <Text
               style={[
-                {...styles.Welcome_Text},
-                {color: '#fff', fontWeight: '500'},
+                { ...styles.Welcome_Text },
+                { color: '#fff', fontWeight: '500' },
               ]}>
               {trainer_data?.fullName}
             </Text>
           </Text>
-          <Text style={{color: '#bbbbbb'}}>{formattedDate}</Text>
+          <Text style={{ color: '#bbbbbb' }}>{formattedDate}</Text>
         </View>
 
         <View
@@ -227,8 +285,8 @@ const CompletedTrainerHome = () => {
             onPress={() => {
               navigation.navigate('Earnings');
             }}
-            style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={{color: '#9FED3A'}}>See details</Text>
+            style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={{ color: '#9FED3A' }}>See details</Text>
             <Image
               source={Images.rightarrow}
               style={{
@@ -250,8 +308,8 @@ const CompletedTrainerHome = () => {
 
             borderRadius: responsiveWidth(3),
           }}>
-          <View style={{padding: 20}}>
-            <Text style={{color: '#9FED3A', fontSize: 14}}>Total Earning</Text>
+          <View style={{ padding: 20 }}>
+            <Text style={{ color: '#9FED3A', fontSize: 14 }}>Total Earning</Text>
 
             <View
               style={{
@@ -259,51 +317,55 @@ const CompletedTrainerHome = () => {
                 alignItems: 'center',
                 marginTop: 5,
               }}>
-              <Text style={{color: '#fff', fontSize: 28, fontWeight: '700'}}>
-                $5,392
+              <Text style={{ color: '#fff', fontSize: 28, fontWeight: '700' }}>
+                ${earningsData.totalEarnings}
               </Text>
 
-              <Text style={{color: '#9FED3A', marginLeft: 10}}>▲ 0.0%</Text>
+              <Text style={{ color: '#9FED3A', marginLeft: 10 }}>▲ 100%</Text>
             </View>
           </View>
 
           <LineChart
-            data={data}
+            data={earningsData.chartData}
             width={responsiveWidth(85)}
             height={responsiveHeight(30)}
-            withDots={false}
-            withShadow={false}
+            withDots={true}
+            withShadow={true}
             withInnerLines={true}
             withOuterLines={false}
             withVerticalLines={false}
             withHorizontalLines={true}
             fromZero
             bezier
+            animate={{
+              duration: 2000,
+              onEnd: () => console.log('Done'),
+            }}
             style={{
               marginTop: 10,
               borderRadius: 16,
+              paddingRight: 40,
             }}
             chartConfig={{
-              backgroundGradientFrom: 'transparent',
-              backgroundGradientTo: 'transparent',
-
+              backgroundGradientFrom: '#151515',
+              backgroundGradientTo: '#151515',
               decimalPlaces: 0,
-
-              color: () => '#9FED3A',
+              color: (opacity = 1) => `rgba(159, 237, 58, ${opacity})`,
               labelColor: () => '#777',
-
               propsForBackgroundLines: {
-                stroke: 'rgba(255,255,255,0.1)',
-                strokeWidth: 1,
+                stroke: 'rgba(255,255,255,0.05)',
+                strokeDasharray: '0',
               },
-
               propsForLabels: {
-                fontSize: 11,
+                fontSize: 10,
               },
-
               propsForDots: {
-                r: '0',
+                r: '4',
+                strokeWidth: '2',
+                stroke: '#9FED3A',
               },
+              fillShadowGradient: '#9FED3A',
+              fillShadowGradientOpacity: 0.2,
             }}
           />
         </View>
@@ -397,5 +459,22 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 11,
     fontWeight: '800',
+  },
+  badge_red: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#9FED3A',
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText_white: {
+    color: '#000',
+    fontSize: 10,
+    fontWeight: '700',
   },
 });

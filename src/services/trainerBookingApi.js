@@ -16,4 +16,20 @@ export const TrainerBookingAPI = {
         );
         return res.data;
     },
+    trainerComplete: async (token, bookingId) => {
+        const res = await axiosBaseURL.patch(
+            `/booking/${bookingId}/trainer-complete`,
+            {},
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        return res.data;
+    },
+    reschedule: async (token, bookingId, payload) => {
+        const res = await axiosBaseURL.patch(
+            `/booking/${bookingId}/reschedule`,
+            payload,
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        return res.data;
+    },
 };

@@ -7,29 +7,91 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import WrapperContainer from '../../Components/Wrapper';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {Images} from '../../utils/Images';
-import {useNavigation} from '@react-navigation/native';
+import { Images } from '../../utils/Images';
+import { useNavigation } from '@react-navigation/native';
 import axiosBaseURL from '../../services/AxiosBaseURL';
-import {useDispatch, useSelector} from 'react-redux';
-import {AnimatedCircularProgress} from 'react-native-circular-progress';
-import {socketService} from '../../utils/socketService';
-import {SaveLogedInUser} from '../../store/Slices/db_ID';
+import { useDispatch, useSelector } from 'react-redux';
+import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import { socketService } from '../../utils/socketService';
+import { SaveLogedInUser } from '../../store/Slices/db_ID';
 import notifee from '@notifee/react-native';
+import {
+  getFcmToken,
+  saveFcmTokenToBackend,
+  setupNotificationChannel,
+  showForegroundNotification,
+} from '../../Notifications/notificationService';
+import { getMessaging } from '@react-native-firebase/messaging';
+
+const firebaseMessaging = getMessaging();
+
 const TrainerHome = () => {
   const trainer_data = useSelector(state => state.Auth.data);
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const res = await axiosBaseURL.get('/notification/list');
+      if (res.data.success) {
+        const count = res.data.data.filter(n => !n.isRead).length;
+        setUnreadNotifCount(count);
+      }
+    } catch (err) {
+      // silent
+    }
+  }, []);
 
   useEffect(() => {
     socketService.initializeSocket();
-  }, []);
+    setupNotificationChannel();
+
+    const syncFcmToken = async () => {
+      try {
+        const token = await getFcmToken();
+        if (token && trainer_data?._id) {
+          await saveFcmTokenToBackend({
+            userId: trainer_data._id,
+            role: 'trainer',
+            token: token,
+          });
+          console.log('Trainer FCM Token synced');
+        }
+      } catch (err) {
+        console.log('FCM Sync Error:', err.message);
+      }
+    };
+
+    syncFcmToken();
+    fetchUnreadCount();
+
+    const unsubscribe = firebaseMessaging.onMessage(async remoteMessage => {
+      console.log('Foreground Message:', remoteMessage);
+      await showForegroundNotification(remoteMessage);
+      fetchUnreadCount();
+    });
+
+    return unsubscribe;
+  }, [trainer_data?._id, fetchUnreadCount]);
+
+  // Re-fetch count when coming back to this screen
+  useEffect(() => {
+    const unsub = navigation.addListener('focus', () => {
+      fetchUnreadCount();
+    });
+    return unsub;
+  }, [navigation, fetchUnreadCount]);
+
+  // ... rest of component continues below (useEffect blocks remain unchanged)
+
   useEffect(() => {
     console.log('=----------', trainer_data);
     if (trainer_data.type === 'trainer') {
@@ -101,6 +163,13 @@ const TrainerHome = () => {
                 navigation.navigate('Notification');
               }}>
               <Image source={Images.notification} style={styles.notifiaction} />
+              {unreadNotifCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {unreadNotifCount > 99 ? '99+' : unreadNotifCount}
+                  </Text>
+                </View>
+              )}
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.8}
@@ -116,8 +185,8 @@ const TrainerHome = () => {
             Welcome{' '}
             <Text
               style={[
-                {...styles.Welcome_Text},
-                {color: '#fff', fontWeight: '500'},
+                { ...styles.Welcome_Text },
+                { color: '#fff', fontWeight: '500' },
               ]}>
               {trainer_data?.fullName}
             </Text>
@@ -129,7 +198,7 @@ const TrainerHome = () => {
         <View style={styles.cont_2}>
           <Text
             style={[
-              {...styles.Welcome_Text},
+              { ...styles.Welcome_Text },
               {
                 fontSize: responsiveFontSize(2),
                 fontWeight: '500',
@@ -162,7 +231,7 @@ const TrainerHome = () => {
                 <Text style={styles.percent}>80%</Text>
                 <Text
                   style={[
-                    {...styles.slogan},
+                    { ...styles.slogan },
                     {
                       color: '#BBBBBB',
                       marginLeft: responsiveWidth(1),
@@ -172,14 +241,14 @@ const TrainerHome = () => {
                   Profile Completion
                 </Text>
               </View>
-              <Text style={[{...styles.slogan}, {color: '#BBBBBB'}]}>
+              <Text style={[{ ...styles.slogan }, { color: '#BBBBBB' }]}>
                 Complete your Profile to attract more clients.
               </Text>
               <TouchableOpacity
                 onPress={() => {
                   navigation.navigate('Profile');
                 }}>
-                <Text style={{color: '#9FED3A', alignSelf: 'flex-end'}}>
+                <Text style={{ color: '#9FED3A', alignSelf: 'flex-end' }}>
                   View Your Profile
                 </Text>
               </TouchableOpacity>
@@ -187,7 +256,7 @@ const TrainerHome = () => {
           </TouchableOpacity>
         </View>
 
-        <View style={{paddingHorizontal: responsiveWidth(7)}}>
+        <View style={{ paddingHorizontal: responsiveWidth(7) }}>
           <View
             style={{
               flexDirection: 'row',
@@ -206,8 +275,8 @@ const TrainerHome = () => {
               onPress={() => {
                 navigation.navigate('Earnings');
               }}
-              style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={{color: '#9FED3A'}}>See all</Text>
+              style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ color: '#9FED3A' }}>See all</Text>
               <Image
                 source={Images.rightarrow}
                 style={{
@@ -229,13 +298,13 @@ const TrainerHome = () => {
               paddingVertical: responsiveHeight(2),
               borderRadius: responsiveWidth(3),
             }}>
-            <View style={{width: responsiveWidth(45)}}>
+            <View style={{ width: responsiveWidth(45) }}>
               <Text
-                style={{color: '#9FED3A', fontSize: responsiveFontSize(2.5)}}>
+                style={{ color: '#9FED3A', fontSize: responsiveFontSize(2.5) }}>
                 Earnings
               </Text>
               <Text
-                style={{color: '#BBBBBB', fontSize: responsiveFontSize(1.7)}}>
+                style={{ color: '#BBBBBB', fontSize: responsiveFontSize(1.7) }}>
                 Earnings will appears here once your first session is complete!
               </Text>
             </View>
@@ -245,7 +314,7 @@ const TrainerHome = () => {
           </View>
         </View>
 
-        <View style={{paddingHorizontal: responsiveWidth(7)}}>
+        <View style={{ paddingHorizontal: responsiveWidth(7) }}>
           <View
             style={{
               flexDirection: 'row',
@@ -264,8 +333,8 @@ const TrainerHome = () => {
               onPress={() => {
                 navigation.navigate('Sessions');
               }}
-              style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={{color: '#9FED3A'}}>See all</Text>
+              style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ color: '#9FED3A' }}>See all</Text>
               <Image
                 source={Images.rightarrow}
                 style={{
@@ -287,13 +356,13 @@ const TrainerHome = () => {
               paddingVertical: responsiveHeight(2),
               borderRadius: responsiveWidth(3),
             }}>
-            <View style={{width: responsiveWidth(43)}}>
+            <View style={{ width: responsiveWidth(43) }}>
               <Text
-                style={{color: '#9FED3A', fontSize: responsiveFontSize(2.5)}}>
+                style={{ color: '#9FED3A', fontSize: responsiveFontSize(2.5) }}>
                 Sessions
               </Text>
               <Text
-                style={{color: '#BBBBBB', fontSize: responsiveFontSize(1.7)}}>
+                style={{ color: '#BBBBBB', fontSize: responsiveFontSize(1.7) }}>
                 When a client books you, your upcoming sessions will show here.
               </Text>
             </View>
@@ -372,5 +441,22 @@ const styles = StyleSheet.create({
   },
   main_child_2: {
     marginLeft: responsiveWidth(3),
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#FF3B30',
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
   },
 });

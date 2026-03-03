@@ -23,6 +23,7 @@ import TrainerFlow from './TrainerFlow.js';
 import Chats from '../Screens/userScreens/Chats.js';
 import ChatScreen from '../Screens/chat/ChatScreen';
 import BookingDetails from '../Screens/userScreens/BookingDetails';
+import TransactionDetails from '../Screens/trainerScreens/TransactionDetails';
 
 const Stack = createNativeStackNavigator();
 
@@ -170,6 +171,7 @@ const TrainerStack = () => {
       <Stack.Screen name="StoryView" component={StoryView} />
       <Stack.Screen name="PostCaptionScreen" component={PostCaptionScreen} />
       <Stack.Screen name="AllUploadsScreen" component={AllUploadsScreen} />
+      <Stack.Screen name="TransactionDetails" component={TransactionDetails} />
     </Stack.Navigator>
   );
 };

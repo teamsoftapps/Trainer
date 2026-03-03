@@ -34,7 +34,7 @@ const Upcoming = () => {
 
       if (res?.success) {
         const filtered = res.data.filter(
-          (b) => b.status === "pending" || b.status === "confirmed" || b.status === "pending_payment"
+          (b) => b.status === "pending" || b.status === "confirmed" || b.status === "pending_payment" || b.status === "trainer_completed"
         );
         setBookings(filtered);
       }
@@ -56,9 +56,9 @@ const Upcoming = () => {
 
     console.log("item in upcoming:", item)
 
-    const statusText = item.status === "pending_payment" ? "Pending" : item.status.charAt(0).toUpperCase() + item.status.slice(1);
-    const statusBg = item.status === "confirmed" ? "#9FED3A" : item.status === "pending_payment" || item.status === "pending" ? "#C7C7CC" : "#FF4B4B";
-    const statusTextColor = item.status === "confirmed" ? "black" : "white";
+    const statusText = item.status === "pending_payment" ? "Pending" : (item.status === "trainer_completed" ? "Waiting Approval" : item.status.charAt(0).toUpperCase() + item.status.slice(1));
+    const statusBg = item.status === "confirmed" ? "#9FED3A" : (item.status === "trainer_completed" ? "#FFA500" : (item.status === "pending_payment" || item.status === "pending" ? "#C7C7CC" : "#FF4B4B"));
+    const statusTextColor = (item.status === "confirmed" || item.status === "trainer_completed") ? "black" : "white";
 
     return (
       <TouchableOpacity

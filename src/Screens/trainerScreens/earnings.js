@@ -1,17 +1,19 @@
-import {StyleSheet, Text, View, FlatList, TouchableOpacity} from 'react-native';
-import React, {useState} from 'react';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import Header from '../../Components/Header';
 import WrapperContainer from '../../Components/Wrapper';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {LineChart} from 'react-native-chart-kit';
-import {Image} from 'react-native';
-import {ScrollView} from 'react-native';
-import {Images} from '../../utils/Images';
+import { LineChart } from 'react-native-chart-kit';
+import { Image } from 'react-native';
+import { ScrollView } from 'react-native';
+import { Images } from '../../utils/Images';
+import { useSelector } from 'react-redux';
+import axiosBaseURL from '../../services/AxiosBaseURL';
 
 const chartDataMap = {
   0: [20, 40, 60, 80, 40, 90, 120], // week
@@ -46,21 +48,33 @@ const Bookings = [
   },
 ];
 const Earnings = () => {
-  const [timing, setTiming] = useState(1);
+  const [timing, setTiming] = useState(1); // 0: Weekly, 1: Monthly, 2: Yearly
+  const [earningsData, setEarningsData] = useState(null);
+  const trainer_data = useSelector((state) => state.Auth.data);
   const navigation = useNavigation();
+
+  useEffect(() => {
+    fetchEarnings();
+  }, []);
+
+  const fetchEarnings = async () => {
+    try {
+      const res = await axiosBaseURL.get(`/trainer/${trainer_data._id}/earnings`);
+      if (res.data.success) {
+        setEarningsData(res.data.data);
+      }
+    } catch (e) {
+      console.log("Error fetching earnings details:", e);
+    }
+  };
+
   const categories = [
-    {
-      feild: 'Weekly',
-    },
-    {
-      feild: 'Monthly',
-    },
-    {
-      feild: 'Yearly',
-    },
+    { field: "Weekly" },
+    { field: "Monthly" },
+    { field: "Yearly" },
   ];
 
-  const timings = ({item, index}) => {
+  const timings = ({ item, index }) => {
     const isSelected = timing === index;
 
     return (
@@ -78,16 +92,18 @@ const Earnings = () => {
             color: isSelected ? '#000' : '#bbb',
             fontWeight: '600',
           }}>
-          {item.feild}
+          {item.field}
         </Text>
       </TouchableOpacity>
     );
   };
 
-  const Transactions = ({item, index}) => {
+  const Transactions = ({ item }) => {
+    const user = item.userId;
     return (
       <View>
         <TouchableOpacity
+          onPress={() => navigation.navigate('TransactionDetails', { transaction: item })}
           style={{
             backgroundColor: 'rgba(187, 187, 187, 0.1)',
             flexDirection: 'row',
@@ -96,33 +112,42 @@ const Earnings = () => {
             borderRadius: responsiveWidth(3),
             marginRight: responsiveWidth(2),
             marginBottom: responsiveHeight(1.5),
+            alignItems: 'center',
+            justifyContent: 'space-between',
           }}>
-          <View>
-            <Image source={item.userImage} />
-          </View>
-          <View style={{marginLeft: responsiveWidth(3)}}>
-            <Text style={{color: '#fff'}}>{item.userName}</Text>
-            <Text style={{color: '#fff'}}>{item.userDate}</Text>
-            <Text style={{color: '#bbbbbb'}}>{item.selectedTime}</Text>
-          </View>
-          <View
-            style={{
-              paddingLeft: responsiveWidth(6),
-              justifyContent: 'space-between',
-            }}>
-            <View
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Image
+              source={{
+                uri:
+                  item.userId?.profileImage ||
+                  'https://i.pravatar.cc/150?img=11',
+              }}
               style={{
-                paddingHorizontal: responsiveWidth(2),
-                paddingVertical: responsiveHeight(0.5),
-                borderRadius: responsiveWidth(2),
-                backgroundColor: '#9FED3A',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <Text style={{color: '#000', fontWeight: '500'}}>Paid</Text>
+                height: responsiveWidth(14),
+                width: responsiveWidth(14),
+                borderRadius: responsiveWidth(7),
+              }}
+            />
+            <View style={{ marginLeft: responsiveWidth(4) }}>
+              <Text
+                style={{
+                  color: '#fff',
+                  fontSize: responsiveFontSize(2),
+                  fontWeight: '500',
+                }}>
+                {item.userId?.fullName || 'User'}
+              </Text>
+              <Text style={{ color: '#aaa', fontSize: responsiveFontSize(1.6), marginTop: 2 }}>
+                {new Date(item.updatedAt).toLocaleDateString()} • {new Date(item.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </Text>
             </View>
-            <Text style={{color: '#9FED3A', fontSize: responsiveFontSize(2.5)}}>
-              $60.00
+          </View>
+          <View style={{ alignItems: 'flex-end', justifyContent: 'center' }}>
+            <View style={{ backgroundColor: '#2a2a2a', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, alignSelf: 'center', marginBottom: 2 }}>
+              <Text style={{ color: '#9FED3A', fontSize: 10, fontWeight: 'bold' }}>COMPLETED</Text>
+            </View>
+            <Text style={{ color: '#9FED3A', fontSize: 18, fontWeight: 'bold' }}>
+              ${(item.amount / 100).toFixed(2)}
             </Text>
           </View>
         </TouchableOpacity>
@@ -140,7 +165,7 @@ const Earnings = () => {
           rightView={
             <Image
               source={Images.logo}
-              style={{height: responsiveHeight(5), width: responsiveWidth(10)}}
+              style={{ height: responsiveHeight(5), width: responsiveWidth(10) }}
             />
           }
         />
@@ -220,8 +245,8 @@ const Earnings = () => {
             marginTop: 10,
           }}>
           {/* HEADER */}
-          <View style={{paddingHorizontal: 20}}>
-            <Text style={{color: '#9FED3A', fontSize: 14}}>Total Earning</Text>
+          <View style={{ paddingHorizontal: 20 }}>
+            <Text style={{ color: '#9FED3A', fontSize: 14 }}>Total Earning</Text>
 
             <View
               style={{
@@ -229,50 +254,52 @@ const Earnings = () => {
                 alignItems: 'center',
                 marginTop: 5,
               }}>
-              <Text style={{color: '#fff', fontSize: 28, fontWeight: '700'}}>
-                $5,392
+              <Text style={{ color: '#fff', fontSize: 28, fontWeight: '700' }}>
+                ${earningsData?.totalEarnings || '0.00'}
               </Text>
 
-              <Text style={{color: '#9FED3A', marginLeft: 10}}>▲ 2.4%</Text>
+              <Text style={{ color: '#9FED3A', marginLeft: 10 }}>▲ 100%</Text>
             </View>
           </View>
 
           {/* GRAPH */}
-          <LineChart
-            data={{
-              labels: ['Jan', 'Mar', 'May', 'Jul', 'Sep', 'Nov'],
-              datasets: [
-                {
-                  data: chartDataMap[timing],
-                  strokeWidth: 3,
-                  color: () => '#9FED3A',
+          {earningsData && earningsData.filters && (
+            <LineChart
+              data={{
+                labels: (timing === 0 ? earningsData.filters.weekly : timing === 1 ? earningsData.filters.monthly : earningsData.filters.yearly)?.labels || [''],
+                datasets: [{
+                  data: (timing === 0 ? earningsData.filters.weekly : timing === 1 ? earningsData.filters.monthly : earningsData.filters.yearly)?.data?.length ? (timing === 0 ? earningsData.filters.weekly : timing === 1 ? earningsData.filters.monthly : earningsData.filters.yearly).data : [0]
+                }]
+              }}
+              width={responsiveWidth(88)}
+              height={responsiveHeight(30)}
+              withDots={true}
+              withShadow={true}
+              withVerticalLines={false}
+              withOuterLines={false}
+              withInnerLines
+              fromZero
+              bezier
+              chartConfig={{
+                backgroundGradientFrom: '#151515',
+                backgroundGradientTo: '#151515',
+                decimalPlaces: 0,
+                color: (opacity = 1) => `rgba(159, 237, 58, ${opacity})`,
+                labelColor: () => '#777',
+                propsForBackgroundLines: {
+                  stroke: 'rgba(255,255,255,0.05)',
                 },
-              ],
-            }}
-            width={responsiveWidth(88)}
-            height={responsiveHeight(30)}
-            withDots={false}
-            withShadow={false}
-            withVerticalLines={false}
-            withOuterLines={false}
-            withInnerLines
-            fromZero
-            bezier
-            chartConfig={{
-              backgroundGradientFrom: 'transparent',
-              backgroundGradientTo: 'transparent',
-              decimalPlaces: 0,
-              color: () => '#9FED3A',
-              labelColor: () => '#777',
-              propsForBackgroundLines: {
-                stroke: 'rgba(255,255,255,0.1)',
-              },
-            }}
-            style={{
-              marginTop: 10,
-              borderRadius: 16,
-            }}
-          />
+                propsForLabels: {
+                  fontSize: 10,
+                },
+              }}
+              style={{
+                marginTop: 10,
+                borderRadius: 16,
+                paddingRight: 40,
+              }}
+            />
+          )}
         </View>
 
         <Text
@@ -290,7 +317,14 @@ const Earnings = () => {
             width: responsiveWidth(85),
             alignSelf: 'center',
           }}>
-          <FlatList data={Bookings} renderItem={Transactions} />
+          <FlatList
+            data={earningsData?.recentTransactions || []}
+            renderItem={Transactions}
+            scrollEnabled={false}
+            ListEmptyComponent={() => (
+              <Text style={{ color: '#777', textAlign: 'center', marginTop: 20 }}>No transactions yet.</Text>
+            )}
+          />
         </View>
       </ScrollView>
     </WrapperContainer>

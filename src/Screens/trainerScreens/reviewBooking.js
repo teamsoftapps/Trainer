@@ -8,7 +8,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, { useState, useCallback } from 'react';
+import { useSelector } from 'react-redux';
+import { TrainerBookingAPI } from '../../services/trainerBookingApi';
+import { BookingAPI } from '../../services/bookingApi';
+import { showMessage } from 'react-native-flash-message';
 import WrapperContainer from '../../Components/Wrapper';
 import Header from '../../Components/Header';
 import {
@@ -18,20 +22,90 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {FontFamily, Images} from '../../utils/Images';
+import { FontFamily, Images } from '../../utils/Images';
 
 import ButtonComp from '../../Components/ButtonComp';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
-const BookingDetails = ({route}) => {
+const BookingDetails = ({ route }) => {
   const data = route.params;
   const routeData = data.data;
   console.log('data from upcomimg: ', routeData);
   const navigation = useNavigation();
-  const toggleSwitch = () => setIsEnabled(prevState => !prevState);
+  const token = useSelector(state => state?.Auth?.data?.token);
+  const myId = useSelector(state => state?.Auth?.data?._id);
+
   const [isEnabled, setIsEnabled] = useState(false);
   const [isAccept, setIsAccept] = useState(false);
-  const [status, setStatus] = useState('Pending');
+  const [status, setStatus] = useState(routeData.status || 'Pending');
+  const [loading, setLoading] = useState(false);
+
+  const toggleSwitch = () => setIsEnabled(prevState => !prevState);
+
+  const handleChat = useCallback(async () => {
+    if (!routeData?.userId?._id && !routeData?.userId) {
+      showMessage({ message: 'User information missing', type: 'danger' });
+      return;
+    }
+
+    const otherUserId = routeData.userId._id || routeData.userId;
+
+    try {
+      setLoading(true);
+      const res = await BookingAPI.createConversation(otherUserId, myId);
+      if (res?.success) {
+        const conv = res.conversation || res.data;
+        navigation.navigate('ChatScreen', {
+          conversationId: conv?._id,
+          otherUser: routeData.userId,
+        });
+      } else {
+        showMessage({
+          message: res?.message || 'Failed to start chat',
+          type: 'danger',
+        });
+      }
+    } catch (error) {
+      console.log('handleChat error:', error);
+      showMessage({ message: 'Error starting chat', type: 'danger' });
+    } finally {
+      setLoading(false);
+    }
+  }, [myId, routeData, navigation]);
+
+  const handleStatusUpdate = useCallback(
+    async newStatus => {
+      try {
+        setLoading(true);
+        const res = await TrainerBookingAPI.updateStatus(
+          token,
+          routeData._id,
+          newStatus,
+        );
+
+        if (res?.success) {
+          setStatus(newStatus === 'confirmed' ? 'Confirmed' : 'Rejected');
+          if (newStatus === 'confirmed') {
+            setIsAccept(true);
+          } else {
+            showMessage({ message: 'Booking Rejected', type: 'success' });
+            navigation.goBack();
+          }
+        } else {
+          showMessage({
+            message: res?.message || 'Update failed',
+            type: 'danger',
+          });
+        }
+      } catch (error) {
+        console.log('handleStatusUpdate error:', error);
+        showMessage({ message: 'Error updating booking status', type: 'danger' });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token, routeData._id, navigation],
+  );
   return (
     <WrapperContainer>
       <Header
@@ -41,7 +115,7 @@ const BookingDetails = ({route}) => {
         rightView={
           <Image
             source={Images.logo}
-            style={{height: responsiveHeight(5), width: responsiveWidth(10)}}
+            style={{ height: responsiveHeight(5), width: responsiveWidth(10) }}
           />
         }
       />
@@ -69,16 +143,16 @@ const BookingDetails = ({route}) => {
               alignSelf: 'center',
               alignItems: 'center',
             }}>
-            <View style={{flexDirection: 'row', gap: responsiveWidth(4)}}>
+            <View style={{ flexDirection: 'row', gap: responsiveWidth(4) }}>
               <Image
-                src={routeData.profileImage}
+                source={{ uri: routeData.userId?.profileImage || routeData.profileImage }}
                 style={{
                   width: responsiveScreenWidth(18),
                   height: responsiveScreenWidth(18),
                   borderRadius: 50,
                 }}
               />
-              <View style={{justifyContent: 'space-evenly'}}>
+              <View style={{ justifyContent: 'space-evenly' }}>
                 <Text
                   numberOfLines={2}
                   style={{
@@ -87,7 +161,7 @@ const BookingDetails = ({route}) => {
                     color: 'white',
                     maxWidth: responsiveWidth(34),
                   }}>
-                  {routeData.userName}
+                  {routeData?.userId?.fullName || routeData?.userName}
                 </Text>
                 <View
                   style={{
@@ -108,7 +182,7 @@ const BookingDetails = ({route}) => {
                 gap: responsiveWidth(3),
                 alignItems: 'center',
               }}>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={handleChat}>
                 <Image
                   source={Images.chat_icon}
                   style={{
@@ -139,15 +213,15 @@ const BookingDetails = ({route}) => {
           }}>
           <View>
             <Text
-              style={{color: '#A4A4A4', fontSize: responsiveScreenFontSize(2)}}>
+              style={{ color: '#A4A4A4', fontSize: responsiveScreenFontSize(2) }}>
               Date & Time
             </Text>
             <Text
-              style={{color: 'white', fontSize: responsiveScreenFontSize(2.6)}}>
+              style={{ color: 'white', fontSize: responsiveScreenFontSize(2.6) }}>
               {routeData.Date}
             </Text>
             <Text
-              style={{color: 'white', fontSize: responsiveScreenFontSize(2.3)}}>
+              style={{ color: 'white', fontSize: responsiveScreenFontSize(2.3) }}>
               {routeData.bookingTime}
             </Text>
           </View>
@@ -162,11 +236,11 @@ const BookingDetails = ({route}) => {
           }}>
           <View>
             <Text
-              style={{color: '#A4A4A4', fontSize: responsiveScreenFontSize(2)}}>
+              style={{ color: '#A4A4A4', fontSize: responsiveScreenFontSize(2) }}>
               Earnings
             </Text>
             <Text
-              style={{color: 'white', fontSize: responsiveScreenFontSize(2.6)}}>
+              style={{ color: 'white', fontSize: responsiveScreenFontSize(2.6) }}>
               ${routeData.Amount} (1 Hour)
             </Text>
           </View>
@@ -212,7 +286,7 @@ const BookingDetails = ({route}) => {
             </View>
             <View>
               <Switch
-                trackColor={{false: '#767577', true: '#18D200'}}
+                trackColor={{ false: '#767577', true: '#18D200' }}
                 thumbColor={'#f4f3f4'}
                 onValueChange={toggleSwitch}
                 value={isEnabled}
@@ -220,28 +294,32 @@ const BookingDetails = ({route}) => {
             </View>
           </View>
         </View>
-        <ButtonComp
-          onPress={() => {
-            setIsAccept(true);
-            setIsEnabled(false);
-          }}
-          text="Accept"
-          mainStyle={{
-            backgroundColor: '#9BE639',
-            marginHorizontal: responsiveWidth(7),
-          }}
-        />
-        <ButtonComp
-          text="Decline"
-          textstyle={{color: 'red'}}
-          mainStyle={{
-            backgroundColor: '#181818',
-            marginHorizontal: responsiveWidth(7),
-            borderColor: 'red',
-            borderWidth: responsiveWidth(0.3),
-            marginVertical: responsiveHeight(2),
-          }}
-        />
+        {status.toLowerCase() === 'pending' && (
+          <>
+            <ButtonComp
+              onPress={() => handleStatusUpdate('confirmed')}
+              disabled={loading}
+              text={loading ? '...' : 'Accept'}
+              mainStyle={{
+                backgroundColor: '#9BE639',
+                marginHorizontal: responsiveWidth(7),
+              }}
+            />
+            <ButtonComp
+              onPress={() => handleStatusUpdate('rejected')}
+              disabled={loading}
+              text="Decline"
+              textstyle={{ color: 'red' }}
+              mainStyle={{
+                backgroundColor: '#181818',
+                marginHorizontal: responsiveWidth(7),
+                borderColor: 'red',
+                borderWidth: responsiveWidth(0.3),
+                marginVertical: responsiveHeight(2),
+              }}
+            />
+          </>
+        )}
         {isAccept && (
           <Modal
             animationType="slide"
@@ -262,7 +340,7 @@ const BookingDetails = ({route}) => {
                   }}>
                   Session Confirmed!
                 </Text>
-                <Text style={{color: '#000', textAlign: 'center'}}>
+                <Text style={{ color: '#000', textAlign: 'center' }}>
                   You've successfully accepted the session invite.Get ready to
                   train with John Doe on October 15th, 2024, at 10:00 AM
                 </Text>
@@ -277,7 +355,7 @@ const BookingDetails = ({route}) => {
                     backgroundColor: '#000',
                     marginTop: responsiveHeight(2),
                   }}
-                  textstyle={{color: '#fff', fontWeight: 'lighter'}}
+                  textstyle={{ color: '#fff', fontWeight: 'lighter' }}
                   text="View Booking Details"
                 />
                 <ButtonComp
@@ -290,7 +368,7 @@ const BookingDetails = ({route}) => {
                     backgroundColor: '#fff',
                     marginTop: responsiveHeight(2),
                   }}
-                  textstyle={{color: '#000', fontWeight: 'lighter'}}
+                  textstyle={{ color: '#000', fontWeight: 'lighter' }}
                   text="Back to Home"
                 />
               </View>

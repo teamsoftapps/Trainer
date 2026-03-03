@@ -11,28 +11,38 @@ import {
   FlatList,
   Dimensions,
 } from 'react-native';
-import React, {useState, useCallback, useEffect, useRef} from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   responsiveHeight,
   responsiveWidth,
   responsiveFontSize,
 } from 'react-native-responsive-dimensions';
 import WrapperContainer from '../../Components/Wrapper';
-import {FontFamily, Images} from '../../utils/Images';
-import {AirbnbRating} from 'react-native-ratings';
+import { FontFamily, Images } from '../../utils/Images';
+import { AirbnbRating } from 'react-native-ratings';
 import LinearGradient from 'react-native-linear-gradient';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import {useSelector, useDispatch} from 'react-redux';
-import {FlashList} from '@shopify/flash-list';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useSelector, useDispatch } from 'react-redux';
+import { FlashList } from '@shopify/flash-list';
 import axiosBaseURL from '../../services/AxiosBaseURL';
-import {useGetTrainersQuery} from '../../store/Apis/Post';
-import {SaveLogedInUser} from '../../store/Slices/db_ID';
-import {followTrainer, unfollowTrainer} from '../../store/Slices/follow';
-import {saveBookings} from '../../store/Slices/trainerBookings';
+import { useGetTrainersQuery } from '../../store/Apis/Post';
+import { SaveLogedInUser } from '../../store/Slices/db_ID';
+import { followTrainer, unfollowTrainer } from '../../store/Slices/follow';
+import { saveBookings } from '../../store/Slices/trainerBookings';
 import followingHook from '../../Hooks/Follow';
 import StoryRing from '../../Components/StoryRing';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-const {width: SCREEN_WIDTH} = Dimensions.get('window');
+import { getMessaging } from '@react-native-firebase/messaging';
+import {
+  getFcmToken,
+  saveFcmTokenToBackend,
+  setupNotificationChannel,
+  showForegroundNotification,
+} from '../../Notifications/notificationService';
+
+const firebaseMessaging = getMessaging();
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const adsData = [
   {
     id: '1',
@@ -55,7 +65,7 @@ const Home = () => {
   const dispatch = useDispatch();
   const [unreadTotal, setUnreadTotal] = useState(0);
 
-  const {data, isLoading, isFetching, refetch} = useGetTrainersQuery(
+  const { data, isLoading, isFetching, refetch } = useGetTrainersQuery(
     undefined,
     {
       refetchOnMountOrArgChange: true,
@@ -77,6 +87,7 @@ const Home = () => {
   useFocusEffect(
     useCallback(() => {
       fetchUnreadTotal();
+      fetchUnreadNotifCount();
     }, [authData?._id]),
   );
 
@@ -84,7 +95,7 @@ const Home = () => {
   const token = authData?.token;
   const followedTrainers = useSelector(state => state?.follow?.follow || []);
 
-  const {isFollow, unFollow, loading: loadingFollow} = followingHook();
+  const { isFollow, unFollow, loading: loadingFollow } = followingHook();
 
   const [storiesData, setStoriesData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -92,8 +103,48 @@ const Home = () => {
 
   const flatListRef = useRef(null);
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+
+  const fetchUnreadNotifCount = useCallback(async () => {
+    try {
+      const res = await axiosBaseURL.get('/notification/list');
+      if (res.data.success) {
+        const count = res.data.data.filter(n => !n.isRead).length;
+        setUnreadNotifCount(count);
+      }
+    } catch (err) {
+      // silent
+    }
+  }, []);
 
   useEffect(() => {
+    setupNotificationChannel();
+
+    const syncFcmToken = async () => {
+      try {
+        const fcmToken = await getFcmToken();
+        if (fcmToken && authData?._id) {
+          await saveFcmTokenToBackend({
+            userId: authData._id,
+            role: 'user',
+            token: fcmToken,
+          });
+          console.log('User FCM Token synced');
+        }
+      } catch (err) {
+        console.log('User FCM Sync Error:', err.message);
+      }
+    };
+
+    syncFcmToken();
+    fetchUnreadNotifCount();
+
+    const unsubscribe = firebaseMessaging.onMessage(async remoteMessage => {
+      console.log('Foreground Message (User):', remoteMessage);
+      await showForegroundNotification(remoteMessage);
+      fetchUnreadNotifCount();
+    });
+
     const interval = setInterval(() => {
       const nextIndex = (currentAdIndex + 1) % adsData.length;
 
@@ -106,8 +157,11 @@ const Home = () => {
       setCurrentAdIndex(nextIndex);
     }, 4500);
 
-    return () => clearInterval(interval);
-  }, [currentAdIndex]);
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
+  }, [currentAdIndex, authData?._id]);
 
   useEffect(() => {
     if (!token) return;
@@ -135,10 +189,18 @@ const Home = () => {
 
     const loadStories = async () => {
       try {
-        const requests = data.data.map(trainer =>
+        const followedIds = followedTrainers || [];
+        const followedTrainersList = data.data.filter(t => followedIds.includes(t._id));
+
+        if (!followedTrainersList.length) {
+          setStoriesData([]);
+          return;
+        }
+
+        const requests = followedTrainersList.map(trainer =>
           axiosBaseURL.get(`/trainer/stories/${trainer._id}`).catch(err => {
             console.log(`Stories failed for ${trainer._id}:`, err.message);
-            return {data: {data: []}};
+            return { data: { data: [] } };
           }),
         );
 
@@ -146,7 +208,7 @@ const Home = () => {
 
         const stories = responses
           .map((res, idx) => {
-            const trainer = data.data[idx];
+            const trainer = followedTrainersList[idx];
             const trainerStories = res?.data?.data || [];
 
             if (!trainerStories.length) return null;
@@ -205,7 +267,7 @@ const Home = () => {
           `/user/getBookingbyId/${trainer._id}`,
         );
         dispatch(saveBookings(response.data?.data || []));
-        navigation.navigate('TrainerProfile', {data: trainer});
+        navigation.navigate('TrainerProfile', { data: trainer });
       } catch (error) {
         console.log('Booking fetch error:', error);
       }
@@ -260,15 +322,15 @@ const Home = () => {
   );
 
   const renderTrainer = useCallback(
-    ({item}) => (
+    ({ item }) => (
       <ImageBackground
-        source={{uri: item?.profileImage}}
-        imageStyle={{borderRadius: responsiveWidth(2)}}
+        source={{ uri: item?.profileImage }}
+        imageStyle={{ borderRadius: responsiveWidth(2) }}
         style={styles.trainerCard}>
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => getBookingAndNavigate(item)}
-          style={{flex: 1}}>
+          style={{ flex: 1 }}>
           {/* Follow button */}
           <TouchableOpacity
             activeOpacity={0.9}
@@ -296,8 +358,8 @@ const Home = () => {
           {/* Bottom info gradient */}
           <LinearGradient
             colors={['transparent', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.9)']}
-            start={{x: 0, y: 0}}
-            end={{x: 0, y: 1}}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
             style={styles.bottomGradient}>
             <View style={styles.trainerInfo}>
               <Text style={styles.speciality}>
@@ -357,24 +419,24 @@ const Home = () => {
   const markStorySeen = useCallback(async storyId => {
     if (!storyId) return;
     try {
-      await axiosBaseURL.post('/trainer/story/seen', {storyId});
+      await axiosBaseURL.post('/trainer/story/seen', { storyId });
       console.log('Story marked as seen:', storyId);
     } catch (err) {
       console.log('Failed to mark story seen:', err.message);
     }
   }, []);
 
-  const MessageIconWithBadge = ({count, onPress}) => {
+  const MessageIconWithBadge = ({ count, onPress }) => {
     const display = count > 99 ? '99+' : String(count || 0);
 
     return (
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.8}
-        style={{position: 'relative'}}>
+        style={{ position: 'relative' }}>
         <Image
           source={Images.messages}
-          style={{height: responsiveHeight(3.3), width: responsiveWidth(7)}}
+          style={{ height: responsiveHeight(3.3), width: responsiveWidth(7) }}
         />
 
         {count > 0 && (
@@ -415,6 +477,13 @@ const Home = () => {
             onPress={() => navigation.navigate('Notification')}
             activeOpacity={0.8}>
             <Image source={Images.notification} style={styles.notifiaction} />
+            {unreadNotifCount > 0 && (
+              <View style={styles.notifBadge}>
+                <Text style={styles.notifBadgeText}>
+                  {unreadNotifCount > 99 ? '99+' : unreadNotifCount}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
           <MessageIconWithBadge
             count={unreadTotal}
@@ -451,7 +520,7 @@ const Home = () => {
                 offset: 96 * index,
                 index,
               })}
-              renderItem={({item}) => {
+              renderItem={({ item }) => {
                 const isSeen = seenUsers.has(item.user_id);
 
                 const RING_SIZE = responsiveWidth(22);
@@ -492,7 +561,7 @@ const Home = () => {
                       />
 
                       <Image
-                        source={{uri: item.user_image}}
+                        source={{ uri: item.user_image }}
                         style={{
                           position: 'absolute',
                           width: IMAGE_SIZE,
@@ -547,7 +616,7 @@ const Home = () => {
               );
               setCurrentAdIndex(index);
             }}
-            renderItem={({item}) => (
+            renderItem={({ item }) => (
               <View style={styles.adsCard}>
                 <Image
                   source={item.image}
@@ -822,6 +891,23 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 11,
     fontWeight: '800',
+  },
+  notifBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#9FED3A',
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  notifBadgeText: {
+    color: '#000',
+    fontSize: 10,
+    fontWeight: '700',
   },
 });
 

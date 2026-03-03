@@ -7,37 +7,35 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
-import {FontFamily, Images} from '../../utils/Images';
+import React, { useState } from 'react';
+import { FontFamily, Images } from '../../utils/Images';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import ButtonComp from '../../Components/ButtonComp';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import WrapperContainer from '../../Components/Wrapper';
-import {useDispatch} from 'react-redux';
-import {useSignInUserMutation} from '../../store/Apis/userAuth';
-import {useSignInTrainerMutation} from '../../store/Apis/trainerAuth';
-import {IsLogin} from '../../store/Slices/AuthSlice';
+import { useDispatch } from 'react-redux';
+import { useSignInUserMutation } from '../../store/Apis/userAuth';
+import { useSignInTrainerMutation } from '../../store/Apis/trainerAuth';
+import { IsLogin } from '../../store/Slices/AuthSlice';
 import useToast from '../../Hooks/Toast';
-import {showMessage} from 'react-native-flash-message';
-import {saveFollowers} from '../../store/Slices/follow';
-import auth from '@react-native-firebase/auth';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import { showMessage } from 'react-native-flash-message';
+import { saveFollowers } from '../../store/Slices/follow';
 
-const Signin = ({route}) => {
+const Signin = ({ route }) => {
   const [email, setemail] = useState('');
   const [password, setpassword] = useState('');
   const [secure, setsecure] = useState(false);
   const [remember, setremember] = useState(false);
   const data = route.params;
   console.log('ADSASAD', data.checkUser);
-  const {showToast} = useToast();
+  const { showToast } = useToast();
   const dispatch = useDispatch();
-  const [SignInUser, {isLoading: SigninUserLoading}] = useSignInUserMutation();
-  const [SignInTrainer, {isLoading: SigninTrainerLoading}] =
+  const [SignInUser, { isLoading: SigninUserLoading }] = useSignInUserMutation();
+  const [SignInTrainer, { isLoading: SigninTrainerLoading }] =
     useSignInTrainerMutation();
   const navigation = useNavigation();
   const handleSignin = async () => {
@@ -85,7 +83,7 @@ const Signin = ({route}) => {
       <ImageBackground
         resizeMode="cover"
         source={Images.bg}
-        style={{height: responsiveHeight(100)}}>
+        style={{ height: responsiveHeight(100) }}>
         <View
           style={{
             alignItems: 'center',
@@ -95,6 +93,8 @@ const Signin = ({route}) => {
             source={Images.logo}
             style={{
               marginBottom: responsiveHeight(2),
+              width: responsiveWidth(40),
+              height: responsiveHeight(20),
             }}
           />
           <Text
@@ -115,7 +115,7 @@ const Signin = ({route}) => {
             }}>
             Sign in To Continue
           </Text>
-          <View style={{gap: responsiveHeight(3)}}>
+          <View style={{ gap: responsiveHeight(3) }}>
             <View
               style={{
                 width: responsiveWidth(85),
@@ -125,7 +125,7 @@ const Signin = ({route}) => {
                 borderColor: '#908C8D',
                 borderRadius: 17,
               }}>
-              <Text style={{color: '#908C8D'}}>Email</Text>
+              <Text style={{ color: '#908C8D' }}>Email</Text>
               <TextInput
                 placeholder="Enter Email"
                 value={email || undefined}
@@ -154,7 +154,7 @@ const Signin = ({route}) => {
                 alignItems: 'center',
               }}>
               <View>
-                <Text style={{color: '#908C8D'}}>Password</Text>
+                <Text style={{ color: '#908C8D' }}>Password</Text>
                 <TextInput
                   placeholder="Enter Password"
                   secureTextEntry={secure}
@@ -178,7 +178,7 @@ const Signin = ({route}) => {
                 }}>
                 <Image
                   source={secure ? Images.eye_off : Images.eye}
-                  style={{width: responsiveWidth(6)}}
+                  style={{ width: responsiveWidth(6) }}
                 />
               </TouchableOpacity>
             </View>
@@ -220,7 +220,7 @@ const Signin = ({route}) => {
             </View>
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate('ForgotPassword', {data: data});
+                navigation.navigate('ForgotPassword', { data: data });
               }}>
               <Text
                 style={{
@@ -258,7 +258,7 @@ const Signin = ({route}) => {
             </Text>
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate('signup', {checkUser: data.checkUser});
+                navigation.navigate('signup', { checkUser: data.checkUser });
               }}>
               <Text
                 style={{

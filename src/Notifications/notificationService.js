@@ -1,7 +1,9 @@
-import messaging from '@react-native-firebase/messaging';
-import notifee, {AndroidImportance} from '@notifee/react-native';
-import {Platform, PermissionsAndroid} from 'react-native';
+import { getMessaging, getToken } from '@react-native-firebase/messaging';
+import notifee, { AndroidImportance } from '@notifee/react-native';
+import { Platform, PermissionsAndroid } from 'react-native';
 import axiosBaseURL from '../services/AxiosBaseURL';
+
+const messaging = getMessaging();
 
 export async function setupNotificationChannel() {
   if (Platform.OS === 'android') {
@@ -25,21 +27,20 @@ export async function ensureNotificationPermission() {
   }
 
   // iOS + Android (FCM permission API)
-  const authStatus = await messaging().requestPermission();
+  const authStatus = await messaging.requestPermission();
   const enabled =
-    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+    authStatus === 1 || // AUTHORIZED
+    authStatus === 2; // PROVISIONAL
 
   return enabled;
 }
 
 export async function getFcmToken() {
-  await messaging().registerDeviceForRemoteMessages();
-  return messaging().getToken();
+  return getToken(messaging);
 }
 
 // call your backend: POST /notifications/save-token
-export async function saveFcmTokenToBackend({userId, role, token}) {
+export async function saveFcmTokenToBackend({ userId, role, token }) {
   return axiosBaseURL.post('notification/save-token', {
     userId,
     role: (role || 'user').toLowerCase(),
@@ -49,6 +50,7 @@ export async function saveFcmTokenToBackend({userId, role, token}) {
 
 export async function showForegroundNotification(remoteMessage) {
   const senderName = remoteMessage?.data?.senderName;
+  const data = remoteMessage?.data || {};
 
   const title =
     remoteMessage?.notification?.title ||
@@ -62,12 +64,13 @@ export async function showForegroundNotification(remoteMessage) {
   await notifee.displayNotification({
     title,
     body,
+    data: data, // Pass through deep linking keys
     android: {
       channelId: 'chat',
       smallIcon: 'ic_stat_notification',
       importance: AndroidImportance.HIGH,
       priority: 'high',
-      pressAction: {id: 'default'},
+      pressAction: { id: 'default' },
       sound: 'default',
     },
   });

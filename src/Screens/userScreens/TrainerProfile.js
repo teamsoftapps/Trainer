@@ -10,31 +10,31 @@ import {
   Modal,
   TouchableWithoutFeedback,
 } from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import WrapperContainer from '../../Components/Wrapper';
-import {FontFamily, Images} from '../../utils/Images';
+import { FontFamily, Images } from '../../utils/Images';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   responsiveHeight,
   responsiveFontSize,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import {useDispatch, useSelector} from 'react-redux';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
 import axiosBaseURL from '../../services/AxiosBaseURL';
-import {followTrainer, unfollowTrainer} from '../../store/Slices/follow';
+import { followTrainer, unfollowTrainer } from '../../store/Slices/follow';
 import {
   favouriteTrainer,
   unfavouriteTrainer,
 } from '../../store/Slices/favourite';
-import {SaveLogedInUser} from '../../store/Slices/db_ID';
+import { SaveLogedInUser } from '../../store/Slices/db_ID';
 import followingHook from '../../Hooks/Follow';
-import MapView, {Marker} from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {showMessage} from 'react-native-flash-message';
+import { showMessage } from 'react-native-flash-message';
 import Video from 'react-native-video';
-const TrainerProfile = ({route}) => {
-  const {data} = route.params;
+const TrainerProfile = ({ route }) => {
+  const { data } = route.params;
 
   console.log('Data from route in trainer Profile:', data);
 
@@ -46,9 +46,9 @@ const TrainerProfile = ({route}) => {
   const [reviews, setReviews] = useState([]);
   const [expanded, setExpanded] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
-  const [menuPosition, setMenuPosition] = useState({x: 0, y: 0});
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const navigation = useNavigation();
-  const {isFollow, unFollow, loading: loadingFollow} = followingHook();
+  const { isFollow, unFollow, loading: loadingFollow } = followingHook();
   const authData = useSelector(state => state?.Auth.data);
   const token = useSelector(state => state?.Auth?.data?.token);
   const checkFollowed = useSelector(state => state?.follow);
@@ -59,7 +59,7 @@ const TrainerProfile = ({route}) => {
 
   const dispatch = useDispatch();
   const [filtered, setfiltered] = useState();
-  const {Bookings} = useSelector(state => state?.bookings);
+  const { Bookings } = useSelector(state => state?.bookings);
 
   const calculateAge = birthdateString => {
     const [month, day, year] = birthdateString.split('/');
@@ -80,7 +80,7 @@ const TrainerProfile = ({route}) => {
 
     return age;
   };
-  const age = calculateAge(data.Dob);
+  const age = data?.Dob ? calculateAge(data.Dob) : '--';
 
   const fetchReviews = async () => {
     try {
@@ -171,7 +171,7 @@ const TrainerProfile = ({route}) => {
           });
           await fetchFavoriteTrainers();
           console.log('Deleted favorite trainer');
-          dispatch(unfavouriteTrainer({trainerID: data?._id}));
+          dispatch(unfavouriteTrainer({ trainerID: data?._id }));
         } else {
           await axiosBaseURL.post('/user/favoritetrainers', {
             userId: authData?._id,
@@ -182,7 +182,7 @@ const TrainerProfile = ({route}) => {
           });
           await fetchFavoriteTrainers();
           console.log('Added favorite trainer');
-          dispatch(favouriteTrainer({trainerID: data?._id}));
+          dispatch(favouriteTrainer({ trainerID: data?._id }));
         }
       } catch (error) {
         console.log('Error adding/removing favorite trainer:', error);
@@ -219,7 +219,7 @@ const TrainerProfile = ({route}) => {
       console.log('Unfollow success');
     }
   };
-  const renderItem = ({item, index}) => {
+  const renderItem = ({ item, index }) => {
     return (
       <View
         style={{
@@ -323,7 +323,7 @@ const TrainerProfile = ({route}) => {
     }
   };
   return (
-    <WrapperContainer style={{backgroundColor: 'black'}}>
+    <WrapperContainer style={{ backgroundColor: 'black' }}>
       <ScrollView
         contentContainerStyle={{
           paddingBottom: responsiveHeight(15), // space for floating button
@@ -332,11 +332,11 @@ const TrainerProfile = ({route}) => {
         {/* ================= HEADER SECTION ================= */}
         <ImageBackground
           source={Images.ProfileBG}
-          style={{width: responsiveWidth(100)}}
+          style={{ width: responsiveWidth(100) }}
           resizeMode="cover">
           <LinearGradient
             colors={['transparent', '#000', '#000']}
-            style={{flex: 1, paddingTop: responsiveHeight(5)}}>
+            style={{ flex: 1, paddingTop: responsiveHeight(5) }}>
             {/* Top Bar */}
             <View
               style={{
@@ -351,15 +351,15 @@ const TrainerProfile = ({route}) => {
               <TouchableOpacity onPress={AddFavouriteTrainer}>
                 <Image
                   source={isFavorite ? Images.heart_filled : Images.fav_heart}
-                  style={{width: 28, height: 24}}
+                  style={{ width: 28, height: 24 }}
                 />
               </TouchableOpacity>
             </View>
 
             {/* Profile Image */}
-            <View style={{alignItems: 'center', marginTop: 20}}>
+            <View style={{ alignItems: 'center', marginTop: 20 }}>
               <Image
-                source={{uri: data?.profileImage}}
+                source={{ uri: data?.profileImage }}
                 style={{
                   width: 110,
                   height: 110,
@@ -378,7 +378,7 @@ const TrainerProfile = ({route}) => {
                   borderRadius: 20,
                   marginTop: 10,
                 }}>
-                <Text style={{color: '#000', fontWeight: '600'}}>
+                <Text style={{ color: '#000', fontWeight: '600' }}>
                   {data?.isAvailable ? 'Available' : 'Not-Available'}
                 </Text>
               </View>
@@ -394,7 +394,7 @@ const TrainerProfile = ({route}) => {
                 {data?.fullName}
               </Text>
 
-              <Text style={{color: '#ccc', fontSize: 14}}>
+              <Text style={{ color: '#ccc', fontSize: 14 }}>
                 Certified Personal Trainer
               </Text>
 
@@ -405,11 +405,11 @@ const TrainerProfile = ({route}) => {
                   marginTop: 6,
                   alignItems: 'center',
                 }}>
-                <Text style={{color: '#ccc'}}>
+                <Text style={{ color: '#ccc' }}>
                   {data?.Speciality?.[0]?.value}
                 </Text>
-                <Text style={{color: '#ccc'}}> • </Text>
-                <Text style={{color: '#ccc'}}>
+                <Text style={{ color: '#ccc' }}> • </Text>
+                <Text style={{ color: '#ccc' }}>
                   {data?.experience || 'No Experience Added'}
                 </Text>
               </View>
@@ -422,26 +422,26 @@ const TrainerProfile = ({route}) => {
                 justifyContent: 'space-around',
                 marginTop: 25,
               }}>
-              <View style={{alignItems: 'center'}}>
-                <Text style={{color: '#9FED3A', fontSize: 18}}>
+              <View style={{ alignItems: 'center' }}>
+                <Text style={{ color: '#9FED3A', fontSize: 18 }}>
                   ⭐ {data?.Rating || '0.0'}
                 </Text>
-                <Text style={{color: '#aaa'}}>Rating</Text>
+                <Text style={{ color: '#aaa' }}>Rating</Text>
               </View>
 
-              <View style={{alignItems: 'center'}}>
-                <Text style={{color: '#fff', fontSize: 18}}>
+              <View style={{ alignItems: 'center' }}>
+                <Text style={{ color: '#fff', fontSize: 18 }}>
                   {/* {data?.followers?.length || 0} */}
                   {followersCount}
                 </Text>
-                <Text style={{color: '#aaa'}}>Followers</Text>
+                <Text style={{ color: '#aaa' }}>Followers</Text>
               </View>
 
-              <View style={{alignItems: 'center'}}>
-                <Text style={{color: '#fff', fontSize: 18}}>
+              <View style={{ alignItems: 'center' }}>
+                <Text style={{ color: '#fff', fontSize: 18 }}>
                   {data?.Dob ? age : '--'}
                 </Text>
-                <Text style={{color: '#aaa'}}>Years old</Text>
+                <Text style={{ color: '#aaa' }}>Years old</Text>
               </View>
             </View>
 
@@ -464,7 +464,7 @@ const TrainerProfile = ({route}) => {
                   paddingHorizontal: 40,
                   borderRadius: 30,
                 }}>
-                <Text style={{color: '#000', fontWeight: '600'}}>
+                <Text style={{ color: '#000', fontWeight: '600' }}>
                   {checkFollowed?.follow.includes(data?._id)
                     ? 'Following'
                     : 'Follow +'}
@@ -480,7 +480,7 @@ const TrainerProfile = ({route}) => {
                   paddingHorizontal: 40,
                   borderRadius: 30,
                 }}>
-                <Text style={{color: '#fff'}}>Message</Text>
+                <Text style={{ color: '#fff' }}>Message</Text>
               </TouchableOpacity>
             </View>
             {/* Hourly Rate Box (Hired Removed) */}
@@ -498,7 +498,7 @@ const TrainerProfile = ({route}) => {
                   width: responsiveWidth(88),
                   backgroundColor: '#0f0f0f',
                 }}>
-                <Text style={{color: '#9FED3A', fontSize: 14}}>
+                <Text style={{ color: '#9FED3A', fontSize: 14 }}>
                   Hourly Rate
                 </Text>
 
@@ -510,7 +510,7 @@ const TrainerProfile = ({route}) => {
                     fontWeight: '600',
                   }}>
                   ${data?.Hourlyrate}{' '}
-                  <Text style={{color: '#aaa', fontSize: 14}}>/ per hour</Text>
+                  <Text style={{ color: '#aaa', fontSize: 14 }}>/ per hour</Text>
                 </Text>
               </View>
             </View>
@@ -518,9 +518,9 @@ const TrainerProfile = ({route}) => {
         </ImageBackground>
 
         {/* ================= SPECIALITIES ================= */}
-        <View style={{paddingHorizontal: 25, marginTop: 20}}>
+        <View style={{ paddingHorizontal: 25, marginTop: 20 }}>
           <Text style={styles.heading}>Specialities</Text>
-          <Text style={{color: 'gray'}}>Verified by Business</Text>
+          <Text style={{ color: 'gray' }}>Verified by Business</Text>
 
           {data?.Speciality?.map((item, index) => (
             <Text key={index} style={styles.whiteText}>
@@ -529,7 +529,7 @@ const TrainerProfile = ({route}) => {
           ))}
         </View>
 
-        <View style={{marginTop: responsiveHeight(2)}}>
+        <View style={{ marginTop: responsiveHeight(2) }}>
           <View
             style={{
               flexDirection: 'row',
@@ -547,27 +547,27 @@ const TrainerProfile = ({route}) => {
                     posts: posts,
                   })
                 }>
-                <Text style={{color: '#9FED3A'}}>See all ›</Text>
+                <Text style={{ color: '#9FED3A' }}>See all ›</Text>
               </TouchableOpacity>
             )}
           </View>
 
           {loadingPosts ? (
-            <Text style={{color: 'gray', paddingHorizontal: 20}}>
+            <Text style={{ color: 'gray', paddingHorizontal: 20 }}>
               Loading...
             </Text>
           ) : previewPosts.length === 0 ? (
-            <Text style={{color: 'gray', paddingHorizontal: 20}}>
+            <Text style={{ color: 'gray', paddingHorizontal: 20 }}>
               No posts available
             </Text>
           ) : (
             <FlatList
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{paddingLeft: responsiveWidth(6)}}
+              contentContainerStyle={{ paddingLeft: responsiveWidth(6) }}
               data={previewPosts}
               keyExtractor={item => item._id}
-              renderItem={({item}) => {
+              renderItem={({ item }) => {
                 const isVideo = item.type === 'video';
 
                 return (
@@ -601,7 +601,7 @@ const TrainerProfile = ({route}) => {
                           justifyContent: 'center',
                           alignItems: 'center',
                         }}>
-                        <Text style={{fontSize: 30, color: 'white'}}>▶</Text>
+                        <Text style={{ fontSize: 30, color: 'white' }}>▶</Text>
                       </View>
                     )}
                   </TouchableOpacity>
@@ -628,14 +628,14 @@ const TrainerProfile = ({route}) => {
           {showReadMore && (
             <Text
               onPress={() => setExpanded(!expanded)}
-              style={{color: '#9FED3A', marginTop: 5}}>
+              style={{ color: '#9FED3A', marginTop: 5 }}>
               {expanded ? 'See less' : 'Read more'}
             </Text>
           )}
         </View>
 
         {/* ================= SCHEDULE ================= */}
-        <View style={{paddingHorizontal: 25, marginTop: 20}}>
+        <View style={{ paddingHorizontal: 25, marginTop: 20 }}>
           <Text style={styles.heading}>Schedule</Text>
 
           <FlatList
@@ -649,11 +649,11 @@ const TrainerProfile = ({route}) => {
 
         {/* ================= LOCATION ================= */}
         {/* ================= LOCATION ================= */}
-        <View style={{paddingHorizontal: 25, marginTop: 20}}>
+        <View style={{ paddingHorizontal: 25, marginTop: 20 }}>
           <Text style={styles.heading}>Location</Text>
 
           {data?.location?.coordinates &&
-          data.location.coordinates.length === 2 ? (
+            data.location.coordinates.length === 2 ? (
             <View
               style={{
                 height: responsiveHeight(25),
@@ -662,7 +662,7 @@ const TrainerProfile = ({route}) => {
                 marginTop: 10,
               }}>
               <MapView
-                style={{flex: 1}}
+                style={{ flex: 1 }}
                 initialRegion={{
                   latitude: Number(data.location.coordinates[1]), // ✅ latitude
                   longitude: Number(data.location.coordinates[0]), // ✅ longitude
@@ -682,7 +682,7 @@ const TrainerProfile = ({route}) => {
           )}
         </View>
         {/* ================= REVIEWS ================= */}
-        <View style={{paddingHorizontal: 25, marginTop: 25}}>
+        <View style={{ paddingHorizontal: 25, marginTop: 25 }}>
           {/* Header */}
           <View
             style={{
@@ -700,7 +700,7 @@ const TrainerProfile = ({route}) => {
                     trainerData: data,
                   })
                 }>
-                <Text style={{color: '#9FED3A'}}>See all ›</Text>
+                <Text style={{ color: '#9FED3A' }}>See all ›</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -718,7 +718,7 @@ const TrainerProfile = ({route}) => {
                   style={styles.reviewAvatar}
                 />
 
-                <View style={{flex: 1}}>
+                <View style={{ flex: 1 }}>
                   <Text style={styles.reviewName}>
                     {item.userId?.fullName || 'User'}
                   </Text>
@@ -729,7 +729,7 @@ const TrainerProfile = ({route}) => {
                 </View>
 
                 {/* ⭐ Stars */}
-                <View style={{flexDirection: 'row', marginRight: 8}}>
+                <View style={{ flexDirection: 'row', marginRight: 8 }}>
                   {[1, 2, 3, 4, 5].map(star => (
                     <Text
                       key={star}
@@ -747,11 +747,11 @@ const TrainerProfile = ({route}) => {
                   <>
                     <TouchableOpacity
                       onPress={event => {
-                        const {pageX, pageY} = event.nativeEvent;
-                        setMenuPosition({x: pageX, y: pageY});
+                        const { pageX, pageY } = event.nativeEvent;
+                        setMenuPosition({ x: pageX, y: pageY });
                         setActiveMenu(item._id);
                       }}
-                      style={{paddingLeft: 6}}>
+                      style={{ paddingLeft: 6 }}>
                       <Ionicons
                         name="ellipsis-vertical"
                         size={18}
@@ -788,7 +788,7 @@ const TrainerProfile = ({route}) => {
                                     name="create-outline"
                                     size={16}
                                     color="#fff"
-                                    style={{marginRight: 8}}
+                                    style={{ marginRight: 8 }}
                                   />
                                   <Text style={styles.dropdownText}>
                                     Update
@@ -802,12 +802,12 @@ const TrainerProfile = ({route}) => {
                                     name="trash-outline"
                                     size={16}
                                     color="red"
-                                    style={{marginRight: 8}}
+                                    style={{ marginRight: 8 }}
                                   />
                                   <Text
                                     style={[
                                       styles.dropdownText,
-                                      {color: 'red'},
+                                      { color: 'red' },
                                     ]}>
                                     Delete
                                   </Text>
@@ -827,17 +827,17 @@ const TrainerProfile = ({route}) => {
 
               {/* 🔥 Media (if exists) */}
               {item.mediaUrl && (
-                <View style={{marginTop: 10}}>
+                <View style={{ marginTop: 10 }}>
                   {item.mediaType === 'video' ? (
                     <Video
-                      source={{uri: item.mediaUrl}}
-                      style={{height: 180, borderRadius: 12}}
+                      source={{ uri: item.mediaUrl }}
+                      style={{ height: 180, borderRadius: 12 }}
                       controls
                       resizeMode="cover"
                     />
                   ) : (
                     <Image
-                      source={{uri: item.mediaUrl}}
+                      source={{ uri: item.mediaUrl }}
                       style={{
                         width: '100%',
                         height: 180,
@@ -858,7 +858,7 @@ const TrainerProfile = ({route}) => {
                 trainerId: data._id,
               });
             }}
-            style={{marginTop: 15, alignSelf: 'center'}}>
+            style={{ marginTop: 15, alignSelf: 'center' }}>
             <Text
               style={{
                 color: '#9FED3A',
@@ -874,7 +874,7 @@ const TrainerProfile = ({route}) => {
         <TouchableOpacity
           style={styles.floatingButton}
           activeOpacity={0.8}
-          onPress={() => navigation.navigate('Schedule', {Data: data})}>
+          onPress={() => navigation.navigate('Schedule', { Data: data })}>
           <Text style={styles.floatingText}>Book Now</Text>
         </TouchableOpacity>
       </View>
@@ -903,7 +903,7 @@ const styles = StyleSheet.create({
 
     // iOS shadow
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 5},
+    shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
 
@@ -961,7 +961,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
 
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 5},
+    shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.4,
     shadowRadius: 6,
     elevation: 10,
@@ -1017,7 +1017,7 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     gap: responsiveHeight(0.7),
   },
-  SpecialitiesContainer: {paddingHorizontal: responsiveWidth(7)},
+  SpecialitiesContainer: { paddingHorizontal: responsiveWidth(7) },
   BioContainer: {
     paddingHorizontal: responsiveWidth(7),
     marginTop: responsiveHeight(1),

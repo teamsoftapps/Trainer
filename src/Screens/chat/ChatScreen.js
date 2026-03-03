@@ -15,7 +15,7 @@
  *  6. API object lives at module scope — zero hook overhead.
  */
 
-import React, {useEffect, useState, useRef, useCallback, useMemo} from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -33,13 +33,13 @@ import {
   InteractionManager,
 } from 'react-native';
 import io from 'socket.io-client';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {launchImageLibrary} from 'react-native-image-picker';
+import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
-import {useSelector} from 'react-redux';
-import {baseUrl} from '../../services/Urls';
-import {ScrollView, Swipeable} from 'react-native-gesture-handler';
+import { useSelector } from 'react-redux';
+import { baseUrl } from '../../services/Urls';
+import { ScrollView, Swipeable } from 'react-native-gesture-handler';
 import {
   responsiveHeight,
   responsiveWidth,
@@ -62,6 +62,7 @@ const API = {
   upload: () => joinUrl(API_BASE, `/chat/upload-chat-media`),
   deleteMsg: id => joinUrl(API_BASE, `/chat/message/${id}`),
   markSeen: () => joinUrl(API_BASE, `/chat/mark-seen`),
+  getConversation: id => joinUrl(API_BASE, `/chat/conversation/${id}`),
 };
 
 // ─── MessageBubble (memoized, custom equality) ────────────────────────────────
@@ -78,14 +79,14 @@ const areMessagesEqual = (prev, next) =>
   prev.myUserId === next.myUserId;
 
 const MessageBubble = React.memo(
-  ({item, myUserId, onReply, openDeletePopup, openImagePreview}) => {
+  ({ item, myUserId, onReply, openDeletePopup, openImagePreview }) => {
     const isMe = item?.senderId === myUserId || item?.sender === 'me';
 
     const time = item.createdAt
       ? new Date(item.createdAt).toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-        })
+        hour: '2-digit',
+        minute: '2-digit',
+      })
       : item.time || '';
 
     return (
@@ -98,7 +99,7 @@ const MessageBubble = React.memo(
         <View
           style={[
             styles.messageRow,
-            {justifyContent: isMe ? 'flex-end' : 'flex-start'},
+            { justifyContent: isMe ? 'flex-end' : 'flex-start' },
           ]}>
           <TouchableOpacity
             activeOpacity={0.85}
@@ -134,7 +135,7 @@ const MessageBubble = React.memo(
                   activeOpacity={0.9}
                   onPress={() => openImagePreview(item.mediaUrl)}>
                   <Image
-                    source={{uri: item.mediaUrl}}
+                    source={{ uri: item.mediaUrl }}
                     style={styles.mediaImage}
                     resizeMode="cover"
                   />
@@ -174,13 +175,14 @@ const MessageBubble = React.memo(
 const ChatScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const {otherUser, conversationId} = route.params || {};
+  const { otherUser, conversationId } = route.params || {};
 
   const user = useSelector(state => state.Auth.data);
   const myUserId = user?._id;
 
   // ─── State ────────────────────────────────────────────────────────────────
   const [messages, setMessages] = useState([]);
+  const [otherUserData, setOtherUserData] = useState(otherUser || null);
   const [text, setText] = useState('');
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [isSending, setIsSending] = useState(false);
@@ -211,11 +213,34 @@ const ChatScreen = () => {
   useEffect(() => {
     if (!conversationId || !myUserId) return;
     axios
-      .post(API.markSeen(), {conversationId, userId: myUserId})
+      .post(API.markSeen(), { conversationId, userId: myUserId })
       .catch(err =>
         console.log('markSeen error', err?.response?.data || err.message),
       );
   }, [conversationId, myUserId]);
+
+  // ─── Fetch Conversation Details (if otherUser is missing) ──────────────────
+  useEffect(() => {
+    if (!otherUserData && conversationId && myUserId) {
+      const fetchConv = async () => {
+        try {
+          const res = await axios.get(API.getConversation(conversationId));
+          if (res.data?.success && res.data?.conversation) {
+            const conv = res.data.conversation;
+            const other = conv.participants.find(
+              p => String(p.userId?._id || p.userId) !== String(myUserId)
+            );
+            if (other && other.userId) {
+              setOtherUserData(other.userId);
+            }
+          }
+        } catch (err) {
+          console.log('Fetch conversation error:', err?.response?.data || err.message);
+        }
+      };
+      fetchConv();
+    }
+  }, [conversationId, myUserId, otherUserData]);
 
   // ─── Load messages ────────────────────────────────────────────────────────
   const loadMessages = useCallback(async () => {
@@ -263,7 +288,7 @@ const ChatScreen = () => {
           );
           if (idx !== -1) {
             const next = [...prev];
-            next[idx] = {...newMsg, isOptimistic: false};
+            next[idx] = { ...newMsg, isOptimistic: false };
             return next;
           }
 
@@ -272,7 +297,7 @@ const ChatScreen = () => {
         });
       });
 
-      s.on('messageDeleted', ({messageId}) => {
+      s.on('messageDeleted', ({ messageId }) => {
         setMessages(prev => prev.filter(m => m._id !== messageId));
       });
 
@@ -289,7 +314,7 @@ const ChatScreen = () => {
   // ─── Handlers ─────────────────────────────────────────────────────────────
   const pickMedia = useCallback((mediaType = 'photo') => {
     launchImageLibrary(
-      {mediaType, quality: 0.8, includeBase64: false},
+      { mediaType, quality: 0.8, includeBase64: false },
       response => {
         if (
           !response.didCancel &&
@@ -331,7 +356,7 @@ const ChatScreen = () => {
     try {
       setMessages(prev => prev.filter(m => m._id !== msg._id));
       closeDeletePopup();
-      await axios.delete(API.deleteMsg(msg._id), {data: {userId: myUserId}});
+      await axios.delete(API.deleteMsg(msg._id), { data: { userId: myUserId } });
       socketRef.current?.emit?.('deleteMessage', {
         conversationId,
         messageId: msg._id,
@@ -404,7 +429,7 @@ const ChatScreen = () => {
       });
       try {
         const up = await axios.post(API.upload(), formData, {
-          headers: {'Content-Type': 'multipart/form-data'},
+          headers: { 'Content-Type': 'multipart/form-data' },
         });
         if (up.data?.success) {
           mediaUrl = up.data.fileUrl || up.data.url;
@@ -440,7 +465,7 @@ const ChatScreen = () => {
         // Replace optimistic with persisted message
         setMessages(prev =>
           prev.map(m =>
-            m._id === optimisticId ? {...saved, isOptimistic: false} : m,
+            m._id === optimisticId ? { ...saved, isOptimistic: false } : m,
           ),
         );
       } else {
@@ -458,7 +483,7 @@ const ChatScreen = () => {
   const keyExtractor = useCallback(item => item._id?.toString() || item.id, []);
 
   const renderMessage = useCallback(
-    ({item}) => (
+    ({ item }) => (
       <MessageBubble
         item={item}
         myUserId={myUserId}
@@ -482,24 +507,24 @@ const ChatScreen = () => {
       {/* ── Header (outside KAV — always pinned at top) ── */}
       <View style={styles.header}>
         <TouchableOpacity
-          hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={26} color="#fff" />
         </TouchableOpacity>
 
         <Image
           source={{
-            uri: otherUser?.profileImage || 'https://i.pravatar.cc/150?img=12',
+            uri: otherUserData?.profileImage || 'https://i.pravatar.cc/150?img=12',
           }}
           style={styles.avatar}
         />
 
         <View style={styles.headerInfo}>
           <Text style={styles.name} numberOfLines={1}>
-            {otherUser?.fullName || 'Trainer'}
+            {otherUserData?.fullName || 'Chat'}
           </Text>
           <Text style={styles.status}>
-            {otherUser?.isAvailable ? 'Active now' : 'Offline'}
+            {otherUserData?.isAvailable ? 'Active now' : 'Offline'}
           </Text>
         </View>
 
@@ -546,11 +571,11 @@ const ChatScreen = () => {
         {!!selectedMedia && (
           <View style={styles.mediaPreview}>
             <Image
-              source={{uri: selectedMedia.uri}}
+              source={{ uri: selectedMedia.uri }}
               style={styles.mediaThumb}
             />
             <TouchableOpacity
-              hitSlop={{top: 6, bottom: 6, left: 6, right: 6}}
+              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
               onPress={() => setSelectedMedia(null)}>
               <Icon
                 name="close"
@@ -573,7 +598,7 @@ const ChatScreen = () => {
               </Text>
             </View>
             <TouchableOpacity
-              hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               onPress={() => setReplyTo(null)}>
               <Icon name="close" size={22} color="#9FED3A" />
             </TouchableOpacity>
@@ -671,7 +696,7 @@ const ChatScreen = () => {
               <Icon name="close" size={30} color="#fff" />
             </TouchableOpacity>
             <ScrollView
-              style={{flex: 1}}
+              style={{ flex: 1 }}
               contentContainerStyle={styles.previewScrollContent}
               maximumZoomScale={3}
               minimumZoomScale={1}
@@ -680,7 +705,7 @@ const ChatScreen = () => {
               bouncesZoom
               centerContent>
               <Image
-                source={{uri: previewUrl || ''}}
+                source={{ uri: previewUrl || '' }}
                 style={{
                   width: responsiveWidth(100),
                   height: responsiveHeight(100),
