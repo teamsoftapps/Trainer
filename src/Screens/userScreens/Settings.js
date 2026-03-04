@@ -7,7 +7,9 @@ import {
   ScrollView,
   Alert,
   Linking,
+  Modal,
 } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import React from 'react';
 import WrapperContainer from '../../Components/Wrapper';
 import Header from '../../Components/Header';
@@ -17,15 +19,19 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {FontFamily, Images} from '../../utils/Images';
+import { FontFamily, Images } from '../../utils/Images';
 import Button from '../../Components/Button';
-import {useNavigation} from '@react-navigation/native';
-import {useDispatch} from 'react-redux';
-import {SignOut} from '../../store/Slices/AuthSlice';
+import { useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import { SignOut } from '../../store/Slices/AuthSlice';
+import axiosBaseURL from '../../services/AxiosBaseURL';
+import { showMessage } from 'react-native-flash-message';
 
 const Settings = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const token = useSelector(state => state?.Auth?.data?.token);
+
   const handleSignout = async () => {
     let res = await Alert.alert('Info', 'Are you sure you want to Signout', [
       {
@@ -34,7 +40,6 @@ const Settings = () => {
           dispatch(SignOut());
         },
       },
-
       {
         text: 'No',
         onPress: () => {
@@ -42,6 +47,42 @@ const Settings = () => {
         },
       },
     ]);
+  };
+
+  const handleDeleteAccount = async () => {
+    Alert.alert(
+      'Delete Account',
+      'Are you sure you want to delete your account? This action is irreversible.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const res = await axiosBaseURL.delete('/user/deleteAccount', {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              if (res.data.status) {
+                showMessage({
+                  message: 'Account deleted successfully',
+                  type: 'success',
+                  backgroundColor: '#B2FF00',
+                  color: '#000'
+                });
+                dispatch(SignOut());
+              }
+            } catch (error) {
+              console.log('Error deleting account:', error);
+              showMessage({
+                message: 'Failed to delete account',
+                type: 'danger'
+              });
+            }
+          }
+        }
+      ]
+    );
   };
   return (
     <WrapperContainer>
@@ -53,7 +94,7 @@ const Settings = () => {
           rightView={
             <Image
               source={Images.logo}
-              style={{height: responsiveHeight(5), width: responsiveWidth(10)}}
+              style={{ height: responsiveHeight(5), width: responsiveWidth(10) }}
             />
           }
         />
@@ -68,7 +109,7 @@ const Settings = () => {
             Settings
           </Text>
         </View>
-        <View style={{paddingHorizontal: responsiveScreenWidth(8)}}>
+        <View style={{ paddingHorizontal: responsiveScreenWidth(8) }}>
           <Text
             style={{
               fontSize: responsiveFontSize(2.4),
@@ -89,7 +130,7 @@ const Settings = () => {
               borderBottomColor: '#2E2E2E',
               paddingVertical: responsiveHeight(2.5),
             }}>
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 20}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
               <Image
                 source={Images.lock}
                 style={{
@@ -97,7 +138,7 @@ const Settings = () => {
                   height: responsiveScreenWidth(10),
                 }}
               />
-              <Text style={{color: 'white', fontSize: responsiveFontSize(2.4)}}>
+              <Text style={{ color: 'white', fontSize: responsiveFontSize(2.4) }}>
                 Change Password
               </Text>
             </View>
@@ -115,7 +156,7 @@ const Settings = () => {
               borderBottomColor: '#2E2E2E',
               paddingVertical: responsiveHeight(2.5),
             }}>
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 20}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
               <Image
                 source={Images.bell}
                 style={{
@@ -123,7 +164,7 @@ const Settings = () => {
                   height: responsiveScreenWidth(10),
                 }}
               />
-              <Text style={{color: 'white', fontSize: responsiveFontSize(2.4)}}>
+              <Text style={{ color: 'white', fontSize: responsiveFontSize(2.4) }}>
                 Notifications
               </Text>
             </View>
@@ -144,7 +185,7 @@ const Settings = () => {
               borderBottomColor: '#2E2E2E',
               paddingVertical: responsiveHeight(2.5),
             }}>
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 20}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
               <Image
                 source={Images.privacy}
                 style={{
@@ -152,17 +193,36 @@ const Settings = () => {
                   height: responsiveScreenWidth(10),
                 }}
               />
-              <Text style={{color: 'white', fontSize: responsiveFontSize(2.4)}}>
+              <Text style={{ color: 'white', fontSize: responsiveFontSize(2.4) }}>
                 Privacy Policy
               </Text>
             </View>
             <Image source={Images.rightarrow} resizeMode="contain" />
           </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleDeleteAccount}
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              borderBottomWidth: 1,
+              borderBottomColor: '#2E2E2E',
+              paddingVertical: responsiveHeight(2.5),
+            }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
+              <Ionicons name="trash-outline" size={responsiveScreenWidth(8)} color="#FF3B30" />
+              <Text style={{ color: '#FF3B30', fontSize: responsiveFontSize(2.4) }}>
+                Delete Account
+              </Text>
+            </View>
+            <Image source={Images.rightarrow} resizeMode="contain" tintColor="#FF3B30" />
+          </TouchableOpacity>
         </View>
-        <View style={{alignItems: 'center', marginTop: responsiveHeight(5)}}>
+        <View style={{ alignItems: 'center', marginTop: responsiveHeight(5) }}>
           <Button
             text="Sign Out"
-            textstyle={{fontSize: responsiveFontSize(2.5)}}
+            textstyle={{ fontSize: responsiveFontSize(2.5) }}
             onPress={handleSignout}
           />
         </View>

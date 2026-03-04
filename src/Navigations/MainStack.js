@@ -29,6 +29,11 @@ import AddReviewScreen from '../Screens/userScreens/AddReviewScreen';
 import AllReviewsScreen from '../Screens/userScreens/AllReviewsScreen';
 import PaymentCards from '../Screens/userScreens/PaymentCards';
 import ChatScreen from '../Screens/chat/ChatScreen';
+import FAQs from '../Screens/userScreens/FAQs';
+import Cart from '../Screens/userScreens/Cart';
+import ProductDetails from '../Screens/userScreens/ProductDetails';
+import MyOrders from '../Screens/userScreens/MyOrders';
+import OrderDetails from '../Screens/userScreens/OrderDetails';
 
 const Stack = createNativeStackNavigator();
 
@@ -61,6 +66,11 @@ const MainStack = () => {
       <Stack.Screen name="AddReviewScreen" component={AddReviewScreen} />
       <Stack.Screen name="AllReviewsScreen" component={AllReviewsScreen} />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
+      <Stack.Screen name="FAQs" component={FAQs} />
+      <Stack.Screen name="Cart" component={Cart} />
+      <Stack.Screen name="ProductDetails" component={ProductDetails} />
+      <Stack.Screen name="MyOrders" component={MyOrders} />
+      <Stack.Screen name="OrderDetails" component={OrderDetails} />
     </Stack.Navigator>
   );
 };

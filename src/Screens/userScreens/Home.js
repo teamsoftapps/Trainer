@@ -129,7 +129,6 @@ const Home = () => {
             role: 'user',
             token: fcmToken,
           });
-          console.log('User FCM Token synced');
         }
       } catch (err) {
         console.log('User FCM Sync Error:', err.message);
@@ -459,14 +458,16 @@ const Home = () => {
           justifyContent: 'space-between',
           paddingHorizontal: responsiveWidth(7),
         }}>
-        <Image
-          source={Images.logo}
-          style={{
-            width: responsiveWidth(12),
-            height: responsiveHeight(12),
-            resizeMode: 'contain',
-          }}
-        />
+        <TouchableOpacity onPress={() => navigation.openDrawer()}>
+          <Image
+            source={Images.logo}
+            style={{
+              width: responsiveWidth(12),
+              height: responsiveHeight(12),
+              resizeMode: 'contain',
+            }}
+          />
+        </TouchableOpacity>
         <View
           style={{
             flexDirection: 'row',

@@ -1,13 +1,14 @@
-import {combineReducers} from '@reduxjs/toolkit';
+import { combineReducers } from '@reduxjs/toolkit';
 import authSlice from './AuthSlice';
-import {TrainerAuth} from '../Apis/trainerAuth';
-import {userAuth} from '../Apis/userAuth';
-import {Posts} from '../Apis/Post';
+import { TrainerAuth } from '../Apis/trainerAuth';
+import { userAuth } from '../Apis/userAuth';
+import { Posts } from '../Apis/Post';
 import profileImage from './profileImage';
 import db_ID from './db_ID';
 import follow from './follow';
 import favourite from './favourite';
 import TrainerBookings from './trainerBookings';
+import CartSlice from './CartSlice';
 
 const Reducers = combineReducers({
   Auth: authSlice,
@@ -16,6 +17,7 @@ const Reducers = combineReducers({
   follow: follow,
   favourite: favourite,
   bookings: TrainerBookings,
+  cart: CartSlice,
   [TrainerAuth.reducerPath]: TrainerAuth.reducer,
   [userAuth.reducerPath]: userAuth.reducer,
   [Posts.reducerPath]: Posts.reducer,

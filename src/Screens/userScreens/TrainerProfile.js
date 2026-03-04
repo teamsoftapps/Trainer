@@ -56,6 +56,8 @@ const TrainerProfile = ({ route }) => {
   const [followersCount, setFollowersCount] = useState(
     data?.followers?.length || 0,
   );
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
 
   const dispatch = useDispatch();
   const [filtered, setfiltered] = useState();
@@ -153,8 +155,52 @@ const TrainerProfile = ({ route }) => {
       fetchFavoriteTrainers();
       fetchTrainerPosts();
       fetchReviews();
+      checkIfBlocked();
     }, [heart]),
   );
+
+  const checkIfBlocked = async () => {
+    try {
+      const res = await axiosBaseURL.get(`/user/blocked`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.status) {
+        const blockedList = res.data.data;
+        const blocked = blockedList.some(user => user._id === data._id);
+        setIsBlocked(blocked);
+      }
+    } catch (error) {
+      console.log('Error checking blocked status:', error);
+    }
+  };
+
+  const handleBlockTrainer = async () => {
+    try {
+      const res = await axiosBaseURL.post('/user/block', {
+        userIdToBlock: data._id
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.data.status) {
+        setIsBlocked(true);
+        setShowBlockModal(false);
+        showMessage({
+          message: "Trainer blocked successfully",
+          type: "success",
+          backgroundColor: "#B2FF00",
+          color: "#000"
+        });
+        navigation.goBack();
+      }
+    } catch (error) {
+      console.log('Error blocking trainer:', error);
+      showMessage({
+        message: "Failed to block trainer",
+        type: "danger"
+      });
+    }
+  };
 
   const AddFavouriteTrainer = async () => {
     if (authData.isType === 'user') {
@@ -354,6 +400,10 @@ const TrainerProfile = ({ route }) => {
                   style={{ width: 28, height: 24 }}
                 />
               </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => setShowBlockModal(true)} style={{ marginLeft: 15 }}>
+                <Ionicons name="ban-outline" size={24} color="red" />
+              </TouchableOpacity>
             </View>
 
             {/* Profile Image */}
@@ -483,6 +533,37 @@ const TrainerProfile = ({ route }) => {
                 <Text style={{ color: '#fff' }}>Message</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Block Confirmation Modal */}
+            <Modal
+              transparent={true}
+              visible={showBlockModal}
+              animationType="fade"
+              onRequestClose={() => setShowBlockModal(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>Block Trainer?</Text>
+                  <Text style={styles.modalMessage}>
+                    Are you sure you want to block {data?.fullName}? You will no longer see their posts or be able to book sessions.
+                  </Text>
+                  <View style={styles.modalButtons}>
+                    <TouchableOpacity
+                      style={[styles.modalButton, styles.cancelButton]}
+                      onPress={() => setShowBlockModal(false)}
+                    >
+                      <Text style={styles.cancelButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.modalButton, styles.confirmButton]}
+                      onPress={handleBlockTrainer}
+                    >
+                      <Text style={styles.confirmButtonText}>Block</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </Modal>
             {/* Hourly Rate Box (Hired Removed) */}
             <View
               style={{
