@@ -6,21 +6,22 @@ import {
   Text,
   TouchableOpacity,
   View,
+  RefreshControl,
 } from 'react-native';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, {useEffect, useState, useCallback, useRef} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { Images } from '../../utils/Images';
-import { useNavigation } from '@react-navigation/native';
+import {Images} from '../../utils/Images';
+import {useNavigation} from '@react-navigation/native';
 import axiosBaseURL from '../../services/AxiosBaseURL';
-import { useDispatch, useSelector } from 'react-redux';
-import { AnimatedCircularProgress } from 'react-native-circular-progress';
-import { socketService } from '../../utils/socketService';
-import { SaveLogedInUser } from '../../store/Slices/db_ID';
+import {useDispatch, useSelector} from 'react-redux';
+import {AnimatedCircularProgress} from 'react-native-circular-progress';
+import {socketService} from '../../utils/socketService';
+import {SaveLogedInUser} from '../../store/Slices/db_ID';
 import notifee from '@notifee/react-native';
 import {
   getFcmToken,
@@ -28,7 +29,7 @@ import {
   setupNotificationChannel,
   showForegroundNotification,
 } from '../../Notifications/notificationService';
-import { getMessaging } from '@react-native-firebase/messaging';
+import {getMessaging} from '@react-native-firebase/messaging';
 
 const firebaseMessaging = getMessaging();
 
@@ -37,6 +38,8 @@ const TrainerHome = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const lastFetchRef = useRef(0);
 
   const fetchUnreadCount = useCallback(async () => {
     try {
@@ -85,7 +88,11 @@ const TrainerHome = () => {
   // Re-fetch count when coming back to this screen
   useEffect(() => {
     const unsub = navigation.addListener('focus', () => {
-      fetchUnreadCount();
+      const now = Date.now();
+      if (now - lastFetchRef.current > 30000) {
+        fetchUnreadCount();
+        lastFetchRef.current = now;
+      }
     });
     return unsub;
   }, [navigation, fetchUnreadCount]);
@@ -132,9 +139,35 @@ const TrainerHome = () => {
     fetchData();
   }, [trainer_data?.token]);
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Re-fetch profile
+      const profileResponse = await axiosBaseURL.get(
+        `/Common/GetProfile/${trainer_data.token}`,
+      );
+      if (profileResponse.data.success) {
+        dispatch(SaveLogedInUser(profileResponse.data.data));
+      }
+      // Re-fetch unread count
+      await fetchUnreadCount();
+    } catch (error) {
+      console.error('Refresh Error:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [trainer_data?.token, fetchUnreadCount, dispatch]);
+
   return (
     <WrapperContainer>
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#9FED3A"
+          />
+        }>
         <View
           style={{
             height: responsiveHeight(8),
@@ -185,8 +218,8 @@ const TrainerHome = () => {
             Welcome{' '}
             <Text
               style={[
-                { ...styles.Welcome_Text },
-                { color: '#fff', fontWeight: '500' },
+                {...styles.Welcome_Text},
+                {color: '#fff', fontWeight: '500'},
               ]}>
               {trainer_data?.fullName}
             </Text>
@@ -198,7 +231,7 @@ const TrainerHome = () => {
         <View style={styles.cont_2}>
           <Text
             style={[
-              { ...styles.Welcome_Text },
+              {...styles.Welcome_Text},
               {
                 fontSize: responsiveFontSize(2),
                 fontWeight: '500',
@@ -231,7 +264,7 @@ const TrainerHome = () => {
                 <Text style={styles.percent}>80%</Text>
                 <Text
                   style={[
-                    { ...styles.slogan },
+                    {...styles.slogan},
                     {
                       color: '#BBBBBB',
                       marginLeft: responsiveWidth(1),
@@ -241,14 +274,14 @@ const TrainerHome = () => {
                   Profile Completion
                 </Text>
               </View>
-              <Text style={[{ ...styles.slogan }, { color: '#BBBBBB' }]}>
+              <Text style={[{...styles.slogan}, {color: '#BBBBBB'}]}>
                 Complete your Profile to attract more clients.
               </Text>
               <TouchableOpacity
                 onPress={() => {
                   navigation.navigate('Profile');
                 }}>
-                <Text style={{ color: '#9FED3A', alignSelf: 'flex-end' }}>
+                <Text style={{color: '#9FED3A', alignSelf: 'flex-end'}}>
                   View Your Profile
                 </Text>
               </TouchableOpacity>
@@ -256,7 +289,7 @@ const TrainerHome = () => {
           </TouchableOpacity>
         </View>
 
-        <View style={{ paddingHorizontal: responsiveWidth(7) }}>
+        <View style={{paddingHorizontal: responsiveWidth(7)}}>
           <View
             style={{
               flexDirection: 'row',
@@ -275,8 +308,8 @@ const TrainerHome = () => {
               onPress={() => {
                 navigation.navigate('Earnings');
               }}
-              style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ color: '#9FED3A' }}>See all</Text>
+              style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Text style={{color: '#9FED3A'}}>See all</Text>
               <Image
                 source={Images.rightarrow}
                 style={{
@@ -298,13 +331,13 @@ const TrainerHome = () => {
               paddingVertical: responsiveHeight(2),
               borderRadius: responsiveWidth(3),
             }}>
-            <View style={{ width: responsiveWidth(45) }}>
+            <View style={{width: responsiveWidth(45)}}>
               <Text
-                style={{ color: '#9FED3A', fontSize: responsiveFontSize(2.5) }}>
+                style={{color: '#9FED3A', fontSize: responsiveFontSize(2.5)}}>
                 Earnings
               </Text>
               <Text
-                style={{ color: '#BBBBBB', fontSize: responsiveFontSize(1.7) }}>
+                style={{color: '#BBBBBB', fontSize: responsiveFontSize(1.7)}}>
                 Earnings will appears here once your first session is complete!
               </Text>
             </View>
@@ -314,7 +347,7 @@ const TrainerHome = () => {
           </View>
         </View>
 
-        <View style={{ paddingHorizontal: responsiveWidth(7) }}>
+        <View style={{paddingHorizontal: responsiveWidth(7)}}>
           <View
             style={{
               flexDirection: 'row',
@@ -333,8 +366,8 @@ const TrainerHome = () => {
               onPress={() => {
                 navigation.navigate('Sessions');
               }}
-              style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ color: '#9FED3A' }}>See all</Text>
+              style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Text style={{color: '#9FED3A'}}>See all</Text>
               <Image
                 source={Images.rightarrow}
                 style={{
@@ -356,13 +389,13 @@ const TrainerHome = () => {
               paddingVertical: responsiveHeight(2),
               borderRadius: responsiveWidth(3),
             }}>
-            <View style={{ width: responsiveWidth(43) }}>
+            <View style={{width: responsiveWidth(43)}}>
               <Text
-                style={{ color: '#9FED3A', fontSize: responsiveFontSize(2.5) }}>
+                style={{color: '#9FED3A', fontSize: responsiveFontSize(2.5)}}>
                 Sessions
               </Text>
               <Text
-                style={{ color: '#BBBBBB', fontSize: responsiveFontSize(1.7) }}>
+                style={{color: '#BBBBBB', fontSize: responsiveFontSize(1.7)}}>
                 When a client books you, your upcoming sessions will show here.
               </Text>
             </View>

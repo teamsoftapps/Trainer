@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, {useCallback, useState} from 'react';
 import {
   View,
   Text,
@@ -7,20 +7,21 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-} from "react-native";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { useSelector } from "react-redux";
+} from 'react-native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
 import {
   responsiveFontSize,
   responsiveWidth,
-} from "react-native-responsive-dimensions";
-import { BookingAPI } from "../../services/bookingApi";
+} from 'react-native-responsive-dimensions';
+import {BookingAPI} from '../../services/bookingApi';
+import WrapperContainer from '../../Components/Wrapper';
 
 const Upcoming = () => {
   const navigation = useNavigation();
-  const token = useSelector((state) => state?.Auth?.data?.token);
+  const token = useSelector(state => state?.Auth?.data?.token);
 
-  console.log("token in upcoming:", token)
+  console.log('token in upcoming:', token);
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -30,16 +31,20 @@ const Upcoming = () => {
       setLoading(true);
       const res = await BookingAPI.getMyBookings(token);
 
-      console.log("response in upcoming:", res.data)
+      console.log('response in upcoming:', res.data);
 
       if (res?.success) {
         const filtered = res.data.filter(
-          (b) => b.status === "pending" || b.status === "confirmed" || b.status === "pending_payment" || b.status === "trainer_completed"
+          b =>
+            b.status === 'pending' ||
+            b.status === 'confirmed' ||
+            b.status === 'pending_payment' ||
+            b.status === 'trainer_completed',
         );
         setBookings(filtered);
       }
     } catch (e) {
-      console.log("Upcoming error:", e.message);
+      console.log('Upcoming error:', e.message);
     } finally {
       setLoading(false);
     }
@@ -48,29 +53,43 @@ const Upcoming = () => {
   useFocusEffect(
     useCallback(() => {
       fetchBookings();
-    }, [])
+    }, []),
   );
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({item}) => {
     const trainer = item.trainerId;
 
-    console.log("item in upcoming:", item)
+    console.log('item in upcoming:', item);
 
-    const statusText = item.status === "pending_payment" ? "Pending" : (item.status === "trainer_completed" ? "Waiting Approval" : item.status.charAt(0).toUpperCase() + item.status.slice(1));
-    const statusBg = item.status === "confirmed" ? "#9FED3A" : (item.status === "trainer_completed" ? "#FFA500" : (item.status === "pending_payment" || item.status === "pending" ? "#C7C7CC" : "#FF4B4B"));
-    const statusTextColor = (item.status === "confirmed" || item.status === "trainer_completed") ? "black" : "white";
+    const statusText =
+      item.status === 'pending_payment'
+        ? 'Pending'
+        : item.status === 'trainer_completed'
+          ? 'Waiting Approval'
+          : item.status.charAt(0).toUpperCase() + item.status.slice(1);
+    const statusBg =
+      item.status === 'confirmed'
+        ? '#9FED3A'
+        : item.status === 'trainer_completed'
+          ? '#FFA500'
+          : item.status === 'pending_payment' || item.status === 'pending'
+            ? '#C7C7CC'
+            : '#FF4B4B';
+    const statusTextColor =
+      item.status === 'confirmed' || item.status === 'trainer_completed'
+        ? 'black'
+        : 'white';
 
     return (
       <TouchableOpacity
         style={styles.card}
         onPress={() =>
-          navigation.navigate("BookingDetails", {
+          navigation.navigate('BookingDetails', {
             data: item,
           })
-        }
-      >
+        }>
         <View style={styles.cardContent}>
-          <Image source={{ uri: trainer?.profileImage }} style={styles.avatar} />
+          <Image source={{uri: trainer?.profileImage}} style={styles.avatar} />
 
           <View style={styles.infoContainer}>
             <Text style={styles.name}>{trainer?.fullName}</Text>
@@ -80,8 +99,10 @@ const Upcoming = () => {
 
           <View style={styles.rightContainer}>
             <Text style={styles.reminderText}>{item.reminder} before</Text>
-            <View style={[styles.statusPill, { backgroundColor: statusBg }]}>
-              <Text style={[styles.statusText, { color: statusTextColor }]}>{statusText}</Text>
+            <View style={[styles.statusPill, {backgroundColor: statusBg}]}>
+              <Text style={[styles.statusText, {color: statusTextColor}]}>
+                {statusText}
+              </Text>
             </View>
           </View>
         </View>
@@ -92,30 +113,68 @@ const Upcoming = () => {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#181818', justifyContent: 'center', alignItems: 'center' }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: '#181818',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
         <ActivityIndicator size="large" color="#9FED3A" />
       </View>
     );
   }
 
-  if (!bookings.length) {
-    return (
-      <Text style={{ color: "gray", textAlign: "center", marginTop: 40, fontSize: responsiveFontSize(2) }}>
-        No upcoming bookings
-      </Text>
-    );
-  }
+  // if (!bookings.length) {
+  //   return (
+  //     <Text
+  //       style={{
+  //         flex: 1,
+  //         color: 'gray',
+  //         textAlign: 'center',
+  //         // paddingTop: 40,
+  //         fontSize: responsiveFontSize(2),
+  //         backgroundColor: '#181818',
+  //       }}>
+  //       No upcoming bookings
+  //     </Text>
+  //   );
+  // }
+
+  const Empty = () => (
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 40,
+      }}>
+      {loading ? (
+        <ActivityIndicator size="large" color={'#9FED3A'} />
+      ) : (
+        <Text
+          style={{
+            color: 'gray',
+            fontSize: responsiveFontSize(2),
+            textAlign: 'center',
+          }}>
+          No upcoming bookings found
+        </Text>
+      )}
+    </View>
+  );
 
   return (
-    <View style={styles.container}>
+    <WrapperContainer style={{backgroundColor: '#181818'}}>
       <FlatList
         data={bookings}
-        keyExtractor={(item) => item._id}
+        keyExtractor={item => item._id}
         renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{paddingBottom: 20}}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={Empty}
       />
-    </View>
+    </WrapperContainer>
   );
 };
 
@@ -124,15 +183,15 @@ export default Upcoming;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#181818',
+    // backgroundColor: 'red',
   },
   card: {
     paddingHorizontal: responsiveWidth(6),
     marginTop: 20,
   },
   cardContent: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingBottom: 20,
   },
   avatar: {
@@ -146,18 +205,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   name: {
-    color: "white",
+    color: 'white',
     fontSize: responsiveFontSize(2.2),
-    fontWeight: "700",
+    fontWeight: '700',
     marginBottom: 4,
   },
   dateText: {
-    color: "#8E8E93",
+    color: '#8E8E93',
     fontSize: responsiveFontSize(1.8),
     marginBottom: 2,
   },
   timeText: {
-    color: "#8E8E93",
+    color: '#8E8E93',
     fontSize: responsiveFontSize(1.8),
   },
   rightContainer: {
@@ -165,7 +224,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   reminderText: {
-    color: "#8E8E93",
+    color: '#8E8E93',
     fontSize: responsiveFontSize(1.6),
     marginBottom: 8,
   },
@@ -178,7 +237,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: responsiveFontSize(1.7),
-    fontWeight: "600",
+    fontWeight: '600',
   },
   separator: {
     height: 1,

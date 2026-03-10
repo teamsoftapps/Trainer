@@ -8,19 +8,19 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { FontFamily, Images } from '../../utils/Images';
-import { useDispatch, useSelector } from 'react-redux';
+import {FontFamily, Images} from '../../utils/Images';
+import {useDispatch, useSelector} from 'react-redux';
 import axiosBaseURL from '../../services/AxiosBaseURL';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { unfavouriteTrainer } from '../../store/Slices/favourite';
-import { useGetTrainersQuery } from '../../store/Apis/Post';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {unfavouriteTrainer} from '../../store/Slices/favourite';
+import {useGetTrainersQuery} from '../../store/Apis/Post';
 
 const Favourites = () => {
   const [isLong, setIsLong] = useState(false);
@@ -32,7 +32,7 @@ const Favourites = () => {
   const textInputRef = useRef(null);
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const { data: allTrainersData } = useGetTrainersQuery();
+  const {data: allTrainersData} = useGetTrainersQuery();
 
   useFocusEffect(
     useCallback(() => {
@@ -59,9 +59,9 @@ const Favourites = () => {
   const deleteFavouriteTrainers = async (trainerID, userId) => {
     try {
       await axiosBaseURL.delete('/user/Deletefavoritetrainers', {
-        data: { userId, trainerID },
+        data: {userId, trainerID},
       });
-      dispatch(unfavouriteTrainer({ trainerID: trainerID }));
+      dispatch(unfavouriteTrainer({trainerID: trainerID}));
       setFavoriteTrainers(prevTrainers =>
         prevTrainers.filter(trainer => trainer.trainerID !== trainerID),
       );
@@ -76,7 +76,7 @@ const Favourites = () => {
 
     // 1. Filter out deleted trainers
     const validFavorites = favouriteTrainers.filter(fav =>
-      allTrainersData.data.some(t => t._id === fav.trainerID)
+      allTrainersData.data.some(t => t._id === fav.trainerID),
     );
 
     // 2. Filter by search text
@@ -86,8 +86,10 @@ const Favourites = () => {
     });
   }, [searchText, favouriteTrainers, allTrainersData]);
 
-  const renderItem = ({ item, index }) => {
+  const renderItem = ({item, index}) => {
     const isLongPressed = longPressIndex === index;
+
+    console.log('Item in favourite screen:', item);
 
     return (
       <View style={styles.cardContainer}>
@@ -95,28 +97,37 @@ const Favourites = () => {
           activeOpacity={0.9}
           onLongPress={() => setLongPressIndex(index)}
           onPress={() => {
-            const fullData = allTrainersData?.data?.find(t => t._id === item.trainerID);
+            const fullData = allTrainersData?.data?.find(
+              t => t._id === item.trainerID,
+            );
             if (fullData) {
-              navigation.navigate('TrainerProfile', { data: fullData });
+              navigation.navigate('TrainerProfile', {data: fullData});
             } else {
               // fallback if not found in cache
-              navigation.navigate('TrainerProfile', { trainerId: item.trainerID, data: item });
+              navigation.navigate('TrainerProfile', {
+                trainerId: item.trainerID,
+                data: item,
+              });
             }
           }}
           style={styles.card}>
-
           {/* REMOVE BUTTON ON LONG PRESS */}
           {isLongPressed && (
             <TouchableOpacity
               style={styles.removeBtn}
-              onPress={() => deleteFavouriteTrainers(item.trainerID, item.userId)}>
-              <Image source={require('../../assets/Images/remove.png')} style={styles.removeIcon} />
+              onPress={() =>
+                deleteFavouriteTrainers(item.trainerID, item.userId)
+              }>
+              <Image
+                source={require('../../assets/Images/remove.png')}
+                style={styles.removeIcon}
+              />
             </TouchableOpacity>
           )}
 
           <View style={styles.imageWrapper}>
             <Image
-              source={{ uri: item?.trainerProfile }}
+              source={{uri: item?.trainerProfile}}
               style={styles.trainerImg}
               resizeMode="cover"
             />
@@ -135,7 +146,7 @@ const Favourites = () => {
             </Text>
             <View style={styles.ratingRow}>
               <Image source={Images.Star} style={styles.starIcon} />
-              <Text style={styles.ratingText}>{item.rating || '4.5'}</Text>
+              <Text style={styles.ratingText}>{item.rating || '0.0'}</Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -148,7 +159,9 @@ const Favourites = () => {
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Favorites</Text>
-          <Text style={styles.subtitle}>{favouriteTrainers.length} trainers you love</Text>
+          <Text style={styles.subtitle}>
+            {favouriteTrainers.length} trainers you love
+          </Text>
         </View>
         <Image source={Images.logo} style={styles.logo} />
       </View>
@@ -194,7 +207,9 @@ const Favourites = () => {
                 tintColor="#333"
               />
               <Text style={styles.emptyText}>
-                {searchText ? 'No trainers match your search' : 'No favorites yet'}
+                {searchText
+                  ? 'No trainers match your search'
+                  : 'No favorites yet'}
               </Text>
               <TouchableOpacity
                 style={styles.exploreBtn}

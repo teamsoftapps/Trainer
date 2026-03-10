@@ -34,6 +34,11 @@ import Cart from '../Screens/userScreens/Cart';
 import ProductDetails from '../Screens/userScreens/ProductDetails';
 import MyOrders from '../Screens/userScreens/MyOrders';
 import OrderDetails from '../Screens/userScreens/OrderDetails';
+import UserEditProfile from '../Screens/userScreens/UserEditProfile';
+import BlockedUsers from '../Screens/userScreens/BlockedUsers';
+import CallScreen from '../Screens/chat/CallScreen';
+
+import ExerciseLogsHistory from '../Screens/userScreens/ExerciseLogsHistory';
 
 const Stack = createNativeStackNavigator();
 
@@ -71,6 +76,13 @@ const MainStack = () => {
       <Stack.Screen name="ProductDetails" component={ProductDetails} />
       <Stack.Screen name="MyOrders" component={MyOrders} />
       <Stack.Screen name="OrderDetails" component={OrderDetails} />
+      <Stack.Screen name="UserEditProfile" component={UserEditProfile} />
+      <Stack.Screen name="BlockedUsers" component={BlockedUsers} />
+      <Stack.Screen
+        name="ExerciseLogsHistory"
+        component={ExerciseLogsHistory}
+      />
+      <Stack.Screen name="CallScreen" component={CallScreen} />
     </Stack.Navigator>
   );
 };

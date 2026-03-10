@@ -308,14 +308,14 @@
 
 // const styles = StyleSheet.create({});
 
-import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { useSelector, useDispatch } from 'react-redux';
-import { StripeProvider } from '@stripe/stripe-react-native';
+import React, {useEffect, useState, useRef} from 'react';
+import {StyleSheet} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import {useSelector, useDispatch} from 'react-redux';
+import {StripeProvider} from '@stripe/stripe-react-native';
 import BootSplash from 'react-native-bootsplash';
-import messaging, { getMessaging } from '@react-native-firebase/messaging';
-import notifee, { EventType } from '@notifee/react-native';
+import messaging, {getMessaging} from '@react-native-firebase/messaging';
+import notifee, {EventType} from '@notifee/react-native';
 
 const firebaseMessaging = getMessaging();
 
@@ -324,14 +324,14 @@ import TrainerStack from './src/Navigations/TrainerStack';
 import UserStack from './src/Navigations/UserStack';
 
 import axiosBaseURL from './src/services/AxiosBaseURL';
-import { updateLogin, SignOut } from './src/store/Slices/AuthSlice';
+import {updateLogin, SignOut} from './src/store/Slices/AuthSlice';
 
 import {
   requestMediaPermission,
   requestNotificationPermission,
 } from './src/Hooks/Permission';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { configureGoogle } from './src/config/googleAuth';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {configureGoogle} from './src/config/googleAuth';
 
 import {
   setupNotificationChannel,
@@ -341,19 +341,15 @@ import {
   showForegroundNotification,
 } from './src/Notifications/notificationService';
 
-import { navigationRef, navigate } from './src/Navigations/navigationService';
+import {navigationRef, navigate} from './src/Navigations/navigationService';
+import SocketService from './src/services/SocketService';
+import IncomingCallModal from './src/Components/IncomingCallModal';
+import {AGORA_TEST_TOKEN} from '@env';
 
-const handleDeepLink = (data) => {
-  if (!data) return;
-  if (data.conversationId) {
-    navigate('ChatScreen', { conversationId: data.conversationId });
-  } else if (data.bookingId) {
-    navigate('BookingDetails', { bookingId: data.bookingId });
-  }
-};
+// ✅ REMOVED handleDeepLink from global scope to move inside App
 
 // ✅ Handle notification clicks even if app is backgrounded/killed
-notifee.onBackgroundEvent(async ({ type, detail }) => {
+notifee.onBackgroundEvent(async ({type, detail}) => {
   if (type === EventType.PRESS) {
     handleDeepLink(detail.notification?.data);
   }
@@ -364,8 +360,45 @@ const App = () => {
   const authData = useSelector(state => state?.Auth?.data);
   const [appLoading, setAppLoading] = useState(true);
 
+  // Incoming Call State
+  const [incomingCall, setIncomingCall] = useState(null);
+
   // prevent duplicate token save
   const savedTokenRef = useRef(null);
+
+  const handleDeepLink = data => {
+    if (!data) return;
+
+    // 1. Check if it's a CALL signal hidden in message text
+    const text = data?.text || '';
+    if (text.startsWith('__COMM_CALL__')) {
+      try {
+        const signalData = JSON.parse(text.replace('__COMM_CALL__', ''));
+        setIncomingCall({
+          callerId: data.senderId,
+          callerName: signalData.callerName || data.senderName || 'Someone',
+          callerImage:
+            signalData.callerImage ||
+            signalData.profileImage ||
+            signalData.profileimage ||
+            data.senderImage,
+          isVideoCall: signalData.isVideoCall,
+          channelName: signalData.channelName,
+          conversationId: data.conversationId,
+        });
+        return; // Modal will handle accept/decline buttons
+      } catch (err) {
+        console.log('Error parsing deep link call signal:', err);
+      }
+    }
+
+    // 2. Fallback to normal chat navigation
+    if (data.conversationId) {
+      navigate('ChatScreen', {conversationId: data.conversationId});
+    } else if (data.bookingId) {
+      navigate('BookingDetails', {bookingId: data.bookingId});
+    }
+  };
 
   /* ---------------- GOOGLE CONFIG ---------------- */
   useEffect(() => {
@@ -403,7 +436,7 @@ const App = () => {
   /* ---------------- BOOTSTRAP ---------------- */
   useEffect(() => {
     const init = async () => {
-      await BootSplash.hide({ fade: true });
+      await BootSplash.hide({fade: true});
       await requestNotificationPermission();
       await requestMediaPermission();
     };
@@ -466,16 +499,18 @@ const App = () => {
     });
 
     /* -------- Notifee (Foreground) -------- */
-    const unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
+    const unsubscribeNotifee = notifee.onForegroundEvent(({type, detail}) => {
       if (type === EventType.PRESS) {
         handleDeepLink(detail.notification?.data);
       }
     });
 
     /* -------- App opened from background (FCM) -------- */
-    unsubscribeOpen = firebaseMessaging.onNotificationOpenedApp(remoteMessage => {
-      handleDeepLink(remoteMessage?.data);
-    });
+    unsubscribeOpen = firebaseMessaging.onNotificationOpenedApp(
+      remoteMessage => {
+        handleDeepLink(remoteMessage?.data);
+      },
+    );
 
     /* -------- App opened from killed state (FCM) -------- */
     const checkInitialNotification = async () => {
@@ -497,10 +532,101 @@ const App = () => {
     };
   }, [authData?._id, authData?.token]);
 
+  /* ---------------- GLOBAL SOCKET INIT ---------------- */
+  useEffect(() => {
+    if (authData?._id) {
+      const role = (authData.isType || authData.role || 'user').toLowerCase();
+      SocketService.init(authData._id, role);
+
+      // Listen for incoming calls (Standard events)
+      SocketService.on('incoming_call', data => {
+        setIncomingCall(data);
+      });
+
+      // Listen for calls via Conversation Updated (Reliable fallback)
+      SocketService.on('conversationUpdated', data => {
+        const lastMsg = data?.lastMessage;
+        if (
+          lastMsg &&
+          typeof lastMsg.text === 'string' &&
+          lastMsg.text.startsWith('__COMM_CALL__')
+        ) {
+          try {
+            const signalData = JSON.parse(
+              lastMsg.text.replace('__COMM_CALL__', ''),
+            );
+            // Don't show modal if I am the one who sent the signal
+            if (lastMsg.senderId !== authData._id) {
+              setIncomingCall({
+                callerId: lastMsg.senderId,
+                callerName:
+                  signalData.callerName || data.senderName || 'Someone',
+                callerImage:
+                  signalData.callerImage ||
+                  signalData.profileImage ||
+                  signalData.profileimage ||
+                  data.senderImage,
+                isVideoCall: signalData.isVideoCall,
+                channelName: signalData.channelName,
+                conversationId: data.conversationId || data._id,
+              });
+            }
+          } catch (e) {
+            console.log('Error parsing call signal:', e);
+          }
+        }
+      });
+
+      // Listen for call cancelled by caller
+      SocketService.on('call_cancelled', () => {
+        setIncomingCall(null);
+      });
+    }
+
+    return () => {
+      // Don't disconnect here unless logging out,
+      // but remove listeners if needed.
+    };
+  }, [authData?._id]);
+
+  const onAcceptCall = () => {
+    const callData = incomingCall;
+    setIncomingCall(null);
+    if (!callData) return;
+
+    // Signal acceptance to the caller
+    SocketService.emit('accept_call', {
+      to: callData.callerId,
+      acceptedBy: authData._id,
+    });
+
+    navigate('CallScreen', {
+      channelName: callData.channelName || 'test',
+      isVideoCall: callData.isVideoCall,
+      otherUser: {
+        _id: callData.callerId,
+        fullName: callData.callerName,
+        profileImage: callData.callerImage,
+        profileimage: callData.callerImage,
+      },
+      token: AGORA_TEST_TOKEN,
+    });
+  };
+
+  const onDeclineCall = () => {
+    if (incomingCall) {
+      SocketService.emit('call_declined', {
+        to: incomingCall.callerId,
+        declinedBy: authData._id,
+      });
+    }
+    setIncomingCall(null);
+  };
+
   if (appLoading) return null;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{flex: 1}}>
       <StripeProvider
         publishableKey="pk_test_51MhKy0E1gqTY55tO7v4bGT0EifIECw1SHFcUx33Jgc7YF46jqRPNvDzGoSE1h9konayrzaNes7Jse3NGDLpawDql00rxdyk8Cw"
         urlScheme="trainerapp">
@@ -514,6 +640,15 @@ const App = () => {
           )}
         </NavigationContainer>
       </StripeProvider>
+
+      <IncomingCallModal
+        visible={!!incomingCall}
+        callerName={incomingCall?.callerName}
+        callerImage={incomingCall?.callerImage}
+        isVideoCall={incomingCall?.isVideoCall}
+        onAccept={onAcceptCall}
+        onDecline={onDeclineCall}
+      />
     </GestureHandlerRootView>
   );
 };

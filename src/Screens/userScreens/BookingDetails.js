@@ -7,8 +7,8 @@ import {
   View,
   ActivityIndicator,
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
-import { Modal } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {Modal} from 'react-native';
 
 import Header from '../../Components/Header';
 import {
@@ -19,19 +19,19 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { FontFamily, Images } from '../../utils/Images';
+import {FontFamily, Images} from '../../utils/Images';
 
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import WrapperContainer from '../../Components/Wrapper';
-import { ScrollView } from 'react-native-gesture-handler';
+import {ScrollView} from 'react-native-gesture-handler';
 import ButtonComp from '../../Components/ButtonComp';
-import { showMessage } from 'react-native-flash-message';
-import { useSelector } from 'react-redux';
-import { BookingAPI } from '../../services/bookingApi';
-import { TrainerBookingAPI } from '../../services/trainerBookingApi';
-import { subMonths } from 'date-fns';
-import { Calendar } from 'react-native-calendars';
+import {showMessage} from 'react-native-flash-message';
+import {useSelector} from 'react-redux';
+import {BookingAPI} from '../../services/bookingApi';
+import {TrainerBookingAPI} from '../../services/trainerBookingApi';
+import {subMonths} from 'date-fns';
+import {Calendar} from 'react-native-calendars';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 const BookingDetails = () => {
@@ -43,7 +43,9 @@ const BookingDetails = () => {
   const token = authData?.token;
 
   const [data, setData] = useState(routeData || null);
-  const [fetchLoading, setFetchLoading] = useState(!routeData && !!routeBookingId);
+  const [fetchLoading, setFetchLoading] = useState(
+    !routeData && !!routeBookingId,
+  );
   const [cancelLoading, setCancelLoading] = useState(false);
 
   // ✅ Fetch full booking data when navigated with only bookingId (from notifications)
@@ -57,12 +59,12 @@ const BookingDetails = () => {
             setData(res.data);
             setStatus(res.data.status || 'pending');
           } else {
-            showMessage({ message: 'Could not load booking', type: 'danger' });
+            showMessage({message: 'Could not load booking', type: 'danger'});
             navigation.goBack();
           }
         } catch (err) {
           console.log('Fetch booking error:', err?.message);
-          showMessage({ message: 'Error loading booking', type: 'danger' });
+          showMessage({message: 'Error loading booking', type: 'danger'});
           navigation.goBack();
         } finally {
           setFetchLoading(false);
@@ -72,7 +74,8 @@ const BookingDetails = () => {
     }
   }, [routeBookingId, routeData, token]);
 
-  const bookingId = data?.bookingId || data?._id || data?.booking?._id || routeBookingId;
+  const bookingId =
+    data?.bookingId || data?._id || data?.booking?._id || routeBookingId;
   const [loading, setLoading] = useState('');
   const [status, setStatus] = useState(data?.status || 'pending');
 
@@ -80,9 +83,12 @@ const BookingDetails = () => {
   const [selectedReason, setSelectedReason] = useState('');
 
   // Reschedule States
-  const [isRescheduleModalVisible, setIsRescheduleModalVisible] = useState(false);
+  const [isRescheduleModalVisible, setIsRescheduleModalVisible] =
+    useState(false);
   const [rescheduleLoading, setRescheduleLoading] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(data?.date || moment().format('YYYY-MM-DD'));
+  const [selectedDate, setSelectedDate] = useState(
+    data?.date || moment().format('YYYY-MM-DD'),
+  );
   const [isTimePickerVisible, setIsTimePickerVisible] = useState(false);
   const [selectedTime, setSelectedTime] = useState(data?.time || '10:00 AM');
 
@@ -103,11 +109,11 @@ const BookingDetails = () => {
     'Other',
   ];
 
-
-
-
   const isTrainer = authData?.isType?.toLowerCase() === 'trainer';
-  const displayUser = isTrainer ? data?.userId : (data?.trainerId || data?.trainerData || data?.data);
+  const displayUser = isTrainer
+    ? data?.userId
+    : data?.trainerId || data?.trainerData || data?.data;
+  // console.log('displayUser:', displayUser.profileImage);
   const currentStatus = status || data?.status || 'pending';
   const normalizedStatus = currentStatus.toString().toLowerCase().trim();
 
@@ -123,32 +129,43 @@ const BookingDetails = () => {
     return (
       <WrapperContainer>
         <Header onPress={() => navigation.goBack()} />
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <ActivityIndicator size="large" color="#9BE639" />
-          <Text style={{ color: '#888', marginTop: 12, fontSize: 14 }}>Loading booking...</Text>
+          <Text style={{color: '#888', marginTop: 12, fontSize: 14}}>
+            Loading booking...
+          </Text>
         </View>
       </WrapperContainer>
     );
   }
 
-  const handleStatusUpdate = async (newStatus) => {
+  const handleStatusUpdate = async newStatus => {
     try {
       setLoading(newStatus);
-      const res = await TrainerBookingAPI.updateStatus(token, bookingId, newStatus);
+      const res = await TrainerBookingAPI.updateStatus(
+        token,
+        bookingId,
+        newStatus,
+      );
       console.log('Update status response:', res);
       if (res?.success) {
         setStatus(newStatus);
-        const displayStatus = newStatus === 'confirmed' ? 'Accepted' : (newStatus === 'rejected' ? 'Declined' : 'Updated');
-        showMessage({ message: `Booking ${displayStatus}`, type: "success" });
+        const displayStatus =
+          newStatus === 'confirmed'
+            ? 'Accepted'
+            : newStatus === 'rejected'
+              ? 'Declined'
+              : 'Updated';
+        showMessage({message: `Booking ${displayStatus}`, type: 'success'});
         if (newStatus === 'rejected' || newStatus === 'completed') {
           navigation.goBack();
         }
       } else {
-        showMessage({ message: res?.message || "Update failed", type: "danger" });
+        showMessage({message: res?.message || 'Update failed', type: 'danger'});
       }
     } catch (error) {
       console.log('Update status error:', error);
-      showMessage({ message: "Error updating status", type: "danger" });
+      showMessage({message: 'Error updating status', type: 'danger'});
     } finally {
       setLoading('');
     }
@@ -160,12 +177,18 @@ const BookingDetails = () => {
       const res = await TrainerBookingAPI.trainerComplete(token, bookingId);
       if (res?.success) {
         setStatus('trainer_completed');
-        showMessage({ message: "Session marked as completed", type: "success" });
+        showMessage({message: 'Session marked as completed', type: 'success'});
       } else {
-        showMessage({ message: res?.message || "Complete failed", type: "danger" });
+        showMessage({
+          message: res?.message || 'Complete failed',
+          type: 'danger',
+        });
       }
     } catch (e) {
-      showMessage({ message: e?.response?.data?.message || e.message, type: "danger" });
+      showMessage({
+        message: e?.response?.data?.message || e.message,
+        type: 'danger',
+      });
     } finally {
       setLoading('');
     }
@@ -177,13 +200,19 @@ const BookingDetails = () => {
       const res = await BookingAPI.approveCompletion(token, bookingId);
       if (res?.success) {
         setStatus('completed');
-        showMessage({ message: "Session completed", type: "success" });
+        showMessage({message: 'Session completed', type: 'success'});
         navigation.goBack();
       } else {
-        showMessage({ message: res?.message || "Approve failed", type: "danger" });
+        showMessage({
+          message: res?.message || 'Approve failed',
+          type: 'danger',
+        });
       }
     } catch (e) {
-      showMessage({ message: e?.response?.data?.message || e.message, type: "danger" });
+      showMessage({
+        message: e?.response?.data?.message || e.message,
+        type: 'danger',
+      });
     } finally {
       setLoading('');
     }
@@ -197,19 +226,27 @@ const BookingDetails = () => {
         time: selectedTime,
       });
       if (res?.success) {
-        showMessage({ message: 'Booking rescheduled successfully', type: 'success' });
+        showMessage({
+          message: 'Booking rescheduled successfully',
+          type: 'success',
+        });
         setIsRescheduleModalVisible(false);
         navigation.goBack();
       } else {
-        showMessage({ message: res?.message || 'Reschedule failed', type: 'danger' });
+        showMessage({
+          message: res?.message || 'Reschedule failed',
+          type: 'danger',
+        });
       }
     } catch (e) {
-      showMessage({ message: e?.response?.data?.message || e.message, type: 'danger' });
+      showMessage({
+        message: e?.response?.data?.message || e.message,
+        type: 'danger',
+      });
     } finally {
       setRescheduleLoading(false);
     }
   };
-
 
   return (
     <WrapperContainer>
@@ -220,8 +257,18 @@ const BookingDetails = () => {
       />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={{ paddingHorizontal: responsiveScreenWidth(6), marginTop: responsiveScreenHeight(2) }}>
-          <Text style={{ color: 'white', fontSize: responsiveFontSize(3.5), fontFamily: FontFamily.Bold, marginBottom: responsiveScreenHeight(3) }}>
+        <View
+          style={{
+            paddingHorizontal: responsiveScreenWidth(6),
+            marginTop: responsiveScreenHeight(2),
+          }}>
+          <Text
+            style={{
+              color: 'white',
+              fontSize: responsiveFontSize(3.5),
+              fontFamily: FontFamily.Bold,
+              marginBottom: responsiveScreenHeight(3),
+            }}>
             Booking Details
           </Text>
 
@@ -238,7 +285,11 @@ const BookingDetails = () => {
               marginBottom: responsiveScreenHeight(3),
             }}>
             <Image
-              source={{ uri: displayUser?.profileImage }}
+              source={{
+                uri:
+                  displayUser?.profileImage ||
+                  'https://t3.ftcdn.net/jpg/03/64/62/36/360_F_364623623_ERzQYfO4HHHyawYkJ16tREsizLyvcaeg.jpg',
+              }}
               style={{
                 width: responsiveScreenWidth(18),
                 height: responsiveScreenWidth(18),
@@ -247,7 +298,7 @@ const BookingDetails = () => {
                 borderColor: '#9FED3A',
               }}
             />
-            <View style={{ marginLeft: responsiveScreenWidth(4), flex: 1 }}>
+            <View style={{marginLeft: responsiveScreenWidth(4), flex: 1}}>
               <Text
                 style={{
                   fontFamily: FontFamily.Bold,
@@ -263,19 +314,37 @@ const BookingDetails = () => {
                   fontSize: responsiveScreenFontSize(1.8),
                   marginTop: 2,
                 }}>
-                {isTrainer ? 'Client' : (displayUser?.Speciality?.[0]?.value || 'Professional Trainer')}
+                {isTrainer
+                  ? 'Client'
+                  : displayUser?.Speciality?.[0]?.value ||
+                    'Professional Trainer'}
               </Text>
-              <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
+              <View style={{flexDirection: 'row', gap: 6, flexWrap: 'wrap'}}>
                 <View
                   style={{
                     marginTop: 6,
-                    backgroundColor: normalizedStatus === 'confirmed' ? '#9FED3A' : (normalizedStatus === 'rejected' ? '#FF4B4B' : (normalizedStatus === 'completed' ? '#4A90E2' : (normalizedStatus === 'trainer_completed' ? '#FFA500' : '#BBBBBB'))),
+                    backgroundColor:
+                      normalizedStatus === 'confirmed'
+                        ? '#9FED3A'
+                        : normalizedStatus === 'rejected'
+                          ? '#FF4B4B'
+                          : normalizedStatus === 'completed'
+                            ? '#4A90E2'
+                            : normalizedStatus === 'trainer_completed'
+                              ? '#FFA500'
+                              : '#BBBBBB',
                     paddingHorizontal: 8,
                     paddingVertical: 2,
                     borderRadius: 12,
                     alignSelf: 'flex-start',
                   }}>
-                  <Text style={{ color: 'black', fontSize: 10, fontWeight: '700', textTransform: 'uppercase' }}>
+                  <Text
+                    style={{
+                      color: 'black',
+                      fontSize: 10,
+                      fontWeight: '700',
+                      textTransform: 'uppercase',
+                    }}>
                     {currentStatus.replace('_', ' ')}
                   </Text>
                 </View>
@@ -284,33 +353,54 @@ const BookingDetails = () => {
                   <View
                     style={{
                       marginTop: 6,
-                      backgroundColor: data?.payment?.paymentStatus === 'succeeded' ? '#9FED3A' : '#FF4B4B',
+                      backgroundColor:
+                        data?.payment?.paymentStatus === 'succeeded'
+                          ? '#9FED3A'
+                          : '#FF4B4B',
                       paddingHorizontal: 8,
                       paddingVertical: 2,
                       borderRadius: 12,
                       alignSelf: 'flex-start',
                     }}>
-                    <Text style={{ color: 'black', fontSize: 10, fontWeight: '700', textTransform: 'uppercase' }}>
-                      {data?.payment?.paymentStatus === 'succeeded' ? 'PAID' : 'UNPAID'}
+                    <Text
+                      style={{
+                        color: 'black',
+                        fontSize: 10,
+                        fontWeight: '700',
+                        textTransform: 'uppercase',
+                      }}>
+                      {['succeeded', 'paid'].includes(
+                        data?.payment?.paymentStatus,
+                      )
+                        ? 'PAID'
+                        : 'UNPAID'}
                     </Text>
                   </View>
                 )}
               </View>
             </View>
-            <View style={{ flexDirection: 'row', gap: responsiveWidth(2) }}>
+            <View style={{flexDirection: 'row', gap: responsiveWidth(2)}}>
               <TouchableOpacity
                 onPress={async () => {
                   try {
                     if (!displayUser?._id) {
-                      showMessage({ message: "User information missing", type: "warning" });
+                      showMessage({
+                        message: 'User information missing',
+                        type: 'warning',
+                      });
                       return;
                     }
 
                     const userId = isTrainer ? displayUser?._id : authData?._id;
-                    const trainerId = isTrainer ? authData?._id : displayUser?._id;
+                    const trainerId = isTrainer
+                      ? authData?._id
+                      : displayUser?._id;
 
-                    const res = await BookingAPI.createConversation(userId, trainerId);
-                    console.log("responce:", res)
+                    const res = await BookingAPI.createConversation(
+                      userId,
+                      trainerId,
+                    );
+                    console.log('responce:', res);
                     if (res.success) {
                       const conversation = res.conversation || res.data;
                       navigation.navigate('ChatScreen', {
@@ -319,15 +409,22 @@ const BookingDetails = () => {
                       });
                     }
                   } catch (error) {
-                    console.log('Chat error:', error?.response?.data || error.message);
+                    console.log(
+                      'Chat error:',
+                      error?.response?.data || error.message,
+                    );
                     showMessage({
-                      message: "Failed to start chat",
-                      type: "danger"
+                      message: 'Failed to start chat',
+                      type: 'danger',
                     });
                   }
                 }}
                 style={styles.iconBtn}>
-                <Icon name="chatbubble-ellipses-outline" size={20} color="#9FED3A" />
+                <Icon
+                  name="chatbubble-ellipses-outline"
+                  size={20}
+                  color="#9FED3A"
+                />
               </TouchableOpacity>
               <TouchableOpacity style={styles.iconBtn}>
                 <Icon name="call-outline" size={20} color="#9FED3A" />
@@ -345,7 +442,6 @@ const BookingDetails = () => {
               borderColor: '#2A2A2A',
               gap: responsiveScreenHeight(2.5),
             }}>
-
             {/* Info Item */}
             <View style={styles.infoRow}>
               <View style={styles.infoIconBox}>
@@ -364,12 +460,18 @@ const BookingDetails = () => {
               <View style={styles.infoIconBox}>
                 <Icon name="location-outline" size={20} color="#9FED3A" />
               </View>
-              <View style={{ flex: 1 }}>
+              <View style={{flex: 1}}>
                 <Text style={styles.infoLabel}>Location</Text>
                 <Text style={styles.infoValue}>
-                  {data?.trainerId?.Address || data?.data?.Address || 'Not Available'}
+                  {data?.trainerId?.Address ||
+                    data?.trainerData?.Address ||
+                    data?.address ||
+                    data?.data?.Address ||
+                    'Not Available'}
                 </Text>
-                <Text style={{ color: '#9FED3A', fontSize: 12, marginTop: 4 }}>0.31 mi away</Text>
+                <Text style={{color: '#9FED3A', fontSize: 12, marginTop: 4}}>
+                  0.31 mi away
+                </Text>
               </View>
             </View>
 
@@ -381,9 +483,12 @@ const BookingDetails = () => {
               <View>
                 <Text style={styles.infoLabel}>Price Details</Text>
                 <Text style={styles.infoValue}>
-                  Total price ${data?.amount ? data.amount / 100 : (data?.hourlyRate || data?.data?.Hourlyrate || '0')}
+                  Total price $
+                  {data?.amount
+                    ? data.amount / 100
+                    : data?.hourlyRate || data?.data?.Hourlyrate || '0'}
                 </Text>
-                <Text style={{ color: '#8E8E93', fontSize: 12, marginTop: 4 }}>
+                <Text style={{color: '#8E8E93', fontSize: 12, marginTop: 4}}>
                   for {data?.durationMinutes || 60}min session
                 </Text>
               </View>
@@ -397,20 +502,23 @@ const BookingDetails = () => {
               <View>
                 <Text style={styles.infoLabel}>Reminder</Text>
                 <Text style={styles.infoValue}>
-                  {data?.reminder || data?.data?.Reminder || 'None'} before session
+                  {data?.reminder || data?.data?.Reminder || 'None'} before
+                  session
                 </Text>
-                <Text style={{ color: '#8E8E93', fontSize: 12, marginTop: 4 }}>Repeat: Off</Text>
+                <Text style={{color: '#8E8E93', fontSize: 12, marginTop: 4}}>
+                  Repeat: Off
+                </Text>
               </View>
             </View>
           </View>
         </View>
 
-        <View style={{ height: responsiveScreenHeight(12) }} />
+        <View style={{height: responsiveScreenHeight(12)}} />
       </ScrollView>
 
       {isTrainer ? (
         <View style={styles.bottomBar}>
-          <View style={{ gap: 12 }}>
+          <View style={{gap: 12}}>
             {normalizedStatus === 'pending' ? (
               <>
                 <ButtonComp
@@ -418,11 +526,11 @@ const BookingDetails = () => {
                   isLoading={loading === 'confirmed'}
                   isDisable={!!loading}
                   text="Accept Booking"
-                  mainStyle={{ backgroundColor: '#9FED3A', width: '100%' }}
-                  textstyle={{ color: 'black', fontFamily: FontFamily.Bold }}
+                  mainStyle={{backgroundColor: '#9FED3A', width: '100%'}}
+                  textstyle={{color: 'black', fontFamily: FontFamily.Bold}}
                 />
                 <ButtonComp
-                  textstyle={{ color: '#FF4B4B', fontFamily: FontFamily.Bold }}
+                  textstyle={{color: '#FF4B4B', fontFamily: FontFamily.Bold}}
                   onPress={() => handleStatusUpdate('rejected')}
                   isLoading={loading === 'rejected'}
                   isDisable={!!loading}
@@ -442,8 +550,8 @@ const BookingDetails = () => {
                   isLoading={loading === 'trainer_completed'}
                   isDisable={!!loading}
                   text="Complete Session"
-                  mainStyle={{ backgroundColor: '#9FED3A', width: '100%' }}
-                  textstyle={{ color: 'black', fontFamily: FontFamily.Bold }}
+                  mainStyle={{backgroundColor: '#9FED3A', width: '100%'}}
+                  textstyle={{color: 'black', fontFamily: FontFamily.Bold}}
                 />
                 <ButtonComp
                   onPress={() => setIsRescheduleModalVisible(true)}
@@ -454,21 +562,24 @@ const BookingDetails = () => {
                     borderWidth: 1,
                     borderColor: '#9FED3A',
                   }}
-                  textstyle={{ color: '#9FED3A', fontFamily: FontFamily.Bold }}
+                  textstyle={{color: '#9FED3A', fontFamily: FontFamily.Bold}}
                 />
               </>
             ) : null}
             <ButtonComp
               onPress={() => {
                 if (isTrainer) {
-                  navigation.navigate('TrainerBttomStack', { screen: 'CompletedTrainerHome' });
+                  navigation.navigate('TrainerBttomStack', {
+                    screen: 'CompletedTrainerHome',
+                  });
                 } else {
-                  navigation.navigate('Bottom', { screen: 'Home' });
+                  navigation.navigate('Bottom', {screen: 'Home'});
                 }
               }}
               text="Back to Home"
               mainStyle={{
-                backgroundColor: normalizedStatus === 'confirmed' ? '#181818' : '#9FED3A',
+                backgroundColor:
+                  normalizedStatus === 'confirmed' ? '#181818' : '#9FED3A',
                 width: '100%',
                 borderWidth: normalizedStatus === 'confirmed' ? 1 : 0,
                 borderColor: '#9FED3A',
@@ -482,15 +593,15 @@ const BookingDetails = () => {
         </View>
       ) : (
         <View style={styles.bottomBar}>
-          <View style={{ gap: 12 }}>
+          <View style={{gap: 12}}>
             {normalizedStatus === 'trainer_completed' && (
               <ButtonComp
                 onPress={() => handleUserApprove()}
                 isLoading={loading === 'approve'}
                 isDisable={!!loading}
                 text="Approve Completion (End Session)"
-                mainStyle={{ backgroundColor: '#9FED3A', width: '100%' }}
-                textstyle={{ color: 'black', fontFamily: FontFamily.Bold }}
+                mainStyle={{backgroundColor: '#9FED3A', width: '100%'}}
+                textstyle={{color: 'black', fontFamily: FontFamily.Bold}}
               />
             )}
 
@@ -498,49 +609,61 @@ const BookingDetails = () => {
               <ButtonComp
                 onPress={() => {
                   navigation.navigate('AddReviewScreen', {
-                    trainerId: data?.trainerId?._id || data?.trainerId || data?.data?.trainerId,
+                    trainerId:
+                      data?.trainerId?._id ||
+                      data?.trainerId ||
+                      data?.data?.trainerId,
                   });
                 }}
                 text="Approve Completion (Leave a Review)"
-                mainStyle={{ backgroundColor: '#9FED3A', width: '100%' }}
-                textstyle={{ color: 'black', fontFamily: FontFamily.Bold }}
+                mainStyle={{backgroundColor: '#9FED3A', width: '100%'}}
+                textstyle={{color: 'black', fontFamily: FontFamily.Bold}}
               />
             )}
 
             <ButtonComp
               onPress={() => {
                 if (isTrainer) {
-                  navigation.navigate('TrainerBttomStack', { screen: 'CompletedTrainerHome' });
+                  navigation.navigate('TrainerBttomStack', {
+                    screen: 'CompletedTrainerHome',
+                  });
                 } else {
-                  navigation.navigate('Bottom', { screen: 'Home' });
+                  navigation.navigate('Bottom', {screen: 'Home'});
                 }
               }}
               text="Back to Home"
               mainStyle={{
                 backgroundColor:
-                  normalizedStatus === 'confirmed' || normalizedStatus === 'trainer_completed'
+                  normalizedStatus === 'confirmed' ||
+                  normalizedStatus === 'trainer_completed'
                     ? '#181818'
                     : '#9FED3A',
                 width: '100%',
                 borderWidth:
-                  normalizedStatus === 'confirmed' || normalizedStatus === 'trainer_completed'
+                  normalizedStatus === 'confirmed' ||
+                  normalizedStatus === 'trainer_completed'
                     ? 1
                     : 0,
                 borderColor: '#9FED3A',
               }}
               textstyle={{
                 color:
-                  normalizedStatus === 'confirmed' || normalizedStatus === 'trainer_completed'
+                  normalizedStatus === 'confirmed' ||
+                  normalizedStatus === 'trainer_completed'
                     ? '#9FED3A'
                     : 'black',
                 fontFamily: FontFamily.Bold,
               }}
             />
-            {(normalizedStatus === 'pending' || normalizedStatus === 'confirmed') && (
+            {(normalizedStatus === 'pending' ||
+              normalizedStatus === 'confirmed') && (
               <TouchableOpacity
-                style={{ marginTop: 15, alignItems: 'center' }}
+                style={{marginTop: 15, alignItems: 'center'}}
                 onPress={() => setCancelModalVisible(true)}>
-                <Text style={{ color: '#FF4B4B', fontFamily: FontFamily.Semi_Bold }}>Cancel Booking</Text>
+                <Text
+                  style={{color: '#FF4B4B', fontFamily: FontFamily.Semi_Bold}}>
+                  Cancel Booking
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -560,49 +683,64 @@ const BookingDetails = () => {
           <View style={styles.modalContent}>
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>Cancel Booking</Text>
-            <Text style={styles.modalSubTitle}>Please select a reason for cancellation</Text>
+            <Text style={styles.modalSubTitle}>
+              Please select a reason for cancellation
+            </Text>
 
-            <View style={{ marginBottom: 20 }}>
+            <View style={{marginBottom: 20}}>
               {reasons.map((reason, index) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.reasonOption}
                   onPress={() => setSelectedReason(reason)}>
-                  <Text style={[
-                    styles.reasonText,
-                    selectedReason === reason && { color: '#9FED3A', fontFamily: FontFamily.Bold }
-                  ]}>
+                  <Text
+                    style={[
+                      styles.reasonText,
+                      selectedReason === reason && {
+                        color: '#9FED3A',
+                        fontFamily: FontFamily.Bold,
+                      },
+                    ]}>
                     {reason}
                   </Text>
-                  <View style={[
-                    styles.radioCircle,
-                    selectedReason === reason && { borderColor: '#9FED3A' }
-                  ]}>
-                    {selectedReason === reason && <View style={styles.radioDot} />}
+                  <View
+                    style={[
+                      styles.radioCircle,
+                      selectedReason === reason && {borderColor: '#9FED3A'},
+                    ]}>
+                    {selectedReason === reason && (
+                      <View style={styles.radioDot} />
+                    )}
                   </View>
                 </TouchableOpacity>
               ))}
             </View>
 
             <ButtonComp
-
               onPress={async () => {
                 try {
                   if (!selectedReason) return;
 
                   if (!bookingId) {
-                    showMessage({ message: "Booking ID missing", type: "danger" });
+                    showMessage({
+                      message: 'Booking ID missing',
+                      type: 'danger',
+                    });
                     return;
                   }
 
                   setCancelLoading(true);
 
-                  const res = await BookingAPI.cancelBooking(token, bookingId, selectedReason);
+                  const res = await BookingAPI.cancelBooking(
+                    token,
+                    bookingId,
+                    selectedReason,
+                  );
 
                   if (!res?.success) {
                     showMessage({
-                      message: res?.message || "Failed to cancel booking",
-                      type: "danger",
+                      message: res?.message || 'Failed to cancel booking',
+                      type: 'danger',
                     });
                     return;
                   }
@@ -610,15 +748,16 @@ const BookingDetails = () => {
                   setCancelModalVisible(false);
 
                   showMessage({
-                    message: "Booking Cancelled Successfully",
-                    type: "success",
+                    message: 'Booking Cancelled Successfully',
+                    type: 'success',
                   });
 
                   navigation.replace('Bottom');
                 } catch (e) {
                   showMessage({
-                    message: e?.response?.data?.message || e.message || "Cancel error",
-                    type: "danger",
+                    message:
+                      e?.response?.data?.message || e.message || 'Cancel error',
+                    type: 'danger',
                   });
                 } finally {
                   setCancelLoading(false);
@@ -627,19 +766,22 @@ const BookingDetails = () => {
               isLoading={cancelLoading}
               text="Confirm Cancellation"
               mainStyle={{
-                backgroundColor: selectedReason && !cancelLoading ? '#FF4B4B' : '#3A3A3A',
-                marginBottom: 10
+                backgroundColor:
+                  selectedReason && !cancelLoading ? '#FF4B4B' : '#3A3A3A',
+                marginBottom: 10,
               }}
               textstyle={{
                 color: selectedReason && !cancelLoading ? 'white' : '#777',
-                fontFamily: FontFamily.Bold
+                fontFamily: FontFamily.Bold,
               }}
             />
 
             <TouchableOpacity
-              style={{ paddingVertical: 15, alignItems: 'center' }}
+              style={{paddingVertical: 15, alignItems: 'center'}}
               onPress={() => setCancelModalVisible(false)}>
-              <Text style={{ color: 'white', fontFamily: FontFamily.Semi_Bold }}>Keep Booking</Text>
+              <Text style={{color: 'white', fontFamily: FontFamily.Semi_Bold}}>
+                Keep Booking
+              </Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -705,9 +847,13 @@ const RescheduleModal = ({
                 textMonthFontSize: 16,
                 textDayHeaderFontSize: 12,
               }}
-              onDayPress={(day) => setSelectedDate(day.dateString)}
+              onDayPress={day => setSelectedDate(day.dateString)}
               markedDates={{
-                [selectedDate]: { selected: true, disableTouchEvent: true, selectedDotColor: 'orange' },
+                [selectedDate]: {
+                  selected: true,
+                  disableTouchEvent: true,
+                  selectedDotColor: 'orange',
+                },
               }}
               minDate={moment().format('YYYY-MM-DD')}
             />
@@ -715,8 +861,7 @@ const RescheduleModal = ({
             <Text style={styles.sectionLabel}>Select Time</Text>
             <TouchableOpacity
               style={styles.timePickerBtn}
-              onPress={() => setShowTimePicker(true)}
-            >
+              onPress={() => setShowTimePicker(true)}>
               <Text style={styles.timePickerText}>{selectedTime}</Text>
               <Icon name="time-outline" size={20} color="#9FED3A" />
             </TouchableOpacity>
@@ -725,8 +870,8 @@ const RescheduleModal = ({
               isLoading={loading}
               text="Confirm Reschedule"
               onPress={onConfirm}
-              mainStyle={{ marginTop: 20, backgroundColor: '#9FED3A' }}
-              textstyle={{ color: 'black' }}
+              mainStyle={{marginTop: 20, backgroundColor: '#9FED3A'}}
+              textstyle={{color: 'black'}}
             />
           </ScrollView>
         </View>
@@ -734,7 +879,7 @@ const RescheduleModal = ({
         <DateTimePickerModal
           isVisible={showTimePicker}
           mode="time"
-          onConfirm={(date) => {
+          onConfirm={date => {
             setSelectedTime(moment(date).format('hh:mm A'));
             setShowTimePicker(false);
           }}

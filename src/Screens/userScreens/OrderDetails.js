@@ -9,6 +9,7 @@ import {
   Image,
   Linking,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import {
   responsiveFontSize,
@@ -18,12 +19,17 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import moment from 'moment';
 import {useSelector} from 'react-redux';
 import {ShopAPI} from '../../services/shopApi';
+import {useStripe} from '@stripe/stripe-react-native';
+import {showMessage} from 'react-native-flash-message';
 
 const OrderDetails = ({route, navigation}) => {
   const {order: initialOrder} = route.params;
   const [order, setOrder] = React.useState(initialOrder);
   const [refreshing, setRefreshing] = React.useState(false);
+  const [isPaying, setIsPaying] = React.useState(false);
+  const [isCancelling, setIsCancelling] = React.useState(false);
   const token = useSelector(state => state?.Auth?.data?.token);
+  const {initPaymentSheet, presentPaymentSheet} = useStripe();
 
   const fetchOrderDetails = async () => {
     try {
@@ -42,22 +48,126 @@ const OrderDetails = ({route, navigation}) => {
     }
   };
 
+  const handlePayNow = async () => {
+    try {
+      setIsPaying(true);
+      const intentRes = await ShopAPI.payForOrder(token, order._id);
+      if (!intentRes?.success) {
+        showMessage({
+          message: intentRes?.message || 'Payment intent failed',
+          type: 'danger',
+        });
+        return;
+      }
+
+      const {paymentIntent, ephemeralKey, customer} = intentRes.data;
+
+      const {error: initError} = await initPaymentSheet({
+        merchantDisplayName: 'Trainer App Shop',
+        customerId: customer,
+        customerEphemeralKeySecret: ephemeralKey,
+        paymentIntentClientSecret: paymentIntent,
+        allowsDelayedPaymentMethods: false,
+      });
+
+      if (initError) {
+        showMessage({message: initError.message, type: 'danger'});
+        return;
+      }
+
+      const {error: presentError} = await presentPaymentSheet();
+      if (presentError) {
+        if (presentError.code !== 'Canceled') {
+          showMessage({message: presentError.message, type: 'danger'});
+        }
+        return;
+      }
+
+      showMessage({
+        message: 'Payment successful!',
+        type: 'success',
+        backgroundColor: '#B2FF00',
+        color: '#000',
+      });
+      fetchOrderDetails();
+    } catch (error) {
+      console.log('Payment error:', error);
+      showMessage({
+        message: error.message || 'Something went wrong',
+        type: 'danger',
+      });
+    } finally {
+      setIsPaying(false);
+    }
+  };
+
+  const handleCancelOrder = () => {
+    Alert.alert(
+      'Cancel Order',
+      'Are you sure you want to cancel this order? This action cannot be undone.',
+      [
+        {text: 'No', style: 'cancel'},
+        {
+          text: 'Yes, Cancel',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setIsCancelling(true);
+              const res = await ShopAPI.cancelOrder(token, order._id);
+              if (res.success) {
+                showMessage({
+                  message: 'Order cancelled successfully',
+                  type: 'success',
+                  backgroundColor: '#B2FF00',
+                  color: '#000',
+                });
+                fetchOrderDetails();
+              } else {
+                showMessage({
+                  message: res.message || 'Failed to cancel order',
+                  type: 'danger',
+                });
+              }
+            } catch (error) {
+              console.log('Cancel order error:', error);
+              showMessage({
+                message: error.message || 'Something went wrong',
+                type: 'danger',
+              });
+            } finally {
+              setIsCancelling(false);
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const getStatusColor = status => {
     switch (status?.toLowerCase()) {
+      case 'succeeded':
       case 'paid':
         return '#B2FF00';
+      case 'received':
+        return '#9C27B0';
       case 'pending':
         return '#FFA500';
       case 'shipped':
         return '#2196F3';
       case 'delivered':
         return '#4CAF50';
+      case 'failed':
       case 'cancelled':
         return '#F44336';
       default:
         return '#fff';
     }
   };
+
+  const isPaymentPending =
+    !['succeeded', 'paid'].includes(
+      order.payment?.paymentStatus?.toLowerCase(),
+    ) && order.status !== 'cancelled';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -122,7 +232,7 @@ const OrderDetails = ({route, navigation}) => {
                 styles.infoValue,
                 {color: getStatusColor(order.payment?.paymentStatus)},
               ]}>
-              {order.payment?.paymentStatus || 'N/A'}
+              {order.payment?.paymentStatus?.toUpperCase() || 'N/A'}
             </Text>
           </View>
         </View>
@@ -164,7 +274,7 @@ const OrderDetails = ({route, navigation}) => {
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Subtotal</Text>
             <Text style={styles.summaryValue}>
-              ${(order.totalAmount / 100).toFixed(2)}
+              ${order.totalAmount?.toFixed(2)}
             </Text>
           </View>
           <View style={styles.summaryRow}>
@@ -174,21 +284,42 @@ const OrderDetails = ({route, navigation}) => {
           <View style={[styles.summaryRow, styles.totalRow]}>
             <Text style={styles.totalLabel}>Grand Total</Text>
             <Text style={styles.grandTotal}>
-              ${(order.totalAmount / 100).toFixed(2)}
+              ${order.totalAmount?.toFixed(2)}
             </Text>
           </View>
         </View>
 
-        {order.payment?.paymentIntentId && (
+        {isPaymentPending && (
           <TouchableOpacity
-            style={styles.receiptButton}
-            onPress={() =>
-              Linking.openURL(
-                `https://dashboard.stripe.com/payments/${order.payment.paymentIntentId}`,
-              )
-            }>
-            <Text style={styles.receiptButtonText}>View Stripe Reference</Text>
-            <Icon name="external-link-outline" size={18} color="#000" />
+            style={[styles.payNowButton, isPaying && {opacity: 0.7}]}
+            onPress={handlePayNow}
+            disabled={isPaying}>
+            {isPaying ? (
+              <ActivityIndicator size="small" color="#000" />
+            ) : (
+              <>
+                <Icon name="card-outline" size={22} color="#000" />
+                <Text style={styles.payNowText}>Pay Now</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
+
+        {['pending', 'paid', 'received'].includes(
+          order.status?.toLowerCase(),
+        ) && (
+          <TouchableOpacity
+            style={[styles.cancelButton, isCancelling && {opacity: 0.7}]}
+            onPress={handleCancelOrder}
+            disabled={isCancelling}>
+            {isCancelling ? (
+              <ActivityIndicator size="small" color="#F44336" />
+            ) : (
+              <>
+                <Icon name="close-circle-outline" size={22} color="#F44336" />
+                <Text style={styles.cancelButtonText}>Cancel Order</Text>
+              </>
+            )}
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -360,5 +491,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginRight: 10,
+  },
+  payNowButton: {
+    backgroundColor: '#B2FF00',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 30,
+    marginTop: 25,
+    gap: 10,
+  },
+  payNowText: {
+    color: '#000',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  cancelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 15,
+    borderRadius: 30,
+    marginTop: 15,
+    borderWidth: 1,
+    borderColor: '#F44336',
+    gap: 10,
+  },
+  cancelButtonText: {
+    color: '#F44336',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

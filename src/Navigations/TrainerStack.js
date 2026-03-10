@@ -1,8 +1,8 @@
-import { StyleSheet } from 'react-native';
-import React, { useEffect, useRef } from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useSelector } from 'react-redux';
-import { useNavigation } from '@react-navigation/native';
+import {StyleSheet} from 'react-native';
+import React, {useEffect, useRef} from 'react';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {useSelector} from 'react-redux';
+import {useNavigation} from '@react-navigation/native';
 import notifee from '@notifee/react-native';
 
 import TrainerBttomStack from './TrainerBttomStack';
@@ -24,6 +24,7 @@ import Chats from '../Screens/userScreens/Chats.js';
 import ChatScreen from '../Screens/chat/ChatScreen';
 import BookingDetails from '../Screens/userScreens/BookingDetails';
 import TransactionDetails from '../Screens/trainerScreens/TransactionDetails';
+import CallScreen from '../Screens/chat/CallScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -150,7 +151,7 @@ const TrainerStack = () => {
     new Date(trainer.subscription.endDate) > new Date();
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{headerShown: false}}>
       {!isProfileComplete ? (
         <Stack.Screen name="CompleteProfile" component={CompleteProfile} />
       ) : !isSubscriptionValid ? (
@@ -172,6 +173,7 @@ const TrainerStack = () => {
       <Stack.Screen name="PostCaptionScreen" component={PostCaptionScreen} />
       <Stack.Screen name="AllUploadsScreen" component={AllUploadsScreen} />
       <Stack.Screen name="TransactionDetails" component={TransactionDetails} />
+      <Stack.Screen name="CallScreen" component={CallScreen} />
     </Stack.Navigator>
   );
 };

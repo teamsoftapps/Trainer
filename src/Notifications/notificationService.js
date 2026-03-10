@@ -1,6 +1,6 @@
-import { getMessaging, getToken } from '@react-native-firebase/messaging';
-import notifee, { AndroidImportance } from '@notifee/react-native';
-import { Platform, PermissionsAndroid } from 'react-native';
+import {getMessaging, getToken} from '@react-native-firebase/messaging';
+import notifee, {AndroidImportance} from '@notifee/react-native';
+import {Platform, PermissionsAndroid} from 'react-native';
 import axiosBaseURL from '../services/AxiosBaseURL';
 
 const messaging = getMessaging();
@@ -40,7 +40,7 @@ export async function getFcmToken() {
 }
 
 // call your backend: POST /notifications/save-token
-export async function saveFcmTokenToBackend({ userId, role, token }) {
+export async function saveFcmTokenToBackend({userId, role, token}) {
   return axiosBaseURL.post('notification/save-token', {
     userId,
     role: (role || 'user').toLowerCase(),
@@ -56,10 +56,14 @@ export async function showForegroundNotification(remoteMessage) {
     remoteMessage?.notification?.title ||
     (senderName ? `New message from ${senderName}` : 'New Message');
 
-  const body =
+  let body =
     remoteMessage?.notification?.body ||
     remoteMessage?.data?.text ||
     'You received a message';
+
+  if (body.startsWith('__COMM_CALL__')) {
+    body = 'Incoming Call...';
+  }
 
   await notifee.displayNotification({
     title,
@@ -70,7 +74,7 @@ export async function showForegroundNotification(remoteMessage) {
       smallIcon: 'ic_stat_notification',
       importance: AndroidImportance.HIGH,
       priority: 'high',
-      pressAction: { id: 'default' },
+      pressAction: {id: 'default'},
       sound: 'default',
     },
   });

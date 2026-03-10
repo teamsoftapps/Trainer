@@ -22,10 +22,50 @@ import {useNavigation} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
 import {SignOut} from '../../store/Slices/AuthSlice';
 import {showMessage} from 'react-native-flash-message';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import axiosBaseURL from '../../services/AxiosBaseURL';
 
 const Settings = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const token = useSelector(state => state?.Auth?.data?.token);
+
+  const handleDeleteAccount = async () => {
+    Alert.alert(
+      'Delete Account',
+      'Are you sure you want to delete your account? This action is irreversible.',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const res = await axiosBaseURL.delete('/trainer/deleteAccount', {
+                headers: {Authorization: `Bearer ${token}`},
+              });
+              if (res.data.status) {
+                showMessage({
+                  message: 'Account deleted successfully',
+                  type: 'success',
+                  backgroundColor: '#B2FF00',
+                  color: '#000',
+                });
+                dispatch(SignOut());
+              }
+            } catch (error) {
+              console.log('Error deleting account:', error);
+              showMessage({
+                message: 'Failed to delete account',
+                type: 'danger',
+              });
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const handleSignout = async () => {
     let res = await Alert.alert('Info', 'Are you sure you want to Signout', [
       {
@@ -171,6 +211,33 @@ const Settings = () => {
               </Text>
             </View>
             <Image source={Images.rightarrow} resizeMode="contain" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleDeleteAccount}
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              borderBottomWidth: 1,
+              borderBottomColor: '#2E2E2E',
+              paddingVertical: responsiveHeight(2.5),
+            }}>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 20}}>
+              <Ionicons
+                name="trash-outline"
+                size={responsiveScreenWidth(8)}
+                color="#FF3B30"
+              />
+              <Text
+                style={{color: '#FF3B30', fontSize: responsiveFontSize(2.4)}}>
+                Delete Account
+              </Text>
+            </View>
+            <Image
+              source={Images.rightarrow}
+              resizeMode="contain"
+              tintColor="#FF3B30"
+            />
           </TouchableOpacity>
         </View>
         <View style={{alignItems: 'center', marginTop: responsiveHeight(5)}}>

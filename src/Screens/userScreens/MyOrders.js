@@ -50,14 +50,18 @@ const MyOrders = ({navigation}) => {
 
   const getStatusColor = status => {
     switch (status?.toLowerCase()) {
+      case 'succeeded':
       case 'paid':
         return '#B2FF00';
+      case 'received':
+        return '#9C27B0';
       case 'pending':
         return '#FFA500';
       case 'shipped':
         return '#2196F3';
       case 'delivered':
         return '#4CAF50';
+      case 'failed':
       case 'cancelled':
         return '#F44336';
       default:
@@ -115,9 +119,7 @@ const MyOrders = ({navigation}) => {
 
       <View style={styles.orderFooter}>
         <Text style={styles.totalLabel}>Total Amount</Text>
-        <Text style={styles.totalValue}>
-          ${(item.totalAmount / 100).toFixed(2)}
-        </Text>
+        <Text style={styles.totalValue}>${item.totalAmount?.toFixed(2)}</Text>
       </View>
     </TouchableOpacity>
   );

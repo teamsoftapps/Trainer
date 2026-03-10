@@ -12,8 +12,6 @@ import {
   Platform,
   ActivityIndicator,
   PermissionsAndroid,
-  Switch,
-  FlatList,
 } from 'react-native';
 import WrapperContainer from '../../Components/Wrapper';
 import Header from '../../Components/Header';
@@ -25,9 +23,11 @@ import axiosBaseURL from '../../services/AxiosBaseURL';
 import {useSelector, useDispatch} from 'react-redux';
 import {updateLogin} from '../../store/Slices/AuthSlice';
 import ImageCropPicker from 'react-native-image-crop-picker';
+import CountryPicker from 'react-native-country-picker-modal';
 import {
   responsiveFontSize,
   responsiveHeight,
+  responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {FontFamily, Images} from '../../utils/Images';
@@ -35,80 +35,26 @@ import {useNavigation, useFocusEffect} from '@react-navigation/native';
 
 const genderOptions = ['Male', 'Female', 'Other'];
 
-const allSpecialities = [
-  {key: 1, value: 'Strength Training'},
-  {key: 2, value: 'Yoga'},
-  {key: 3, value: 'Cardio Fitness'},
-  {key: 4, value: 'Weight Loss Coaching'},
-  {key: 5, value: 'Bodybuilding'},
-  {key: 6, value: 'Crossfit'},
-];
-
-const fitnessOptions = [
-  'Adventure Sports Coaching',
-  'Boxing',
-  'Core Strength Training',
-  'Cross-Fit',
-  'Cycling',
-  'Flexibility and Mobility Training',
-  'Functional Training',
-  'Group Fitness Classes',
-  'High-Intensity Interval Training (HIIT)',
-  'Kickboxing',
-  'Martial Arts',
-  'Nutrition Coaching',
-  'Pilates',
-  'Post-Rehabilitation Training',
-  'Yoga',
-];
-
-const goalOptions = [
-  'Body Composition',
-  'Enhanced Athletic Performance',
-  'Event Preparation',
-  'General Fitness',
-  'Healthy Aging',
-  'Improved Endurance',
-  'Mind-Body Connection',
-  'Muscle Gain',
-  'Posture Correction',
-  'Rehabilitation',
-  'Sport-Specific Training',
-  'Stress Relief',
-  'Weight Loss',
-];
-
-const EditProfile = () => {
+const UserEditProfile = () => {
   const auth = useSelector(state => state.Auth.data);
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
-  // ================= STATES =================
-  const [fullName, setFullName] = useState('');
-  const [bio, setBio] = useState('');
+  const [firstName, setFirstName] = useState('');
   const [gender, setGender] = useState('');
   const [dob, setDob] = useState('');
   const [address, setAddress] = useState('');
   const [coords, setCoords] = useState(null);
-  const [hourly, setHourly] = useState('');
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
-  const [pref, setPref] = useState('');
-  const [goal, setGoal] = useState('');
-  const [specialities, setSpecialities] = useState([]);
-  const [times, setTimes] = useState([]);
-  const [isAvailable, setIsAvailable] = useState(true);
+  const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState('1');
+  const [country, setCountry] = useState('US');
+  const [showPicker, setShowPicker] = useState(false);
 
   const [imageUri, setImageUri] = useState('');
   const [photoModal, setPhotoModal] = useState(false);
   const [genderModal, setGenderModal] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [prefModal, setPrefModal] = useState(false);
-  const [goalModal, setGoalModal] = useState(false);
-  const [timePicker, setTimePicker] = useState(false);
-
   const [tempDate, setTempDate] = useState(new Date());
-  const [tempTime, setTempTime] = useState(new Date());
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -120,23 +66,22 @@ const EditProfile = () => {
       const data = res.data.data;
 
       if (data) {
-        setFullName(data.fullName || '');
-        setBio(data.Bio || '');
+        setFirstName(data.fullName || '');
         setGender(data.gender || '');
         setDob(data.Dob || '');
         setAddress(data.Address || '');
         setImageUri(data.profileImage || '');
-        setHourly(data.Hourlyrate?.toString() || '');
-        setSpecialities(data.Speciality || []);
-        setTimes(data.Availiblity || []);
-        setIsAvailable(data.isAvailable ?? true);
-        setWeight(data.weight?.toString() || '');
-        setHeight(data.height?.toString() || '');
-        setPref(data.fitnessPreference || '');
-        setGoal(data.goal || '');
 
-        if (data.location?.coordinates) {
-          setCoords(data.location.coordinates);
+        if (data.phone) {
+          setCountryCode(data.phone.countryCode || '1');
+          setPhone(data.phone.number || '');
+        }
+
+        if (data.locationCoordinates?.lat && data.locationCoordinates?.lng) {
+          setCoords([
+            data.locationCoordinates.lng,
+            data.locationCoordinates.lat,
+          ]);
         }
       }
     } catch (error) {
@@ -172,6 +117,7 @@ const EditProfile = () => {
         position => {
           const {latitude, longitude} = position.coords;
           setCoords([longitude, latitude]);
+          console.log('coordinates:', longitude, latitude);
 
           fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
@@ -180,7 +126,6 @@ const EditProfile = () => {
             .then(data => {
               if (data?.display_name) {
                 setAddress(data.display_name);
-                showMessage({message: 'Location updated', type: 'success'});
               }
             })
             .catch(err => console.log('Reverse geocode error:', err));
@@ -201,39 +146,39 @@ const EditProfile = () => {
   };
 
   const handleSave = async () => {
-    if (!fullName.trim())
-      return showMessage({message: 'Full name is required', type: 'danger'});
+    if (!firstName.trim())
+      return showMessage({message: 'First name is required', type: 'danger'});
+
+    if (!gender)
+      return showMessage({message: 'Please select gender', type: 'danger'});
+
+    if (!phone.trim())
+      return showMessage({message: 'Phone number required', type: 'danger'});
+
+    if (!dob)
+      return showMessage({
+        message: 'Please select date of birth',
+        type: 'danger',
+      });
+
+    if (!address.trim())
+      return showMessage({message: 'Address is required', type: 'danger'});
 
     try {
       setSaving(true);
       const formData = new FormData();
 
-      formData.append('email', auth.email);
-      formData.append('fullName', fullName.trim());
-      formData.append('Bio', bio.trim());
+      formData.append('userId', auth._id);
+      formData.append('fullName', firstName.trim());
+      formData.append('countryCode', countryCode);
+      formData.append('phoneNumber', phone);
       formData.append('gender', gender);
-      formData.append('Dob', dob);
-      formData.append('Address', address.trim());
-      formData.append('Hourlyrate', hourly);
-      formData.append('weight', weight);
-      formData.append('height', height);
-      formData.append('fitnessPreference', pref);
-      formData.append('goal', goal);
-      formData.append('isAvailable', isAvailable);
-
-      specialities.forEach((item, index) => {
-        formData.append(`Speciality[${index}][key]`, item.key);
-        formData.append(`Speciality[${index}][value]`, item.value);
-      });
-
-      times.forEach((time, index) => {
-        formData.append(`Availiblity[${index}]`, time);
-      });
+      formData.append('dob', dob);
+      formData.append('location', address.trim());
 
       if (coords) {
-        formData.append('location[type]', 'Point');
-        formData.append('location[coordinates][0]', coords[0]);
-        formData.append('location[coordinates][1]', coords[1]);
+        formData.append('lat', coords[1]);
+        formData.append('lng', coords[0]);
       }
 
       if (imageUri && !imageUri.startsWith('http')) {
@@ -244,20 +189,14 @@ const EditProfile = () => {
         });
       }
 
-      const res = await axiosBaseURL.post('/trainer/update', formData, {
+      const res = await axiosBaseURL.post('/user/completeProfile', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${auth.token}`,
         },
       });
 
-      dispatch(
-        updateLogin({
-          ...res.data.data,
-          profileImage: res.data.data.profileImage || imageUri,
-        }),
-      );
-
+      dispatch(updateLogin(res.data.data));
       showMessage({message: 'Profile updated successfully', type: 'success'});
       navigation.goBack();
     } catch (error) {
@@ -267,32 +206,6 @@ const EditProfile = () => {
       setSaving(false);
     }
   };
-
-  const SelectModal = ({visible, data, onSelect, onClose, title}) => (
-    <Modal transparent visible={visible} animationType="slide">
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>{title}</Text>
-            <FlatList
-              data={data}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({item}) => (
-                <TouchableOpacity
-                  style={styles.modalItem}
-                  onPress={() => {
-                    onSelect(item);
-                    onClose();
-                  }}>
-                  <Text style={styles.modalItemText}>{item}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
-  );
 
   if (loading) {
     return (
@@ -329,29 +242,20 @@ const EditProfile = () => {
             </TouchableOpacity>
           </View>
           <View style={styles.profileTextContainer}>
-            <Text style={styles.uploadTitle}>{fullName || 'Trainer'}</Text>
+            <Text style={styles.uploadTitle}>{firstName || 'User'}</Text>
             <Text style={styles.uploadSubtitle}>
-              Update your professional profile
+              Update your profile information
             </Text>
           </View>
         </View>
 
+        <Text style={styles.label}>Full Name</Text>
         <TextInput
           style={styles.input}
           placeholder="Enter your full name"
           placeholderTextColor="#777"
-          value={fullName}
-          onChangeText={setFullName}
-        />
-
-        <Text style={styles.label}>Bio</Text>
-        <TextInput
-          style={[styles.input, {height: 100, textAlignVertical: 'top'}]}
-          placeholder="Tell something about your training style..."
-          placeholderTextColor="#777"
-          multiline
-          value={bio}
-          onChangeText={setBio}
+          value={firstName}
+          onChangeText={setFirstName}
         />
 
         <View style={styles.row}>
@@ -374,149 +278,46 @@ const EditProfile = () => {
           </View>
         </View>
 
-        <View style={styles.row}>
-          <View style={{flex: 1}}>
-            <Text style={styles.label}>Hourly Rate ($)</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="0.00"
-              placeholderTextColor="#777"
-              keyboardType="numeric"
-              value={hourly}
-              onChangeText={setHourly}
+        <Text style={styles.label}>Phone</Text>
+        <View style={styles.phoneContainer}>
+          <TouchableOpacity
+            style={styles.countryPicker}
+            onPress={() => setShowPicker(true)}>
+            <CountryPicker
+              countryCode={country}
+              withFlag
+              withCallingCode
+              withFilter
+              withModal
+              visible={showPicker}
+              onClose={() => setShowPicker(false)}
+              onSelect={c => {
+                setCountry(c.cca2);
+                setCountryCode(c.callingCode[0]);
+                setShowPicker(false);
+              }}
             />
-          </View>
-          <View style={{width: 20}} />
-          <View style={{flex: 1}}>
-            <Text style={styles.label}>Availability</Text>
-            <View style={styles.switchContainer}>
-              <Text style={{color: '#fff'}}>{isAvailable ? 'On' : 'Off'}</Text>
-              <Switch
-                value={isAvailable}
-                onValueChange={setIsAvailable}
-                trackColor={{false: '#444', true: '#9FED3A'}}
-                thumbColor={isAvailable ? '#000' : '#ccc'}
-              />
-            </View>
-          </View>
-        </View>
-
-        <Text style={styles.label}>Specialities</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{marginBottom: 10}}>
-          {allSpecialities.map(item => {
-            const selected = specialities.some(s => s.key === item.key);
-            return (
-              <TouchableOpacity
-                key={item.key}
-                style={[
-                  styles.chip,
-                  {
-                    backgroundColor: selected ? '#9FED3A' : '#1C1C1E',
-                    borderColor: selected ? '#9FED3A' : '#2C2C2E',
-                  },
-                ]}
-                onPress={() =>
-                  selected
-                    ? setSpecialities(prev =>
-                        prev.filter(s => s.key !== item.key),
-                      )
-                    : setSpecialities(prev => [...prev, item])
-                }>
-                <Text
-                  style={{
-                    color: selected ? '#000' : '#9FED3A',
-                    fontWeight: 'bold',
-                  }}>
-                  {item.value}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-
-        <View style={styles.row}>
-          <View style={{flex: 1}}>
-            <Text style={styles.label}>Weight (lbs)</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="0"
-              placeholderTextColor="#777"
-              keyboardType="numeric"
-              value={weight}
-              onChangeText={setWeight}
-            />
-          </View>
-          <View style={{width: 20}} />
-          <View style={{flex: 1}}>
-            <Text style={styles.label}>Height (ft)</Text>
-            <TextInput
-              style={styles.input}
-              placeholder={'0\'0"'}
-              placeholderTextColor="#777"
-              value={height}
-              onChangeText={setHeight}
-            />
-          </View>
-        </View>
-
-        <Text style={styles.label}>Preference</Text>
-        <TouchableOpacity
-          style={styles.input}
-          onPress={() => setPrefModal(true)}>
-          <Text style={{color: '#fff'}}>{pref || 'Select Preference'}</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.label}>Goal</Text>
-        <TouchableOpacity
-          style={styles.input}
-          onPress={() => setGoalModal(true)}>
-          <Text style={{color: '#fff'}}>{goal || 'Select Goal'}</Text>
-        </TouchableOpacity>
-
-        <View style={styles.locationHeader}>
-          <Text style={styles.label}>Shift Times</Text>
-          <TouchableOpacity onPress={() => setTimePicker(true)}>
-            <Text style={styles.getLocationText}>+ Add Time</Text>
+            <Text style={{color: '#fff', marginLeft: 5}}>+{countryCode}</Text>
           </TouchableOpacity>
-        </View>
-        <View style={styles.timesContainer}>
-          {times.length === 0 ? (
-            <Text style={{color: '#555', fontStyle: 'italic'}}>
-              No times added
-            </Text>
-          ) : (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {times.map((time, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.timeChip}
-                  onPress={() =>
-                    setTimes(prev => prev.filter((_, i) => i !== index))
-                  }>
-                  <Text style={{color: '#000', fontWeight: 'bold'}}>
-                    {time}
-                  </Text>
-                  <Text style={{color: '#000', marginLeft: 5, fontSize: 10}}>
-                    ✕
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          )}
+          <TextInput
+            style={styles.phoneInput}
+            keyboardType="phone-pad"
+            placeholder="Phone Number"
+            placeholderTextColor="#777"
+            value={phone}
+            onChangeText={setPhone}
+          />
         </View>
 
         <View style={styles.locationHeader}>
-          <Text style={styles.label}>Location</Text>
+          <Text style={styles.label}>Address</Text>
           <TouchableOpacity onPress={getCurrentLocation}>
             <Text style={styles.getLocationText}>Get Current Location</Text>
           </TouchableOpacity>
         </View>
         <TextInput
           style={styles.input}
-          placeholder="Enter your professional address"
+          placeholder="Enter your full address"
           placeholderTextColor="#777"
           value={address}
           onChangeText={setAddress}
@@ -535,7 +336,7 @@ const EditProfile = () => {
         <View style={{height: 40}} />
       </ScrollView>
 
-      {/* MODALS */}
+      {/* PHOTO MODAL */}
       <Modal transparent visible={photoModal} animationType="slide">
         <TouchableWithoutFeedback onPress={() => setPhotoModal(false)}>
           <View style={styles.modalOverlay}>
@@ -548,8 +349,8 @@ const EditProfile = () => {
                     cropping: true,
                     width: 500,
                     height: 500,
-                  }).then(img => {
-                    uploadImage(img);
+                  }).then(image => {
+                    uploadImage(image);
                     setPhotoModal(false);
                   })
                 }>
@@ -562,8 +363,8 @@ const EditProfile = () => {
                     cropping: true,
                     width: 500,
                     height: 500,
-                  }).then(img => {
-                    uploadImage(img);
+                  }).then(image => {
+                    uploadImage(image);
                     setPhotoModal(false);
                   })
                 }>
@@ -581,6 +382,7 @@ const EditProfile = () => {
         </TouchableWithoutFeedback>
       </Modal>
 
+      {/* GENDER MODAL */}
       <Modal transparent visible={genderModal} animationType="slide">
         <TouchableWithoutFeedback onPress={() => setGenderModal(false)}>
           <View style={styles.modalOverlay}>
@@ -607,58 +409,49 @@ const EditProfile = () => {
         </TouchableWithoutFeedback>
       </Modal>
 
-      <SelectModal
-        visible={prefModal}
-        title="Select Preference"
-        data={fitnessOptions}
-        onSelect={setPref}
-        onClose={() => setPrefModal(false)}
-      />
-
-      <SelectModal
-        visible={goalModal}
-        title="Select Goal"
-        data={goalOptions}
-        onSelect={setGoal}
-        onClose={() => setGoalModal(false)}
-      />
-
       {/* DATE PICKER */}
-      {showDatePicker && (
-        <DateTimePicker
-          value={tempDate}
-          mode="date"
-          maximumDate={new Date()}
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={(event, selectedDate) => {
-            setShowDatePicker(false);
-            if (selectedDate) setDob(moment(selectedDate).format('DD/MM/YYYY'));
-          }}
-        />
-      )}
-
-      {/* TIME PICKER */}
-      {timePicker && (
-        <DateTimePicker
-          value={tempTime}
-          mode="time"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={(event, selectedTime) => {
-            setTimePicker(false);
-            if (selectedTime) {
-              const formatted = moment(selectedTime).format('hh:mm A');
-              if (!times.includes(formatted)) {
-                setTimes(prev => [...prev, formatted]);
-              }
-            }
-          }}
-        />
-      )}
+      {showDatePicker &&
+        (Platform.OS === 'android' ? (
+          <DateTimePicker
+            value={tempDate}
+            mode="date"
+            maximumDate={new Date()}
+            onChange={(event, selectedDate) => {
+              setShowDatePicker(false);
+              if (selectedDate)
+                setDob(moment(selectedDate).format('DD/MM/YYYY'));
+            }}
+          />
+        ) : (
+          <Modal transparent animationType="slide" visible={showDatePicker}>
+            <View style={styles.iosDatePickerOverlay}>
+              <View style={styles.iosDatePickerSheet}>
+                <DateTimePicker
+                  value={tempDate}
+                  mode="date"
+                  display="spinner"
+                  maximumDate={new Date()}
+                  onChange={(e, selectedDate) => {
+                    if (selectedDate) setTempDate(selectedDate);
+                  }}
+                />
+                <TouchableOpacity
+                  style={styles.okBtn}
+                  onPress={() => {
+                    setDob(moment(tempDate).format('DD/MM/YYYY'));
+                    setShowDatePicker(false);
+                  }}>
+                  <Text style={{color: '#9FED3A', fontWeight: 'bold'}}>OK</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        ))}
     </WrapperContainer>
   );
 };
 
-export default EditProfile;
+export default UserEditProfile;
 
 const styles = StyleSheet.create({
   loadingContainer: {
@@ -745,45 +538,32 @@ const styles = StyleSheet.create({
     backgroundColor: '#1C1C1E',
     fontFamily: FontFamily.Regular,
     fontSize: 15,
-    justifyContent: 'center',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  switchContainer: {
+  phoneContainer: {
     flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: '#2C2C2E',
+    borderRadius: 15,
+    backgroundColor: '#1C1C1E',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#1C1C1E',
-    borderRadius: 15,
-    paddingHorizontal: 14,
-    height: 52,
-    borderWidth: 1,
-    borderColor: '#2C2C2E',
   },
-  chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 10,
-    borderWidth: 1,
-  },
-  timesContainer: {
-    backgroundColor: '#1C1C1E',
-    padding: 15,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: '#2C2C2E',
-  },
-  timeChip: {
-    backgroundColor: '#9FED3A',
+  countryPicker: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    marginRight: 10,
+    borderRightWidth: 1,
+    borderRightColor: '#2C2C2E',
+  },
+  phoneInput: {
+    flex: 1,
+    padding: 14,
+    color: '#fff',
+    fontFamily: FontFamily.Regular,
+    fontSize: 15,
   },
   locationHeader: {
     flexDirection: 'row',
@@ -826,7 +606,6 @@ const styles = StyleSheet.create({
     padding: 20,
     borderWidth: 1,
     borderColor: '#2C2C2E',
-    maxHeight: '70%',
   },
   modalTitle: {
     color: '#fff',
@@ -845,5 +624,23 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontFamily: FontFamily.Medium,
+  },
+  iosDatePickerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  iosDatePickerSheet: {
+    backgroundColor: '#1C1C1E',
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    padding: 20,
+  },
+  okBtn: {
+    backgroundColor: '#2A2A2A',
+    padding: 15,
+    borderRadius: 15,
+    alignItems: 'center',
+    marginTop: 10,
   },
 });

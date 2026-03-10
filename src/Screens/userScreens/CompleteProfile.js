@@ -30,7 +30,6 @@ const CompleteUserProfile = ({navigation}) => {
   const dispatch = useDispatch();
 
   const [firstName, setFirstName] = useState('');
-  const [bio, setBio] = useState('');
   const [gender, setGender] = useState('');
   const [dob, setDob] = useState('');
   const [address, setAddress] = useState('');
@@ -60,7 +59,6 @@ const CompleteUserProfile = ({navigation}) => {
       setPhone(auth.phone.number);
     }
 
-    if (auth.bio) setBio(auth.bio);
     if (auth.gender) setGender(auth.gender);
     if (auth.Dob) setDob(auth.Dob);
     if (auth.Address) setAddress(auth.Address);
@@ -122,12 +120,6 @@ const CompleteUserProfile = ({navigation}) => {
     if (!firstName.trim())
       return showMessage({message: 'First name is required', type: 'danger'});
 
-    if (firstName.trim().length < 2)
-      return showMessage({message: 'First name too short', type: 'danger'});
-
-    if (!bio.trim())
-      return showMessage({message: 'Bio is required', type: 'danger'});
-
     if (!gender)
       return showMessage({message: 'Please select gender', type: 'danger'});
 
@@ -165,7 +157,6 @@ const CompleteUserProfile = ({navigation}) => {
       formData.append('fullName', firstName.trim());
       formData.append('countryCode', countryCode);
       formData.append('phoneNumber', phone);
-      formData.append('bio', bio.trim());
       formData.append('gender', gender);
       formData.append('dob', dob);
       formData.append('location', address.trim());
@@ -243,17 +234,6 @@ const CompleteUserProfile = ({navigation}) => {
           placeholderTextColor="#777"
           value={firstName}
           onChangeText={setFirstName}
-        />
-
-        {/* BIO */}
-        <Text style={styles.label}>Bio</Text>
-        <TextInput
-          style={[styles.input, {height: 80}]}
-          placeholder="Tell something about yourself..."
-          placeholderTextColor="#777"
-          multiline
-          value={bio}
-          onChangeText={setBio}
         />
 
         {/* GENDER */}

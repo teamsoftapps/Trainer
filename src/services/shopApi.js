@@ -24,4 +24,24 @@ export const ShopAPI = {
     });
     return res.data;
   },
+
+  // ✅ pay for an existing unpaid order
+  payForOrder: async (token, orderId) => {
+    const res = await axiosBaseURL.post(
+      `/shop/pay-order/${orderId}`,
+      {},
+      {headers: {Authorization: `Bearer ${token}`}},
+    );
+    return res.data;
+  },
+
+  // ✅ cancel order
+  cancelOrder: async (token, orderId) => {
+    const res = await axiosBaseURL.patch(
+      `/shop/${orderId}/status`,
+      {status: 'cancelled'},
+      {headers: {Authorization: `Bearer ${token}`}},
+    );
+    return res.data;
+  },
 };

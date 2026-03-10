@@ -1,4 +1,6 @@
 PODS:
+  - AgoraIrisRTC_iOS2 (4.6.2-build.1)
+  - AgoraVideo_Special_iOS (4.6.2.70)
   - AppAuth (2.0.0):
     - AppAuth/Core (= 2.0.0)
     - AppAuth/ExternalUserAgent (= 2.0.0)
@@ -1076,6 +1078,29 @@ PODS:
   - React-Mapbuffer (0.74.2):
     - glog
     - React-debug
+  - react-native-agora (4.6.2):
+    - AgoraIrisRTC_iOS2 (= 4.6.2-build.1)
+    - AgoraVideo_Special_iOS (= 4.6.2.70)
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-cameraroll (7.8.3):
     - DoubleConversion
     - glog
@@ -1650,6 +1675,8 @@ PODS:
     - RNNotifee/NotifeeCore (= 9.1.1)
   - RNNotifee/NotifeeCore (9.1.1):
     - React-Core
+  - RNPermissions (5.5.1):
+    - React-Core
   - RNReanimated (3.15.3):
     - DoubleConversion
     - glog
@@ -1841,6 +1868,7 @@ DEPENDENCIES:
   - React-jsitracing (from `../node_modules/react-native/ReactCommon/hermes/executor/`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
+  - react-native-agora (from `../node_modules/react-native-agora`)
   - "react-native-cameraroll (from `../node_modules/@react-native-camera-roll/camera-roll`)"
   - react-native-chat-sdk (from `../node_modules/react-native-agora-chat`)
   - react-native-create-thumbnail (from `../node_modules/react-native-create-thumbnail`)
@@ -1890,6 +1918,7 @@ DEPENDENCIES:
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNImageCropPicker (from `../node_modules/react-native-image-crop-picker`)
   - "RNNotifee (from `../node_modules/@notifee/react-native`)"
+  - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
@@ -1899,6 +1928,8 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - AgoraIrisRTC_iOS2
+    - AgoraVideo_Special_iOS
     - AppAuth
     - AppCheckCore
     - Firebase
@@ -2004,6 +2035,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/logger"
   React-Mapbuffer:
     :path: "../node_modules/react-native/ReactCommon"
+  react-native-agora:
+    :path: "../node_modules/react-native-agora"
   react-native-cameraroll:
     :path: "../node_modules/@react-native-camera-roll/camera-roll"
   react-native-chat-sdk:
@@ -2102,6 +2135,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-image-crop-picker"
   RNNotifee:
     :path: "../node_modules/@notifee/react-native"
+  RNPermissions:
+    :path: "../node_modules/react-native-permissions"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -2116,6 +2151,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  AgoraIrisRTC_iOS2: 13996c3c78134da357634f6a1a12741436658886
+  AgoraVideo_Special_iOS: 9bd42c487f936f4d335d5630e2632f0b08e214f5
   AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
@@ -2173,6 +2210,7 @@ SPEC CHECKSUMS:
   React-jsitracing: d56e7d2c109265f1c5cef24cc4a9220a71c396e5
   React-logger: 70e002e04cc56ff5c12157537405d1644c050703
   React-Mapbuffer: 39d399e4d1115ba93442df1470e2ba8baef4b569
+  react-native-agora: b0778116aa5cf06b6570510aeba570327c966eb2
   react-native-cameraroll: 4c1424f786b73653584299e46aaa1f26f25a281e
   react-native-chat-sdk: 4b07abfcb1521ed848a41281ab23b32ee32adfcc
   react-native-create-thumbnail: c15cedc37f3822777d44e6035be041f7961341ea
@@ -2223,6 +2261,7 @@ SPEC CHECKSUMS:
   RNGoogleSignin: 5782dd7dad559608a06f3c6b1d4142c395fb5308
   RNImageCropPicker: d14a08134d1b5bc2d5f29a12ce3ac1d402dd2389
   RNNotifee: 52a019f99f8f878e3037a8ec33725bb232edef95
+  RNPermissions: 450c904d8ff731c4a5c504cf65a200f97d90fd93
   RNReanimated: 8b46a5efa4b1c67dd7fdfeaf382f674e2bc11d73
   RNScreens: fcbb53e181aa978016abbb9012439364d4bdda05
   RNSVG: 38b927ba26d717c85522fbf9a04b87dcd2d8227a
@@ -2242,6 +2281,6 @@ SPEC CHECKSUMS:
   TOCropViewController: 80b8985ad794298fb69d3341de183f33d1853654
   Yoga: 9ad2c02dbd9811bb5a35fe23081cb0f5d5a3f9dd
 
-PODFILE CHECKSUM: d41e6f518c687661f33e001d43f577a7f5176acf
+PODFILE CHECKSUM: c0713fb387d0fccc96c54d0d121399f9851d1826
 
 COCOAPODS: 1.16.2

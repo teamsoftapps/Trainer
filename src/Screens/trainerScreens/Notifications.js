@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
 import Header from '../../Components/Header';
 import {
@@ -17,12 +17,12 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { Images } from '../../utils/Images';
-import { useNavigation } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
+import {Images} from '../../utils/Images';
+import {useNavigation} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
 import axiosBaseURL from '../../services/AxiosBaseURL';
-import { TrainerBookingAPI } from '../../services/trainerBookingApi';
-import { getMessaging } from '@react-native-firebase/messaging';
+import {TrainerBookingAPI} from '../../services/trainerBookingApi';
+import {getMessaging} from '@react-native-firebase/messaging';
 import moment from 'moment';
 
 const firebaseMessaging = getMessaging();
@@ -72,7 +72,7 @@ const Notifications = () => {
   const markAllRead = async () => {
     try {
       await axiosBaseURL.patch('/notification/read-all');
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setNotifications(prev => prev.map(n => ({...n, isRead: true})));
     } catch (err) {
       console.log('Mark all read error:', err?.message);
     }
@@ -82,15 +82,26 @@ const Notifications = () => {
   const handleAccept = async (bookingId, notifId) => {
     try {
       setActionLoading(notifId);
-      await TrainerBookingAPI.updateStatus(authData?.token, bookingId, 'confirmed');
+      await TrainerBookingAPI.updateStatus(
+        authData?.token,
+        bookingId,
+        'confirmed',
+      );
       // Mark notification as read in DB so buttons won't reappear
-      try { await axiosBaseURL.patch(`/notification/${notifId}/read`); } catch (_) { }
+      try {
+        await axiosBaseURL.patch(`/notification/${notifId}/read`);
+      } catch (_) {}
       Alert.alert('Success', 'Booking confirmed!');
       // Update notification locally
       setNotifications(prev =>
         prev.map(n =>
           n._id === notifId
-            ? { ...n, title: 'Booking Confirmed', type: 'booking_confirmed', isRead: true }
+            ? {
+                ...n,
+                title: 'Booking Confirmed',
+                type: 'booking_confirmed',
+                isRead: true,
+              }
             : n,
         ),
       );
@@ -103,38 +114,56 @@ const Notifications = () => {
 
   // ✅ Inline Reject
   const handleReject = async (bookingId, notifId) => {
-    Alert.alert('Decline Booking', 'Are you sure you want to decline this booking?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Decline',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            setActionLoading(notifId);
-            await TrainerBookingAPI.updateStatus(authData?.token, bookingId, 'rejected');
-            // Mark notification as read in DB
-            try { await axiosBaseURL.patch(`/notification/${notifId}/read`); } catch (_) { }
-            Alert.alert('Done', 'Booking declined.');
-            setNotifications(prev =>
-              prev.map(n =>
-                n._id === notifId
-                  ? { ...n, title: 'Booking Declined', type: 'booking_rejected', isRead: true }
-                  : n,
-              ),
-            );
-          } catch (err) {
-            Alert.alert('Error', err?.response?.data?.message || 'Failed to decline');
-          } finally {
-            setActionLoading(null);
-          }
+    Alert.alert(
+      'Decline Booking',
+      'Are you sure you want to decline this booking?',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Decline',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setActionLoading(notifId);
+              await TrainerBookingAPI.updateStatus(
+                authData?.token,
+                bookingId,
+                'rejected',
+              );
+              // Mark notification as read in DB
+              try {
+                await axiosBaseURL.patch(`/notification/${notifId}/read`);
+              } catch (_) {}
+              Alert.alert('Done', 'Booking declined.');
+              setNotifications(prev =>
+                prev.map(n =>
+                  n._id === notifId
+                    ? {
+                        ...n,
+                        title: 'Booking Declined',
+                        type: 'booking_rejected',
+                        isRead: true,
+                      }
+                    : n,
+                ),
+              );
+            } catch (err) {
+              Alert.alert(
+                'Error',
+                err?.response?.data?.message || 'Failed to decline',
+              );
+            } finally {
+              setActionLoading(null);
+            }
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   const getTimeAgo = date => moment(date).fromNow();
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({item}) => {
     const isNewBooking = item.type === 'booking_new' && !item.isRead;
     const isActioning = actionLoading === item._id;
 
@@ -142,7 +171,7 @@ const Notifications = () => {
       <View style={[styles.card, !item.isRead && styles.unread]}>
         <View style={styles.cardInner}>
           <View style={styles.topRow}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
               {!item.isRead && <View style={styles.dot} />}
               <Text style={styles.heading} numberOfLines={1}>
                 {item.title}
@@ -154,7 +183,8 @@ const Notifications = () => {
             {item.body}
           </Text>
           <View style={styles.actionRow}>
-            {isNewBooking ? (
+            {item.type === 'NEW_FOLLOWER' ||
+            item.type === 'user_follow' ? null : isNewBooking ? (
               isActioning ? (
                 <ActivityIndicator size="small" color="#9BE639" />
               ) : (
@@ -200,13 +230,13 @@ const Notifications = () => {
   };
 
   return (
-    <WrapperContainer style={{ backgroundColor: '#181818' }}>
+    <WrapperContainer style={{backgroundColor: '#181818'}}>
       <Header
         onPress={() => navigation.goBack()}
         rightView={
           <Image
             source={Images.logo}
-            style={{ height: responsiveHeight(5), width: responsiveWidth(10) }}
+            style={{height: responsiveHeight(5), width: responsiveWidth(10)}}
           />
         }
       />
@@ -233,7 +263,7 @@ const Notifications = () => {
           keyExtractor={item => item._id}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: responsiveHeight(4) }}
+          contentContainerStyle={{paddingBottom: responsiveHeight(4)}}
         />
       )}
     </WrapperContainer>

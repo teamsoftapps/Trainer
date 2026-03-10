@@ -293,23 +293,23 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import React, { useCallback, useState } from 'react';
+import React, {useCallback, useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { CameraRoll } from '@react-native-camera-roll/camera-roll';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import {CameraRoll} from '@react-native-camera-roll/camera-roll';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import ImageCropPicker from 'react-native-image-crop-picker';
-import { showMessage } from 'react-native-flash-message';
-import { uploadStory } from '../../services/mediaService';
-import { createThumbnail } from 'react-native-create-thumbnail';
+import {showMessage} from 'react-native-flash-message';
+import {uploadStory} from '../../services/mediaService';
+import {createThumbnail} from 'react-native-create-thumbnail';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 
-const formats = [{ value: 'Story' }, { value: 'Post' }];
+const formats = [{value: 'Story'}, {value: 'Post'}];
 
 const Story = () => {
   const navigation = useNavigation();
@@ -363,15 +363,15 @@ const Story = () => {
   const handleUpload = async (file, mime) => {
     try {
       if (!selectedIndex) {
-        showMessage({ message: 'Select Story or Post first', type: 'info' });
+        showMessage({message: 'Select Story or Post first', type: 'info'});
         return;
       }
 
       let thumbnailFile = null;
 
       if (mime?.includes('video')) {
-        const thumb = await createThumbnail({ url: file.path });
-        thumbnailFile = { path: thumb.path };
+        const thumb = await createThumbnail({url: file.path});
+        thumbnailFile = {path: thumb.path};
       }
 
       if (selectedIndex === 'Post') {
@@ -387,11 +387,11 @@ const Story = () => {
 
       await uploadStory(file, thumbnailFile, setProgress);
 
-      showMessage({ message: 'Story uploaded successfully!', type: 'success' });
+      showMessage({message: 'Story uploaded successfully!', type: 'success'});
       navigation.goBack();
     } catch (err) {
       console.log(err);
-      showMessage({ message: 'Upload failed', type: 'danger' });
+      showMessage({message: 'Upload failed', type: 'danger'});
     } finally {
       setLoading(false);
     }
@@ -417,7 +417,7 @@ const Story = () => {
       await handleUpload(file, file.mime);
     } catch (e) {
       if (e?.code !== 'E_PICKER_CANCELLED') {
-        showMessage({ message: 'Camera error', type: 'danger' });
+        showMessage({message: 'Camera error', type: 'danger'});
       }
     }
   };
@@ -439,7 +439,7 @@ const Story = () => {
       await handleUpload(file, file.mime);
     } catch (e) {
       if (e?.code !== 'E_PICKER_CANCELLED') {
-        showMessage({ message: 'Gallery error', type: 'danger' });
+        showMessage({message: 'Gallery error', type: 'danger'});
       }
     }
   };
@@ -450,9 +450,13 @@ const Story = () => {
         <View style={styles.loaderOverlay}>
           <View style={styles.glassCard}>
             <ActivityIndicator size="large" color="#9FED3A" />
-            <Text style={styles.uploadingText}>Uploading {selectedIndex}...</Text>
+            <Text style={styles.uploadingText}>
+              Uploading {selectedIndex}...
+            </Text>
             <View style={styles.progressTrack}>
-              <View style={[styles.progressIndicator, { width: `${progress}%` }]} />
+              <View
+                style={[styles.progressIndicator, {width: `${progress}%`}]}
+              />
             </View>
             <Text style={styles.progressPercent}>{progress}%</Text>
           </View>
@@ -461,25 +465,31 @@ const Story = () => {
 
       {/* HEADER */}
       <View style={styles.topHeader}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backBtn}>
           <Icon name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Add Media</Text>
-        <View style={{ width: 40 }} />
+        <View style={{width: 40}} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* QUICK ACTIONS */}
         <View style={styles.quickActions}>
-          <TouchableOpacity style={styles.actionBtn} onPress={() => openCamera('photo')}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => openCamera('photo')}>
             <View style={styles.iconCircle}>
               <Icon name="camera" size={26} color="#9FED3A" />
             </View>
             <Text style={styles.actionLabel}>Camera</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionBtn} onPress={() => openPicker('video')}>
-            <View style={[styles.iconCircle, { backgroundColor: '#252525' }]}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => openPicker('video')}>
+            <View style={[styles.iconCircle, {backgroundColor: '#252525'}]}>
               <Icon name="videocam" size={26} color="#9FED3A" />
             </View>
             <Text style={styles.actionLabel}>Videos</Text>
@@ -498,12 +508,15 @@ const Story = () => {
                 const uri = item.node.image.uri;
                 const isVideo = item.node.type?.includes('video');
                 handleUpload(
-                  { path: uri, mime: isVideo ? 'video/mp4' : 'image/jpeg' },
+                  {path: uri, mime: isVideo ? 'video/mp4' : 'image/jpeg'},
                   isVideo ? 'video/mp4' : 'image/jpeg',
                 );
               }}
               style={styles.gridItem}>
-              <Image source={{ uri: item.node.image.uri }} style={styles.gridImage} />
+              <Image
+                source={{uri: item.node.image.uri}}
+                style={styles.gridImage}
+              />
               {item.node.type?.includes('video') && (
                 <View style={styles.videoBadge}>
                   <Icon name="play" size={14} color="#fff" />
@@ -512,7 +525,7 @@ const Story = () => {
             </TouchableOpacity>
           ))}
         </View>
-        <View style={{ height: 100 }} />
+        <View style={{height: 100}} />
       </ScrollView>
 
       {/* BOTTOM SELECTOR */}
@@ -615,7 +628,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 1,
   },
   gridItem: {
-    width: responsiveWidth(33.3) - 2,
+    width: responsiveWidth(33) - 2,
     height: responsiveWidth(40),
     margin: 1,
     borderRadius: 8,

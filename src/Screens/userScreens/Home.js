@@ -11,28 +11,28 @@ import {
   FlatList,
   Dimensions,
 } from 'react-native';
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, {useState, useCallback, useEffect, useRef} from 'react';
 import {
   responsiveHeight,
   responsiveWidth,
   responsiveFontSize,
 } from 'react-native-responsive-dimensions';
 import WrapperContainer from '../../Components/Wrapper';
-import { FontFamily, Images } from '../../utils/Images';
-import { AirbnbRating } from 'react-native-ratings';
+import {FontFamily, Images} from '../../utils/Images';
+import {AirbnbRating} from 'react-native-ratings';
 import LinearGradient from 'react-native-linear-gradient';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { useSelector, useDispatch } from 'react-redux';
-import { FlashList } from '@shopify/flash-list';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useSelector, useDispatch} from 'react-redux';
+import {FlashList} from '@shopify/flash-list';
 import axiosBaseURL from '../../services/AxiosBaseURL';
-import { useGetTrainersQuery } from '../../store/Apis/Post';
-import { SaveLogedInUser } from '../../store/Slices/db_ID';
-import { followTrainer, unfollowTrainer } from '../../store/Slices/follow';
-import { saveBookings } from '../../store/Slices/trainerBookings';
+import {useGetTrainersQuery} from '../../store/Apis/Post';
+import {SaveLogedInUser} from '../../store/Slices/db_ID';
+import {followTrainer, unfollowTrainer} from '../../store/Slices/follow';
+import {saveBookings} from '../../store/Slices/trainerBookings';
 import followingHook from '../../Hooks/Follow';
 import StoryRing from '../../Components/StoryRing';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { getMessaging } from '@react-native-firebase/messaging';
+import {getMessaging} from '@react-native-firebase/messaging';
 import {
   getFcmToken,
   saveFcmTokenToBackend,
@@ -42,30 +42,15 @@ import {
 
 const firebaseMessaging = getMessaging();
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const adsData = [
-  {
-    id: '1',
-    title: 'Fuel Your Workout',
-    description: 'Discover premium supplements for better performance.',
-    buttonText: 'Learn More',
-    image: require('../../assets/Images/add1.png'),
-  },
-  {
-    id: '2',
-    title: 'Boost Recovery Now',
-    description: 'High-quality protein for faster muscle repair.',
-    buttonText: 'Shop Now',
-    image: require('../../assets/Images/add2.png'),
-  },
-];
+const {width: SCREEN_WIDTH} = Dimensions.get('window');
+// Hardcoded ads removed - now fetched dynamically
 
 const Home = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [unreadTotal, setUnreadTotal] = useState(0);
 
-  const { data, isLoading, isFetching, refetch } = useGetTrainersQuery(
+  const {data, isLoading, isFetching, refetch} = useGetTrainersQuery(
     undefined,
     {
       refetchOnMountOrArgChange: true,
@@ -88,22 +73,52 @@ const Home = () => {
     useCallback(() => {
       fetchUnreadTotal();
       fetchUnreadNotifCount();
-    }, [authData?._id]),
+      fetchBlockedUsers();
+      fetchAds();
+    }, [authData?._id, fetchAds]),
   );
 
   const authData = useSelector(state => state?.Auth?.data);
   const token = authData?.token;
   const followedTrainers = useSelector(state => state?.follow?.follow || []);
 
-  const { isFollow, unFollow, loading: loadingFollow } = followingHook();
+  const {isFollow, unFollow, loading: loadingFollow} = followingHook();
 
   const [storiesData, setStoriesData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [seenUsers, setSeenUsers] = useState(new Set());
 
   const flatListRef = useRef(null);
-  const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [blockedIds, setBlockedIds] = useState([]);
+  const [adsData, setAdsData] = useState([]);
+  const [currentAdIndex, setCurrentAdIndex] = useState(0);
+
+  const fetchAds = useCallback(async () => {
+    try {
+      const res = await axiosBaseURL.get('/admin/ads');
+      if (res.data?.success) {
+        const activeAds = (res.data.ads || []).filter(ad => ad.isActive);
+        setAdsData(activeAds);
+      }
+    } catch (err) {
+      console.log('Fetch ads error:', err?.message);
+    }
+  }, []);
+
+  const fetchBlockedUsers = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await axiosBaseURL.get('/user/blocked', {
+        headers: {Authorization: `Bearer ${token}`},
+      });
+      if (res.data?.status) {
+        setBlockedIds(res.data.data.map(user => user._id));
+      }
+    } catch (err) {
+      console.log('Fetch blocked users error:', err?.message);
+    }
+  }, [token]);
 
   const fetchUnreadNotifCount = useCallback(async () => {
     try {
@@ -137,6 +152,7 @@ const Home = () => {
 
     syncFcmToken();
     fetchUnreadNotifCount();
+    fetchBlockedUsers();
 
     const unsubscribe = firebaseMessaging.onMessage(async remoteMessage => {
       console.log('Foreground Message (User):', remoteMessage);
@@ -145,15 +161,17 @@ const Home = () => {
     });
 
     const interval = setInterval(() => {
-      const nextIndex = (currentAdIndex + 1) % adsData.length;
+      if (adsData.length > 0) {
+        const nextIndex = (currentAdIndex + 1) % adsData.length;
 
-      flatListRef.current?.scrollToIndex({
-        index: nextIndex,
-        animated: true,
-        viewPosition: 0,
-      });
+        flatListRef.current?.scrollToIndex({
+          index: nextIndex,
+          animated: true,
+          viewPosition: 0,
+        });
 
-      setCurrentAdIndex(nextIndex);
+        setCurrentAdIndex(nextIndex);
+      }
     }, 4500);
 
     return () => {
@@ -189,7 +207,9 @@ const Home = () => {
     const loadStories = async () => {
       try {
         const followedIds = followedTrainers || [];
-        const followedTrainersList = data.data.filter(t => followedIds.includes(t._id));
+        const followedTrainersList = data.data.filter(t =>
+          followedIds.includes(t._id),
+        );
 
         if (!followedTrainersList.length) {
           setStoriesData([]);
@@ -199,7 +219,7 @@ const Home = () => {
         const requests = followedTrainersList.map(trainer =>
           axiosBaseURL.get(`/trainer/stories/${trainer._id}`).catch(err => {
             console.log(`Stories failed for ${trainer._id}:`, err.message);
-            return { data: { data: [] } };
+            return {data: {data: []}};
           }),
         );
 
@@ -245,11 +265,11 @@ const Home = () => {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await refetch();
+      await Promise.all([refetch(), fetchAds()]);
     } finally {
       setRefreshing(false);
     }
-  }, [refetch]);
+  }, [refetch, fetchAds]);
 
   useFocusEffect(
     useCallback(() => {
@@ -266,7 +286,7 @@ const Home = () => {
           `/user/getBookingbyId/${trainer._id}`,
         );
         dispatch(saveBookings(response.data?.data || []));
-        navigation.navigate('TrainerProfile', { data: trainer });
+        navigation.navigate('TrainerProfile', {data: trainer});
       } catch (error) {
         console.log('Booking fetch error:', error);
       }
@@ -321,15 +341,15 @@ const Home = () => {
   );
 
   const renderTrainer = useCallback(
-    ({ item }) => (
+    ({item}) => (
       <ImageBackground
-        source={{ uri: item?.profileImage }}
-        imageStyle={{ borderRadius: responsiveWidth(2) }}
+        source={{uri: item?.profileImage}}
+        imageStyle={{borderRadius: responsiveWidth(2)}}
         style={styles.trainerCard}>
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => getBookingAndNavigate(item)}
-          style={{ flex: 1 }}>
+          style={{flex: 1}}>
           {/* Follow button */}
           <TouchableOpacity
             activeOpacity={0.9}
@@ -357,8 +377,8 @@ const Home = () => {
           {/* Bottom info gradient */}
           <LinearGradient
             colors={['transparent', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.9)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
+            start={{x: 0, y: 0}}
+            end={{x: 0, y: 1}}
             style={styles.bottomGradient}>
             <View style={styles.trainerInfo}>
               <Text style={styles.speciality}>
@@ -418,24 +438,24 @@ const Home = () => {
   const markStorySeen = useCallback(async storyId => {
     if (!storyId) return;
     try {
-      await axiosBaseURL.post('/trainer/story/seen', { storyId });
+      await axiosBaseURL.post('/trainer/story/seen', {storyId});
       console.log('Story marked as seen:', storyId);
     } catch (err) {
       console.log('Failed to mark story seen:', err.message);
     }
   }, []);
 
-  const MessageIconWithBadge = ({ count, onPress }) => {
+  const MessageIconWithBadge = ({count, onPress}) => {
     const display = count > 99 ? '99+' : String(count || 0);
 
     return (
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.8}
-        style={{ position: 'relative' }}>
+        style={{position: 'relative'}}>
         <Image
           source={Images.messages}
-          style={{ height: responsiveHeight(3.3), width: responsiveWidth(7) }}
+          style={{height: responsiveHeight(3.3), width: responsiveWidth(7)}}
         />
 
         {count > 0 && (
@@ -521,7 +541,7 @@ const Home = () => {
                 offset: 96 * index,
                 index,
               })}
-              renderItem={({ item }) => {
+              renderItem={({item}) => {
                 const isSeen = seenUsers.has(item.user_id);
 
                 const RING_SIZE = responsiveWidth(22);
@@ -562,7 +582,7 @@ const Home = () => {
                       />
 
                       <Image
-                        source={{ uri: item.user_image }}
+                        source={{uri: item.user_image}}
                         style={{
                           position: 'absolute',
                           width: IMAGE_SIZE,
@@ -617,10 +637,10 @@ const Home = () => {
               );
               setCurrentAdIndex(index);
             }}
-            renderItem={({ item }) => (
+            renderItem={({item}) => (
               <View style={styles.adsCard}>
                 <Image
-                  source={item.image}
+                  source={{uri: item.mediaUrl}}
                   style={styles.adsFullImage}
                   resizeMode="cover" // or "contain" if you prefer no cropping
                 />
@@ -650,7 +670,10 @@ const Home = () => {
 
         <FlashList
           estimatedItemSize={responsiveHeight(52)}
-          data={data?.data || []}
+          data={(data?.data || []).filter(
+            item =>
+              !blockedIds.includes(item._id) && item.isVerified === 'approved',
+          )}
           renderItem={renderTrainer}
           keyExtractor={item => item._id}
           ListEmptyComponent={ListEmpty}

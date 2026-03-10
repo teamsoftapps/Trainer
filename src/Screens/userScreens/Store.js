@@ -57,9 +57,9 @@ const Store = ({navigation}) => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${baseUrl}/Common/GetProducts`);
-      if (response.data.status) {
-        setProducts(response.data.data);
+      const response = await axios.get(`${baseUrl}shop/all`);
+      if (response.data.success && response.data.products) {
+        setProducts(response.data.products);
       } else {
         setProducts(dummyProducts);
       }

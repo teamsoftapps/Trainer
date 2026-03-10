@@ -15,7 +15,7 @@
  *  6. API object lives at module scope — zero hook overhead.
  */
 
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import React, {useEffect, useState, useRef, useCallback, useMemo} from 'react';
 import {
   View,
   Text,
@@ -33,17 +33,21 @@ import {
   InteractionManager,
 } from 'react-native';
 import io from 'socket.io-client';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { launchImageLibrary } from 'react-native-image-picker';
+import {launchImageLibrary} from 'react-native-image-picker';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
-import { baseUrl } from '../../services/Urls';
-import { ScrollView, Swipeable } from 'react-native-gesture-handler';
+import {useSelector} from 'react-redux';
+import {baseUrl} from '../../services/Urls';
+import {ScrollView, Swipeable} from 'react-native-gesture-handler';
 import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
+import {Images} from '../../utils/Images';
+import {requestCallPermissions} from '../../utils/PermissionHelper';
+import {AGORA_TEST_TOKEN} from '@env';
+import SocketService from '../../services/SocketService';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const SOCKET_URL = baseUrl;
@@ -79,14 +83,14 @@ const areMessagesEqual = (prev, next) =>
   prev.myUserId === next.myUserId;
 
 const MessageBubble = React.memo(
-  ({ item, myUserId, onReply, openDeletePopup, openImagePreview }) => {
+  ({item, myUserId, onReply, openDeletePopup, openImagePreview}) => {
     const isMe = item?.senderId === myUserId || item?.sender === 'me';
 
     const time = item.createdAt
       ? new Date(item.createdAt).toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+          hour: '2-digit',
+          minute: '2-digit',
+        })
       : item.time || '';
 
     return (
@@ -99,7 +103,7 @@ const MessageBubble = React.memo(
         <View
           style={[
             styles.messageRow,
-            { justifyContent: isMe ? 'flex-end' : 'flex-start' },
+            {justifyContent: isMe ? 'flex-end' : 'flex-start'},
           ]}>
           <TouchableOpacity
             activeOpacity={0.85}
@@ -135,7 +139,7 @@ const MessageBubble = React.memo(
                   activeOpacity={0.9}
                   onPress={() => openImagePreview(item.mediaUrl)}>
                   <Image
-                    source={{ uri: item.mediaUrl }}
+                    source={{uri: item.mediaUrl}}
                     style={styles.mediaImage}
                     resizeMode="cover"
                   />
@@ -175,7 +179,7 @@ const MessageBubble = React.memo(
 const ChatScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { otherUser, conversationId } = route.params || {};
+  const {otherUser, conversationId} = route.params || {};
 
   const user = useSelector(state => state.Auth.data);
   const myUserId = user?._id;
@@ -207,13 +211,20 @@ const ChatScreen = () => {
    * So we reverse the chronological array → newest message is index 0
    * and appears at the bottom, oldest is last and appears at top.
    */
-  const invertedMessages = useMemo(() => [...messages].reverse(), [messages]);
+  const invertedMessages = useMemo(() => {
+    return [...messages]
+      .filter(
+        m =>
+          !(typeof m.text === 'string' && m.text.startsWith('__COMM_CALL__')),
+      )
+      .reverse();
+  }, [messages]);
 
   // ─── Mark seen ────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!conversationId || !myUserId) return;
     axios
-      .post(API.markSeen(), { conversationId, userId: myUserId })
+      .post(API.markSeen(), {conversationId, userId: myUserId})
       .catch(err =>
         console.log('markSeen error', err?.response?.data || err.message),
       );
@@ -228,14 +239,17 @@ const ChatScreen = () => {
           if (res.data?.success && res.data?.conversation) {
             const conv = res.data.conversation;
             const other = conv.participants.find(
-              p => String(p.userId?._id || p.userId) !== String(myUserId)
+              p => String(p.userId?._id || p.userId) !== String(myUserId),
             );
             if (other && other.userId) {
               setOtherUserData(other.userId);
             }
           }
         } catch (err) {
-          console.log('Fetch conversation error:', err?.response?.data || err.message);
+          console.log(
+            'Fetch conversation error:',
+            err?.response?.data || err.message,
+          );
         }
       };
       fetchConv();
@@ -263,7 +277,7 @@ const ChatScreen = () => {
       loadMessages();
 
       const s = io(SOCKET_URL, {
-        transports: ['websocket'],
+        transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionAttempts: 5,
         timeout: 10000,
@@ -288,7 +302,7 @@ const ChatScreen = () => {
           );
           if (idx !== -1) {
             const next = [...prev];
-            next[idx] = { ...newMsg, isOptimistic: false };
+            next[idx] = {...newMsg, isOptimistic: false};
             return next;
           }
 
@@ -297,7 +311,7 @@ const ChatScreen = () => {
         });
       });
 
-      s.on('messageDeleted', ({ messageId }) => {
+      s.on('messageDeleted', ({messageId}) => {
         setMessages(prev => prev.filter(m => m._id !== messageId));
       });
 
@@ -314,7 +328,7 @@ const ChatScreen = () => {
   // ─── Handlers ─────────────────────────────────────────────────────────────
   const pickMedia = useCallback((mediaType = 'photo') => {
     launchImageLibrary(
-      { mediaType, quality: 0.8, includeBase64: false },
+      {mediaType, quality: 0.8, includeBase64: false},
       response => {
         if (
           !response.didCancel &&
@@ -356,7 +370,7 @@ const ChatScreen = () => {
     try {
       setMessages(prev => prev.filter(m => m._id !== msg._id));
       closeDeletePopup();
-      await axios.delete(API.deleteMsg(msg._id), { data: { userId: myUserId } });
+      await axios.delete(API.deleteMsg(msg._id), {data: {userId: myUserId}});
       socketRef.current?.emit?.('deleteMessage', {
         conversationId,
         messageId: msg._id,
@@ -377,6 +391,56 @@ const ChatScreen = () => {
     setImagePreviewVisible(false);
     setPreviewUrl(null);
   }, []);
+
+  const handleCall = useCallback(
+    async (isVideo = false) => {
+      const hasPermission = await requestCallPermissions();
+      if (!hasPermission) {
+        alert('Camera and Microphone permissions are required for calls.');
+        return;
+      }
+
+      if (!otherUserData?._id) {
+        alert('Other user data not available.');
+        return;
+      }
+
+      // Signal the incoming call via a hidden message (Reliable)
+      const callSignal = {
+        callerName: user?.fullName || 'Someone',
+        callerImage: user?.profileImage || user?.profileimage,
+        profileImage: user?.profileImage || user?.profileimage,
+        profileimage: user?.profileImage || user?.profileimage,
+        isVideoCall: isVideo,
+        channelName: 'test',
+      };
+
+      axios
+        .post(API.send(), {
+          conversationId,
+          senderId: myUserId,
+          senderRole: user?.isType || user?.role || 'user',
+          text: `__COMM_CALL__${JSON.stringify(callSignal)}`,
+        })
+        .catch(err => console.log('Call signal error:', err));
+
+      // Also try the custom socket event just in case
+      SocketService.emit('incoming_call', {
+        to: otherUserData._id,
+        callerId: myUserId,
+        ...callSignal,
+        conversationId,
+      });
+
+      navigation.navigate('CallScreen', {
+        channelName: 'test',
+        isVideoCall: isVideo,
+        otherUser: otherUserData,
+        token: AGORA_TEST_TOKEN,
+      });
+    },
+    [conversationId, otherUserData, navigation],
+  );
 
   // ─── Send message ─────────────────────────────────────────────────────────
   const sendMessage = useCallback(async () => {
@@ -429,7 +493,7 @@ const ChatScreen = () => {
       });
       try {
         const up = await axios.post(API.upload(), formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
+          headers: {'Content-Type': 'multipart/form-data'},
         });
         if (up.data?.success) {
           mediaUrl = up.data.fileUrl || up.data.url;
@@ -465,7 +529,7 @@ const ChatScreen = () => {
         // Replace optimistic with persisted message
         setMessages(prev =>
           prev.map(m =>
-            m._id === optimisticId ? { ...saved, isOptimistic: false } : m,
+            m._id === optimisticId ? {...saved, isOptimistic: false} : m,
           ),
         );
       } else {
@@ -483,7 +547,7 @@ const ChatScreen = () => {
   const keyExtractor = useCallback(item => item._id?.toString() || item.id, []);
 
   const renderMessage = useCallback(
-    ({ item }) => (
+    ({item}) => (
       <MessageBubble
         item={item}
         myUserId={myUserId}
@@ -507,15 +571,18 @@ const ChatScreen = () => {
       {/* ── Header (outside KAV — always pinned at top) ── */}
       <View style={styles.header}>
         <TouchableOpacity
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}
           onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={26} color="#fff" />
         </TouchableOpacity>
 
         <Image
-          source={{
-            uri: otherUserData?.profileImage || 'https://i.pravatar.cc/150?img=12',
-          }}
+          source={
+            otherUserData?.profileImage &&
+            typeof otherUserData.profileImage === 'string'
+              ? {uri: otherUserData.profileImage}
+              : Images.logo
+          }
           style={styles.avatar}
         />
 
@@ -528,10 +595,14 @@ const ChatScreen = () => {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.iconButton}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => handleCall(true)}>
           <Icon name="videocam" size={26} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => handleCall(false)}>
           <Icon name="call" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -571,11 +642,11 @@ const ChatScreen = () => {
         {!!selectedMedia && (
           <View style={styles.mediaPreview}>
             <Image
-              source={{ uri: selectedMedia.uri }}
+              source={{uri: selectedMedia.uri}}
               style={styles.mediaThumb}
             />
             <TouchableOpacity
-              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+              hitSlop={{top: 6, bottom: 6, left: 6, right: 6}}
               onPress={() => setSelectedMedia(null)}>
               <Icon
                 name="close"
@@ -598,7 +669,7 @@ const ChatScreen = () => {
               </Text>
             </View>
             <TouchableOpacity
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}
               onPress={() => setReplyTo(null)}>
               <Icon name="close" size={22} color="#9FED3A" />
             </TouchableOpacity>
@@ -696,7 +767,7 @@ const ChatScreen = () => {
               <Icon name="close" size={30} color="#fff" />
             </TouchableOpacity>
             <ScrollView
-              style={{ flex: 1 }}
+              style={{flex: 1}}
               contentContainerStyle={styles.previewScrollContent}
               maximumZoomScale={3}
               minimumZoomScale={1}
@@ -705,7 +776,7 @@ const ChatScreen = () => {
               bouncesZoom
               centerContent>
               <Image
-                source={{ uri: previewUrl || '' }}
+                source={{uri: previewUrl || ''}}
                 style={{
                   width: responsiveWidth(100),
                   height: responsiveHeight(100),

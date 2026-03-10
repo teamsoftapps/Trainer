@@ -271,10 +271,14 @@ const Chats = ({navigation}) => {
         renderItem={({item}) => {
           const other = getOtherUser(item);
 
-          const lastMsgText =
+          let lastMsgText =
             item?.lastMessage?.text ||
             (item?.lastMessage?.mediaUrl ? 'Media' : '') ||
             '';
+
+          if (lastMsgText.startsWith('__COMM_CALL__')) {
+            lastMsgText = 'Call signal'; // Or keep it empty/previous
+          }
 
           const timeText = item?.lastMessage?.createdAt
             ? new Date(item.lastMessage.createdAt).toLocaleTimeString([], {

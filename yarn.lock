@@ -4519,6 +4519,7 @@ __metadata:
     patch-package: ^8.0.1
     react: 18.2.0
     react-native: 0.74.2
+    react-native-agora: ^4.6.2
     react-native-agora-chat: ^1.3.5
     react-native-alert-notification: ^0.4.0
     react-native-bootsplash: 4.1.5
@@ -4549,6 +4550,7 @@ __metadata:
     react-native-modal-datetime-picker: ^18.0.0
     react-native-otp-entry: ^1.7.1
     react-native-pager-view: ^6.3.3
+    react-native-permissions: ^5.5.1
     react-native-picker-select: ^9.2.0
     react-native-range-slider: ^0.1.2
     react-native-ratings: ^8.1.0
@@ -5059,6 +5061,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bignumber.js@npm:^9.0.0":
+  version: 9.3.1
+  resolution: "bignumber.js@npm:9.3.1"
+  checksum: 6ab100271a23a75bb8b99a4b1a34a1a94967ac0b9a52a198147607bd91064e72c6f356380d7a09cd687bf50d81ad2ed1a0a8edfaa90369c9003ed8bb2440d7f0
+  languageName: node
+  linkType: hard
+
 "bl@npm:^4.1.0":
   version: 4.1.0
   resolution: "bl@npm:4.1.0"
@@ -5156,6 +5165,16 @@ __metadata:
     base64-js: ^1.3.1
     ieee754: ^1.1.13
   checksum: e2cf8429e1c4c7b8cbd30834ac09bd61da46ce35f5c22a78e6c2f04497d6d25541b16881e30a019c6fd3154150650ccee27a308eff3e26229d788bbdeb08ab84
+  languageName: node
+  linkType: hard
+
+"buffer@npm:^6.0.3":
+  version: 6.0.3
+  resolution: "buffer@npm:6.0.3"
+  dependencies:
+    base64-js: ^1.3.1
+    ieee754: ^1.2.1
+  checksum: 5ad23293d9a731e4318e420025800b42bf0d264004c0286c8cc010af7a270c7a0f6522e84f54b9ad65cbd6db20b8badbfd8d2ebf4f80fa03dab093b89e68c3f9
   languageName: node
   linkType: hard
 
@@ -6494,6 +6513,13 @@ __metadata:
   version: 5.0.1
   resolution: "event-target-shim@npm:5.0.1"
   checksum: 1ffe3bb22a6d51bdeb6bf6f7cf97d2ff4a74b017ad12284cc9e6a279e727dc30a5de6bb613e5596ff4dc3e517841339ad09a7eec44266eccb1aa201a30448166
+  languageName: node
+  linkType: hard
+
+"eventemitter3@npm:^5.0.1":
+  version: 5.0.4
+  resolution: "eventemitter3@npm:5.0.4"
+  checksum: bcbd2c3a9d2553c2289623ede8aab474d5c92bcbf18e5fe76f0e550c2b7801afb5a4351c7f11e8ee2379cca1ee48316aeb98fc3b946b7dd1f47a4c1ee8c4dcf2
   languageName: node
   linkType: hard
 
@@ -8467,6 +8493,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"json-bigint@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "json-bigint@npm:1.0.0"
+  dependencies:
+    bignumber.js: ^9.0.0
+  checksum: c67bb93ccb3c291e60eb4b62931403e378906aab113ec1c2a8dd0f9a7f065ad6fd9713d627b732abefae2e244ac9ce1721c7a3142b2979532f12b258634ce6f6
+  languageName: node
+  linkType: hard
+
 "json-parse-better-errors@npm:^1.0.1":
   version: 1.0.2
   resolution: "json-parse-better-errors@npm:1.0.2"
@@ -10244,6 +10279,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-agora@npm:^4.6.2":
+  version: 4.6.2
+  resolution: "react-native-agora@npm:4.6.2"
+  dependencies:
+    buffer: ^6.0.3
+    eventemitter3: ^5.0.1
+    json-bigint: ^1.0.0
+    ts-interface-checker: ^1.0.2
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: f49a4426dba61c7df39a3d6e23025e33717f3392c90b49a009fe80fface061c09c39e188eee1bcd000b5ce43a32f02c554657f9197091fb68875970f5b823cfb
+  languageName: node
+  linkType: hard
+
 "react-native-alert-notification@npm:^0.4.0":
   version: 0.4.0
   resolution: "react-native-alert-notification@npm:0.4.0"
@@ -10688,6 +10738,20 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: a8672a50bbc60c9d925b8935b484cda2ed976483fce156f31b497d799eb349b24b79934aa683576e606e3fd3d8d97877d0048eba95f702f15ae21263c2658fd5
+  languageName: node
+  linkType: hard
+
+"react-native-permissions@npm:^5.5.1":
+  version: 5.5.1
+  resolution: "react-native-permissions@npm:5.5.1"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-windows: "*"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: 09a872c7bb7299351b8fb6446125def3d4deec06738491f59fe05f1a6d7e827b3113569d2540c48358ca89e60eeca4c13e534102d61cf169465b053a552a3930
   languageName: node
   linkType: hard
 
@@ -12162,6 +12226,13 @@ __metadata:
   peerDependencies:
     typescript: ">=4.2.0"
   checksum: c746ddabfdffbf16cb0b0db32bb287236a19e583057f8649ee7c49995bb776e1d3ef384685181c11a1a480369e022ca97512cb08c517b2d2bd82c83754c97012
+  languageName: node
+  linkType: hard
+
+"ts-interface-checker@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "ts-interface-checker@npm:1.0.2"
+  checksum: 3d96094a92740f3fe17ee69da005e0d077749a6c4ee0031d84f65222e97f06f2ea9f72d483f268c95b32b7054fd9aafc257b85f1135278203f4984c9fd91037e
   languageName: node
   linkType: hard
 
