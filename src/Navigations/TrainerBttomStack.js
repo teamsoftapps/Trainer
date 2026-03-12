@@ -9,6 +9,7 @@ import Story from '../Screens/trainerScreens/Story';
 import Sessions from '../Screens/trainerScreens/sessions';
 import Earnings from '../Screens/trainerScreens/earnings';
 import CompletedTrainerHome from '../Screens/trainerScreens/trainerOld';
+import BrowseTrainers from '../Screens/trainerScreens/BrowseTrainers';
 
 const Bottom = createBottomTabNavigator();
 
@@ -49,6 +50,23 @@ const TrainerBttomStack = () => {
               source={
                 focused ? Images.sessions_filled : Images.sessions_outline
               }
+              resizeMode="contain"
+              style={{
+                height: responsiveScreenHeight(3),
+                width: responsiveScreenHeight(3),
+              }}
+            />
+          ),
+        }}
+      />
+
+      <Bottom.Screen
+        name="BrowseTrainers"
+        component={BrowseTrainers}
+        options={{
+          tabBarIcon: ({focused}) => (
+            <Image
+              source={focused ? Images.search_filled : Images.search}
               resizeMode="contain"
               style={{
                 height: responsiveScreenHeight(3),

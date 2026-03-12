@@ -302,8 +302,8 @@ const TrainerProfile = ({route}) => {
   };
 
   useEffect(() => {
-    if (Bookings) {
-      const timeArray = Bookings?.map(item => item?.bookingTime);
+    if (Array.isArray(Bookings)) {
+      const timeArray = Bookings.map(item => item?.bookingTime);
       setbookingTime(timeArray);
     }
   }, [Bookings]);

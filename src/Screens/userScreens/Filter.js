@@ -17,7 +17,7 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import Button from '../../Components/Button';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
 const Filter = () => {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -28,6 +28,7 @@ const Filter = () => {
 
   const toggleSwitch = () => setIsEnabled(prev => !prev);
   const navigation = useNavigation();
+  const route = useRoute();
 
   const resetAll = () => {
     setIsEnabled(false);
@@ -185,8 +186,10 @@ const Filter = () => {
           : null,
     };
 
+    const returnTo = route.params?.returnTo || 'SearchTrainer';
+
     // Navigate back with the data
-    navigation.navigate('SearchTrainer', {filters: filterData});
+    navigation.navigate(returnTo, {filters: filterData});
   };
 
   return (

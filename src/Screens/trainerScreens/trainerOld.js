@@ -21,6 +21,7 @@ import {useSelector} from 'react-redux';
 import {LineChart} from 'react-native-chart-kit';
 import axiosBaseURL from '../../services/AxiosBaseURL';
 import {useCallback, useEffect, useState, useRef} from 'react';
+import MembershipCountdown from '../../Components/MembershipCountdown';
 import {getMessaging} from '@react-native-firebase/messaging';
 
 const firebaseMessaging = getMessaging();
@@ -260,6 +261,12 @@ const CompletedTrainerHome = () => {
             />
           </View>
         </View>
+
+        <MembershipCountdown
+          membershipStatus={trainer_data?.membershipStatus}
+          onPress={() => navigation.navigate('Subscription')}
+        />
+
         <View style={styles.cont_1}>
           <Text style={styles.Welcome_Text}>
             Hello{' '}
