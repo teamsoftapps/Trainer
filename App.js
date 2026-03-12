@@ -345,6 +345,8 @@ import {navigationRef, navigate} from './src/Navigations/navigationService';
 import SocketService from './src/services/SocketService';
 import IncomingCallModal from './src/Components/IncomingCallModal';
 import {AGORA_TEST_TOKEN} from '@env';
+import {AlertNotificationRoot} from 'react-native-alert-notification';
+import NetworkStatusProvider from './src/Components/NetworkStatusProvider';
 
 // ✅ REMOVED handleDeepLink from global scope to move inside App
 
@@ -627,28 +629,32 @@ const App = () => {
 
   return (
     <GestureHandlerRootView style={{flex: 1}}>
-      <StripeProvider
-        publishableKey="pk_test_51MhKy0E1gqTY55tO7v4bGT0EifIECw1SHFcUx33Jgc7YF46jqRPNvDzGoSE1h9konayrzaNes7Jse3NGDLpawDql00rxdyk8Cw"
-        urlScheme="trainerapp">
-        <NavigationContainer ref={navigationRef}>
-          {authData?.token && authData?.isType === 'user' ? (
-            <UserStack />
-          ) : authData?.token && authData?.isType === 'trainer' ? (
-            <TrainerStack />
-          ) : (
-            <AuthStack />
-          )}
-        </NavigationContainer>
-      </StripeProvider>
+      <AlertNotificationRoot>
+        <NetworkStatusProvider>
+          <StripeProvider
+            publishableKey="pk_test_51MhKy0E1gqTY55tO7v4bGT0EifIECw1SHFcUx33Jgc7YF46jqRPNvDzGoSE1h9konayrzaNes7Jse3NGDLpawDql00rxdyk8Cw"
+            urlScheme="trainerapp">
+            <NavigationContainer ref={navigationRef}>
+              {authData?.token && authData?.isType === 'user' ? (
+                <UserStack />
+              ) : authData?.token && authData?.isType === 'trainer' ? (
+                <TrainerStack />
+              ) : (
+                <AuthStack />
+              )}
+            </NavigationContainer>
+          </StripeProvider>
 
-      <IncomingCallModal
-        visible={!!incomingCall}
-        callerName={incomingCall?.callerName}
-        callerImage={incomingCall?.callerImage}
-        isVideoCall={incomingCall?.isVideoCall}
-        onAccept={onAcceptCall}
-        onDecline={onDeclineCall}
-      />
+          <IncomingCallModal
+            visible={!!incomingCall}
+            callerName={incomingCall?.callerName}
+            callerImage={incomingCall?.callerImage}
+            isVideoCall={incomingCall?.isVideoCall}
+            onAccept={onAcceptCall}
+            onDecline={onDeclineCall}
+          />
+        </NetworkStatusProvider>
+      </AlertNotificationRoot>
     </GestureHandlerRootView>
   );
 };

@@ -91,11 +91,12 @@ const Signin = ({route}) => {
             marginTop: responsiveHeight(10),
           }}>
           <Image
+            resizeMode="contain"
             source={Images.logo}
             style={{
               marginBottom: responsiveHeight(2),
-              width: responsiveWidth(40),
-              height: responsiveHeight(20),
+              width: responsiveWidth(45),
+              height: responsiveHeight(21),
             }}
           />
           <Text

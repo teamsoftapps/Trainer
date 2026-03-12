@@ -177,18 +177,25 @@ const TrainerStack = () => {
   });
 
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
+    <Stack.Navigator
+      screenOptions={{headerShown: false}}
+      initialRouteName={
+        !isProfileComplete
+          ? 'CompleteProfile'
+          : !isMembershipActive
+          ? 'Subscription'
+          : 'TrainerBttomStack'
+      }>
       {!isProfileComplete ? (
         <Stack.Screen name="CompleteProfile" component={CompleteProfile} />
-      ) : !isMembershipActive ? (
-        <Stack.Screen name="Subscription" component={Subscription} />
       ) : (
         <>
+          {/* Always keep these available to prevent unmount crashes */}
+          <Stack.Screen name="Subscription" component={Subscription} />
           <Stack.Screen
             name="TrainerBttomStack"
             component={TrainerBttomStack}
           />
-          <Stack.Screen name="Subscription" component={Subscription} />
           <Stack.Screen name="Chats" component={Chats} />
           <Stack.Screen name="ChatScreen" component={ChatScreen} />
           <Stack.Screen name="Settings" component={Settings} />

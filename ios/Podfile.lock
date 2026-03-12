@@ -1220,6 +1220,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - react-native-netinfo (12.0.1):
+    - React-Core
   - react-native-pager-view (6.4.1):
     - DoubleConversion
     - glog
@@ -1879,6 +1881,7 @@ DEPENDENCIES:
   - react-native-insta-story (from `../node_modules/react-native-insta-story`)
   - react-native-maps (from `../node_modules/react-native-maps`)
   - react-native-mmkv (from `../node_modules/react-native-mmkv`)
+  - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
@@ -2057,6 +2060,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-maps"
   react-native-mmkv:
     :path: "../node_modules/react-native-mmkv"
+  react-native-netinfo:
+    :path: "../node_modules/@react-native-community/netinfo"
   react-native-pager-view:
     :path: "../node_modules/react-native-pager-view"
   react-native-safe-area-context:
@@ -2221,6 +2226,7 @@ SPEC CHECKSUMS:
   react-native-insta-story: 2f1028459065547b4b4cd81dd0a3f5a08fa25eb1
   react-native-maps: c34648af107791f0e1d7cd054a29db15f290c272
   react-native-mmkv: cbb7cc0f2479caa4d2f5e5a0951b3acb28bec375
+  react-native-netinfo: bed7e7b8f68e22e0862a77d7df28d31faa66375d
   react-native-pager-view: 3dda88237cbd7813b1d9450c4a907f199d4deaf1
   react-native-safe-area-context: ca0ebcd9798c5a45863c608c961d4f3f984b6ed2
   react-native-slider: bf7839ce7fcccb1eeaf903a92db8f83db400af06

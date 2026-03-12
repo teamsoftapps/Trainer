@@ -1,3 +1,5 @@
+import {Toast, ALERT_TYPE} from 'react-native-alert-notification';
+
 export const getDistance = (lat1, lon1, lat2, lon2) => {
   if (!lat1 || !lon1 || !lat2 || !lon2) return '0.0';
 
@@ -14,4 +16,22 @@ export const getDistance = (lat1, lon1, lat2, lon2) => {
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return (R * c).toFixed(2); // Returns distance in miles rounded to 2 decimal places
+};
+
+export const showSuccess = message => {
+  Toast.show({
+    type: ALERT_TYPE.SUCCESS,
+    title: 'Success',
+    textBody: message,
+    onPress: () => Toast.hide(),
+  });
+};
+
+export const showError = message => {
+  Toast.show({
+    type: ALERT_TYPE.DANGER,
+    title: 'Error',
+    textBody: message,
+    onPress: () => Toast.hide(),
+  });
 };

@@ -3442,6 +3442,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-community/netinfo@npm:^12.0.1":
+  version: 12.0.1
+  resolution: "@react-native-community/netinfo@npm:12.0.1"
+  peerDependencies:
+    react: "*"
+    react-native: ">=0.59"
+  checksum: 1b01d5840df4a3b71acb70e755e956d891be27557ec5e166f6f3f173ac7f061f73fc7b705b03bc1444626d81b81d20cbb2f3e35cee149268f97e2cfa8341f823
+  languageName: node
+  linkType: hard
+
 "@react-native-community/slider@npm:^4.5.2":
   version: 4.5.3
   resolution: "@react-native-community/slider@npm:4.5.3"
@@ -4487,6 +4497,7 @@ __metadata:
     "@react-native-camera-roll/camera-roll": ^7.8.3
     "@react-native-community/datetimepicker": ^8.2.0
     "@react-native-community/geolocation": ^3.4.0
+    "@react-native-community/netinfo": ^12.0.1
     "@react-native-community/slider": ^4.5.2
     "@react-native-firebase/app": ^23.8.4
     "@react-native-firebase/auth": ^23.8.4

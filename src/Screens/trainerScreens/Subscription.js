@@ -135,6 +135,12 @@ const Subscription = ({navigation}) => {
 
       const updatedTrainer = res.data.data;
       dispatch(updateLogin(updatedTrainer));
+
+      // Navigate to Home screen
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'TrainerBttomStack'}],
+      });
     } catch (e) {
       console.log('Subscribe Error:', e);
     }
