@@ -586,7 +586,7 @@ const App = () => {
     }
 
     return () => {
-      // Don't disconnect here unless logging out,
+      // Don't disconnect here unless logging out,,
       // but remove listeners if needed.
     };
   }, [authData?._id]);
