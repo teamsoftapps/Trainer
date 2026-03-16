@@ -27,7 +27,6 @@ import axios from 'axios';
 import {baseUrl} from '../../services/Urls';
 import {requestCallPermissions} from '../../utils/PermissionHelper';
 import SocketService from '../../services/SocketService';
-import {AGORA_TEST_TOKEN} from '@env';
 
 const joinUrl = (base, path) => {
   const b = (base || '').replace(/\/+$/, '');
@@ -119,11 +118,13 @@ const TrainerDetailView = ({route}) => {
 
       if (res.data.success) {
         const conversation = res.data.conversation || res.data.data;
-        setConversationId(conversation?._id);
+        const convId = conversation?._id || conversation?.id; // Robust ID extraction
+        setConversationId(convId);
 
         navigation.navigate('ChatScreen', {
-          conversationId: conversation?._id,
+          conversationId: convId,
           otherUser: data,
+          myRole: 'user', // Initiator is always 'user'
         });
       }
     } catch (error) {
@@ -153,7 +154,7 @@ const TrainerDetailView = ({route}) => {
         });
         if (res.data.success) {
           const conversation = res.data.conversation || res.data.data;
-          convId = conversation?._id;
+          convId = conversation?._id || conversation?.id;
           setConversationId(convId);
         }
       } catch (err) {
@@ -176,7 +177,7 @@ const TrainerDetailView = ({route}) => {
       .post(joinUrl(baseUrl, '/chat/send-message'), {
         conversationId: convId,
         senderId: authData?._id,
-        senderRole: authData?.isType || authData?.role || 'trainer',
+        senderRole: 'user', // Initiator is user
         text: `__COMM_CALL__${JSON.stringify(callSignal)}`,
       })
       .catch(err => console.log('Call signal error:', err));
@@ -192,7 +193,6 @@ const TrainerDetailView = ({route}) => {
       channelName: 'test',
       isVideoCall: isVideo,
       otherUser: data,
-      token: AGORA_TEST_TOKEN,
     });
   };
 
@@ -291,9 +291,7 @@ const TrainerDetailView = ({route}) => {
               </View>
 
               <View style={styles.statItem}>
-                <Text style={styles.statValue}>
-                  {data?.Dob ? age : '--'}
-                </Text>
+                <Text style={styles.statValue}>{data?.Dob ? age : '--'}</Text>
                 <Text style={styles.statLabel}>Years old</Text>
               </View>
             </View>
@@ -358,8 +356,7 @@ const TrainerDetailView = ({route}) => {
               renderItem={({item}) => {
                 const isVideo = item.type === 'video';
                 return (
-                  <TouchableOpacity
-                    style={styles.postThumb}>
+                  <TouchableOpacity style={styles.postThumb}>
                     <Image
                       source={{
                         uri: isVideo
@@ -503,9 +500,7 @@ const TrainerDetailView = ({route}) => {
           activeOpacity={0.8}
           onPress={() => handleCall(false)}>
           <Ionicons name="call" size={22} color="#9FED3A" />
-          <Text style={[styles.contactBtnText, {color: '#9FED3A'}]}>
-            Audio
-          </Text>
+          <Text style={[styles.contactBtnText, {color: '#9FED3A'}]}>Audio</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -513,9 +508,7 @@ const TrainerDetailView = ({route}) => {
           activeOpacity={0.8}
           onPress={() => handleCall(true)}>
           <Ionicons name="videocam" size={22} color="#9FED3A" />
-          <Text style={[styles.contactBtnText, {color: '#9FED3A'}]}>
-            Video
-          </Text>
+          <Text style={[styles.contactBtnText, {color: '#9FED3A'}]}>Video</Text>
         </TouchableOpacity>
       </View>
     </WrapperContainer>

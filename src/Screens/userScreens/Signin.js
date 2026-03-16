@@ -1,4 +1,7 @@
 import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Image,
   ImageBackground,
   StyleSheet,
@@ -9,6 +12,9 @@ import {
 } from 'react-native';
 import React, {useState} from 'react';
 import {FontFamily, Images} from '../../utils/Images';
+import auth from '@react-native-firebase/auth';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {baseUrl} from '../../services/Urls';
 import {
   responsiveFontSize,
   responsiveHeight,
@@ -79,205 +85,281 @@ const Signin = ({route}) => {
     }
   };
 
+  const handleGoogleSignin = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signOut();
+      const userInfo = await GoogleSignin.signIn();
+      const idToken = userInfo.data.idToken;
+      if (!idToken) throw new Error('No idToken received from Google');
+
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      const userCredential =
+        await auth().signInWithCredential(googleCredential);
+      const firebaseUser = userCredential.user;
+
+      const response = await fetch(`${baseUrl}common/auth/google`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          role: data.checkUser,
+          email: firebaseUser.email,
+          fullName: firebaseUser.displayName,
+          profileImage: firebaseUser.photoURL,
+          firebaseUID: firebaseUser.uid,
+        }),
+      });
+
+      const resData = await response.json();
+      if (!response.ok || !resData.data) {
+        throw new Error(
+          resData.message || resData.error || 'Backend authentication failed',
+        );
+      }
+
+      dispatch(IsLogin({...resData.data, authProvider: 'google'}));
+      if (data.checkUser === 'user') {
+        dispatch(saveFollowers(resData.data.followedTrainers));
+      }
+      showToast('Success', 'Logged in with Google', 'success');
+    } catch (error) {
+      console.log('Google Error:', error);
+      if (error.message !== 'Sign in action cancelled') {
+        showToast('Error', error.message || 'Google login failed', 'danger');
+      }
+    }
+  };
+
   return (
-    <WrapperContainer>
-      <ImageBackground
-        resizeMode="cover"
-        source={Images.bg}
-        style={{height: responsiveHeight(100)}}>
-        <View
-          style={{
-            alignItems: 'center',
-            marginTop: responsiveHeight(10),
-          }}>
-          <Image
-            resizeMode="contain"
-            source={Images.logo}
-            style={{
-              marginBottom: responsiveHeight(2),
-              width: responsiveWidth(45),
-              height: responsiveHeight(21),
-            }}
-          />
-          <Text
-            style={{
-              color: 'white',
-              fontSize: responsiveFontSize(4),
-              fontFamily: FontFamily.Semi_Bold,
-              marginBottom: responsiveHeight(2),
-            }}>
-            Welcome Back!
-          </Text>
-          <Text
-            style={{
-              color: 'white',
-              fontSize: responsiveFontSize(2.5),
-              fontFamily: FontFamily.Medium,
-              marginBottom: responsiveHeight(2),
-            }}>
-            Sign in To Continue
-          </Text>
-          <View style={{gap: responsiveHeight(3)}}>
+    <WrapperContainer withSafeArea={false}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{flex: 1}}>
+        <ScrollView
+          contentContainerStyle={{flexGrow: 1}}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
+          <ImageBackground
+            resizeMode="cover"
+            source={Images.bg}
+            style={{flex: 1}}>
             <View
               style={{
-                width: responsiveWidth(85),
-                paddingHorizontal: responsiveWidth(5),
-                paddingVertical: responsiveWidth(2),
-                borderWidth: 1,
-                borderColor: '#908C8D',
-                borderRadius: 17,
-              }}>
-              <Text style={{color: '#908C8D'}}>Email</Text>
-              <TextInput
-                placeholder="Enter Email"
-                value={email || undefined}
-                onChangeText={setemail}
-                style={{
-                  padding: 0,
-                  fontFamily: FontFamily.Semi_Bold,
-                  color: 'white',
-                  fontSize: responsiveFontSize(2),
-                  width: responsiveWidth(67),
-                  height: responsiveHeight(4),
-                }}
-                numberOfLines={1}
-                placeholderTextColor={'white'}
-              />
-            </View>
-            <View
-              style={{
-                width: responsiveWidth(85),
-                paddingHorizontal: responsiveWidth(5),
-                paddingVertical: responsiveWidth(2),
-                borderWidth: 1,
-                borderColor: '#908C8D',
-                borderRadius: 17,
-                flexDirection: 'row',
                 alignItems: 'center',
+                marginTop: responsiveHeight(10),
+                paddingBottom: responsiveHeight(5),
               }}>
-              <View>
-                <Text style={{color: '#908C8D'}}>Password</Text>
-                <TextInput
-                  placeholder="Enter Password"
-                  secureTextEntry={secure}
-                  value={password || undefined}
-                  onChangeText={setpassword}
+              <Image
+                resizeMode="contain"
+                source={Images.logo}
+                style={{
+                  marginBottom: responsiveHeight(2),
+                  width: responsiveWidth(45),
+                  height: responsiveHeight(21),
+                }}
+              />
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: responsiveFontSize(4),
+                  fontFamily: FontFamily.Semi_Bold,
+                  marginBottom: responsiveHeight(2),
+                }}>
+                Welcome Back!
+              </Text>
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: responsiveFontSize(2.5),
+                  fontFamily: FontFamily.Medium,
+                  marginBottom: responsiveHeight(2),
+                }}>
+                Sign in To Continue
+              </Text>
+              <View style={{gap: responsiveHeight(3)}}>
+                <View
                   style={{
-                    padding: 0,
-                    fontFamily: FontFamily.Semi_Bold,
+                    width: responsiveWidth(85),
+                    paddingHorizontal: responsiveWidth(5),
+                    paddingVertical: responsiveWidth(2),
+                    borderWidth: 1,
+                    borderColor: '#908C8D',
+                    borderRadius: 17,
+                  }}>
+                  <Text style={{color: '#908C8D'}}>Email</Text>
+                  <TextInput
+                    placeholder="Enter Email"
+                    value={email || undefined}
+                    onChangeText={setemail}
+                    style={{
+                      padding: 0,
+                      fontFamily: FontFamily.Semi_Bold,
+                      color: 'white',
+                      fontSize: responsiveFontSize(2),
+                      width: responsiveWidth(67),
+                      height: responsiveHeight(4),
+                    }}
+                    numberOfLines={1}
+                    placeholderTextColor={'white'}
+                  />
+                </View>
+                <View
+                  style={{
+                    width: responsiveWidth(85),
+                    paddingHorizontal: responsiveWidth(5),
+                    paddingVertical: responsiveWidth(2),
+                    borderWidth: 1,
+                    borderColor: '#908C8D',
+                    borderRadius: 17,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}>
+                  <View>
+                    <Text style={{color: '#908C8D'}}>Password</Text>
+                    <TextInput
+                      placeholder="Enter Password"
+                      secureTextEntry={secure}
+                      value={password || undefined}
+                      onChangeText={setpassword}
+                      style={{
+                        padding: 0,
+                        fontFamily: FontFamily.Semi_Bold,
+                        color: 'white',
+                        fontSize: responsiveFontSize(2),
+                        width: responsiveWidth(67),
+                        height: responsiveHeight(4),
+                      }}
+                      numberOfLines={1}
+                      placeholderTextColor={'white'}
+                    />
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setsecure(!secure);
+                    }}>
+                    <Image
+                      source={secure ? Images.eye_off : Images.eye}
+                      style={{width: responsiveWidth(6)}}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View
+                style={{
+                  width: responsiveWidth(85),
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginTop: responsiveHeight(2),
+                }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    gap: responsiveWidth(2),
+                    alignItems: 'center',
+                  }}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setremember(!remember);
+                    }}>
+                    <Image
+                      source={remember ? Images.checked : Images.unchecked}
+                      style={{
+                        width: responsiveWidth(7),
+                        height: responsiveWidth(7),
+                      }}
+                    />
+                  </TouchableOpacity>
+                  <Text
+                    style={{
+                      color: 'white',
+                      fontSize: responsiveFontSize(2),
+                      fontFamily: FontFamily.Semi_Bold,
+                    }}>
+                    Remember me
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate('ForgotPassword', {data: data});
+                  }}>
+                  <Text
+                    style={{
+                      color: '#9FED3A',
+                      textDecorationLine: 'underline',
+                      fontSize: responsiveFontSize(2),
+                      fontFamily: FontFamily.Semi_Bold,
+                    }}>
+                    Forgot password?
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <ButtonComp
+                onPress={handleSignin}
+                text="Sign In"
+                mainStyle={{
+                  width: responsiveWidth(85),
+                  marginTop: responsiveHeight(5),
+                }}
+                isLoading={SigninUserLoading || SigninTrainerLoading}
+              />
+
+              <Text style={{color: '#aaa', marginTop: 20}}>
+                Or continue with
+              </Text>
+
+              <View style={styles.socialRow}>
+                <TouchableOpacity onPress={handleGoogleSignin}>
+                  <Image source={Images.google} style={styles.socialIcon} />
+                </TouchableOpacity>
+              </View>
+              <View
+                style={{
+                  width: '85%',
+                  marginTop: responsiveHeight(1),
+                  flexDirection: 'row',
+                }}>
+                <Text
+                  style={{
                     color: 'white',
                     fontSize: responsiveFontSize(2),
-                    width: responsiveWidth(67),
-                    height: responsiveHeight(4),
-                  }}
-                  numberOfLines={1}
-                  placeholderTextColor={'white'}
-                />
+                    fontFamily: FontFamily.Light,
+                  }}>
+                  Don't have an account?{' '}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate('signup', {checkUser: data.checkUser});
+                  }}>
+                  <Text
+                    style={{
+                      color: '#9FED3A',
+                      textDecorationLine: 'underline',
+                      fontFamily: FontFamily.Extra_Bold,
+                    }}>
+                    Sign up.
+                  </Text>
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                onPress={() => {
-                  setsecure(!secure);
-                }}>
-                <Image
-                  source={secure ? Images.eye_off : Images.eye}
-                  style={{width: responsiveWidth(6)}}
-                />
-              </TouchableOpacity>
             </View>
-          </View>
-          <View
-            style={{
-              width: responsiveWidth(85),
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginTop: responsiveHeight(2),
-            }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                gap: responsiveWidth(2),
-                alignItems: 'center',
-              }}>
-              <TouchableOpacity
-                onPress={() => {
-                  setremember(!remember);
-                }}>
-                <Image
-                  source={remember ? Images.checked : Images.unchecked}
-                  style={{
-                    width: responsiveWidth(7),
-                    height: responsiveWidth(7),
-                  }}
-                />
-              </TouchableOpacity>
-              <Text
-                style={{
-                  color: 'white',
-                  fontSize: responsiveFontSize(2),
-                  fontFamily: FontFamily.Semi_Bold,
-                }}>
-                Remember me
-              </Text>
-            </View>
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate('ForgotPassword', {data: data});
-              }}>
-              <Text
-                style={{
-                  color: '#9FED3A',
-                  textDecorationLine: 'underline',
-                  fontSize: responsiveFontSize(2),
-                  fontFamily: FontFamily.Semi_Bold,
-                }}>
-                Forgot password?
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <ButtonComp
-            onPress={handleSignin}
-            text="Sign In"
-            mainStyle={{
-              width: responsiveWidth(85),
-              marginTop: responsiveHeight(5),
-            }}
-            isLoading={SigninUserLoading || SigninTrainerLoading}
-          />
-          <View
-            style={{
-              width: '85%',
-              marginTop: responsiveHeight(1),
-              flexDirection: 'row',
-            }}>
-            <Text
-              style={{
-                color: 'white',
-                fontSize: responsiveFontSize(2),
-                fontFamily: FontFamily.Light,
-              }}>
-              Don't have an account?{' '}
-            </Text>
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate('signup', {checkUser: data.checkUser});
-              }}>
-              <Text
-                style={{
-                  color: '#9FED3A',
-                  textDecorationLine: 'underline',
-                  fontFamily: FontFamily.Extra_Bold,
-                }}>
-                Sign up.
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ImageBackground>
+          </ImageBackground>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </WrapperContainer>
   );
 };
 
 export default Signin;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  socialRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginTop: 15,
+  },
+  socialIcon: {
+    width: responsiveWidth(15),
+    height: responsiveWidth(15),
+    resizeMode: 'contain',
+  },
+});

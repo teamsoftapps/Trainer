@@ -120,11 +120,27 @@ const BrowseTrainers = () => {
             </View>
             <TouchableOpacity
               style={styles.contactBtn}
-              onPress={() => {
-                navigation.navigate('ChatScreen', {
-                  otherUser: item,
-                  conversationId: null, // ChatScreen will handle conversation fetching/creation
-                });
+              onPress={async () => {
+                try {
+                  const res = await axiosBaseURL.post(
+                    '/chat/create-conversation',
+                    {
+                      userId: authData?._id,
+                      trainerId: item?._id,
+                    },
+                  );
+                  if (res.data?.success) {
+                    const conversation = res.data.conversation || res.data.data;
+                    const convId = conversation?._id || conversation?.id;
+                    navigation.navigate('ChatScreen', {
+                      conversationId: convId,
+                      otherUser: item,
+                      myRole: 'user', // Initiator role
+                    });
+                  }
+                } catch (err) {
+                  console.log('Chat error:', err?.message);
+                }
               }}>
               <Text style={styles.contactBtnText}>Contact</Text>
             </TouchableOpacity>

@@ -123,15 +123,17 @@ const ReviewBooking = ({ route }) => {
           </View>
 
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {/* <TouchableOpacity
+            <TouchableOpacity
               onPress={async () => {
                 try {
                   const res = await BookingAPI.createConversation(authData?._id, trainer?._id);
                   if (res.success) {
                     const conversation = res.conversation || res.data;
+                    const convId = conversation?._id || conversation?.id;
                     navigation.navigate('ChatScreen', {
-                      conversationId: conversation?._id,
+                      conversationId: convId,
                       otherUser: trainer,
+                      myRole: 'user', // Initiator
                     });
                   }
                 } catch (error) {
@@ -145,7 +147,7 @@ const ReviewBooking = ({ route }) => {
               style={styles.messageIconContainer}
             >
               <Icon name="chatbubble-ellipses-outline" size={24} color="#9FED3A" />
-            </TouchableOpacity> */}
+            </TouchableOpacity>
             <Image source={{ uri: trainer?.profileImage }} style={styles.avatar} />
           </View>
         </View>

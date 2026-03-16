@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {
+  Alert,
   View,
   Text,
   StyleSheet,
@@ -44,10 +45,15 @@ const prices = {
 };
 
 const Subscription = ({navigation}) => {
-  const [selectedPlan, setSelectedPlan] = useState('monthly');
   const {initPaymentSheet, presentPaymentSheet} = useStripe();
   const authData = useSelector(state => state.Auth.data);
-  console.log('Auth data in Subscriptio screen:', authData._id);
+  const [selectedPlan, setSelectedPlan] = useState(
+    authData?.isTrialUsed ? 'monthly' : 'trial',
+  );
+  console.log('Auth data in Subscription screen:', {
+    id: authData?._id,
+    isTrialUsed: authData?.isTrialUsed,
+  });
   const dispatch = useDispatch();
   const renderPlan = item => {
     const isSelected = selectedPlan === item.id;
@@ -116,8 +122,39 @@ const Subscription = ({navigation}) => {
     return true;
   };
 
+  const availablePlans = authData?.isTrialUsed
+    ? plans
+    : [
+        {
+          id: 'trial',
+          title: '7-Day Free Trial',
+          subtitle: 'Experience all features for free',
+          price: 'FREE',
+        },
+        ...plans,
+      ];
+
   const handleSubscribe = async () => {
     try {
+      if (selectedPlan === 'trial') {
+        const res = await axiosBaseURL.post('/trainer/activateTrial', {
+          trainerId: authData._id,
+        });
+
+        if (res.data.status) {
+          Alert.alert('Success', 'Free trial activated successfully!');
+          dispatch(updateLogin(res.data.data));
+          // Navigate to Home screen
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'TrainerBttomStack'}],
+          });
+        } else {
+          Alert.alert('Error', res.data.message || 'Failed to activate trial');
+        }
+        return;
+      }
+
       const amount = prices[selectedPlan];
 
       const ready = await initializePaymentSheet(amount);
@@ -143,6 +180,10 @@ const Subscription = ({navigation}) => {
       });
     } catch (e) {
       console.log('Subscribe Error:', e);
+      Alert.alert(
+        'Error',
+        e.response?.data?.message || e.message || 'Something went wrong',
+      );
     }
   };
 
@@ -160,7 +201,7 @@ const Subscription = ({navigation}) => {
 
       {/* plans */}
       <View style={{marginTop: responsiveHeight(3)}}>
-        {plans.map(renderPlan)}
+        {availablePlans.map(renderPlan)}
       </View>
 
       {/* bottom */}
@@ -168,7 +209,9 @@ const Subscription = ({navigation}) => {
         <Text style={styles.note}>No commitment. Cancel anytime.</Text>
 
         <TouchableOpacity style={styles.subscribeBtn} onPress={handleSubscribe}>
-          <Text style={styles.subscribeText}>Subscribe</Text>
+          <Text style={styles.subscribeText}>
+            {selectedPlan === 'trial' ? 'Activate Trial' : 'Subscribe'}
+          </Text>
         </TouchableOpacity>
 
         <Text style={styles.terms}>

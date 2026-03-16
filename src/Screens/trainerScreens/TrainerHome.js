@@ -224,6 +224,14 @@ const TrainerHome = () => {
               {trainer_data?.fullName}
             </Text>
           </Text>
+          {trainer_data?.membershipStatus?.membershipType === 'trial' && (
+            <View style={styles.trialBanner}>
+              <Text style={styles.trialText}>
+                Trial Period: {trainer_data?.membershipStatus?.remainingDays} days
+                remaining
+              </Text>
+            </View>
+          )}
           <Text style={styles.slogan}>
             Ready to start your journey with Sterns's Gym?
           </Text>
@@ -491,5 +499,20 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 10,
     fontWeight: '700',
+  },
+  trialBanner: {
+    backgroundColor: 'rgba(159, 237, 58, 0.2)',
+    paddingHorizontal: responsiveWidth(3),
+    paddingVertical: responsiveHeight(0.5),
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginTop: responsiveHeight(1),
+    borderWidth: 1,
+    borderColor: '#9FED3A',
+  },
+  trialText: {
+    color: '#9FED3A',
+    fontSize: responsiveFontSize(1.6),
+    fontWeight: '600',
   },
 });

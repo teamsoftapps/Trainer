@@ -46,40 +46,81 @@ const Chats = ({navigation}) => {
 
   const getOtherUser = useCallback(
     conv => {
-      const wantRole = viewerRole === 'trainer' ? 'user' : 'trainer';
-      const part = conv?.participants?.find(p => p?.role === wantRole);
+      const part = conv?.participants?.find(p => {
+        const pid = p?.userId?._id || p?.userId;
+        return String(pid) !== String(myId);
+      });
       const u = part?.userId;
 
       // populated -> object
       if (u && typeof u === 'object') return u;
 
-      // not populated -> null (or return {_id:u} if you prefer)
+      // not populated -> null
       return null;
     },
-    [viewerRole],
+    [myId],
   );
 
-  const getConversationListUrl = useCallback(() => {
-    if (viewerRole === 'trainer') {
-      console.log(joinUrl(API_BASE, `/chat/conversation-list-trainer/${myId}`));
-      return joinUrl(API_BASE, `/chat/conversation-list-trainer/${myId}`);
-    }
-    return joinUrl(API_BASE, `/chat/conversation-list/${myId}`);
-  }, [viewerRole, myId]);
+
 
   const fetchConversations = useCallback(async () => {
     if (!myId) return;
 
     try {
       setLoading(true);
-      const url = getConversationListUrl();
-      const res = await axios.get(url);
+      const isTrainer = viewerRole === 'trainer';
 
-      if (res?.data?.success) {
-        setAllChats(res.data.conversations || []);
-      } else {
-        setAllChats([]);
+      // Endpoint 1: Where I am the "trainer" participant
+      const urlTrainer = joinUrl(
+        API_BASE,
+        `/chat/conversation-list-trainer/${myId}`,
+      );
+      // Endpoint 2: Where I am the "user" participant (initiated the chat)
+      const urlUser = joinUrl(API_BASE, `/chat/conversation-list/${myId}`);
+
+      const [resTrainer, resUser] = await Promise.all([
+        isTrainer
+          ? axios.get(urlTrainer).catch(() => ({data: {success: false}}))
+          : Promise.resolve({data: {success: false}}),
+        axios.get(urlUser).catch(() => ({data: {success: false}})),
+      ]);
+
+      let combined = [];
+      if (resTrainer.data?.success) {
+        // I am the trainer in these
+        const list = (resTrainer.data.conversations || []).map(c => ({
+          ...c,
+          myRoleInThisChat: 'trainer',
+        }));
+        combined = [...list];
       }
+
+      if (resUser.data?.success) {
+        // I am the user in these (initiated them or found via broadened query)
+        const userConversations = (resUser.data.conversations || []).map(c => ({
+          ...c,
+          myRoleInThisChat: c.myRoleInThisChat || 'user',
+        }));
+
+        userConversations.forEach(conv => {
+          if (!combined.some(c => c._id === conv._id)) {
+            combined.push(conv);
+          }
+        });
+      }
+
+      // Sort by last message / updatedAt
+      combined.sort((a, b) => {
+        const dateA = new Date(
+          a.lastMessage?.createdAt || a.updatedAt || 0,
+        ).getTime();
+        const dateB = new Date(
+          b.lastMessage?.createdAt || b.updatedAt || 0,
+        ).getTime();
+        return dateB - dateA;
+      });
+
+      setAllChats(combined);
     } catch (err) {
       console.log(
         'Fetch conversations error:',
@@ -90,7 +131,7 @@ const Chats = ({navigation}) => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [myId, getConversationListUrl]);
+  }, [myId, viewerRole]);
 
   useFocusEffect(
     useCallback(() => {
@@ -302,9 +343,9 @@ const Chats = ({navigation}) => {
                 );
 
                 navigation.navigate('ChatScreen', {
-                  conversationId: item?._id,
+                  conversationId: item?._id || item?.id,
                   otherUser: other,
-                  viewerRole,
+                  myRole: item?.myRoleInThisChat || viewerRole,
                 });
               }}>
               <View style={{flexDirection: 'row', alignItems: 'center'}}>

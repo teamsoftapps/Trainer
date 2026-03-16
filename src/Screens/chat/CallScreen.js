@@ -23,6 +23,8 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import SocketService from '../../services/SocketService';
+import axios from 'axios';
+import {baseUrl} from '../../services/Urls';
 
 // Fill in your App ID
 const appId = 'ec1f9bf00fb9454a8fdcc00914d98084';
@@ -30,7 +32,7 @@ const appId = 'ec1f9bf00fb9454a8fdcc00914d98084';
 const CallScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const {channelName, isVideoCall, otherUser, token} = route.params || {};
+  const {channelName, isVideoCall, otherUser} = route.params || {};
 
   const agoraEngineRef = useRef();
   const [isJoined, setIsJoined] = useState(false);
@@ -65,7 +67,6 @@ const CallScreen = () => {
     console.log('🚀 Setting up Agora:', {
       appId,
       channelName,
-      hasToken: !!token,
     });
     try {
       agoraEngineRef.current = createAgoraRtcEngine();
@@ -103,16 +104,33 @@ const CallScreen = () => {
         agoraEngine.setDefaultAudioRouteToSpeakerphone(true);
       }
 
-      join();
+      await join();
     } catch (e) {
       console.log(e);
+    }
+  };
+
+  const fetchAgoraToken = async () => {
+    try {
+      const url = `${baseUrl.replace(/\/+$/, '')}/chat/agora-token`;
+      console.log('🔑 Fetching Agora token from:', url);
+      const res = await axios.post(url, {
+        channelName: channelName,
+        uid: 0,
+      });
+      console.log('✅ Agora token fetched successfully');
+      return res.data?.token || '';
+    } catch (e) {
+      console.error('❌ Failed to fetch Agora token:', e?.message || e);
+      return '';
     }
   };
 
   const join = async () => {
     if (isJoined) return;
     try {
-      agoraEngineRef.current?.joinChannel(token || '', channelName, 0, {
+      const freshToken = await fetchAgoraToken();
+      agoraEngineRef.current?.joinChannel(freshToken, channelName, 0, {
         clientRoleType: ClientRoleType.ClientRoleBroadcaster,
       });
     } catch (e) {

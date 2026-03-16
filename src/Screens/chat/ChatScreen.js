@@ -46,7 +46,6 @@ import {
 } from 'react-native-responsive-dimensions';
 import {Images} from '../../utils/Images';
 import {requestCallPermissions} from '../../utils/PermissionHelper';
-import {AGORA_TEST_TOKEN} from '@env';
 import SocketService from '../../services/SocketService';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -179,10 +178,12 @@ const MessageBubble = React.memo(
 const ChatScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const {otherUser, conversationId} = route.params || {};
+  const {otherUser, conversationId, myRole: initialRole} = route.params || {};
 
   const user = useSelector(state => state.Auth.data);
   const myUserId = user?._id;
+
+  console.log('DEBUG: ChatScreen Render - conversationId:', conversationId, 'myRole:', initialRole);
 
   // ─── State ────────────────────────────────────────────────────────────────
   const [messages, setMessages] = useState([]);
@@ -196,6 +197,7 @@ const ChatScreen = () => {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [imagePreviewVisible, setImagePreviewVisible] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [myRole, setMyRole] = useState(initialRole || user?.isType || user?.role || 'user');
 
   // ─── Refs ─────────────────────────────────────────────────────────────────
   const flatListRef = useRef(null);
@@ -230,19 +232,31 @@ const ChatScreen = () => {
       );
   }, [conversationId, myUserId]);
 
-  // ─── Fetch Conversation Details (if otherUser is missing) ──────────────────
+  // ─── Fetch Conversation Details (if otherUser is missing or to get myRole) ──
   useEffect(() => {
-    if (!otherUserData && conversationId && myUserId) {
+    if (conversationId && myUserId) {
       const fetchConv = async () => {
         try {
           const res = await axios.get(API.getConversation(conversationId));
           if (res.data?.success && res.data?.conversation) {
             const conv = res.data.conversation;
-            const other = conv.participants.find(
-              p => String(p.userId?._id || p.userId) !== String(myUserId),
+
+            // Find me to get my role in this specific conversation
+            const me = conv.participants.find(
+              p => String(p.userId?._id || p.userId) === String(myUserId),
             );
-            if (other && other.userId) {
-              setOtherUserData(other.userId);
+            if (me && me.role) {
+              setMyRole(me.role);
+            }
+
+            // Find other user if missing
+            if (!otherUserData) {
+              const other = conv.participants.find(
+                p => String(p.userId?._id || p.userId) !== String(myUserId),
+              );
+              if (other && other.userId) {
+                setOtherUserData(other.userId);
+              }
             }
           }
         } catch (err) {
@@ -254,11 +268,11 @@ const ChatScreen = () => {
       };
       fetchConv();
     }
-  }, [conversationId, myUserId, otherUserData]);
+  }, [conversationId, myUserId]); // removed otherUserData from deps so it runs once to get Role
 
   // ─── Load messages ────────────────────────────────────────────────────────
   const loadMessages = useCallback(async () => {
-    if (!conversationId) return;
+    if (!conversationId || conversationId === 'null') return;
     try {
       const res = await axios.get(API.messages(conversationId));
       if (res.data?.success) {
@@ -394,6 +408,10 @@ const ChatScreen = () => {
 
   const handleCall = useCallback(
     async (isVideo = false) => {
+      if (!conversationId || conversationId === 'null') {
+        alert('Chat not initialized yet.');
+        return;
+      }
       const hasPermission = await requestCallPermissions();
       if (!hasPermission) {
         alert('Camera and Microphone permissions are required for calls.');
@@ -419,7 +437,7 @@ const ChatScreen = () => {
         .post(API.send(), {
           conversationId,
           senderId: myUserId,
-          senderRole: user?.isType || user?.role || 'user',
+          senderRole: myRole, // ✅ use dynamic role
           text: `__COMM_CALL__${JSON.stringify(callSignal)}`,
         })
         .catch(err => console.log('Call signal error:', err));
@@ -436,7 +454,6 @@ const ChatScreen = () => {
         channelName: 'test',
         isVideoCall: isVideo,
         otherUser: otherUserData,
-        token: AGORA_TEST_TOKEN,
       });
     },
     [conversationId, otherUserData, navigation],
@@ -444,6 +461,10 @@ const ChatScreen = () => {
 
   // ─── Send message ─────────────────────────────────────────────────────────
   const sendMessage = useCallback(async () => {
+    if (!conversationId || conversationId === 'null') {
+      console.error('DEBUG: sendMessage - attempting to send with null ID');
+      return;
+    }
     const trimmed = text.trim();
     const hasText = trimmed.length > 0;
     const hasMedia = !!selectedMedia;
@@ -513,9 +534,9 @@ const ChatScreen = () => {
 
     // ── Send to server ──
     const payload = {
-      conversationId,
+      conversationId: String(conversationId), // ✅ Ensure string
       senderId: myUserId,
-      senderRole: user?.isType || user?.role || 'user',
+      senderRole: myRole, // ✅ use dynamic role
       text: hasText ? trimmed : '',
       mediaUrl,
       replyTo: currentReply?._id ?? null,
@@ -541,7 +562,7 @@ const ChatScreen = () => {
     } finally {
       setIsSending(false);
     }
-  }, [text, selectedMedia, myUserId, conversationId, user]);
+  }, [text, selectedMedia, myUserId, conversationId, user, myRole]); // Added myRole
 
   // ─── FlatList helpers (all stable) ────────────────────────────────────────
   const keyExtractor = useCallback(item => item._id?.toString() || item.id, []);

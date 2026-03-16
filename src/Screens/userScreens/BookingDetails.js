@@ -403,9 +403,11 @@ const BookingDetails = () => {
                     console.log('responce:', res);
                     if (res.success) {
                       const conversation = res.conversation || res.data;
+                      const convId = conversation?._id || conversation?.id;
                       navigation.navigate('ChatScreen', {
-                        conversationId: conversation?._id,
+                        conversationId: convId,
                         otherUser: displayUser,
+                        myRole: isTrainer ? 'trainer' : 'user',
                       });
                     }
                   } catch (error) {

@@ -5,16 +5,22 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 const WrapperContainer = ({
   style = {},
   children,
-  statusbackgroundColor = '#181818',
+  statusbackgroundColor = 'transparent',
+  withSafeArea = true,
 }) => {
   return (
     <View style={[styles.container, style]}>
       <StatusBar
         barStyle="light-content"
         backgroundColor={statusbackgroundColor}
+        translucent={!withSafeArea}
       />
 
-      <SafeAreaView style={{flex: 1}}>{children}</SafeAreaView>
+      {withSafeArea ? (
+        <SafeAreaView style={{flex: 1}}>{children}</SafeAreaView>
+      ) : (
+        <View style={{flex: 1}}>{children}</View>
+      )}
     </View>
   );
 };

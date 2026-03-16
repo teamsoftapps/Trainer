@@ -344,7 +344,6 @@ import {
 import {navigationRef, navigate} from './src/Navigations/navigationService';
 import SocketService from './src/services/SocketService';
 import IncomingCallModal from './src/Components/IncomingCallModal';
-import {AGORA_TEST_TOKEN} from '@env';
 import {AlertNotificationRoot} from 'react-native-alert-notification';
 import NetworkStatusProvider from './src/Components/NetworkStatusProvider';
 
@@ -421,7 +420,25 @@ const App = () => {
         );
 
         if (res.data.status) {
-          dispatch(updateLogin(res.data.data));
+          const userData = res.data.data;
+          // Enforcement: If trainer and trial expired/none AND trial already used, sign out
+          if (userData.isType === 'trainer') {
+            const mStatus = userData.membershipStatus;
+            console.log('Membership Check:', {
+              type: mStatus?.membershipType,
+              isTrialUsed: userData.isTrialUsed,
+            });
+            if (
+              mStatus &&
+              mStatus.membershipType === 'none' &&
+              userData.isTrialUsed === true
+            ) {
+              console.log('Trial expired and used, signing out...');
+              dispatch(SignOut());
+              return;
+            }
+          }
+          dispatch(updateLogin(userData));
         } else {
           dispatch(SignOut());
         }
@@ -611,7 +628,6 @@ const App = () => {
         profileImage: callData.callerImage,
         profileimage: callData.callerImage,
       },
-      token: AGORA_TEST_TOKEN,
     });
   };
 

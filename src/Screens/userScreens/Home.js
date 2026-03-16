@@ -304,9 +304,11 @@ const Home = () => {
 
         if (res.data?.success) {
           const conversation = res.data.conversation || res.data.data;
+          const convId = conversation?._id || conversation?.id;
           navigation.navigate('ChatScreen', {
-            conversationId: conversation?._id,
+            conversationId: convId,
             otherUser: trainer,
+            myRole: 'user', // Home initiator is always user
           });
         }
       } catch (error) {

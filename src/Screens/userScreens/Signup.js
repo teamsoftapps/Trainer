@@ -1,5 +1,7 @@
 import {Dropdown} from 'react-native-element-dropdown';
 import {
+  KeyboardAvoidingView,
+  Platform,
   ImageBackground,
   TouchableOpacity,
   StyleSheet,
@@ -12,7 +14,6 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
-import {Platform} from 'react-native';
 import {
   responsiveFontSize,
   responsiveHeight,
@@ -314,13 +315,13 @@ const Signup = ({route, navigation}) => {
       console.log('Firebase User:', firebaseUser);
 
       // ✅ SEND TO BACKEND
-      const res = await fetch(`${baseUrl}common/auth/google`, {
+      const response = await fetch(`${baseUrl}common/auth/google`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          role: route.params.checkUser, // 🔥 FIXED
+          role: route.params.checkUser, // 🔥 role: 'user' or 'trainer'
           email: firebaseUser.email,
           fullName: firebaseUser.displayName,
           profileImage: firebaseUser.photoURL,
@@ -328,18 +329,26 @@ const Signup = ({route, navigation}) => {
         }),
       });
 
-      const data = await res.json();
+      const data = await response.json();
+      console.log('Backend response data:', data);
 
-      // dispatch(IsLogin(data.data));
+      if (!response.ok || !data.data) {
+        throw new Error(data.message || data.error || 'Backend authentication failed');
+      }
+
+      // ✅ SUCCESS → LOGIN
       dispatch(
         IsLogin({
           ...data.data,
           authProvider: 'google',
         }),
       );
+      showToast('Success', 'Logged in with Google', 'success');
     } catch (error) {
-      console.log('Google Error:', error);
-      showToast('Error', 'Google login failed', 'danger');
+      console.log('Google Error Details:', error);
+      if (error.message !== 'Sign in action cancelled') {
+        showToast('Error', error.message || 'Google login failed', 'danger');
+      }
     }
   };
 
@@ -370,8 +379,14 @@ const Signup = ({route, navigation}) => {
   };
 
   return (
-    <ScrollView style={{flexGrow: 1}}>
-      <WrapperContainer>
+    <WrapperContainer withSafeArea={false}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{flex: 1}}>
+        <ScrollView
+          contentContainerStyle={{flexGrow: 1}}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
         <ImageBackground
           resizeMode="cover"
           source={Images.bg}
@@ -379,6 +394,7 @@ const Signup = ({route, navigation}) => {
           <View
             style={{
               alignItems: 'center',
+              marginTop: responsiveHeight(5),
             }}>
             <Image
               resizeMode="contain"
@@ -890,7 +906,6 @@ const Signup = ({route, navigation}) => {
                 <Image source={Images.google} style={styles.socialIcon} />
               </TouchableOpacity>
               {/* <Image source={Images.facebook} style={styles.socialIcon} /> */}
-              <Image source={Images.apple} style={styles.socialIcon} />
             </View>
             <View
               style={{
@@ -938,7 +953,6 @@ const Signup = ({route, navigation}) => {
           data={goalOptions}
           onSelect={setGoal}
         />
-      </WrapperContainer>
       {/* ================= ANDROID ================= */}
       {Platform.OS === 'android' && modalVisible2 && (
         <DateTimePicker
@@ -1038,7 +1052,9 @@ const Signup = ({route, navigation}) => {
       )}
 
       <FlashMessage position="top" />
-    </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </WrapperContainer>
   );
 };
 

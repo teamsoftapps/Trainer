@@ -365,6 +365,7 @@ const TrainerProfile = ({route}) => {
         navigation.navigate('ChatScreen', {
           conversationId: conversation?._id,
           otherUser: data,
+          myRole: 'user', // Initiator is always 'user' in the DB
         });
       }
     } catch (error) {
@@ -397,18 +398,22 @@ const TrainerProfile = ({route}) => {
                 <Image source={Images.back} tintColor={'white'} />
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={AddFavouriteTrainer}>
-                <Image
-                  source={isFavorite ? Images.heart_filled : Images.fav_heart}
-                  style={{width: 28, height: 24}}
-                />
-              </TouchableOpacity>
+              {authData?.isType === 'user' && (
+                <TouchableOpacity onPress={AddFavouriteTrainer}>
+                  <Image
+                    source={isFavorite ? Images.heart_filled : Images.fav_heart}
+                    style={{width: 28, height: 24}}
+                  />
+                </TouchableOpacity>
+              )}
 
-              <TouchableOpacity
-                onPress={() => setShowBlockModal(true)}
-                style={{marginLeft: 15}}>
-                <Ionicons name="ban-outline" size={24} color="red" />
-              </TouchableOpacity>
+              {authData?.isType === 'user' && (
+                <TouchableOpacity
+                  onPress={() => setShowBlockModal(true)}
+                  style={{marginLeft: 15}}>
+                  <Ionicons name="ban-outline" size={24} color="red" />
+                </TouchableOpacity>
+              )}
             </View>
 
             {/* Profile Image */}
@@ -936,32 +941,36 @@ const TrainerProfile = ({route}) => {
           ))}
 
           {/* Add Review Button */}
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('AddReviewScreen', {
-                trainerId: data._id,
-              });
-            }}
-            style={{marginTop: 15, alignSelf: 'center'}}>
-            <Text
-              style={{
-                color: '#9FED3A',
-                fontWeight: '600',
-                textDecorationLine: 'underline',
-              }}>
-              Add review
-            </Text>
-          </TouchableOpacity>
+          {authData?.isType === 'user' && (
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('AddReviewScreen', {
+                  trainerId: data._id,
+                });
+              }}
+              style={{marginTop: 15, alignSelf: 'center'}}>
+              <Text
+                style={{
+                  color: '#9FED3A',
+                  fontWeight: '600',
+                  textDecorationLine: 'underline',
+                }}>
+                Add review
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
-      <View style={styles.floatingWrapper}>
-        <TouchableOpacity
-          style={styles.floatingButton}
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate('Schedule', {Data: data})}>
-          <Text style={styles.floatingText}>Book Now</Text>
-        </TouchableOpacity>
-      </View>
+      {authData?.isType === 'user' && (
+        <View style={styles.floatingWrapper}>
+          <TouchableOpacity
+            style={styles.floatingButton}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('Schedule', {Data: data})}>
+            <Text style={styles.floatingText}>Book Now</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </WrapperContainer>
   );
 };
