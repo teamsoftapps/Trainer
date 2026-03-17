@@ -292,8 +292,10 @@ import {
   View,
   ActivityIndicator,
   Image,
+  Modal,
 } from 'react-native';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useState, useRef} from 'react';
+import Video from 'react-native-video';
 import WrapperContainer from '../../Components/Wrapper';
 import {
   responsiveFontSize,
@@ -318,6 +320,9 @@ const Story = () => {
   const [media, setMedia] = useState([]);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [previewFile, setPreviewFile] = useState(null);
+  const [previewMime, setPreviewMime] = useState(null);
+  const videoRef = useRef(null);
 
   /* ---------------------------------- */
   /* Permission */
@@ -406,7 +411,7 @@ const Story = () => {
       if (type === 'photo') {
         file = await ImageCropPicker.openCamera({
           mediaType: 'photo',
-          cropping: true,
+          cropping: false,
           compressImageQuality: 0.8,
         });
       } else {
@@ -414,7 +419,8 @@ const Story = () => {
           mediaType: 'video',
         });
       }
-      await handleUpload(file, file.mime);
+      setPreviewFile(file);
+      setPreviewMime(file.mime);
     } catch (e) {
       if (e?.code !== 'E_PICKER_CANCELLED') {
         showMessage({message: 'Camera error', type: 'danger'});
@@ -428,7 +434,7 @@ const Story = () => {
       if (type === 'photo') {
         file = await ImageCropPicker.openPicker({
           mediaType: 'photo',
-          cropping: true,
+          cropping: false,
           compressImageQuality: 0.8,
         });
       } else {
@@ -436,7 +442,8 @@ const Story = () => {
           mediaType: 'video',
         });
       }
-      await handleUpload(file, file.mime);
+      setPreviewFile(file);
+      setPreviewMime(file.mime);
     } catch (e) {
       if (e?.code !== 'E_PICKER_CANCELLED') {
         showMessage({message: 'Gallery error', type: 'danger'});
@@ -507,10 +514,9 @@ const Story = () => {
               onPress={() => {
                 const uri = item.node.image.uri;
                 const isVideo = item.node.type?.includes('video');
-                handleUpload(
-                  {path: uri, mime: isVideo ? 'video/mp4' : 'image/jpeg'},
-                  isVideo ? 'video/mp4' : 'image/jpeg',
-                );
+                const mime = isVideo ? 'video/mp4' : 'image/jpeg';
+                setPreviewFile({path: uri, mime});
+                setPreviewMime(mime);
               }}
               style={styles.gridItem}>
               <Image
@@ -527,6 +533,63 @@ const Story = () => {
         </View>
         <View style={{height: 100}} />
       </ScrollView>
+
+      {/* PREVIEW MODAL */}
+      <Modal
+        visible={!!previewFile}
+        transparent={false}
+        animationType="slide"
+        onRequestClose={() => setPreviewFile(null)}>
+        <View style={styles.previewContainer}>
+          <View style={styles.previewHeader}>
+            <TouchableOpacity
+              onPress={() => setPreviewFile(null)}
+              style={styles.closePreview}>
+              <Icon name="close" size={28} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.previewTitle}>Preview {selectedIndex}</Text>
+            <View style={{width: 40}} />
+          </View>
+
+          <View style={styles.previewMediaBox}>
+            {previewMime?.includes('video') ? (
+              <Video
+                source={{uri: previewFile?.path}}
+                ref={videoRef}
+                style={styles.previewMedia}
+                resizeMode="contain"
+                controls={true}
+                repeat={true}
+              />
+            ) : (
+              <Image
+                source={{uri: previewFile?.path}}
+                style={styles.previewMedia}
+                resizeMode="contain"
+              />
+            )}
+          </View>
+
+          <View style={styles.previewFooter}>
+            <TouchableOpacity
+              style={styles.cancelPostBtn}
+              onPress={() => setPreviewFile(null)}>
+              <Text style={styles.cancelPostText}>Cancel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.confirmPostBtn}
+              onPress={() => {
+                const file = previewFile;
+                const mime = previewMime;
+                setPreviewFile(null);
+                handleUpload(file, mime);
+              }}>
+              <Text style={styles.confirmPostText}>Post Now</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {/* BOTTOM SELECTOR */}
       <View style={styles.floatingTabs}>
@@ -721,5 +784,64 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginTop: 10,
     fontWeight: '600',
+  },
+  previewContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  previewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingBottom: 20,
+  },
+  previewTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  closePreview: {
+    padding: 5,
+  },
+  previewMediaBox: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewMedia: {
+    width: '100%',
+    height: '100%',
+  },
+  previewFooter: {
+    flexDirection: 'row',
+    padding: 20,
+    gap: 15,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+  },
+  cancelPostBtn: {
+    flex: 1,
+    backgroundColor: '#222',
+    paddingVertical: 15,
+    borderRadius: 15,
+    alignItems: 'center',
+  },
+  cancelPostText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  confirmPostBtn: {
+    flex: 2,
+    backgroundColor: '#9FED3A',
+    paddingVertical: 15,
+    borderRadius: 15,
+    alignItems: 'center',
+  },
+  confirmPostText: {
+    color: '#000',
+    fontWeight: '700',
+    fontSize: 16,
   },
 });

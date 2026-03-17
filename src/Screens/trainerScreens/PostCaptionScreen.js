@@ -9,7 +9,9 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   SafeAreaView,
+  Platform,
 } from 'react-native';
+import Video from 'react-native-video';
 import { uploadPost } from '../../services/mediaService';
 import { showMessage } from 'react-native-flash-message';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -58,9 +60,24 @@ const PostCaptionScreen = ({ route, navigation }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{ flex: 1 }}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* IMAGE PREVIEW CARD */}
+          {/* MEDIA PREVIEW CARD */}
           <View style={styles.previewCard}>
-            <Image source={{ uri: file.path }} style={styles.previewImage} />
+            {file.mime?.includes('video') ? (
+              <Video
+                source={{uri: file.path}}
+                style={styles.previewImage}
+                resizeMode="contain"
+                controls={false}
+                repeat={true}
+                muted={true}
+              />
+            ) : (
+              <Image
+                source={{uri: file.path}}
+                style={styles.previewImage}
+                resizeMode="contain"
+              />
+            )}
             <View style={styles.imageOverlay} />
           </View>
 
@@ -153,7 +170,6 @@ const styles = StyleSheet.create({
   previewImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   imageOverlay: {
     ...StyleSheet.absoluteFillObject,

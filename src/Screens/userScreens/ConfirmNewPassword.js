@@ -8,7 +8,10 @@ import {
   TouchableWithoutFeedback,
   View,
   TouchableOpacity,
+  ImageBackground,
+  Platform,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import React, {useState} from 'react';
 
 import WrapperContainer from '../../Components/Wrapper';
@@ -180,22 +183,33 @@ const ConfirmNewPassword = ({navigation, route}) => {
 export default ConfirmNewPassword;
 
 const styles = StyleSheet.create({
+  backButton: {
+    position: 'absolute',
+    top: responsiveHeight(2),
+    left: responsiveWidth(5),
+    zIndex: 10,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    height: 40,
+    width: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   inputBox: {
     width: responsiveWidth(85),
     borderWidth: 1,
-    borderColor: '#908C8D',
+    borderColor: 'rgba(255,255,255,0.3)',
     borderRadius: 17,
     paddingHorizontal: responsiveWidth(5),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
   input: {
     flex: 1,
     color: 'white',
-    fontFamily: FontFamily.Semi_Bold,
-  },
-  eye: {
-    width: responsiveWidth(6),
+    fontFamily: FontFamily.Medium,
+    height: responsiveHeight(6),
   },
 });

@@ -28,7 +28,9 @@ const MembershipCountdown = ({membershipStatus, onPress}) => {
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{isTrial ? 'Trial' : 'Active'}</Text>
         </View>
-        <Text style={styles.message}>{message}</Text>
+        <Text numberOfLines={2} style={styles.message}>
+          {message}
+        </Text>
       </View>
       <Text style={styles.actionText}>Renew ›</Text>
     </TouchableOpacity>
@@ -74,6 +76,7 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: responsiveFontSize(1.6),
     fontFamily: FontFamily.Semi_Bold,
+    width: responsiveWidth(45),
   },
   actionText: {
     color: '#000',

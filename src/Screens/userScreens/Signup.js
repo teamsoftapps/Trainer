@@ -13,6 +13,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import React, {useEffect, useRef, useState} from 'react';
 import {
   responsiveFontSize,
@@ -333,7 +334,9 @@ const Signup = ({route, navigation}) => {
       console.log('Backend response data:', data);
 
       if (!response.ok || !data.data) {
-        throw new Error(data.message || data.error || 'Backend authentication failed');
+        throw new Error(
+          data.message || data.error || 'Backend authentication failed',
+        );
       }
 
       // ✅ SUCCESS → LOGIN
@@ -387,363 +390,369 @@ const Signup = ({route, navigation}) => {
           contentContainerStyle={{flexGrow: 1}}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
-        <ImageBackground
-          resizeMode="cover"
-          source={Images.bg}
-          style={{flex: 1}}>
-          <View
-            style={{
-              alignItems: 'center',
-              marginTop: responsiveHeight(5),
-            }}>
-            <Image
-              resizeMode="contain"
-              source={Images.logo}
-              style={{
-                marginBottom: responsiveHeight(2),
-                width: responsiveWidth(45),
-                height: responsiveHeight(21),
-              }}
-            />
-            <Text
-              style={{
-                color: 'white',
-                fontSize: responsiveFontSize(4),
-                fontFamily: FontFamily.Semi_Bold,
-                marginBottom: responsiveHeight(2),
-              }}>
-              Sign Up
-            </Text>
-            <Text
-              style={{
-                color: 'white',
-                fontSize: responsiveFontSize(2.5),
-                fontFamily: FontFamily.Medium,
-                marginBottom: responsiveHeight(2),
-              }}>
-              Create An Account
-            </Text>
-
-            <View style={{gap: responsiveHeight(3)}}>
-              <View
-                style={{
-                  width: responsiveWidth(85),
-                  paddingHorizontal: responsiveWidth(5),
-                  paddingVertical: responsiveWidth(2),
-                  borderWidth: 1,
-                  borderColor: focused === 'name' ? '#9FED3A' : '#908C8D',
-                  borderRadius: 17,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}>
-                <View>
-                  <Text style={{color: '#908C8D'}}>Full name</Text>
-                  <TextInput
-                    ref={nameRef}
-                    onFocus={() => setFocused('name')}
-                    onBlur={() => setFocused(null)}
-                    placeholder="Enter name"
-                    value={name || undefined}
-                    onChangeText={setname}
-                    style={{
-                      padding: 0,
-                      fontFamily: FontFamily.Semi_Bold,
-                      color: 'white',
-                      fontSize: responsiveFontSize(2),
-                      width: responsiveWidth(68),
-                    }}
-                    numberOfLines={1}
-                    placeholderTextColor={'#908C8D'}
-                  />
-                </View>
-                <TouchableOpacity onPress={handleNameInput}>
-                  <Image
-                    source={Images.user}
-                    style={{
-                      width: responsiveWidth(3.6),
-                      height: responsiveWidth(5),
-                    }}
-                  />
-                </TouchableOpacity>
-              </View>
-              <View
-                style={{
-                  width: responsiveWidth(85),
-                  paddingHorizontal: responsiveWidth(5),
-                  paddingVertical: responsiveWidth(2),
-                  borderWidth: 1,
-                  borderColor: focused === 'email' ? '#9FED3A' : '#908C8D',
-                  borderRadius: 17,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}>
-                <View>
-                  <Text style={{color: '#908C8D'}}>Email</Text>
-                  <TextInput
-                    ref={emailRef}
-                    onFocus={() => setFocused('email')}
-                    onBlur={() => setFocused(null)}
-                    placeholder="Enter email"
-                    value={email || undefined}
-                    onChangeText={setemail}
-                    style={{
-                      padding: 0,
-                      fontFamily: FontFamily.Semi_Bold,
-                      color: 'white',
-                      fontSize: responsiveFontSize(2),
-                      width: responsiveWidth(68),
-                    }}
-                    numberOfLines={1}
-                    placeholderTextColor={'#908C8D'}
-                  />
-                </View>
-                <TouchableOpacity onPress={handleEmailInput}>
-                  <Image
-                    source={Images.email}
-                    style={{width: responsiveWidth(5)}}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <View
-                style={{
-                  width: responsiveWidth(85),
-                  paddingHorizontal: responsiveWidth(5),
-                  paddingVertical: responsiveWidth(2),
-                  borderWidth: 1,
-                  borderColor: focused === 'phone' ? '#9FED3A' : '#908C8D',
-                  borderRadius: 17,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}>
-                {/* LEFT SIDE → Country Picker */}
-                <TouchableOpacity
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingRight: 10,
-                    borderRightWidth: 1,
-                    borderRightColor: '#555',
-                  }}
-                  onPress={() => setShowPicker(true)}>
-                  <CountryPicker
-                    countryCode={country}
-                    withFlag
-                    withCallingCode
-                    withFilter
-                    withEmoji
-                    withModal
-                    visible={showPicker}
-                    onClose={() => setShowPicker(false)}
-                    onSelect={c => {
-                      setCountry(c.cca2);
-                      setCountryCode(c.callingCode[0]);
-                      setShowPicker(false);
-                    }}
-                  />
-
-                  <Text style={{color: '#fff', marginLeft: 6}}>
-                    +{countryCode}
-                  </Text>
-                </TouchableOpacity>
-
-                {/* RIGHT SIDE → Number */}
-                <TextInput
-                  ref={phoneRef}
-                  onFocus={() => setFocused('phone')}
-                  onBlur={() => setFocused(null)}
-                  keyboardType="phone-pad"
-                  placeholder="Phone Number"
-                  placeholderTextColor="#908C8D"
-                  value={phone}
-                  onChangeText={setPhone}
-                  style={{
-                    color: '#fff',
-                    flex: 1,
-                    paddingLeft: 12,
-                  }}
-                />
-              </View>
-
-              <View
-                style={{
-                  width: responsiveWidth(85),
-                  paddingHorizontal: responsiveWidth(5),
-                  paddingVertical: responsiveWidth(2),
-                  borderWidth: 1,
-                  borderColor: focused === 'password' ? '#9FED3A' : '#908C8D',
-                  borderRadius: 17,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}>
-                <View>
-                  <Text style={{color: '#908C8D'}}>Password</Text>
-                  <TextInput
-                    ref={passwordRef}
-                    onFocus={() => setFocused('password')}
-                    onBlur={() => setFocused(null)}
-                    placeholder="Enter Password"
-                    secureTextEntry={secure}
-                    value={password || undefined}
-                    onChangeText={setpassword}
-                    style={{
-                      padding: 0,
-                      fontFamily: FontFamily.Semi_Bold,
-                      color: 'white',
-                      fontSize: responsiveFontSize(2),
-                      width: responsiveWidth(67),
-                    }}
-                    numberOfLines={1}
-                    placeholderTextColor={'#908C8D'}
-                  />
-                </View>
-                <TouchableOpacity
-                  onPress={() => {
-                    setsecure(!secure);
-                  }}>
-                  <Image
-                    source={secure ? Images.eye_off : Images.eye}
-                    style={{width: responsiveWidth(6)}}
-                    resizeMode="contain"
-                  />
-                </TouchableOpacity>
-              </View>
-              <View
-                style={{
-                  width: responsiveWidth(85),
-                  paddingHorizontal: responsiveWidth(5),
-                  paddingVertical: responsiveWidth(2),
-                  borderWidth: 1,
-                  borderColor: focused === 'confirm' ? '#9FED3A' : '#908C8D',
-                  borderRadius: 17,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}>
-                <View>
-                  <Text style={{color: '#908C8D'}}>Confirm Password</Text>
-                  <TextInput
-                    ref={confirmRef}
-                    onFocus={() => setFocused('confirm')}
-                    onBlur={() => setFocused(null)}
-                    placeholder="Enter Password"
-                    secureTextEntry={secure2}
-                    value={confirmpassword || undefined}
-                    onChangeText={setconfirmpassword}
-                    style={{
-                      padding: 0,
-                      fontFamily: FontFamily.Semi_Bold,
-                      color: 'white',
-                      fontSize: responsiveFontSize(2),
-                      width: responsiveWidth(67),
-                    }}
-                    numberOfLines={1}
-                    placeholderTextColor={'#908C8D'}
-                  />
-                </View>
-                <TouchableOpacity
-                  onPress={() => {
-                    setsecure2(!secure2);
-                  }}>
-                  <Image
-                    source={secure2 ? Images.eye_off : Images.eye}
-                    style={{width: responsiveWidth(6)}}
-                    resizeMode="contain"
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
+          <ImageBackground
+            resizeMode="cover"
+            source={Images.bg}
+            style={{flex: 1}}>
             <View
               style={{
-                flexDirection: 'row',
-                width: responsiveWidth(85),
-                justifyContent: 'space-between',
-                marginTop: responsiveHeight(3),
+                alignItems: 'center',
+                marginTop: responsiveHeight(5),
               }}>
-              <View
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={styles.backButton}>
+                <Icon name="chevron-back" size={24} color="#fff" />
+              </TouchableOpacity>
+              <Image
+                resizeMode="contain"
+                source={Images.logo}
                 style={{
-                  width: responsiveWidth(40),
-                  borderWidth: 1,
-                  borderRadius: 10,
-                  paddingHorizontal: responsiveWidth(4),
-                  paddingTop: responsiveWidth(2),
-                  borderColor: focused === 'name' ? '#9FED3A' : '#908C8D',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}>
-                <View style={{width: responsiveWidth(34)}}>
-                  <Text style={{color: '#908C8D'}}>Gender</Text>
-                  <Dropdown
-                    style={styles.dropdown}
-                    placeholderStyle={styles.placeholderStyle}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    inputSearchStyle={styles.inputSearchStyle}
-                    renderRightIcon={() => (
-                      <Image
-                        source={Images.dropdown}
-                        style={{width: responsiveWidth(5)}}
-                        resizeMode="contain"
-                      />
-                    )}
-                    data={data}
-                    maxHeight={300}
-                    labelField="label"
-                    valueField="value"
-                    placeholder="Gender"
-                    value={Gender}
-                    onChange={item => {
-                      setGender(item.value);
-                    }}
-                    itemTextStyle={{color: '#000'}}
-                  />
-                </View>
-              </View>
-              <View
+                  marginBottom: responsiveHeight(2),
+                  width: responsiveWidth(45),
+                  height: responsiveHeight(21),
+                  marginTop: responsiveHeight(2),
+                }}
+              />
+              <Text
                 style={{
-                  width: responsiveWidth(40),
-                  borderWidth: 1,
-                  borderRadius: 10,
-                  paddingHorizontal: responsiveWidth(4),
-                  paddingVertical: responsiveWidth(2),
-                  borderColor: focused === 'name' ? '#9FED3A' : '#908C8D',
-                  flexDirection: 'row',
-                  alignItems: 'center',
+                  color: 'white',
+                  fontSize: responsiveFontSize(4),
+                  fontFamily: FontFamily.Semi_Bold,
+                  marginBottom: responsiveHeight(2),
                 }}>
-                <View style={{width: responsiveWidth(27)}}>
-                  <Text style={{color: '#908C8D'}}>Date of Birth</Text>
+                Sign Up
+              </Text>
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: responsiveFontSize(2.5),
+                  fontFamily: FontFamily.Medium,
+                  marginBottom: responsiveHeight(2),
+                }}>
+                Create An Account
+              </Text>
 
-                  {dob ? (
-                    <Text
+              <View style={{gap: responsiveHeight(3)}}>
+                <View
+                  style={{
+                    width: responsiveWidth(85),
+                    paddingHorizontal: responsiveWidth(5),
+                    paddingVertical: responsiveWidth(2),
+                    borderWidth: 1,
+                    borderColor: focused === 'name' ? '#9FED3A' : '#908C8D',
+                    borderRadius: 17,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}>
+                  <View>
+                    <Text style={{color: '#908C8D'}}>Full name</Text>
+                    <TextInput
+                      ref={nameRef}
+                      onFocus={() => setFocused('name')}
+                      onBlur={() => setFocused(null)}
+                      placeholder="Enter name"
+                      value={name || undefined}
+                      onChangeText={setname}
                       style={{
-                        color: '#fff',
-                        fontSize: responsiveFontSize(1.8),
-                      }}>
-                      {dob}
-                    </Text>
-                  ) : (
-                    <Text
+                        padding: 0,
+                        fontFamily: FontFamily.Semi_Bold,
+                        color: 'white',
+                        fontSize: responsiveFontSize(2),
+                        width: responsiveWidth(68),
+                      }}
+                      numberOfLines={1}
+                      placeholderTextColor={'#908C8D'}
+                    />
+                  </View>
+                  <TouchableOpacity onPress={handleNameInput}>
+                    <Image
+                      source={Images.user}
                       style={{
-                        color: '#bbbbbb',
-                        fontSize: responsiveFontSize(1.8),
-                      }}>
-                      dd/mm/yyyy
-                    </Text>
-                  )}
+                        width: responsiveWidth(3.6),
+                        height: responsiveWidth(5),
+                      }}
+                    />
+                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity onPress={toggleModalDob}>
-                  <Image
-                    source={Images.calendar}
-                    style={{width: responsiveWidth(4.5)}}
-                    resizeMode="contain"
+                <View
+                  style={{
+                    width: responsiveWidth(85),
+                    paddingHorizontal: responsiveWidth(5),
+                    paddingVertical: responsiveWidth(2),
+                    borderWidth: 1,
+                    borderColor: focused === 'email' ? '#9FED3A' : '#908C8D',
+                    borderRadius: 17,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}>
+                  <View>
+                    <Text style={{color: '#908C8D'}}>Email</Text>
+                    <TextInput
+                      ref={emailRef}
+                      onFocus={() => setFocused('email')}
+                      onBlur={() => setFocused(null)}
+                      placeholder="Enter email"
+                      value={email || undefined}
+                      onChangeText={setemail}
+                      style={{
+                        padding: 0,
+                        fontFamily: FontFamily.Semi_Bold,
+                        color: 'white',
+                        fontSize: responsiveFontSize(2),
+                        width: responsiveWidth(68),
+                      }}
+                      numberOfLines={1}
+                      placeholderTextColor={'#908C8D'}
+                    />
+                  </View>
+                  <TouchableOpacity onPress={handleEmailInput}>
+                    <Image
+                      source={Images.email}
+                      style={{width: responsiveWidth(5)}}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                <View
+                  style={{
+                    width: responsiveWidth(85),
+                    paddingHorizontal: responsiveWidth(5),
+                    paddingVertical: responsiveWidth(2),
+                    borderWidth: 1,
+                    borderColor: focused === 'phone' ? '#9FED3A' : '#908C8D',
+                    borderRadius: 17,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}>
+                  {/* LEFT SIDE → Country Picker */}
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      paddingRight: 10,
+                      borderRightWidth: 1,
+                      borderRightColor: '#555',
+                    }}
+                    onPress={() => setShowPicker(true)}>
+                    <CountryPicker
+                      countryCode={country}
+                      withFlag
+                      withCallingCode
+                      withFilter
+                      withEmoji
+                      withModal
+                      visible={showPicker}
+                      onClose={() => setShowPicker(false)}
+                      onSelect={c => {
+                        setCountry(c.cca2);
+                        setCountryCode(c.callingCode[0]);
+                        setShowPicker(false);
+                      }}
+                    />
+
+                    <Text style={{color: '#fff', marginLeft: 6}}>
+                      +{countryCode}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* RIGHT SIDE → Number */}
+                  <TextInput
+                    ref={phoneRef}
+                    onFocus={() => setFocused('phone')}
+                    onBlur={() => setFocused(null)}
+                    keyboardType="phone-pad"
+                    placeholder="Phone Number"
+                    placeholderTextColor="#908C8D"
+                    value={phone}
+                    onChangeText={setPhone}
+                    style={{
+                      color: '#fff',
+                      flex: 1,
+                      paddingLeft: 12,
+                    }}
                   />
-                </TouchableOpacity>
+                </View>
+
+                <View
+                  style={{
+                    width: responsiveWidth(85),
+                    paddingHorizontal: responsiveWidth(5),
+                    paddingVertical: responsiveWidth(2),
+                    borderWidth: 1,
+                    borderColor: focused === 'password' ? '#9FED3A' : '#908C8D',
+                    borderRadius: 17,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}>
+                  <View>
+                    <Text style={{color: '#908C8D'}}>Password</Text>
+                    <TextInput
+                      ref={passwordRef}
+                      onFocus={() => setFocused('password')}
+                      onBlur={() => setFocused(null)}
+                      placeholder="Enter Password"
+                      secureTextEntry={secure}
+                      value={password || undefined}
+                      onChangeText={setpassword}
+                      style={{
+                        padding: 0,
+                        fontFamily: FontFamily.Semi_Bold,
+                        color: 'white',
+                        fontSize: responsiveFontSize(2),
+                        width: responsiveWidth(67),
+                      }}
+                      numberOfLines={1}
+                      placeholderTextColor={'#908C8D'}
+                    />
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setsecure(!secure);
+                    }}>
+                    <Image
+                      source={secure ? Images.eye_off : Images.eye}
+                      style={{width: responsiveWidth(6)}}
+                      resizeMode="contain"
+                    />
+                  </TouchableOpacity>
+                </View>
+                <View
+                  style={{
+                    width: responsiveWidth(85),
+                    paddingHorizontal: responsiveWidth(5),
+                    paddingVertical: responsiveWidth(2),
+                    borderWidth: 1,
+                    borderColor: focused === 'confirm' ? '#9FED3A' : '#908C8D',
+                    borderRadius: 17,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}>
+                  <View>
+                    <Text style={{color: '#908C8D'}}>Confirm Password</Text>
+                    <TextInput
+                      ref={confirmRef}
+                      onFocus={() => setFocused('confirm')}
+                      onBlur={() => setFocused(null)}
+                      placeholder="Enter Password"
+                      secureTextEntry={secure2}
+                      value={confirmpassword || undefined}
+                      onChangeText={setconfirmpassword}
+                      style={{
+                        padding: 0,
+                        fontFamily: FontFamily.Semi_Bold,
+                        color: 'white',
+                        fontSize: responsiveFontSize(2),
+                        width: responsiveWidth(67),
+                      }}
+                      numberOfLines={1}
+                      placeholderTextColor={'#908C8D'}
+                    />
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setsecure2(!secure2);
+                    }}>
+                    <Image
+                      source={secure2 ? Images.eye_off : Images.eye}
+                      style={{width: responsiveWidth(6)}}
+                      resizeMode="contain"
+                    />
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-            {/* {modalVisible2 && (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  width: responsiveWidth(85),
+                  justifyContent: 'space-between',
+                  marginTop: responsiveHeight(3),
+                }}>
+                <View
+                  style={{
+                    width: responsiveWidth(40),
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    paddingHorizontal: responsiveWidth(4),
+                    paddingTop: responsiveWidth(2),
+                    borderColor: focused === 'name' ? '#9FED3A' : '#908C8D',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}>
+                  <View style={{width: responsiveWidth(34)}}>
+                    <Text style={{color: '#908C8D'}}>Gender</Text>
+                    <Dropdown
+                      style={styles.dropdown}
+                      placeholderStyle={styles.placeholderStyle}
+                      selectedTextStyle={styles.selectedTextStyle}
+                      inputSearchStyle={styles.inputSearchStyle}
+                      renderRightIcon={() => (
+                        <Image
+                          source={Images.dropdown}
+                          style={{width: responsiveWidth(5)}}
+                          resizeMode="contain"
+                        />
+                      )}
+                      data={data}
+                      maxHeight={300}
+                      labelField="label"
+                      valueField="value"
+                      placeholder="Gender"
+                      value={Gender}
+                      onChange={item => {
+                        setGender(item.value);
+                      }}
+                      itemTextStyle={{color: '#000'}}
+                    />
+                  </View>
+                </View>
+                <View
+                  style={{
+                    width: responsiveWidth(40),
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    paddingHorizontal: responsiveWidth(4),
+                    paddingVertical: responsiveWidth(2),
+                    borderColor: focused === 'name' ? '#9FED3A' : '#908C8D',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}>
+                  <View style={{width: responsiveWidth(27)}}>
+                    <Text style={{color: '#908C8D'}}>Date of Birth</Text>
+
+                    {dob ? (
+                      <Text
+                        style={{
+                          color: '#fff',
+                          fontSize: responsiveFontSize(1.8),
+                        }}>
+                        {dob}
+                      </Text>
+                    ) : (
+                      <Text
+                        style={{
+                          color: '#bbbbbb',
+                          fontSize: responsiveFontSize(1.8),
+                        }}>
+                        dd/mm/yyyy
+                      </Text>
+                    )}
+                  </View>
+                  <TouchableOpacity onPress={toggleModalDob}>
+                    <Image
+                      source={Images.calendar}
+                      style={{width: responsiveWidth(4.5)}}
+                      resizeMode="contain"
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              {/* {modalVisible2 && (
               <Modal
                 animationType="slide"
                 transparent={true}
@@ -767,7 +776,7 @@ const Signup = ({route, navigation}) => {
               </Modal>
             )} */}
 
-            {/* {modalVisible2 && (
+              {/* {modalVisible2 && (
               <Modal
                 transparent
                 animationType="fade"
@@ -798,260 +807,262 @@ const Signup = ({route, navigation}) => {
               </Modal>
             )} */}
 
-            <View
-              style={{
-                flexDirection: 'row',
-                width: responsiveWidth(85),
-                justifyContent: 'space-between',
-                marginTop: responsiveHeight(3),
-              }}>
               <View
                 style={{
-                  width: responsiveWidth(40),
-                  borderWidth: 1,
-                  borderRadius: 10,
-                  paddingHorizontal: responsiveWidth(4),
-                  paddingVertical: responsiveWidth(2),
-                  borderColor: focused === 'weight' ? '#9FED3A' : '#908C8D',
                   flexDirection: 'row',
-                  alignItems: 'center',
+                  width: responsiveWidth(85),
+                  justifyContent: 'space-between',
+                  marginTop: responsiveHeight(3),
                 }}>
-                <View style={{width: responsiveWidth(27)}}>
-                  <Text style={{color: '#908C8D'}}>Weight in lbs</Text>
-                  <TextInput
-                    ref={weightRef}
-                    onFocus={() => setFocused('weight')}
-                    onBlur={() => setFocused(null)}
-                    keyboardType="numeric"
-                    placeholder="Your Weight"
-                    placeholderTextColor={'#908C8D'}
-                    value={weight}
-                    onChangeText={setweight}
-                    style={{
-                      padding: 0,
-                      fontFamily: FontFamily.Semi_Bold,
-                      color: 'white',
-                      fontSize: responsiveFontSize(2),
-                      height: responsiveHeight(3),
-                    }}
-                  />
+                <View
+                  style={{
+                    width: responsiveWidth(40),
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    paddingHorizontal: responsiveWidth(4),
+                    paddingVertical: responsiveWidth(2),
+                    borderColor: focused === 'weight' ? '#9FED3A' : '#908C8D',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}>
+                  <View style={{width: responsiveWidth(27)}}>
+                    <Text style={{color: '#908C8D'}}>Weight in lbs</Text>
+                    <TextInput
+                      ref={weightRef}
+                      onFocus={() => setFocused('weight')}
+                      onBlur={() => setFocused(null)}
+                      keyboardType="numeric"
+                      placeholder="Your Weight"
+                      placeholderTextColor={'#908C8D'}
+                      value={weight}
+                      onChangeText={setweight}
+                      style={{
+                        padding: 0,
+                        fontFamily: FontFamily.Semi_Bold,
+                        color: 'white',
+                        fontSize: responsiveFontSize(2),
+                        height: responsiveHeight(3),
+                      }}
+                    />
+                  </View>
+                </View>
+                <View
+                  style={{
+                    width: responsiveWidth(40),
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    paddingHorizontal: responsiveWidth(4),
+                    paddingVertical: responsiveWidth(2),
+                    borderColor: focused === 'height' ? '#9FED3A' : '#908C8D',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}>
+                  <View style={{width: responsiveWidth(27)}}>
+                    <Text style={{color: '#908C8D'}}>Height in ft</Text>
+                    <TextInput
+                      ref={heightRef}
+                      onFocus={() => setFocused('height')}
+                      onBlur={() => setFocused(null)}
+                      keyboardType="numeric"
+                      placeholder="Your Height"
+                      placeholderTextColor={'#908C8D'}
+                      value={height}
+                      onChangeText={setheight}
+                      style={{
+                        padding: 0,
+                        fontFamily: FontFamily.Semi_Bold,
+                        color: 'white',
+                        fontSize: responsiveFontSize(2),
+                        height: responsiveHeight(3),
+                      }}
+                    />
+                  </View>
                 </View>
               </View>
-              <View
-                style={{
-                  width: responsiveWidth(40),
-                  borderWidth: 1,
-                  borderRadius: 10,
-                  paddingHorizontal: responsiveWidth(4),
-                  paddingVertical: responsiveWidth(2),
-                  borderColor: focused === 'height' ? '#9FED3A' : '#908C8D',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}>
-                <View style={{width: responsiveWidth(27)}}>
-                  <Text style={{color: '#908C8D'}}>Height in ft</Text>
-                  <TextInput
-                    ref={heightRef}
-                    onFocus={() => setFocused('height')}
-                    onBlur={() => setFocused(null)}
-                    keyboardType="numeric"
-                    placeholder="Your Height"
-                    placeholderTextColor={'#908C8D'}
-                    value={height}
-                    onChangeText={setheight}
-                    style={{
-                      padding: 0,
-                      fontFamily: FontFamily.Semi_Bold,
-                      color: 'white',
-                      fontSize: responsiveFontSize(2),
-                      height: responsiveHeight(3),
-                    }}
-                  />
-                </View>
-              </View>
-            </View>
-            <TouchableOpacity
-              style={styles.inputBox}
-              onPress={() => setFitnessModal(true)}>
-              <Text style={{color: '#908C8D'}}>Fitness Preference</Text>
-
-              <Text style={{color: '#fff'}}>
-                {fitnessPreference || 'Select Preference'}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.inputBox}
-              onPress={() => setGoalModal(true)}>
-              <Text style={{color: '#908C8D'}}>Goal</Text>
-
-              <Text style={{color: '#fff'}}>{goal || 'Select Goal'}</Text>
-            </TouchableOpacity>
-
-            <ButtonComp
-              text="Sign Up"
-              mainStyle={{
-                width: responsiveWidth(85),
-                marginTop: responsiveHeight(5),
-              }}
-              onPress={() => {
-                handleSignup();
-              }}
-              isLoading={SignupUserLoading || SignupTrainerLoading}
-            />
-            <Text style={{color: '#aaa', marginTop: 20}}>Or continue with</Text>
-
-            <View style={styles.socialRow}>
-              <TouchableOpacity onPress={handleGoogleSignup}>
-                <Image source={Images.google} style={styles.socialIcon} />
-              </TouchableOpacity>
-              {/* <Image source={Images.facebook} style={styles.socialIcon} /> */}
-            </View>
-            <View
-              style={{
-                width: '85%',
-                marginTop: responsiveHeight(1),
-                flexDirection: 'row',
-                paddingBottom: responsiveHeight(10),
-              }}>
-              <Text
-                style={{
-                  color: 'white',
-                  fontSize: responsiveFontSize(2),
-                  fontFamily: FontFamily.Light,
-                }}>
-                Already have an Account?{' '}
-              </Text>
               <TouchableOpacity
+                style={styles.inputBox}
+                onPress={() => setFitnessModal(true)}>
+                <Text style={{color: '#908C8D'}}>Fitness Preference</Text>
+
+                <Text style={{color: '#fff'}}>
+                  {fitnessPreference || 'Select Preference'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.inputBox}
+                onPress={() => setGoalModal(true)}>
+                <Text style={{color: '#908C8D'}}>Goal</Text>
+
+                <Text style={{color: '#fff'}}>{goal || 'Select Goal'}</Text>
+              </TouchableOpacity>
+
+              <ButtonComp
+                text="Sign Up"
+                mainStyle={{
+                  width: responsiveWidth(85),
+                  marginTop: responsiveHeight(5),
+                }}
                 onPress={() => {
-                  navigation.navigate('signin', {
-                    checkUser: user.checkUser === 'user' ? 'user' : 'trainer',
-                  });
+                  handleSignup();
+                }}
+                isLoading={SignupUserLoading || SignupTrainerLoading}
+              />
+              <Text style={{color: '#aaa', marginTop: 20}}>
+                Or continue with
+              </Text>
+
+              <View style={styles.socialRow}>
+                <TouchableOpacity onPress={handleGoogleSignup}>
+                  <Image source={Images.google} style={styles.socialIcon} />
+                </TouchableOpacity>
+                {/* <Image source={Images.facebook} style={styles.socialIcon} /> */}
+              </View>
+              <View
+                style={{
+                  width: '85%',
+                  marginTop: responsiveHeight(1),
+                  flexDirection: 'row',
+                  paddingBottom: responsiveHeight(10),
                 }}>
                 <Text
                   style={{
-                    color: '#9FED3A',
-                    textDecorationLine: 'underline',
-                    fontFamily: FontFamily.Extra_Bold,
+                    color: 'white',
+                    fontSize: responsiveFontSize(2),
+                    fontFamily: FontFamily.Light,
                   }}>
-                  Sign In!
+                  Already have an Account?{' '}
                 </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ImageBackground>
-        <SelectionModal
-          visible={fitnessModal}
-          onClose={() => setFitnessModal(false)}
-          data={fitnessOptions}
-          onSelect={setFitnessPreference}
-        />
-
-        <SelectionModal
-          visible={goalModal}
-          onClose={() => setGoalModal(false)}
-          data={goalOptions}
-          onSelect={setGoal}
-        />
-      {/* ================= ANDROID ================= */}
-      {Platform.OS === 'android' && modalVisible2 && (
-        <DateTimePicker
-          value={tempDob}
-          mode="date"
-          display="default"
-          maximumDate={new Date()}
-          onChange={(event, selectedDate) => {
-            setModalVisible2(false);
-
-            if (event.type === 'set' && selectedDate) {
-              const today = new Date();
-
-              let age = today.getFullYear() - selectedDate.getFullYear();
-              const m = today.getMonth() - selectedDate.getMonth();
-
-              if (
-                m < 0 ||
-                (m === 0 && today.getDate() < selectedDate.getDate())
-              )
-                age--;
-
-              if (age < 24) {
-                showMessage({
-                  message: 'Error',
-                  description: 'Age must be 24 years old.',
-                  type: 'danger',
-                });
-                return;
-              }
-
-              const formatted = moment(selectedDate).format('DD/MM/YYYY');
-
-              setDob(formatted);
-              setDoB(formatted);
-            }
-          }}
-        />
-      )}
-
-      {/* ================= IOS ================= */}
-      {Platform.OS === 'ios' && (
-        <Modal visible={modalVisible2} transparent animationType="slide">
-          <View style={styles.overlay}>
-            <View style={styles.pickerSheet}>
-              <DateTimePicker
-                value={tempDob}
-                mode="date"
-                display="spinner"
-                maximumDate={new Date()}
-                onChange={(e, d) => d && setTempDob(d)}
-              />
-
-              <View style={styles.pickerBtnRow}>
                 <TouchableOpacity
-                  style={[styles.pickerBtn, {backgroundColor: '#444'}]}
-                  onPress={() => setModalVisible2(false)}>
-                  <Text style={{color: '#fff'}}>Cancel</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.pickerBtn}
                   onPress={() => {
-                    const today = new Date();
-
-                    let age = today.getFullYear() - tempDob.getFullYear();
-                    const m = today.getMonth() - tempDob.getMonth();
-
-                    if (
-                      m < 0 ||
-                      (m === 0 && today.getDate() < tempDob.getDate())
-                    )
-                      age--;
-
-                    if (age < 24) {
-                      showMessage({
-                        message: 'Error',
-                        description: 'Age must be 24 years old.',
-                        type: 'danger',
-                      });
-                      return;
-                    }
-
-                    const formatted = moment(tempDob).format('DD/MM/YYYY');
-
-                    setDob(formatted);
-                    setDoB(formatted);
-
-                    setModalVisible2(false);
+                    navigation.navigate('signin', {
+                      checkUser: user.checkUser === 'user' ? 'user' : 'trainer',
+                    });
                   }}>
-                  <Text style={{color: '#000', fontWeight: '700'}}>OK</Text>
+                  <Text
+                    style={{
+                      color: '#9FED3A',
+                      textDecorationLine: 'underline',
+                      fontFamily: FontFamily.Extra_Bold,
+                    }}>
+                    Sign In!
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
-        </Modal>
-      )}
+          </ImageBackground>
+          <SelectionModal
+            visible={fitnessModal}
+            onClose={() => setFitnessModal(false)}
+            data={fitnessOptions}
+            onSelect={setFitnessPreference}
+          />
 
-      <FlashMessage position="top" />
+          <SelectionModal
+            visible={goalModal}
+            onClose={() => setGoalModal(false)}
+            data={goalOptions}
+            onSelect={setGoal}
+          />
+          {/* ================= ANDROID ================= */}
+          {Platform.OS === 'android' && modalVisible2 && (
+            <DateTimePicker
+              value={tempDob}
+              mode="date"
+              display="default"
+              maximumDate={new Date()}
+              onChange={(event, selectedDate) => {
+                setModalVisible2(false);
+
+                if (event.type === 'set' && selectedDate) {
+                  const today = new Date();
+
+                  let age = today.getFullYear() - selectedDate.getFullYear();
+                  const m = today.getMonth() - selectedDate.getMonth();
+
+                  if (
+                    m < 0 ||
+                    (m === 0 && today.getDate() < selectedDate.getDate())
+                  )
+                    age--;
+
+                  if (age < 24) {
+                    showMessage({
+                      message: 'Error',
+                      description: 'Age must be 24 years old.',
+                      type: 'danger',
+                    });
+                    return;
+                  }
+
+                  const formatted = moment(selectedDate).format('DD/MM/YYYY');
+
+                  setDob(formatted);
+                  setDoB(formatted);
+                }
+              }}
+            />
+          )}
+
+          {/* ================= IOS ================= */}
+          {Platform.OS === 'ios' && (
+            <Modal visible={modalVisible2} transparent animationType="slide">
+              <View style={styles.overlay}>
+                <View style={styles.pickerSheet}>
+                  <DateTimePicker
+                    value={tempDob}
+                    mode="date"
+                    display="spinner"
+                    maximumDate={new Date()}
+                    onChange={(e, d) => d && setTempDob(d)}
+                  />
+
+                  <View style={styles.pickerBtnRow}>
+                    <TouchableOpacity
+                      style={[styles.pickerBtn, {backgroundColor: '#444'}]}
+                      onPress={() => setModalVisible2(false)}>
+                      <Text style={{color: '#fff'}}>Cancel</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.pickerBtn}
+                      onPress={() => {
+                        const today = new Date();
+
+                        let age = today.getFullYear() - tempDob.getFullYear();
+                        const m = today.getMonth() - tempDob.getMonth();
+
+                        if (
+                          m < 0 ||
+                          (m === 0 && today.getDate() < tempDob.getDate())
+                        )
+                          age--;
+
+                        if (age < 24) {
+                          showMessage({
+                            message: 'Error',
+                            description: 'Age must be 24 years old.',
+                            type: 'danger',
+                          });
+                          return;
+                        }
+
+                        const formatted = moment(tempDob).format('DD/MM/YYYY');
+
+                        setDob(formatted);
+                        setDoB(formatted);
+
+                        setModalVisible2(false);
+                      }}>
+                      <Text style={{color: '#000', fontWeight: '700'}}>OK</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </Modal>
+          )}
+
+          <FlashMessage position="top" />
         </ScrollView>
       </KeyboardAvoidingView>
     </WrapperContainer>
@@ -1107,7 +1118,18 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     marginTop: 15,
   },
-
+  backButton: {
+    position: 'absolute',
+    top: responsiveHeight(2),
+    left: responsiveWidth(5),
+    zIndex: 10,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    height: 40,
+    width: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.6)',

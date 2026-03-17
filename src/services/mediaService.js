@@ -113,3 +113,22 @@ export const uploadPost = (file, caption, thumbnailFile, onProgress) => {
     },
   });
 };
+export const deleteStory = async storyId => {
+  try {
+    const response = await axiosBaseURL.delete(`/trainer/story/${storyId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Delete story error:', error);
+    throw error;
+  }
+};
+
+export const deletePost = async postId => {
+  try {
+    const response = await axiosBaseURL.delete(`/trainer/post/${postId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Delete post error:', error);
+    throw error;
+  }
+};

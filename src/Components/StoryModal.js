@@ -8,7 +8,10 @@ import {
   Pressable,
   PanResponder,
   ActivityIndicator,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import Video from 'react-native-video';
 import FastImage from 'react-native-fast-image';
 import axiosBaseURL from '../services/AxiosBaseURL';
@@ -16,7 +19,7 @@ import axiosBaseURL from '../services/AxiosBaseURL';
 const {width, height} = Dimensions.get('window');
 const STORY_DURATION = 5000;
 
-const StoryModal = ({visible, stories = [], onClose}) => {
+const StoryModal = ({visible, stories = [], onClose, onDelete, isOwner}) => {
   const [current, setCurrent] = useState(0);
   const [loaded, setLoaded] = useState(false);
 
@@ -113,6 +116,34 @@ const StoryModal = ({visible, stories = [], onClose}) => {
     },
   });
 
+  const handleDelete = () => {
+    onPressIn(); // pause
+    Alert.alert('Delete Story', 'Are you sure you want to delete this story?', [
+      {
+        text: 'Cancel',
+        onPress: () => onPressOut(), // resume
+        style: 'cancel',
+      },
+      {
+        text: 'Delete',
+        onPress: async () => {
+          try {
+            await onDelete(story.id);
+            // remove current story from array locally or just close/refresh
+            if (stories.length === 1) {
+              onClose();
+            } else {
+              next();
+            }
+          } catch (e) {
+            onPressOut(); // resume on error
+          }
+        },
+        style: 'destructive',
+      },
+    ]);
+  };
+
   if (!visible) return null;
 
   const story = stories[current];
@@ -150,6 +181,13 @@ const StoryModal = ({visible, stories = [], onClose}) => {
             </View>
           ))}
         </View>
+
+        {/* ===== Header / Owner Actions ===== */}
+        {isOwner && (
+          <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
+            <Icon name="trash-outline" size={24} color="#fff" />
+          </TouchableOpacity>
+        )}
 
         {/* ===== MEDIA ===== */}
         {story.type === 'video' ? (
@@ -242,5 +280,14 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: '50%',
+  },
+  deleteBtn: {
+    position: 'absolute',
+    top: 70,
+    right: 20,
+    zIndex: 30,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 10,
+    borderRadius: 25,
   },
 });

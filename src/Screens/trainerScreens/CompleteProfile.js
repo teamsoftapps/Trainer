@@ -22,7 +22,7 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {PermissionsAndroid, NativeModules, Platform} from 'react-native';
+import {PermissionsAndroid, NativeModules, Platform, Linking} from 'react-native';
 import {FontFamily, Images} from '../../utils/Images';
 import ButtonComp from '../../Components/ButtonComp';
 import {availableTimes, Specialities, TimeSlots} from '../../utils/Dummy';
@@ -442,6 +442,27 @@ const CompleteProfile = ({route}) => {
     }
   };
 
+  const showLocationErrorAlert = () => {
+    Alert.alert(
+      'Location Error',
+      'Unable to get your location. Please ensure GPS is enabled and you have granted location permissions.',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {text: 'Retry', onPress: () => getTrainerLocation()},
+        {
+          text: 'Open Settings',
+          onPress: () => {
+            if (Platform.OS === 'ios') {
+              Linking.openURL('app-settings:');
+            } else {
+              Linking.openSettings();
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const getTrainerLocation = async () => {
     try {
       const hasPermission = await requestLocationPermission();
@@ -461,6 +482,7 @@ const CompleteProfile = ({route}) => {
         },
         error => {
           console.log('Location error:', error);
+          showLocationErrorAlert();
         },
         {
           enableHighAccuracy: true,

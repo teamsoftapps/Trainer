@@ -7,6 +7,9 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   View,
+  TouchableOpacity,
+  ImageBackground,
+  Platform,
 } from 'react-native';
 import React, {useState} from 'react';
 
@@ -26,7 +29,7 @@ import {useForgotPassUserMutation} from '../../store/Apis/userAuth';
 import {useTrainerForgetPassMutation} from '../../store/Apis/trainerAuth';
 import {useDispatch} from 'react-redux';
 import {ForgetPasswordID, SaveEmail} from '../../store/Slices/AuthSlice';
-
+import Icon from 'react-native-vector-icons/Ionicons';
 const ForgotPassword = ({navigation, route}) => {
   const data = route.params;
   const reciveddata = data?.data?.checkUser;
@@ -147,6 +150,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: responsiveFontSize(2.2),
   },
+
   emailView: {
     width: responsiveWidth(85),
     paddingHorizontal: responsiveWidth(5),

@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import React, {useState} from 'react';
 import {FontFamily, Images} from '../../utils/Images';
 import auth from '@react-native-firebase/auth';
@@ -143,10 +144,15 @@ const Signin = ({route}) => {
             resizeMode="cover"
             source={Images.bg}
             style={{flex: 1}}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={styles.backButton}>
+              <Icon name="chevron-back" size={24} color="#fff" />
+            </TouchableOpacity>
             <View
               style={{
                 alignItems: 'center',
-                marginTop: responsiveHeight(10),
+                marginTop: responsiveHeight(5),
                 paddingBottom: responsiveHeight(5),
               }}>
               <Image
@@ -156,6 +162,7 @@ const Signin = ({route}) => {
                   marginBottom: responsiveHeight(2),
                   width: responsiveWidth(45),
                   height: responsiveHeight(21),
+                  marginTop: responsiveHeight(2),
                 }}
               />
               <Text
@@ -352,6 +359,18 @@ const Signin = ({route}) => {
 export default Signin;
 
 const styles = StyleSheet.create({
+  backButton: {
+    position: 'absolute',
+    top: responsiveHeight(7),
+    left: responsiveWidth(5),
+    zIndex: 10,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    height: 40,
+    width: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   socialRow: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',

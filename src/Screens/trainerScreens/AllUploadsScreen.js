@@ -6,7 +6,9 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
+  Modal,
 } from 'react-native';
+import Video from 'react-native-video';
 import WrapperContainer from '../../Components/Wrapper';
 import {
   responsiveFontSize,
@@ -19,6 +21,7 @@ const AllUploadsScreen = ({route, navigation}) => {
     route.params;
 
   const [filter, setFilter] = useState('Photos');
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const filteredUploads =
     filter === 'Photos'
@@ -26,7 +29,7 @@ const AllUploadsScreen = ({route, navigation}) => {
       : uploads.filter(item => item.type === 'video');
 
   const renderItem = ({item}) => (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={() => setSelectedItem(item)}>
       <Image
         source={{
           uri: item.type === 'video' ? item.thumbnail || item.url : item.url,
@@ -39,7 +42,7 @@ const AllUploadsScreen = ({route, navigation}) => {
           <Text style={styles.playIcon}>▶</Text>
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -116,6 +119,41 @@ const AllUploadsScreen = ({route, navigation}) => {
         }}
         showsVerticalScrollIndicator={false}
       />
+
+      {/* LONG PREVIEW MODAL */}
+      <Modal
+        visible={!!selectedItem}
+        transparent={false}
+        animationType="fade"
+        onRequestClose={() => setSelectedItem(null)}>
+        <View style={styles.previewContainer}>
+          <View style={styles.previewHeader}>
+            <TouchableOpacity
+              onPress={() => setSelectedItem(null)}
+              style={styles.previewBack}>
+              <Ionicons name="close" size={30} color="#fff" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.previewMediaBox}>
+            {selectedItem?.type === 'video' ? (
+              <Video
+                source={{uri: selectedItem.url}}
+                style={styles.previewMedia}
+                resizeMode="contain"
+                controls={true}
+                repeat={true}
+              />
+            ) : (
+              <Image
+                source={{uri: selectedItem?.url}}
+                style={styles.previewMedia}
+                resizeMode="contain"
+              />
+            )}
+          </View>
+        </View>
+      </Modal>
     </WrapperContainer>
   );
 };
@@ -140,9 +178,11 @@ const styles = StyleSheet.create({
 
   name: {
     color: '#fff',
-    fontSize: responsiveFontSize(2.7),
+    fontSize: responsiveFontSize(2.5),
     marginTop: 10,
-    fontWeight: '600',
+    fontWeight: '700',
+    width: responsiveWidth(60),
+    textAlign: 'center',
   },
 
   sub: {
@@ -216,5 +256,27 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: responsiveFontSize(2.3),
     fontWeight: '600',
+  },
+  previewContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  previewHeader: {
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    zIndex: 10,
+  },
+  previewBack: {
+    padding: 10,
+    alignSelf: 'flex-start',
+  },
+  previewMediaBox: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewMedia: {
+    width: '100%',
+    height: '100%',
   },
 });

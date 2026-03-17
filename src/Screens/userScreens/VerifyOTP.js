@@ -8,6 +8,8 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   View,
+  ImageBackground,
+  Platform,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import WrapperContainer from '../../Components/Wrapper';

@@ -21,7 +21,9 @@ import axiosBaseURL from '../../services/AxiosBaseURL';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import MapView, {Marker} from 'react-native-maps';
 import StoryModal from '../../Components/StoryModal';
-import {ActivityIndicator} from 'react-native';
+import {ActivityIndicator, Alert} from 'react-native';
+import {deleteStory, deletePost} from '../../services/mediaService';
+import Icon from 'react-native-vector-icons/Ionicons';
 const Profile = () => {
   const navigation = useNavigation();
 
@@ -31,41 +33,92 @@ const Profile = () => {
 
   const [profile, setProfile] = useState(null);
   const [uploads, setUploads] = useState([]);
-
-  const [loading, setLoading] = useState(true);
-
   const [stories, setStories] = useState([]);
   const [storyVisible, setStoryVisible] = useState(false);
+
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [uploadsLoading, setUploadsLoading] = useState(true);
+  const [storiesLoading, setStoriesLoading] = useState(true);
 
   const safe = v => (v ? v : '-');
 
   const fetchData = async () => {
-    try {
-      setLoading(true);
+    fetchProfile();
+    fetchUploads();
+    fetchStories();
+  };
 
+  const fetchProfile = async () => {
+    try {
+      setProfileLoading(true);
       const res = await axiosBaseURL.get(
         `/Common/GetProfile/${trainer_data.token}`,
       );
+      setProfile(res.data?.data);
+    } catch (e) {
+      console.log('Profile error:', e);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
-      const uploadsRes = await axiosBaseURL.get('/trainer/getUploads');
-      const storyRes = await axiosBaseURL.get(
+  const fetchUploads = async () => {
+    try {
+      setUploadsLoading(true);
+      const res = await axiosBaseURL.get('/trainer/getUploads');
+      setUploads(res?.data?.data || []);
+    } catch (e) {
+      console.log('Uploads error:', e);
+    } finally {
+      setUploadsLoading(false);
+    }
+  };
+
+  const fetchStories = async () => {
+    try {
+      setStoriesLoading(true);
+      const res = await axiosBaseURL.get(
         `/trainer/stories/${trainer_data._id}`,
       );
-
-      setProfile(res.data?.data);
-      setUploads(uploadsRes?.data?.data);
-
-      const formattedStories = (storyRes.data.data || []).map(s => ({
+      const formatted = (res.data.data || []).map(s => ({
         id: s._id,
         url: s.type === 'video' ? s.thumbnail || s.mediaUrl : s.mediaUrl,
         videoUrl: s.type === 'video' ? s.mediaUrl : null,
         type: s.type,
       }));
-
-      setStories(formattedStories);
+      setStories(formatted);
+    } catch (e) {
+      console.log('Stories error:', e);
     } finally {
-      setLoading(false);
+      setStoriesLoading(false);
     }
+  };
+
+  const handleDeleteStory = async storyId => {
+    try {
+      await deleteStory(storyId);
+      fetchStories();
+    } catch (e) {
+      Alert.alert('Error', 'Failed to delete story');
+    }
+  };
+
+  const handleDeletePost = (postId, type) => {
+    Alert.alert('Delete', `Are you sure you want to delete this ${type}?`, [
+      {text: 'Cancel', style: 'cancel'},
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deletePost(postId);
+            fetchUploads();
+          } catch (e) {
+            Alert.alert('Error', 'Failed to delete item');
+          }
+        },
+      },
+    ]);
   };
 
   useFocusEffect(
@@ -74,21 +127,7 @@ const Profile = () => {
     }, []),
   );
 
-  if (loading) {
-    return (
-      <WrapperContainer>
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: '#000',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <ActivityIndicator size="large" color="#9FED3A" />
-        </View>
-      </WrapperContainer>
-    );
-  }
+
   const calculateAge = dob => {
     console.log('age for calculation:', dob);
 
@@ -239,40 +278,60 @@ const Profile = () => {
             </TouchableOpacity>
           )}
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {uploads.length === 0 ? (
-            <Text style={styles.emptyText}>No uploads yet</Text>
-          ) : (
-            <FlatList
-              // horizontal
-              data={[...uploads].slice(-3).reverse()}
-              numColumns={3}
-              scrollEnabled={false}
-              keyExtractor={item => item.id}
-              columnWrapperStyle={{justifyContent: 'space-between'}}
-              renderItem={({item}) => {
-                const isVideo = item.type === 'video';
 
-                return (
-                  <TouchableOpacity style={styles.uploadCard}>
-                    <Image
-                      source={{
-                        uri: isVideo ? item.thumbnail || item.url : item.url,
-                      }}
-                      style={styles.uploadImg}
-                    />
+        {uploadsLoading ? (
+          <ActivityIndicator
+            color="#9FED3A"
+            style={{marginVertical: 20, alignSelf: 'flex-start'}}
+          />
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {uploads.length === 0 ? (
+              <Text style={styles.emptyText}>No uploads yet</Text>
+            ) : (
+              <FlatList
+                // horizontal
+                data={[...uploads].slice(-3).reverse()}
+                numColumns={3}
+                scrollEnabled={false}
+                keyExtractor={item => item.id}
+                columnWrapperStyle={{justifyContent: 'space-between'}}
+                renderItem={({item}) => {
+                  const isVideo = item.type === 'video';
 
-                    {isVideo && (
-                      <View style={styles.playOverlay}>
-                        <Text style={styles.playIcon}>▶</Text>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                );
-              }}
-            />
-          )}
-        </ScrollView>
+                  return (
+                    <View style={styles.uploadCard}>
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => {
+                          /* optional: open preview */
+                        }}>
+                        <Image
+                          source={{
+                            uri: (isVideo ? item.thumbnail || item.url : item.url) || 'https://via.placeholder.com/150',
+                          }}
+                          style={styles.uploadImg}
+                        />
+
+                        {isVideo && (
+                          <View style={styles.playOverlay}>
+                            <Text style={styles.playIcon}>▶</Text>
+                          </View>
+                        )}
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={styles.deleteOverlayBtn}
+                        onPress={() => handleDeletePost(item.id, 'upload')}>
+                        <Icon name="trash" size={16} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                }}
+              />
+            )}
+          </ScrollView>
+        )}
 
         {/* ========= MAP ========= */}
         {coords && (
@@ -347,7 +406,10 @@ const Profile = () => {
       <StoryModal
         visible={storyVisible}
         onClose={() => setStoryVisible(false)}
+        isOwner={true}
+        onDelete={handleDeleteStory}
         stories={stories.map(s => ({
+          id: s.id,
           type: s.type,
           url: s.type === 'video' ? s.videoUrl : s.url,
         }))}
@@ -559,6 +621,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 60,
     right: 20,
+    zIndex: 10,
+  },
+  deleteOverlayBtn: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    backgroundColor: 'rgba(255,59,48,0.8)',
+    padding: 6,
+    borderRadius: 15,
     zIndex: 10,
   },
 });

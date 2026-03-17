@@ -12,6 +12,8 @@ import {
   Platform,
   ActivityIndicator,
   PermissionsAndroid,
+  Alert,
+  Linking,
 } from 'react-native';
 import WrapperContainer from '../../Components/Wrapper';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -80,6 +82,27 @@ const CompleteUserProfile = ({navigation}) => {
     return true;
   };
 
+  const showLocationErrorAlert = () => {
+    Alert.alert(
+      'Location Error',
+      'Unable to get your location. Please ensure GPS is enabled and you have granted location permissions.',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {text: 'Retry', onPress: () => getCurrentLocation()},
+        {
+          text: 'Open Settings',
+          onPress: () => {
+            if (Platform.OS === 'ios') {
+              Linking.openURL('app-settings:');
+            } else {
+              Linking.openSettings();
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const getCurrentLocation = async () => {
     try {
       const hasPermission = await requestLocationPermission();
@@ -90,9 +113,23 @@ const CompleteUserProfile = ({navigation}) => {
           const {latitude, longitude} = position.coords;
           setCoords([longitude, latitude]); // MongoDB format
           console.log('coordinates:', longitude, latitude);
+
+          // Reverse Geocoding
+          fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+          )
+            .then(res => res.json())
+            .then(data => {
+              if (data?.display_name) {
+                setAddress(data.display_name);
+              }
+            })
+            .catch(err => console.log('Reverse geocode error:', err));
         },
         error => {
           console.log('Geolocation error:', error);
+          // Only show alert if it's a real error (like timeout or permission)
+          // To avoid annoying the user immediately on mount if they haven't decided yet
         },
         {
           enableHighAccuracy: true,
@@ -142,11 +179,10 @@ const CompleteUserProfile = ({navigation}) => {
     if (!address.trim())
       return showMessage({message: 'Address is required', type: 'danger'});
 
-    if (!coords || coords.length !== 2)
-      return showMessage({
-        message: 'Unable to get your location. Please enable GPS.',
-        type: 'danger',
-      });
+    if (!coords || coords.length !== 2) {
+      showLocationErrorAlert();
+      return;
+    }
 
     try {
       setSaving(true);
@@ -288,7 +324,20 @@ const CompleteUserProfile = ({navigation}) => {
         </View>
 
         {/* ADDRESS MANUAL INPUT */}
-        <Text style={styles.label}>Address</Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 6,
+          }}>
+          <Text style={[styles.label, {marginBottom: 0}]}>Address</Text>
+          <TouchableOpacity onPress={() => getCurrentLocation()}>
+            <Text style={{color: '#9FED3A', fontSize: 12}}>
+              Get Current Location
+            </Text>
+          </TouchableOpacity>
+        </View>
         <TextInput
           style={styles.input}
           placeholder="Enter your full address"

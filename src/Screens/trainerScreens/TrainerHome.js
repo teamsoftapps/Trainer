@@ -439,7 +439,6 @@ const styles = StyleSheet.create({
     marginVertical: responsiveHeight(0.5),
   },
   cont_2: {
-    width: responsiveWidth(30),
     marginHorizontal: responsiveWidth(7),
     marginVertical: responsiveHeight(2),
   },

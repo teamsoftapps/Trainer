@@ -1,5 +1,12 @@
-import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import Header from '../../Components/Header';
 import WrapperContainer from '../../Components/Wrapper';
 import { useNavigation } from '@react-navigation/native';
@@ -50,7 +57,8 @@ const Bookings = [
 const Earnings = () => {
   const [timing, setTiming] = useState(1); // 0: Weekly, 1: Monthly, 2: Yearly
   const [earningsData, setEarningsData] = useState(null);
-  const trainer_data = useSelector((state) => state.Auth.data);
+  const [loading, setLoading] = useState(true);
+  const trainer_data = useSelector(state => state.Auth.data);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -59,12 +67,17 @@ const Earnings = () => {
 
   const fetchEarnings = async () => {
     try {
-      const res = await axiosBaseURL.get(`/trainer/${trainer_data._id}/earnings`);
+      setLoading(true);
+      const res = await axiosBaseURL.get(
+        `/trainer/${trainer_data._id}/earnings`,
+      );
       if (res.data.success) {
         setEarningsData(res.data.data);
       }
     } catch (e) {
-      console.log("Error fetching earnings details:", e);
+      console.log('Error fetching earnings details:', e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -157,7 +170,12 @@ const Earnings = () => {
 
   return (
     <WrapperContainer>
-      <ScrollView>
+      {loading ? (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <ActivityIndicator size="large" color="#9FED3A" />
+        </View>
+      ) : (
+        <ScrollView>
         <Header
           onPress={() => {
             navigation.goBack();
@@ -327,6 +345,7 @@ const Earnings = () => {
           />
         </View>
       </ScrollView>
+      )}
     </WrapperContainer>
   );
 };
