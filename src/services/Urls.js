@@ -1,5 +1,5 @@
 // export const baseUrl = `http://192.168.0.189:4000`;
 // export const baseUrl = `https://trainer-backend.vercel.app`;
-export const baseUrl = `https://trainerbackend-production-3c8c.up.railway.app`;
+export const baseUrl = `https://trainerbackend-production-3c8c.up.railway.app/`;
 // export const baseUrl = `http://192.168.0.103:4000/`;
 // export const baseUrl = `http://localhost:5000/`;
